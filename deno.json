@@ -1,0 +1,12 @@
+{
+  "importMap": "./import_map.json",
+  "tasks": {
+    "stop": "pm2 stop nodeschecker",
+    "start": "pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env' --name nodeschecker index.ts && pm2 logs nodeschecker",
+    "logs": "pm2 logs nodeschecker",
+    "reload": "pm2 reload nodeschecker && pm2 logs nodeschecker",
+
+    "run": "deno run --allow-net --allow-read --allow-env index.ts",
+    "watch": "deno run --watch --allow-net --allow-read --allow-env index.ts"
+  }
+}
