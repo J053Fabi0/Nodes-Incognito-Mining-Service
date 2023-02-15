@@ -16,7 +16,7 @@ const DAY = HOUR * 24;
 
 // In minutes
 export const waitingTimes: Record<ErrorTypes, number> = {
-  alert: 0 * MINUTE,
+  alert: 5 * MINUTE,
   offline: 15 * MINUTE,
   isOldVersion: 1 * DAY,
   isSlashed: 0 * MINUTE,
