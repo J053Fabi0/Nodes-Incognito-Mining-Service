@@ -6,6 +6,9 @@ export default async function handleError(e: any) {
   console.error("#".repeat(40));
   for (const key of Object.getOwnPropertyNames(e)) console.error(key, e[key]);
 
+  // I don't care for 502 errors from the incognito api
+  if ("response" in e && e.response.status === 502) return;
+
   const sMessage = (message: string) =>
     sendMessage(`<code>${escapeHtml(message)}</code>`, undefined, { parse_mode: "HTML" });
 
