@@ -4,10 +4,11 @@ import sendMessage from "../telegram/sendMessage.ts";
 // deno-lint-ignore no-explicit-any
 export default async function handleError(e: any) {
   console.error("#".repeat(40));
-  for (const key of Object.getOwnPropertyNames(e)) console.error(key, e[key]);
+  for (const key of Object.getOwnPropertyNames(e)) console.error(key + ":", e[key]);
 
-  // I don't care for 502 errors from the incognito api
+  // These are "Wont fix" issues
   if ("response" in e && e.response.status === 502) return;
+  if ("message" in e && e.message.startsWith("error sending request for url")) return;
 
   const sMessage = (message: string) =>
     sendMessage(`<code>${escapeHtml(message)}</code>`, undefined, { parse_mode: "HTML" });
