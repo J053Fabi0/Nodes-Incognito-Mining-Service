@@ -10,7 +10,8 @@ bot.on("message", async (ctx) => {
         for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
 
       ctx.replyWithHTML(
-        "<code>" +
+        "<b>Name: status, isSlashed</b>" +
+          "\n<code>" +
           (await getNodesStatus())
             .map(({ name, status, isSlashed }) => `${name}: ${status}, ${isSlashed}`)
             .join("\n") +
