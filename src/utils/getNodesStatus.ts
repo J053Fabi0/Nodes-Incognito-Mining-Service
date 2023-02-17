@@ -7,7 +7,7 @@ export default async function getNodesStatus() {
   const { data } = await axiod.post<
     {
       Alert: boolean;
-      Role: "PENDING";
+      Role: "PENDING" | "COMMITEE";
       IsSlashed: boolean;
       MiningPubkey: string;
       IsOldVersion: boolean;
