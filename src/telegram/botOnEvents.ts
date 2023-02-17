@@ -4,14 +4,17 @@ import { lastErrorTimes } from "../utils/variables.ts";
 import getNodesStatus from "../utils/getNodesStatus.ts";
 import sendMessage from "./sendMessage.ts";
 
-type Keys = "name" | "status" | "role" | "isSlashed" | "isOldVersion";
-const keys = ["name", "role", "status", "isSlashed", "isOldVersion"] as Keys[];
+type Keys = "name" | "role" | "isSlashed" | "isOldVersion" | "epochsToNextEvent";
 
 bot.on("message", async (ctx) => {
   if (ctx?.chat?.id === 861616600)
     try {
       if (ctx.message?.text === "restart" || ctx.message?.text === "reset")
         for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
+
+      const keys: Keys[] = ["name", "role", "isSlashed"];
+
+      if (/full|completo|todo|all/gi.test(ctx.message?.text || "")) keys.push("isOldVersion", "epochsToNextEvent");
 
       const nodes = (await getNodesStatus()).map((node) => ({
         ...node,
@@ -28,7 +31,7 @@ bot.on("message", async (ctx) => {
       );
 
       await sendMessage(
-        "<code>" +
+        "<code>⚪️ " +
           `${keys
             .map(
               (key) =>
@@ -39,7 +42,8 @@ bot.on("message", async (ctx) => {
           nodes
             .map(
               ({ name, ...otherData }) =>
-                `${name}: ${" ".repeat(maxLength.name - name.length)}` +
+                (otherData.status === "OFFLINE" ? "🔴" : "🟢") +
+                ` ${name}: ${" ".repeat(maxLength.name - name.length)}` +
                 (keys.slice(1) as Exclude<Keys, "name">[])
                   .map((key) => `${otherData[key]},` + " ".repeat(maxLength[key] - `${otherData[key]}`.length))
                   .join(" ")
