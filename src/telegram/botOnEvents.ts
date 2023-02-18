@@ -70,8 +70,8 @@ bot.on("message", async (ctx) => {
                 (keys.slice(1) as Exclude<Keys, "name">[])
                   .map(
                     (key, i) =>
-                      `${otherData[key]}${i === keys.length - 2 ? "" : ","}` +
-                      " ".repeat(maxLength[key] - `${otherData[key]}`.length)
+                      otherData[key] +
+                      (i === keys.length - 2 ? "" : "," + " ".repeat(maxLength[key] - `${otherData[key]}`.length))
                   )
                   .join(" ")
             )
