@@ -17,12 +17,12 @@ export default async function getNodesStatus() {
   const { data } = await axiod.post<
     {
       Alert: boolean;
-      Role: "PENDING" | "COMMITEE";
       IsSlashed: boolean;
       MiningPubkey: string;
       NextEventMsg: string;
       IsOldVersion: boolean;
       Status: "ONLINE" | "OFFLINE";
+      Role: "PENDING" | "COMMITEE" | "WAITING" | "SYNCING";
     }[]
   >("https://monitor.incognito.org/pubkeystat/stat", { mpk });
 
