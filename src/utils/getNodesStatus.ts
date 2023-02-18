@@ -32,7 +32,7 @@ export default async function getNodesStatus() {
     status: d.Status,
     isSlashed: d.IsSlashed,
     isOldVersion: d.IsOldVersion,
-    epochsToNextEvent: Number(d.NextEventMsg.match(/^\d+/)?.[0] ?? 0),
+    epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
     ...constants.find((c) => c.publicValidatorKey === d.MiningPubkey)!,
   }));
 }
