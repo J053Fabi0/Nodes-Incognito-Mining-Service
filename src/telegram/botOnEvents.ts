@@ -10,8 +10,10 @@ type Keys = typeof allKeys[number];
 bot.on("message", async (ctx) => {
   if (ctx?.chat?.id === 861616600)
     try {
-      if (ctx.message?.text === "restart" || ctx.message?.text === "reset")
+      if (ctx.message?.text === "restart" || ctx.message?.text === "reset") {
         for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
+        await sendMessage("Reset successful.");
+      }
 
       const keys: Keys[] = [];
       let nodes = await getNodesStatus();
