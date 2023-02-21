@@ -13,7 +13,13 @@ export const docker = (name: string | string[], action: "start" | "stop", maxRet
     undefined,
     (e, i) => console.log(`Error on attempt ${i} of ${maxRetries} to ${action} container ${name}:\n${e}`)
   );
-export const dockerPs = () => _docker(["ps"], (v) => v.split("\n"));
+export const dockerPs = () =>
+  _docker(["ps"], (v) =>
+    v
+      .slice(0, -1)
+      .split("\n")
+      .map((v) => v.split(/\s+/))
+  );
 
 export function getExtraFiles(nodePathToShard: string) {
   return ls([nodePathToShard], (v) =>
