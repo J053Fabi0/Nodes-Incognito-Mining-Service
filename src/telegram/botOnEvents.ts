@@ -43,6 +43,7 @@ bot.on("message", async (ctx) => {
 
       const normalizedNodes = nodes.map((node) => ({
         ...node,
+        alert: node.alert ? "Yes" : "No",
         isSlashed: node.isSlashed ? "Yes" : "No",
         isOldVersion: node.isOldVersion ? "Yes" : "No",
         role: node.role.charAt(0) + node.role.slice(1).toLowerCase(),
