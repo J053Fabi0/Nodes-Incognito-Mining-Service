@@ -5,6 +5,7 @@
     "telegram/": "https://deno.land/x/telegram@v0.1.1/",
     "dotenv": "https://deno.land/x/dotenv@v3.2.0/load.ts",
     "telegram": "https://deno.land/x/telegram@v0.1.1/mod.ts",
+    "streams": "https://deno.land/std@0.160.0/streams/mod.ts",
     "escapeHtml": "https://deno.land/x/escape_html@1.0.0/mod.ts"
   }
 }
