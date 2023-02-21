@@ -30,7 +30,7 @@ bot.on("message", async (ctx) => {
 
         // filter the nodes that are relevant
         nodes = nodes.filter((node) => {
-          if (node.status === "OFFLINE") return true;
+          if (node.status === "OFFLINE" && !getShouldBeOffline(node)) return true;
           for (const key of booleanKeys) if (node[key]) return true;
           return false;
         });
