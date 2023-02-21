@@ -3,6 +3,7 @@ import handleError from "../utils/handleError.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import getNodesStatus from "../utils/getNodesStatus.ts";
 import sendMessage from "./sendMessage.ts";
+import getShouldBeOffline from "../utils/getShouldBeOffline.ts";
 
 const allKeys = ["name", "role", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
 type Keys = typeof allKeys[number];
@@ -66,8 +67,8 @@ bot.on("message", async (ctx) => {
           "</code>\n\n<code>" +
           normalizedNodes
             .map(
-              ({ name, ...otherData }) =>
-                (otherData.status === "OFFLINE" ? "🔴" : "🟢") +
+              ({ name, ...otherData }, i) =>
+                (otherData.status === "OFFLINE" ? (getShouldBeOffline(nodes[i]) ? "🔴" : "⚠️") : "🟢") +
                 ` ${name}: ${" ".repeat(maxLength.name - name.length)}` +
                 (keys.slice(1) as Exclude<Keys, "name">[])
                   .map(

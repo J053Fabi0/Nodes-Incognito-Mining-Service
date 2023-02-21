@@ -36,3 +36,6 @@ export default async function getNodesStatus() {
     ...constants.find((c) => c.publicValidatorKey === d.MiningPubkey)!,
   }));
 }
+
+type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+export type NodeStatus = UnwrapPromise<ReturnType<typeof getNodesStatus>>[number];

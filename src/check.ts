@@ -1,8 +1,9 @@
+import { waitingTimes } from "../constants.ts";
 import { docker, dockerPs } from "./utils/commands.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
+import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
-import { waitingTimes, minEpochsToBeOnline } from "../constants.ts";
 import { ErrorTypes, LastErrorTime, lastErrorTimes } from "./utils/variables.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorKey: ErrorTypes) {
@@ -18,7 +19,7 @@ export default async function check() {
     if (!(nodeStatus.publicValidatorKey in lastErrorTimes)) lastErrorTimes[nodeStatus.publicValidatorKey] = {};
     const { [nodeStatus.publicValidatorKey]: lastErrorTime } = lastErrorTimes;
 
-    const shouldBeOffline = nodeStatus.epochsToNextEvent > minEpochsToBeOnline && nodeStatus.role === "PENDING";
+    const shouldBeOffline = getShouldBeOffline(nodeStatus);
 
     // check if the docker is as it should be, and if not, fix it
     if (
