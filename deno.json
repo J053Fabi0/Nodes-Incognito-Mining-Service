@@ -2,7 +2,7 @@
   "importMap": "./import_map.json",
   "tasks": {
     "stop": "pm2 stop nodeschecker",
-    "start": "pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env allow-run' --name nodeschecker index.ts && pm2 logs nodeschecker",
+    "start": "pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env --allow-run' --name nodeschecker index.ts && pm2 logs nodeschecker",
     "logs": "pm2 logs nodeschecker",
     "reload": "pm2 reload nodeschecker && pm2 logs nodeschecker",
 
