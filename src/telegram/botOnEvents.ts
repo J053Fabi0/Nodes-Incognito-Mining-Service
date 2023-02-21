@@ -19,7 +19,7 @@ bot.on("message", async (ctx) => {
       const keys: Keys[] = [];
       let nodes = await getNodesStatus();
 
-      if (/full|completo|todo|all/gi.test(ctx.message?.text || "")) keys.push(...allKeys);
+      if (/full|completo|todo|all|^f/gi.test(ctx.message?.text || "")) keys.push(...allKeys);
       else {
         // minimal information to show
         keys.push("name", "role", "epochsToNextEvent");
