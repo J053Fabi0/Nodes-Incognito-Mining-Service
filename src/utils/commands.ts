@@ -14,11 +14,17 @@ export const docker = (name: string | string[], action: "start" | "stop", maxRet
     (e, i) => console.log(`Error on attempt ${i} of ${maxRetries} to ${action} container ${name}:\n${e}`)
   );
 export const dockerPs = () =>
-  _docker(["ps"], (v) =>
+  _docker(["ps", "--all", "--no-trunc", "--filter", '"name=^inc_mainnet_"'], (v) =>
     v
+      // Get rid of a last "\n" that always has nothing.
       .slice(0, -1)
       .split("\n")
-      .map((v) => v.split(/\s+/))
+      // Remove the first line that is the header.
+      .slice(1)
+      .map((v) => ({
+        dockerIndex: +/(?<=inc_mainnet_)\d+/.exec(v)![0],
+        status: / Up \d+ /g.test(v) ? "ONLINE" : "OFFLINE",
+      }))
   );
 
 export function getExtraFiles(nodePathToShard: string) {
