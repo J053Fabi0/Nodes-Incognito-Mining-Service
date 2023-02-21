@@ -14,7 +14,7 @@ export const docker = (name: string | string[], action: "start" | "stop", maxRet
     (e, i) => console.log(`Error on attempt ${i} of ${maxRetries} to ${action} container ${name}:\n${e}`)
   );
 export const dockerPs = () =>
-  _docker(["ps", "--all", "--no-trunc", "--filter", '"name=^inc_mainnet_"'], (v) =>
+  _docker(["ps", "--all", "--no-trunc", "--filter", "name=^inc_mainnet_"], (v) =>
     v
       // Get rid of a last "\n" that always has nothing.
       .slice(0, -1)
