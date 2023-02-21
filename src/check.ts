@@ -14,8 +14,6 @@ export default async function check() {
   const nodesStatus = await getNodesStatus();
   const dockerStatus = await dockerPs();
 
-  console.table(dockerStatus);
-
   for (const nodeStatus of nodesStatus) {
     if (!(nodeStatus.publicValidatorKey in lastErrorTimes)) lastErrorTimes[nodeStatus.publicValidatorKey] = {};
     const { [nodeStatus.publicValidatorKey]: lastErrorTime } = lastErrorTimes;
@@ -23,8 +21,12 @@ export default async function check() {
     const shouldBeOffline = nodeStatus.epochsToNextEvent > minEpochsToBeOnline && nodeStatus.role === "PENDING";
 
     // check if the docker is as it should be, and if not, fix it
-    if (dockerStatus[nodeStatus.dockerIndex] !== nodeStatus.status)
+    if (dockerStatus[nodeStatus.dockerIndex] !== nodeStatus.status) {
+      console.log(
+        `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} for node ${nodeStatus.name}.`
+      );
       await docker(`inc_mainnet_${nodeStatus.dockerIndex}`, shouldBeOffline ? "stop" : "start");
+    }
 
     // check for errors
     for (const errorKey of ["alert", "isSlashed", "isOldVersion"] as const)
