@@ -1,8 +1,9 @@
+import { docker, dockerPs } from "./utils/commands.ts";
+import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
-import getNodesStatus from "./utils/getNodesStatus.ts";
-import { ErrorTypes, LastErrorTime, lastErrorTimes } from "./utils/variables.ts";
 import { waitingTimes, minEpochsToBeOnline } from "../constants.ts";
+import { ErrorTypes, LastErrorTime, lastErrorTimes } from "./utils/variables.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorKey: ErrorTypes) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();
@@ -11,11 +12,19 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorK
 
 export default async function check() {
   const nodesStatus = await getNodesStatus();
+  const dockerStatus = await dockerPs();
+
+  console.table(dockerStatus);
+
   for (const nodeStatus of nodesStatus) {
     if (!(nodeStatus.publicValidatorKey in lastErrorTimes)) lastErrorTimes[nodeStatus.publicValidatorKey] = {};
     const { [nodeStatus.publicValidatorKey]: lastErrorTime } = lastErrorTimes;
 
     const shouldBeOffline = nodeStatus.epochsToNextEvent > minEpochsToBeOnline && nodeStatus.role === "PENDING";
+
+    // check if the docker is as it should be, and if not, fix it
+    if (dockerStatus[nodeStatus.dockerIndex] !== nodeStatus.status)
+      await docker(`inc_mainnet_${nodeStatus.dockerIndex}`, shouldBeOffline ? "stop" : "start");
 
     // check for errors
     for (const errorKey of ["alert", "isSlashed", "isOldVersion"] as const)
