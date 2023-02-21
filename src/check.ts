@@ -21,7 +21,10 @@ export default async function check() {
     const shouldBeOffline = nodeStatus.epochsToNextEvent > minEpochsToBeOnline && nodeStatus.role === "PENDING";
 
     // check if the docker is as it should be, and if not, fix it
-    if (dockerStatus[nodeStatus.dockerIndex] !== nodeStatus.status) {
+    if (
+      (dockerStatus[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
+      (dockerStatus[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline)
+    ) {
       console.log(
         `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} for node ${nodeStatus.name}.`
       );
