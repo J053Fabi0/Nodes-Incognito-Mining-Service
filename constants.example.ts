@@ -21,3 +21,5 @@ export const waitingTimes: Record<ErrorTypes, number> = {
   isOldVersion: 1 * DAY,
   isSlashed: 0 * MINUTE,
 };
+
+export const minEpochsToBeOnline = 15;
