@@ -4,6 +4,15 @@ img.emoji {
   margin-left: -0.5em;
 }
 
+th img.emoji {
+  height: 1.2em !important;
+  width: 2.4em !important;
+  margin-top: -0.2em;
+  margin-bottom: -0.2em;
+  margin-left: -0.65em;
+  margin-right: -0.75em;
+}
+
 body {
   color: white;
   margin: 0;
@@ -24,7 +33,7 @@ td {
 }
 
 th {
-  background-color: #06a9df;
+  background-color: #482956;
 }
 
 tr:nth-child(even) {
