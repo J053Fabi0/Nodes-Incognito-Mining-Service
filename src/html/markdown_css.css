@@ -1,0 +1,50 @@
+img.emoji {
+  height: 1em !important;
+  width: 2em !important;
+  margin-left: -0.5em;
+}
+
+body {
+  color: white;
+  margin: 0;
+  white-space: nowrap;
+  background-color: #202122;
+  font-family: "Ubuntu Mono", monospace;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #06a9df;
+}
+
+tr:nth-child(even) {
+  background-color: #26292a;
+}
+
+th:first-child,
+td:first-child {
+  padding-left: 1em;
+}
+
+th:last-child,
+td:last-child {
+  padding-right: 1em;
+}
+
+tr:hover {
+  background-color: #2b2d2d;
+}
+
+td[colspan="2"] {
+  font-weight: bold;
+}

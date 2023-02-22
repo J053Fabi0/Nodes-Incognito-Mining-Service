@@ -2,11 +2,11 @@
   "importMap": "./import_map.json",
   "tasks": {
     "stop": "pm2 stop nodeschecker",
-    "start": "pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env --allow-run' --name nodeschecker index.ts && pm2 logs nodeschecker",
+    "start": "pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env --allow-run --allow-write' --name nodeschecker index.ts && pm2 logs nodeschecker",
     "logs": "pm2 logs nodeschecker",
     "reload": "pm2 reload nodeschecker && pm2 logs nodeschecker",
 
-    "run": "deno run --allow-net --allow-read --allow-env --allow-run index.ts",
-    "watch": "deno run --watch --allow-net --allow-read --allow-env --allow-run index.ts"
+    "run": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write index.ts",
+    "watch": "deno run --watch --allow-net --allow-read --allow-env --allow-run --allow-write index.ts"
   }
 }

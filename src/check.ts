@@ -1,3 +1,4 @@
+import flags from "./utils/flags.ts";
 import { waitingTimes } from "../constants.ts";
 import { docker, dockerPs } from "./utils/commands.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
@@ -13,7 +14,7 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorK
 
 export default async function check() {
   const nodesStatus = await getNodesStatus();
-  const dockerStatus = await dockerPs();
+  const dockerStatus = flags.ignoreDocker ? {} : await dockerPs();
 
   for (const nodeStatus of nodesStatus) {
     if (!(nodeStatus.publicValidatorKey in lastErrorTimes)) lastErrorTimes[nodeStatus.publicValidatorKey] = {};
@@ -23,8 +24,9 @@ export default async function check() {
 
     // check if the docker is as it should be, and if not, fix it
     if (
-      (dockerStatus[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
-      (dockerStatus[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline)
+      !flags.ignoreDocker &&
+      ((dockerStatus[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
+        (dockerStatus[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline))
     ) {
       console.log(
         `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} for node ${nodeStatus.name}.`
