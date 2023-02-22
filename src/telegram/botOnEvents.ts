@@ -6,6 +6,7 @@ import { wkhtmltoimage } from "../utils/commands.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import getNodesStatus from "../utils/getNodesStatus.ts";
 import getShouldBeOffline from "../utils/getShouldBeOffline.ts";
+import emojisCodes from "../utils/emojisCodes.ts";
 
 const allKeys = ["name", "role", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
 type Keys = typeof allKeys[number];
@@ -102,20 +103,28 @@ bot.on("message", async (ctx) => {
             <style>
               ${await Deno.readTextFile("./src/html/markdown_css.css")}
             </style>
-            <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
           </head>
           <body>
             <table>
               <tr>
                 <th>
-                  <img src="https://josefabio.com/figures/ayn_rand.png" class="emoji">
                   ${newKeys.map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}`).join("</th>\n<th>")}
                 </th>
               </tr>
               <tr>
                 <td>
                   ${normalizedNodes
-                    .map((data) => newKeys.map((key) => data[key]).join("</td>\n<td>"))
+                    .map((data) =>
+                      newKeys
+                        .map((key) =>
+                          key === "status"
+                            ? `<img src="https://abs.twimg.com/emoji/v2/svg/${
+                                emojisCodes[data.status]
+                              }.svg" class="emoji">`
+                            : data[key]
+                        )
+                        .join("</td>\n<td>")
+                    )
                     .join("</td>\n</tr>\n<tr>\n<td>")}
                 </td>
               </tr>
