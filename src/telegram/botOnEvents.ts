@@ -152,14 +152,20 @@ bot.on("message", async (ctx) => {
           </body>
         </html>`;
 
-      if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html)
+      if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html) {
+        const seconds = Math.round((Date.now() - lastPhotoIdTime) / 1000);
+        const minutes = Math.round(seconds / 60);
+        const leftSeconds = seconds - minutes * 60;
+        const timeString =
+          seconds > 60
+            ? `${minutes} minute${minutes === 1 ? "" : "s"}` +
+              `${leftSeconds ? ` and ${leftSeconds} second${leftSeconds === 1 ? "" : "s"}` : ""}`
+            : `${seconds} second${seconds === 1 ? "" : "s"}`;
         await bot.api.sendPhoto(ctx.chat.id, lastPhotoId, {
-          caption:
-            `<i>Nothing changed since last time you checked ` +
-            `${Math.round((Date.now() - lastPhotoIdTime) / 1000)} seconds ago.</i>`,
+          caption: `<i>Nothing changed since last time you checked ${timeString} ago.</i>`,
           parse_mode: "HTML",
         });
-      else {
+      } else {
         Deno.writeTextFileSync("./full.html", html);
         await wkhtmltoimage(["--width", "0", "full.html", "full.png"]).catch((e) => {
           if (e.message.includes("Done")) return;
