@@ -125,10 +125,7 @@ bot.on("message", async (ctx) => {
         `
       );
       await wkhtmltoimage(["--width", "0", "full.html", "full.png"]).catch(() => {});
-      await bot.api.sendPhoto(ctx.chat.id, new InputFile("./full.png"), {
-        caption: information,
-        parse_mode: "HTML",
-      });
+      await bot.api.sendPhoto(ctx.chat.id, new InputFile("./full.png"));
     } catch (e) {
       handleError(e);
     }
