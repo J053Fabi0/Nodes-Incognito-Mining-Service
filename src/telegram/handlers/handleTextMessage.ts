@@ -2,7 +2,7 @@ import bot from "../initBot.ts";
 import { InputFile } from "grammy";
 import sendMessage from "../sendMessage.ts";
 import emojisCodes from "../../utils/emojisCodes.ts";
-import { wkhtmltoimage } from "../../utils/commands.ts";
+import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
 import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
@@ -63,7 +63,11 @@ export default async function handleTextMessage(chatId: number, text: string) {
   } else {
     Deno.writeTextFileSync("./full.html", html);
     await wkhtmltoimage(["--width", "0", "full.html", "full.png"]).catch((e) => {
-      if (e.message.includes("Done")) return;
+      if (e.message.includes("Done")) return e.message;
+      throw e;
+    });
+    await optipng(["full.png"]).catch((e) => {
+      if (e.message.includes("decrease")) return e.message;
       throw e;
     });
     const { photo } = await bot.api.sendPhoto(chatId, new InputFile("./full.png"));
