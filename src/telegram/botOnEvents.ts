@@ -13,6 +13,7 @@ const booleanKeys = ["isSlashed", "isOldVersion", "alert"] as const;
 type Keys = typeof allKeys[number];
 
 let lastPhotoId: string | undefined;
+let lastPhotoIdTime: number | undefined;
 
 bot.on("message", async (ctx) => {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
@@ -52,6 +53,7 @@ bot.on("message", async (ctx) => {
         isSlashed: node.isSlashed ? "Yes" : "No",
         isOldVersion: node.isOldVersion ? "Yes" : "No",
         role: node.role.charAt(0) + node.role.slice(1).toLowerCase(),
+        syncState: node.syncState.charAt(0) + node.syncState.slice(1).toLowerCase(),
         status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
       }));
 
@@ -94,18 +96,25 @@ bot.on("message", async (ctx) => {
 
       // further normalization to use emojis
       for (const node of normalizedNodes) {
-        for (const key of booleanKeys) node[key] = node[key] === "Yes" ? "⚠️" : "No";
+        for (const key of booleanKeys) node[key] = node[key] === "Yes" ? "Yes ⚠️" : "No";
         if (node.role === "Pending") node.role = "⏳";
         if (node.role === "Committee") node.role = "⛏";
+        if (node.syncState.endsWith("stall")) node.syncState += " ⚠️";
       }
 
-      const newKeys = [keys[0], "status", ...keys.slice(1)] as (Keys | "status")[];
+      // generate new keys for the table
+      const newKeys = [keys[0], "status", ...keys.slice(1)] as (Keys | "status" | "syncState")[];
+
+      // if every syncState is "-", don't show it
+      const shouldShowSyncState = normalizedNodes.every((node) => node.syncState === "-") === false;
+      if (shouldShowSyncState) newKeys.push("syncState" as const);
+
       const html = `<!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
             <style>
-              ${await Deno.readTextFile("./src/html/markdown_css.css")}
+              ${Deno.readTextFileSync("./src/html/markdown_css.css")}
             </style>
           </head>
           <body>
@@ -124,11 +133,15 @@ bot.on("message", async (ctx) => {
                     .map((data) =>
                       newKeys
                         .map((key) =>
-                          emojisCodes[data[key]]
-                            ? `<img src="https://abs.twimg.com/emoji/v2/svg/${
-                                emojisCodes[data[key]]
-                              }.svg" class="emoji">`
-                            : data[key]
+                          data[key]
+                            .toString()
+                            .split(" ")
+                            .map((char) =>
+                              emojisCodes[char]
+                                ? `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes[char]}.svg" class="emoji">`
+                                : char
+                            )
+                            .join(" ")
                         )
                         .join("</td>\n<td>")
                     )
@@ -139,9 +152,11 @@ bot.on("message", async (ctx) => {
           </body>
         </html>`;
 
-      if (lastPhotoId && Deno.readTextFileSync("./full.html") === html)
+      if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html)
         await bot.api.sendPhoto(ctx.chat.id, lastPhotoId, {
-          caption: "<i>Nothing changed since last time you checked.</i>",
+          caption:
+            `<i>Nothing changed since last time you checked ` +
+            `${Math.round((Date.now() - lastPhotoIdTime) / 1000)} seconds ago.</i>`,
           parse_mode: "HTML",
         });
       else {
@@ -152,6 +167,7 @@ bot.on("message", async (ctx) => {
         });
         const { photo } = await bot.api.sendPhoto(ctx.chat.id, new InputFile("./full.png"));
         lastPhotoId = photo[0].file_id;
+        lastPhotoIdTime = Date.now();
       }
     } catch (e) {
       handleError(e);

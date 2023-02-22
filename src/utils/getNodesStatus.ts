@@ -23,6 +23,7 @@ export default async function getNodesStatus() {
       IsOldVersion: boolean;
       Status: "ONLINE" | "OFFLINE";
       Role: "PENDING" | "COMMITEE" | "WAITING" | "SYNCING";
+      SyncState: "BEACON SYNCING" | "LATEST" | "-" | "BEACON STALL" | "SHARD SYNCING" | "SHARD STALL";
     }[]
   >("https://monitor.incognito.org/pubkeystat/stat", { mpk });
 
@@ -31,6 +32,7 @@ export default async function getNodesStatus() {
     alert: d.Alert,
     status: d.Status,
     isSlashed: d.IsSlashed,
+    syncState: d.SyncState || "-",
     isOldVersion: d.IsOldVersion,
     epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
     ...constants.find((c) => c.publicValidatorKey === d.MiningPubkey)!,
