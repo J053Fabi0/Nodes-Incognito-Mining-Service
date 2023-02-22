@@ -102,8 +102,6 @@ bot.on("message", async (ctx) => {
             <style>
               ${await Deno.readTextFile("./src/html/markdown_css.css")}
             </style>
-            <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" />
-            <script>window.onload = function () { twemoji.parse(document.body);}</script>
           </head>
           <body>
             <table>
