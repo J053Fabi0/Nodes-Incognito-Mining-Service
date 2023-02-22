@@ -53,39 +53,42 @@ bot.on("message", async (ctx) => {
         status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
       }));
 
-      const maxLength = keys.reduce(
-        (obj, key) =>
-          Object.assign(obj, {
-            [key]: Math.max(...normalizedNodes.map((node) => `${node[key]}`.length), key.length),
-          }),
-        {} as Record<Keys, number>
-      );
+      // for text-only
+      if (/(text|t)$/i.test(ctx.message.text)) {
+        const maxLength = keys.reduce(
+          (obj, key) =>
+            Object.assign(obj, {
+              [key]: Math.max(...normalizedNodes.map((node) => `${node[key]}`.length), key.length),
+            }),
+          {} as Record<Keys, number>
+        );
 
-      const information =
-        "<code>⚪️ " +
-        `${keys
-          .map(
-            (key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}${" ".repeat(maxLength[key] - key.length + 1)}`
-          )
-          .join(" ")}` +
-        "</code>\n\n<code>" +
-        normalizedNodes
-          .map(
-            ({ name, ...otherData }) =>
-              `${otherData.status} ${name}: ${" ".repeat(maxLength.name - name.length)}` +
-              (keys.slice(1) as Exclude<Keys, "name">[])
-                .map(
-                  (key, i) =>
-                    otherData[key] +
-                    (i === keys.length - 2 ? "" : "," + " ".repeat(maxLength[key] - `${otherData[key]}`.length))
-                )
-                .join(" ")
-          )
-          .join("</code>\n<code>") +
-        "</code>";
+        const information =
+          "<code>⚪️ " +
+          `${keys
+            .map(
+              (key) =>
+                `${key.charAt(0).toUpperCase()}${key.slice(1)}${" ".repeat(maxLength[key] - key.length + 1)}`
+            )
+            .join(" ")}` +
+          "</code>\n\n<code>" +
+          normalizedNodes
+            .map(
+              ({ name, ...otherData }) =>
+                `${otherData.status} ${name}: ${" ".repeat(maxLength.name - name.length)}` +
+                (keys.slice(1) as Exclude<Keys, "name">[])
+                  .map(
+                    (key, i) =>
+                      otherData[key] +
+                      (i === keys.length - 2 ? "" : "," + " ".repeat(maxLength[key] - `${otherData[key]}`.length))
+                  )
+                  .join(" ")
+            )
+            .join("</code>\n<code>") +
+          "</code>";
 
-      if (/(text|t)$/i.test(ctx.message.text))
         return await sendMessage(information, ctx.chat.id, { parse_mode: "HTML" });
+      }
 
       // further normalization to use emojis
       for (const node of normalizedNodes) {
