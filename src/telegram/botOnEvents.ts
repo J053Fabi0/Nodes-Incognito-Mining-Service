@@ -102,11 +102,13 @@ bot.on("message", async (ctx) => {
             <style>
               ${await Deno.readTextFile("./src/html/markdown_css.css")}
             </style>
+            <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
           </head>
           <body>
             <table>
               <tr>
                 <th>
+                  <img src="https://josefabio.com/figures/ayn_rand.png" class="emoji">
                   ${newKeys.map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}`).join("</th>\n<th>")}
                 </th>
               </tr>
