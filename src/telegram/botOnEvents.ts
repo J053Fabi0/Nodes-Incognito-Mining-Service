@@ -153,8 +153,8 @@ bot.on("message", async (ctx) => {
         </html>`;
 
       if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html) {
-        const seconds = Math.round((Date.now() - lastPhotoIdTime) / 1000);
-        const minutes = Math.round(seconds / 60);
+        const seconds = Math.floor((Date.now() - lastPhotoIdTime) / 1000);
+        const minutes = Math.floor(seconds / 60);
         const leftSeconds = seconds - minutes * 60;
         const timeString =
           seconds > 60
