@@ -3,7 +3,7 @@ import { InputFile } from "grammy";
 import sendMessage from "../sendMessage.ts";
 import emojisCodes from "../../utils/emojisCodes.ts";
 import { wkhtmltoimage } from "../../utils/commands.ts";
-import getNodesStatus from "../../utils/getNodesStatus.ts";
+import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 
@@ -28,8 +28,9 @@ export default async function handleTextMessage(chatId: number, text: string) {
 
     // filter the nodes that are relevant
     nodes = nodes.filter((node) => {
-      if (node.status === "OFFLINE" && !getShouldBeOffline(node)) return true;
+      if (node.syncState.endsWith("STALL")) return true;
       for (const key of booleanKeys) if (node[key]) return true;
+      if (node.status === "OFFLINE" && !getShouldBeOffline(node)) return true;
       return false;
     });
   }
@@ -39,7 +40,40 @@ export default async function handleTextMessage(chatId: number, text: string) {
     return;
   }
 
-  const normalizedNodes = nodes.map((node) => ({
+  // for text-only
+  if (/(text|t)$/i.test(text))
+    return await sendMessage(getMessageText(keys, nodes), chatId, { parse_mode: "HTML" });
+
+  // generate new keys for the table
+  const newKeys = [keys[0], "status", ...keys.slice(1)] as (Keys | "status" | "syncState")[];
+
+  // if every syncState is "-", don't show it
+  const shouldShowSyncState = nodes.every((node) => node.syncState === "-") === false;
+  if (shouldShowSyncState) newKeys.push("syncState" as const);
+
+  const html = getTableHTML(newKeys, nodes);
+
+  // if the html hasn't changed, send the last photo
+  if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html) {
+    const timeString = rangeMsToTimeDescription(lastPhotoIdTime);
+    await bot.api.sendPhoto(chatId, lastPhotoId, {
+      caption: `<i>Nothing changed since last time you checked ${timeString} ago.</i>`,
+      parse_mode: "HTML",
+    });
+  } else {
+    Deno.writeTextFileSync("./full.html", html);
+    await wkhtmltoimage(["--width", "0", "full.html", "full.png"]).catch((e) => {
+      if (e.message.includes("Done")) return;
+      throw e;
+    });
+    const { photo } = await bot.api.sendPhoto(chatId, new InputFile("./full.png"));
+    lastPhotoId = photo[0].file_id;
+    lastPhotoIdTime = Date.now();
+  }
+}
+
+const getMessageText = (keys: Keys[], nodes: NodeStatus[]) => {
+  const normalizedNodes: Record<string, string | number>[] = nodes.map((node) => ({
     ...node,
     alert: node.alert ? "Yes" : "No",
     isSlashed: node.isSlashed ? "Yes" : "No",
@@ -49,58 +83,57 @@ export default async function handleTextMessage(chatId: number, text: string) {
     status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
   }));
 
-  // for text-only
-  if (/(text|t)$/i.test(text)) {
-    const maxLength = keys.reduce(
-      (obj, key) =>
-        Object.assign(obj, {
-          [key]: Math.max(...normalizedNodes.map((node) => `${node[key]}`.length), key.length),
-        }),
-      {} as Record<Keys, number>
-    );
+  const maxLength = keys.reduce(
+    (obj, key) =>
+      Object.assign(obj, {
+        [key]: Math.max(...normalizedNodes.map((node) => `${node[key]}`.length), key.length),
+      }),
+    {} as Record<Keys, number>
+  );
 
-    const information =
-      "<code>⚪️ " +
-      `${keys
-        .map(
-          (key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}${" ".repeat(maxLength[key] - key.length + 1)}`
-        )
-        .join(" ")}` +
-      "</code>\n\n<code>" +
-      normalizedNodes
-        .map(
-          ({ name, ...otherData }) =>
-            `${otherData.status} ${name}: ${" ".repeat(maxLength.name - name.length)}` +
-            (keys.slice(1) as Exclude<Keys, "name">[])
-              .map(
-                (key, i) =>
-                  otherData[key] +
-                  (i === keys.length - 2 ? "" : "," + " ".repeat(maxLength[key] - `${otherData[key]}`.length))
-              )
-              .join(" ")
-        )
-        .join("</code>\n<code>") +
-      "</code>";
+  return (
+    "<code>⚪️ " +
+    `${keys
+      .map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}${" ".repeat(maxLength[key] - key.length + 1)}`)
+      .join(" ")}` +
+    "</code>\n\n<code>" +
+    normalizedNodes
+      .map(
+        ({ name, ...otherData }) =>
+          `${otherData.status} ${name}: ${" ".repeat(maxLength.name - (name as string).length)}` +
+          (keys.slice(1) as Exclude<Keys, "name">[])
+            .map(
+              (key, i) =>
+                otherData[key] +
+                (i === keys.length - 2 ? "" : "," + " ".repeat(maxLength[key] - `${otherData[key]}`.length))
+            )
+            .join(" ")
+      )
+      .join("</code>\n<code>") +
+    "</code>"
+  );
+};
 
-    return await sendMessage(information, chatId, { parse_mode: "HTML" });
-  }
+const getTableHTML = (newKeys: (Keys | "status" | "syncState")[], nodes: NodeStatus[]) => {
+  const normalizedNodes: Record<string, string | number>[] = nodes.map((node) => ({
+    ...node,
+    alert: node.alert ? "Yes ⚠️" : "No",
+    isSlashed: node.isSlashed ? "Yes ⚠️" : "No",
+    isOldVersion: node.isOldVersion ? "Yes ⚠️" : "No",
+    role:
+      node.role === "PENDING"
+        ? "⏳"
+        : node.role === "COMMITEE"
+        ? "⛏"
+        : node.role.charAt(0) + node.role.slice(1).toLowerCase(),
+    syncState:
+      node.syncState.charAt(0) +
+      node.syncState.slice(1).toLowerCase() +
+      (node.syncState.endsWith("STALL") ? " ⚠️" : ""),
+    status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
+  }));
 
-  // further normalization to use emojis
-  for (const node of normalizedNodes) {
-    for (const key of booleanKeys) node[key] = node[key] === "Yes" ? "Yes ⚠️" : "No";
-    if (node.role === "Pending") node.role = "⏳";
-    if (node.role === "Committee") node.role = "⛏";
-    if (node.syncState.endsWith("stall")) node.syncState += " ⚠️";
-  }
-
-  // generate new keys for the table
-  const newKeys = [keys[0], "status", ...keys.slice(1)] as (Keys | "status" | "syncState")[];
-
-  // if every syncState is "-", don't show it
-  const shouldShowSyncState = normalizedNodes.every((node) => node.syncState === "-") === false;
-  if (shouldShowSyncState) newKeys.push("syncState" as const);
-
-  const html = `<!DOCTYPE html>
+  return `<!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
@@ -161,22 +194,4 @@ export default async function handleTextMessage(chatId: number, text: string) {
             </table>
           </body>
         </html>`;
-
-  // if the html hasn't changed, send the last photo
-  if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html) {
-    const timeString = rangeMsToTimeDescription(lastPhotoIdTime);
-    await bot.api.sendPhoto(chatId, lastPhotoId, {
-      caption: `<i>Nothing changed since last time you checked ${timeString} ago.</i>`,
-      parse_mode: "HTML",
-    });
-  } else {
-    Deno.writeTextFileSync("./full.html", html);
-    await wkhtmltoimage(["--width", "0", "full.html", "full.png"]).catch((e) => {
-      if (e.message.includes("Done")) return;
-      throw e;
-    });
-    const { photo } = await bot.api.sendPhoto(chatId, new InputFile("./full.png"));
-    lastPhotoId = photo[0].file_id;
-    lastPhotoIdTime = Date.now();
-  }
-}
+};
