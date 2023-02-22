@@ -2,7 +2,7 @@ import bot from "./initBot.ts";
 import { InputFile } from "grammy";
 import sendMessage from "./sendMessage.ts";
 import handleError from "../utils/handleError.ts";
-import { electronPDF } from "../utils/commands.ts";
+import { wkhtmltoimage } from "../utils/commands.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import getNodesStatus from "../utils/getNodesStatus.ts";
 import getShouldBeOffline from "../utils/getShouldBeOffline.ts";
@@ -93,7 +93,38 @@ bot.on("message", async (ctx) => {
           `${newKeys.map(() => "---").join(" | ")}\n` +
           normalizedNodes.map((data) => newKeys.map((key) => data[key]).join(" | ")).join("\n")
       );
-      await electronPDF(["full.md", "full.png", "-c", "markdown_css.css", "-l"]);
+      await Deno.writeTextFile(
+        "./full.html",
+        `<!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              ${await Deno.readTextFile("./src/html/markdown_css.css")}
+            </style>
+            <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" />
+            <script>window.onload = function () { twemoji.parse(document.body);}</script>
+          </head>
+          <body>
+            <table>
+              <tr>
+                <th>
+                  ${newKeys.map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}`).join("</th>\n<th>")}
+                </th>
+              </tr>
+              <tr>
+                <td>
+                  ${normalizedNodes
+                    .map((data) => newKeys.map((key) => data[key]).join("</td>\n<td>"))
+                    .join("</td>\n</tr>\n<tr>\n<td>")}
+                </td>
+              </tr>
+            </table>
+          </body>
+        </html>
+        `
+      );
+      await wkhtmltoimage(["--width", "0", "full.html", "full.png"]).catch(() => {});
       await bot.api.sendPhoto(ctx.chat.id, new InputFile("./full.png"), {
         caption: information,
         parse_mode: "HTML",

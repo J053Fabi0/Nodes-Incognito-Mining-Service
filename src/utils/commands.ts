@@ -6,7 +6,7 @@ export const cp = binaryWrapper("cp");
 export const rm = binaryWrapper("rm");
 export const ls = binaryWrapper("ls");
 export const chown = binaryWrapper("chown");
-export const electronPDF = binaryWrapper("electron-pdf");
+export const wkhtmltoimage = binaryWrapper("wkhtmltoimage");
 
 const _docker = binaryWrapper("docker");
 

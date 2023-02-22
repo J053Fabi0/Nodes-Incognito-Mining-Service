@@ -1,22 +1,27 @@
-body {
-  background-color: #202122;
-  color: white;
-  font-size: larger !important;
+img.emoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.1em;
 }
 
-* {
-  font-family: "Courier New", monospace;
+body {
+  color: white;
+  white-space: nowrap;
+  background-color: #202122;
+  font-size: larger !important;
+  font-family: "Ubuntu Mono", monospace;
 }
 
 table {
-  border-collapse: collapse;
   width: 100%;
+  border-collapse: collapse;
 }
 
 th,
 td {
-  text-align: left;
   padding: 8px;
+  text-align: left;
 }
 
 th {
