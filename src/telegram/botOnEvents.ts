@@ -40,7 +40,7 @@ bot.on("message", async (ctx) => {
       }
 
       if (!nodes.length) {
-        await sendMessage("Everything is alright. Send /full to get all the information.");
+        await sendMessage("Everything is alright. Send /full or /fulltext to get all the information.");
         return;
       }
 
