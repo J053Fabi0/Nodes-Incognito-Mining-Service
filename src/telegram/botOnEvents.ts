@@ -9,6 +9,7 @@ import getShouldBeOffline from "../utils/getShouldBeOffline.ts";
 import emojisCodes from "../utils/emojisCodes.ts";
 
 const allKeys = ["name", "role", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
+const booleanKeys = ["isSlashed", "isOldVersion", "alert"] as const;
 type Keys = typeof allKeys[number];
 
 bot.on("message", async (ctx) => {
@@ -26,7 +27,6 @@ bot.on("message", async (ctx) => {
       else {
         // minimal information to show
         keys.push("name", "role", "epochsToNextEvent");
-        const booleanKeys = ["isSlashed", "isOldVersion", "alert"] as const;
 
         // get the keys that are relevant
         for (const key of booleanKeys) if (nodes.find((node) => node[key])) keys.push(key);
@@ -87,13 +87,14 @@ bot.on("message", async (ctx) => {
       if (/(text|t)$/i.test(ctx.message.text))
         return await sendMessage(information, ctx.chat.id, { parse_mode: "HTML" });
 
+      // further normalization to use emojis
+      for (const node of normalizedNodes) {
+        for (const key of booleanKeys) node[key] = node[key] === "Yes" ? "⚠️" : "No";
+        if (node.role === "Pending") node.role = "⏳";
+        if (node.role === "Committee") node.role = "⛏";
+      }
+
       const newKeys = [keys[0], "status", ...keys.slice(1)] as (Keys | "status")[];
-      await Deno.writeTextFile(
-        "./full.md",
-        `${newKeys.map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}`).join(" | ")}\n` +
-          `${newKeys.map(() => "---").join(" | ")}\n` +
-          normalizedNodes.map((data) => newKeys.map((key) => data[key]).join(" | ")).join("\n")
-      );
       await Deno.writeTextFile(
         "./full.html",
         `<!DOCTYPE html>
@@ -108,7 +109,10 @@ bot.on("message", async (ctx) => {
             <table>
               <tr>
                 <th>
-                  ${newKeys.map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}`).join("</th>\n<th>")}
+                  ${newKeys
+                    .map((key) => (key.startsWith("is") ? key.slice(2) : key))
+                    .map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}`)
+                    .join("</th>\n<th>")}
                 </th>
               </tr>
               <tr>
@@ -117,9 +121,9 @@ bot.on("message", async (ctx) => {
                     .map((data) =>
                       newKeys
                         .map((key) =>
-                          key === "status"
+                          emojisCodes[data[key]]
                             ? `<img src="https://abs.twimg.com/emoji/v2/svg/${
-                                emojisCodes[data.status]
+                                emojisCodes[data[key]]
                               }.svg" class="emoji">`
                             : data[key]
                         )

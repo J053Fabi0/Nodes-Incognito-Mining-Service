@@ -1,15 +1,14 @@
 img.emoji {
   height: 1em !important;
   width: 2em !important;
-  margin: 0 0.05em 0 0.1em;
-  vertical-align: -0.1em;
+  margin-left: -0.5em;
 }
 
 body {
   color: white;
+  margin: 0;
   white-space: nowrap;
   background-color: #202122;
-  font-size: larger !important;
   font-family: "Ubuntu Mono", monospace;
 }
 
@@ -30,6 +29,16 @@ th {
 
 tr:nth-child(even) {
   background-color: #26292a;
+}
+
+th:first-child,
+td:first-child {
+  padding-left: 1em;
+}
+
+th:last-child,
+td:last-child {
+  padding-right: 1em;
 }
 
 tr:hover {
