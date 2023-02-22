@@ -12,6 +12,8 @@ const allKeys = ["name", "role", "isSlashed", "isOldVersion", "alert", "epochsTo
 const booleanKeys = ["isSlashed", "isOldVersion", "alert"] as const;
 type Keys = typeof allKeys[number];
 
+let lastPhotoId: string | undefined;
+
 bot.on("message", async (ctx) => {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
     try {
@@ -98,9 +100,7 @@ bot.on("message", async (ctx) => {
       }
 
       const newKeys = [keys[0], "status", ...keys.slice(1)] as (Keys | "status")[];
-      await Deno.writeTextFile(
-        "./full.html",
-        `<!DOCTYPE html>
+      const html = `<!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
@@ -137,11 +137,22 @@ bot.on("message", async (ctx) => {
               </tr>
             </table>
           </body>
-        </html>
-        `
-      );
-      await wkhtmltoimage(["--width", "0", "full.html", "full.png"]).catch(() => {});
-      await bot.api.sendPhoto(ctx.chat.id, new InputFile("./full.png"));
+        </html>`;
+
+      if (lastPhotoId && Deno.readTextFileSync("./full.html") === html)
+        await bot.api.sendPhoto(ctx.chat.id, lastPhotoId, {
+          caption: "<i>Nothing changed since last time you checked.</i>",
+          parse_mode: "HTML",
+        });
+      else {
+        Deno.writeTextFileSync("./full.html", html);
+        await wkhtmltoimage(["--width", "0", "full.html", "full.png"]).catch((e) => {
+          if (e.message.includes("Done")) return;
+          throw e;
+        });
+        const { photo } = await bot.api.sendPhoto(ctx.chat.id, new InputFile("./full.png"));
+        lastPhotoId = photo[0].file_id;
+      }
     } catch (e) {
       handleError(e);
     }
