@@ -35,10 +35,8 @@ export default async function handleTextMessage(chatId: number, text: string) {
     });
   }
 
-  if (!nodes.length) {
-    await sendMessage("Everything is alright. Send /full or /fulltext to get all the information.");
-    return;
-  }
+  if (!nodes.length)
+    return await sendMessage("Everything is alright. Send /full or /fulltext to get all the information.");
 
   // for text-only
   if (/(text|t)$/i.test(text))
@@ -127,7 +125,7 @@ const getTableHTML = (newKeys: (Keys | "status" | "syncState")[], nodes: NodeSta
     role:
       node.role === "PENDING"
         ? "⏳"
-        : node.role === "COMMITEE"
+        : node.role === "COMMITTEE"
         ? "⛏"
         : node.role.charAt(0) + node.role.slice(1).toLowerCase(),
     syncState:

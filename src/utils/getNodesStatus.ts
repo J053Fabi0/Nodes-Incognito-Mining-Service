@@ -22,7 +22,7 @@ export default async function getNodesStatus() {
       NextEventMsg: string;
       IsOldVersion: boolean;
       Status: "ONLINE" | "OFFLINE";
-      Role: "PENDING" | "COMMITEE" | "WAITING" | "SYNCING";
+      Role: "PENDING" | "COMMITTEE" | "WAITING" | "SYNCING";
       SyncState: "BEACON SYNCING" | "LATEST" | "-" | "BEACON STALL" | "SHARD SYNCING" | "SHARD STALL";
     }[]
   >("https://monitor.incognito.org/pubkeystat/stat", { mpk });
