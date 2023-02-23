@@ -1,10 +1,10 @@
 import bot from "../initBot.ts";
 import { InputFile } from "grammy";
 import sendMessage from "../sendMessage.ts";
-import emojisCodes from "../../utils/emojisCodes.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
-import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
+import emojisCodes, { splitEmoji } from "../../utils/emojisCodes.ts";
+import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 
 const allKeys = ["name", "role", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
@@ -178,7 +178,7 @@ const getTableHTML = (newKeys: (Keys | "status" | "syncState")[], nodes: NodeSta
                     .map((data) =>
                       newKeys
                         .map((key) =>
-                          [...data[key].toString()]
+                          splitEmoji(data[key].toString())
                             .map((char) =>
                               emojisCodes[char]
                                 ? `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes[char]}.svg" class="emoji">`
