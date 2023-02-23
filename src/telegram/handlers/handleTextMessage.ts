@@ -126,7 +126,7 @@ const getTableHTML = (newKeys: (Keys | "status" | "syncState")[], nodes: NodeSta
       node.role === "PENDING"
         ? "⏳"
         : node.role === "COMMITTEE"
-        ? "⛏"
+        ? "⛏⚡"
         : node.role.charAt(0) + node.role.slice(1).toLowerCase(),
     syncState:
       node.syncState.charAt(0) +
@@ -178,15 +178,13 @@ const getTableHTML = (newKeys: (Keys | "status" | "syncState")[], nodes: NodeSta
                     .map((data) =>
                       newKeys
                         .map((key) =>
-                          data[key]
-                            .toString()
-                            .split(" ")
+                          [...data[key].toString()]
                             .map((char) =>
                               emojisCodes[char]
                                 ? `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes[char]}.svg" class="emoji">`
                                 : char
                             )
-                            .join(" ")
+                            .join("")
                         )
                         .join("</td>\n<td>")
                     )
