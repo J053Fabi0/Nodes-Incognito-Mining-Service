@@ -5,7 +5,7 @@ import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
 import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
-import { ErrorTypes, LastErrorTime, lastErrorTimes } from "./utils/variables.ts";
+import { ErrorTypes, LastErrorTime, lastErrorTimes, ignoreDocker } from "./utils/variables.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorKey: ErrorTypes) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();
@@ -25,6 +25,7 @@ export default async function check() {
     // check if the docker is as it should be, and if not, fix it
     if (
       !flags.ignoreDocker &&
+      ignoreDocker.from.getTime() + ignoreDocker.minutes * 60 * 1000 < Date.now() &&
       ((dockerStatus[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
         (dockerStatus[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline))
     ) {
