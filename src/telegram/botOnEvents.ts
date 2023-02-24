@@ -9,7 +9,7 @@ bot.on("message", async (ctx) => {
     try {
       if (/ignore/i.test(ctx.message.text)) {
         const minutes = Number(ctx.message.text.match(/\d+/g)?.[0]);
-        if (minutes) {
+        if (!isNaN(minutes)) {
           ignoreDocker.minutes = minutes;
           ignoreDocker.from = new Date();
           await sendMessage(`Ignoring docker for ${minutes} minutes.`);
