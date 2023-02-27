@@ -19,6 +19,8 @@ export const docker = (name: string | string[], action: "start" | "stop", maxRet
     (e, i) => console.log(`Error on attempt ${i} of ${maxRetries} to ${action} container ${name}:\n${e}`)
   );
 
+export type DockerStatus = "ONLINE" | "OFFLINE";
+export type DockerStatuses = Record<number | string, DockerStatus>;
 export const dockerPs = () =>
   _docker(["ps", "--all", "--no-trunc", "--filter", "name=^inc_mainnet_"], (v) => {
     const dockersStatus = v
@@ -30,7 +32,7 @@ export const dockerPs = () =>
       .reduce((obj, v) => {
         obj[+/(?<=inc_mainnet_)\d+/.exec(v)![0]] = / Up (\d+|about) /gi.test(v) ? "ONLINE" : "OFFLINE";
         return obj;
-      }, {} as Record<number | string, "ONLINE" | "OFFLINE">);
+      }, {} as DockerStatuses);
 
     for (const { dockerIndex } of constants)
       if (dockersStatus[dockerIndex] === undefined) dockersStatus[dockerIndex] = "OFFLINE";

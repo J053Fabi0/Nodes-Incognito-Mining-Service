@@ -14,7 +14,7 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorK
 
 export default async function check() {
   const nodesStatus = await getNodesStatus();
-  const dockerStatus = flags.ignoreDocker ? {} : await dockerPs();
+  const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs();
 
   for (const nodeStatus of nodesStatus) {
     if (!(nodeStatus.publicValidatorKey in lastErrorTimes)) lastErrorTimes[nodeStatus.publicValidatorKey] = {};
@@ -26,8 +26,8 @@ export default async function check() {
     if (
       !flags.ignoreDocker &&
       ignoreDocker.from.getTime() + ignoreDocker.minutes * 60 * 1000 < Date.now() &&
-      ((dockerStatus[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
-        (dockerStatus[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline))
+      ((dockerStatuses[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
+        (dockerStatuses[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline))
     ) {
       console.log(
         `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} for node ${nodeStatus.name}.`
