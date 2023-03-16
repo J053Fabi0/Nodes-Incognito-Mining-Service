@@ -5,7 +5,7 @@ import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
 import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
-import { ErrorTypes, LastErrorTime, lastErrorTimes, ignoreDocker } from "./utils/variables.ts";
+import { ErrorTypes, LastErrorTime, lastErrorTimes, ignore } from "./utils/variables.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorKey: ErrorTypes) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();
@@ -25,7 +25,7 @@ export default async function check() {
     // check if the docker is as it should be, and if not, fix it
     if (
       !flags.ignoreDocker &&
-      ignoreDocker.from.getTime() + ignoreDocker.minutes * 60 * 1000 < Date.now() &&
+      ignore.docker.from.getTime() + ignore.docker.minutes * 60 * 1000 < Date.now() &&
       ((dockerStatuses[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
         (dockerStatuses[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline))
     ) {
@@ -44,7 +44,13 @@ export default async function check() {
     // report errors if they have been present for longer than established
     for (const [errorKey, date] of Object.entries(lastErrorTime) as [ErrorTypes, Date][]) {
       const minutes = getMinutesSinceError(date);
-      if (minutes >= waitingTimes[errorKey]) await handleNodeError(errorKey, nodeStatus.name, minutes);
+      if (
+        // if it has been present for longer than established
+        minutes >= waitingTimes[errorKey] &&
+        // and it's not being ignored
+        ignore[errorKey].from.getTime() + ignore[errorKey].minutes * 60 * 1000 >= Date.now()
+      )
+        await handleNodeError(errorKey, nodeStatus.name, minutes);
     }
   }
 }

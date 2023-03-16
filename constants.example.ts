@@ -24,4 +24,5 @@ export const waitingTimes: Record<ErrorTypes, number> = {
   stalling: 5 * MINUTE,
 };
 
-export const minEpochsToBeOnline = 15;
+export const minEpochsToBeOnline = 5;
+export const minEpochsToLetSync = 20;

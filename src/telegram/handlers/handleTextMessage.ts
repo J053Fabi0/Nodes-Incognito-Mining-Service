@@ -74,7 +74,7 @@ export default async function handleTextMessage(chatId: number, text: string) {
   }
 }
 
-const getMessageText = (keys: Keys[], nodes: NodeStatus[]) => {
+function getMessageText(keys: Keys[], nodes: NodeStatus[]) {
   const normalizedNodes: Record<string, string | number>[] = nodes.map((node) => ({
     ...node,
     alert: node.alert ? "Yes" : "No",
@@ -114,9 +114,9 @@ const getMessageText = (keys: Keys[], nodes: NodeStatus[]) => {
       .join("</code>\n<code>") +
     "</code>"
   );
-};
+}
 
-const getTableHTML = (newKeys: (Keys | "status" | "syncState")[], nodes: NodeStatus[]) => {
+function getTableHTML(newKeys: (Keys | "status" | "syncState")[], nodes: NodeStatus[]) {
   const normalizedNodes: Record<string, string | number>[] = nodes.map((node) => ({
     ...node,
     alert: node.alert ? "Yes ⚠️" : "No",
@@ -194,4 +194,4 @@ const getTableHTML = (newKeys: (Keys | "status" | "syncState")[], nodes: NodeSta
             </table>
           </body>
         </html>`;
-};
+}
