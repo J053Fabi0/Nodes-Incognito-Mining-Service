@@ -48,7 +48,7 @@ export default async function check() {
         // if it has been present for longer than established
         minutes >= waitingTimes[errorKey] &&
         // and it's not being ignored
-        ignore[errorKey].from.getTime() + ignore[errorKey].minutes * 60 * 1000 >= Date.now()
+        ignore[errorKey].from.getTime() + ignore[errorKey].minutes * 60 * 1000 <= Date.now()
       )
         await handleNodeError(errorKey, nodeStatus.name, minutes);
     }
