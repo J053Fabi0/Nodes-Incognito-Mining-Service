@@ -2,6 +2,8 @@ import { NodeStatus } from "./getNodesStatus.ts";
 import { minEpochsToBeOnline, minEpochsToLetSync } from "../../constants.ts";
 import { syncedNodes } from "./variables.ts";
 
+const offlineRoles = ["PENDING", "SYNCING"];
+
 const getShouldBeOffline = (
   nodeStatus: Partial<NodeStatus> &
     Pick<NodeStatus, "epochsToNextEvent" | "role" | "publicValidatorKey" | "syncState">
@@ -9,7 +11,7 @@ const getShouldBeOffline = (
   const inSyncRange =
     minEpochsToLetSync >= nodeStatus.epochsToNextEvent && nodeStatus.epochsToNextEvent > minEpochsToBeOnline;
 
-  if (inSyncRange && nodeStatus.role === "PENDING") {
+  if (inSyncRange && offlineRoles.includes(nodeStatus.role)) {
     // If it is synced and between the sync range, it should be offline
     if (syncedNodes[nodeStatus.publicValidatorKey]) return true;
 
@@ -24,7 +26,7 @@ const getShouldBeOffline = (
 
   // If the epochs to next event is greater than the min epochs to let sync and its only PENDING, it should be offline
   // In any other case, the node should be online
-  return nodeStatus.epochsToNextEvent > minEpochsToLetSync && nodeStatus.role === "PENDING";
+  return nodeStatus.epochsToNextEvent > minEpochsToLetSync && offlineRoles.includes(nodeStatus.role);
 };
 
 export default getShouldBeOffline;
