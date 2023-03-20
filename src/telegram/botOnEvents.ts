@@ -23,7 +23,7 @@ bot.on("message", async (ctx) => {
 
         if (type !== "all" && !errorKeys.includes(type))
           return await sendMessage(
-            `Valid types:\n- <code>${[...errorKeys, "all"].join("</code>\n- <code>")}</code>`,
+            `Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`,
             undefined,
             { parse_mode: "HTML" }
           );
