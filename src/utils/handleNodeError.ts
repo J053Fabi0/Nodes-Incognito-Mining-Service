@@ -8,8 +8,8 @@ export default async function handleNodeError(errorKey: ErrorTypes, node: string
 
   try {
     await sendMessage(
-      `<b>${node}</b> - <code>${escapeHtml(errorKey)}</code>: ` +
-        `<code>${Math.round(minutesSinceError)} minutes</code>`,
+      `<b>${node}</b> - <code>${escapeHtml(errorKey)}</code><code>: ` +
+        `${Math.round(minutesSinceError)} minutes</code>`,
       undefined,
       { parse_mode: "HTML" }
     );
