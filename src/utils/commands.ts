@@ -1,6 +1,5 @@
 import constants from "../../constants.ts";
-import binaryWrapper from "./binaryWrapper.ts";
-import repeatUntilNoError from "./repeatUntilNoError.ts";
+import { binaryWrapper, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 
 export const cp = binaryWrapper("cp");
 export const rm = binaryWrapper("rm");
