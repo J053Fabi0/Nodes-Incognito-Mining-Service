@@ -78,11 +78,13 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
   const shorterKeys = keys.map((key) => {
     switch (key) {
       case "isSlashed":
-        return "Slshd";
+        return "Sl";
       case "isOldVersion":
-        return "Old";
+        return "Ol";
       case "epochsToNextEvent":
-        return "Nxt";
+        return "Ne";
+      case "alert":
+        return "Al";
       default:
         return key;
     }
@@ -90,10 +92,10 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
 
   const normalizedNodes: Record<typeof shorterKeys[number], string | number>[] = nodes.map((node) => ({
     ...node,
-    Nxt: node.epochsToNextEvent,
-    alert: node.alert ? "Yes" : "No",
-    Slshd: node.isSlashed ? "Yes" : "No",
-    Old: node.isOldVersion ? "Yes" : "No",
+    Ne: node.epochsToNextEvent,
+    Al: node.alert ? "Yes" : "No",
+    Sl: node.isSlashed ? "Yes" : "No",
+    Ol: node.isOldVersion ? "Yes" : "No",
     role: node.role.charAt(0) + node.role.slice(1).toLowerCase(),
     syncState: node.syncState.charAt(0) + node.syncState.slice(1).toLowerCase(),
     status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
