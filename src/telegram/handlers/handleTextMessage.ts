@@ -82,7 +82,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
       case "isOldVersion":
         return "Ol";
       case "epochsToNextEvent":
-        return "Ne";
+        return "Nex";
       case "alert":
         return "Al";
       default:
@@ -92,7 +92,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
 
   const normalizedNodes: Record<typeof shorterKeys[number], string | number>[] = nodes.map((node) => ({
     ...node,
-    Ne: node.epochsToNextEvent,
+    Nex: node.epochsToNextEvent,
     Al: node.alert ? "Yes" : "No",
     Sl: node.isSlashed ? "Yes" : "No",
     Ol: node.isOldVersion ? "Yes" : "No",
