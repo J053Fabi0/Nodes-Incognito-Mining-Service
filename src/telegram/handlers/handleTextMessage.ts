@@ -13,6 +13,8 @@ type Keys = typeof allKeys[number];
 
 let lastPhotoId: string | undefined;
 let lastPhotoIdTime: number | undefined;
+let lastText = "";
+let lastTextTime: number | undefined;
 
 export default async function handleTextMessage(chatId: number, text: string) {
   const keys: Keys[] = [];
@@ -109,7 +111,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
     {} as Record<typeof shorterKeys[number], number>
   );
 
-  return (
+  const text =
     "<code>⚪️ " +
     shorterKeys
       .map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}${" ".repeat(maxLength[key] - key.length + 1)}`)
@@ -128,8 +130,17 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
             .join(" ")
       )
       .join("</code>\n<code>") +
-    "</code>"
-  );
+    "</code>";
+
+  if (lastText === text && lastTextTime) {
+    const timeString = rangeMsToTimeDescription(lastTextTime);
+    return `${text}\n\n<i>Nothing changed since last time you checked ${timeString} ago.</i>`;
+  }
+
+  lastText = text;
+  lastTextTime = Date.now();
+
+  return text;
 }
 
 function getTableHTML(newKeys: (Keys | "status" | "syncState")[], nodes: NodeStatus[]) {
