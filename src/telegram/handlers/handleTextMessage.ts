@@ -96,7 +96,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
     Al: node.alert ? "Yes" : "No",
     Sl: node.isSlashed ? "Yes" : "No",
     Ol: node.isOldVersion ? "Yes" : "No",
-    role: node.role.charAt(0) + node.role.slice(1).toLowerCase(),
+    role: node.role.substring(0, 1) + node.role.substring(1, 4).toLowerCase(),
     syncState: node.syncState.charAt(0) + node.syncState.slice(1).toLowerCase(),
     status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
   }));
