@@ -74,51 +74,50 @@ export default async function handleTextMessage(chatId: number, text: string) {
   }
 }
 
-function getMessageText(keys: Keys[], nodes: NodeStatus[]) {
-  const normalizedNodes: Record<string, string | number>[] = nodes.map((node) => ({
+function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
+  const shorterKeys = keys.map((key) => {
+    switch (key) {
+      case "isSlashed":
+        return "Slshd";
+      case "isOldVersion":
+        return "Old";
+      case "epochsToNextEvent":
+        return "Nxt";
+      default:
+        return key;
+    }
+  });
+
+  const normalizedNodes: Record<typeof shorterKeys[number], string | number>[] = nodes.map((node) => ({
     ...node,
+    Nxt: node.epochsToNextEvent,
     alert: node.alert ? "Yes" : "No",
-    isSlashed: node.isSlashed ? "Yes" : "No",
-    isOldVersion: node.isOldVersion ? "Yes" : "No",
+    Slshd: node.isSlashed ? "Yes" : "No",
+    Old: node.isOldVersion ? "Yes" : "No",
     role: node.role.charAt(0) + node.role.slice(1).toLowerCase(),
     syncState: node.syncState.charAt(0) + node.syncState.slice(1).toLowerCase(),
     status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
   }));
 
-  const maxLength = keys.reduce(
+  const maxLength = shorterKeys.reduce(
     (obj, key) =>
       Object.assign(obj, {
         [key]: Math.max(...normalizedNodes.map((node) => `${node[key]}`.length), key.length),
       }),
-    {} as Record<Keys, number>
+    {} as Record<typeof shorterKeys[number], number>
   );
 
   return (
     "<code>⚪️ " +
-    keys
-      .map((key): { value: string; key: Keys } => {
-        switch (key) {
-          case "isSlashed":
-            return { key, value: "Slshd" };
-          case "isOldVersion":
-            return { key, value: "Old" };
-          case "epochsToNextEvent":
-            return { key, value: "Nxt" };
-          default:
-            return { key, value: key };
-        }
-      })
-      .map(
-        ({ key, value }) =>
-          `${value.charAt(0).toUpperCase()}${value.slice(1)}${" ".repeat(maxLength[key] - value.length + 1)}`
-      )
+    shorterKeys
+      .map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}${" ".repeat(maxLength[key] - key.length + 1)}`)
       .join(" ") +
     "</code>\n\n<code>" +
     normalizedNodes
       .map(
         ({ name, ...otherData }) =>
           `${otherData.status} ${name}: ${" ".repeat(maxLength.name - (name as string).length)}` +
-          (keys.slice(1) as Exclude<Keys, "name">[])
+          (shorterKeys.slice(1) as Exclude<typeof shorterKeys[number], "name">[])
             .map(
               (key, i) =>
                 otherData[key] +
