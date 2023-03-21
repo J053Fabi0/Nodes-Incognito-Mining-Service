@@ -1,4 +1,5 @@
 export type ErrorTypes = "alert" | "isSlashed" | "isOldVersion" | "offline" | "stalling";
+export const errorTypes = ["alert", "isSlashed", "isOldVersion", "offline", "stalling"] as const;
 // Node's public validator key as key
 export type LastErrorTime = Partial<Record<ErrorTypes, Date>>;
 export const lastErrorTimes: Record<string, LastErrorTime> = {};
