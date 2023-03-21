@@ -95,9 +95,24 @@ function getMessageText(keys: Keys[], nodes: NodeStatus[]) {
 
   return (
     "<code>⚪️ " +
-    `${keys
-      .map((key) => `${key.charAt(0).toUpperCase()}${key.slice(1)}${" ".repeat(maxLength[key] - key.length + 1)}`)
-      .join(" ")}` +
+    keys
+      .map((key): { value: string; key: Keys } => {
+        switch (key) {
+          case "isSlashed":
+            return { key, value: "Slshd" };
+          case "isOldVersion":
+            return { key, value: "Old" };
+          case "epochsToNextEvent":
+            return { key, value: "Nxt" };
+          default:
+            return { key, value: key };
+        }
+      })
+      .map(
+        ({ key, value }) =>
+          `${value.charAt(0).toUpperCase()}${value.slice(1)}${" ".repeat(maxLength[key] - value.length + 1)}`
+      )
+      .join(" ") +
     "</code>\n\n<code>" +
     normalizedNodes
       .map(
