@@ -1,14 +1,14 @@
 import { escapeHtml } from "escapeHtml";
 import { sendHTMLMessage } from "../sendMessage.ts";
 import objectToTableText from "../objectToTableText.ts";
-import validateNodes from "../../utils/validateNodes.ts";
+import validateItems from "../../utils/validateItems.ts";
 import { Info, df } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 
 const { fileSystem } = duplicatedConstants;
 
-export default async function info(args: string[]) {
-  const nodes = await validateNodes(args).catch(() => undefined);
+export default async function info(rawNodes: string[]) {
+  const nodes = await validateItems({ rawItems: rawNodes }).catch(() => null);
   if (!nodes) return;
 
   const nodesInfo = await duplicatedFilesCleaner.getInfo(nodes.length ? nodes : undefined);

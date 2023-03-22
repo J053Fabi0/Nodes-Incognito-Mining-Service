@@ -1,7 +1,7 @@
-import { sendHTMLMessage } from "../sendMessage.ts";
-import validateNodes from "../../utils/validateNodes.ts";
+import validateItems from "../../utils/validateItems.ts";
+import { docker } from "duplicatedFilesCleanerIncognito";
+import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
-import { docker } from "https://deno.land/x/duplicated_files_cleaner_incognito@1.1.2/mod.ts";
 
 export default async function handleDocker([action, ...rawNodes]: string[]) {
   // check if the command is valid
@@ -13,11 +13,13 @@ export default async function handleDocker([action, ...rawNodes]: string[]) {
   const nodes =
     rawNodes.length === 1 && rawNodes[0] === "all"
       ? duplicatedFilesCleaner.usedNodes
-      : await validateNodes(rawNodes).catch(() => null);
+      : await validateItems({ rawItems: rawNodes }).catch(() => null);
   if (!nodes) return;
 
   for (const node of nodes) {
     await docker(`inc_mainnet_${node}`, action);
     await sendHTMLMessage(`Docker <code>${node}</code> ${action}ed.`);
   }
+
+  await sendMessage("Done.");
 }

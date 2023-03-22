@@ -3,6 +3,7 @@ import info from "./handlers/info.ts";
 import ignore from "./handlers/ignore.ts";
 import sendMessage from "./sendMessage.ts";
 import handleHelp from "./handlers/handleHelp.ts";
+import handleCopy from "./handlers/handleCopy.ts";
 import handleError from "../utils/handleError.ts";
 import handleDocker from "./handlers/handleDocker.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
@@ -11,17 +12,17 @@ import handleTextMessage from "./handlers/handleTextMessage.ts";
 bot.on("message", async (ctx) => {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
     try {
-      const messageParts = ctx.message.text.split(" ");
+      const [command, ...args] = ctx.message.text.split(" ");
 
-      switch (messageParts[0].toLocaleLowerCase()) {
+      switch (command.match(/\/?(\w+)/)?.[1].toLocaleLowerCase()) {
         case "help":
           return await handleHelp();
 
         case "docker":
-          return handleDocker(messageParts.slice(1));
+          return await handleDocker(args);
 
         case "ignore":
-          return ignore(messageParts.slice(1));
+          return await ignore(args);
 
         case "restart":
         case "reset": {
@@ -30,7 +31,11 @@ bot.on("message", async (ctx) => {
         }
 
         case "info":
-          return await info(messageParts.slice(1));
+        case "status":
+          return await info(args);
+
+        case "copy":
+          return await handleCopy(args);
 
         default:
           return await handleTextMessage(ctx.chat.id, ctx.message.text);
