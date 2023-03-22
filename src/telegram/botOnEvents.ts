@@ -65,7 +65,7 @@ bot.on("message", async (ctx) => {
             }
           }
 
-          const nodesInfo = duplicatedFilesCleaner.getInfo(nodes.length ? nodes : undefined);
+          const nodesInfo = await duplicatedFilesCleaner.getInfo(nodes.length ? nodes : undefined);
 
           let text = "";
 
