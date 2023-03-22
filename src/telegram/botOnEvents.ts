@@ -1,11 +1,13 @@
 import bot from "./initBot.ts";
 import { escapeHtml } from "escapeHtml";
 import handleError from "../utils/handleError.ts";
-import { Info } from "duplicatedFilesCleanerIncognito";
+import { Info, df } from "duplicatedFilesCleanerIncognito";
 import { lastErrorTimes, ignore } from "../utils/variables.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
-import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner, { duplicatedConstants } from "../../duplicatedFilesCleaner.ts";
+
+const { fileSystem } = duplicatedConstants;
 
 const errorKeys = Object.keys(ignore).sort((a, b) => a.length - b.length) as (keyof typeof ignore)[];
 type Type = typeof errorKeys[number] | "all";
@@ -79,6 +81,11 @@ bot.on("message", async (ctx) => {
                 .slice(0, -1)
                 .join("</code>\n<code>")}</code>` +
               "\n\n";
+
+          if (fileSystem)
+            text +=
+              `<b>File system</b>:\n` +
+              `<code>${escapeHtml(await df(["-h", fileSystem, "--output=used,avail,pcent"]))}</code>`;
 
           return await sendHTMLMessage(text.trim());
         }
