@@ -1,6 +1,6 @@
 import DuplicatedFilesCleaner, { Constants } from "duplicatedFilesCleanerIncognito";
 
-const constants: Constants = {
+export const duplicatedConstants: Constants = {
   homePath: "/home/incognito",
   storageFolder: "storage",
   fileSystem: "/dev/sda3", // for the server
@@ -34,5 +34,5 @@ const constants: Constants = {
   ],
 };
 
-const duplicatedFilesCleaner = new DuplicatedFilesCleaner(constants);
+const duplicatedFilesCleaner = new DuplicatedFilesCleaner(duplicatedConstants);
 export default duplicatedFilesCleaner;
