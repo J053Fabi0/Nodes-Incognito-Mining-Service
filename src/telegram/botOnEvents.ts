@@ -19,10 +19,10 @@ bot.on("message", async (ctx) => {
           let number = 0;
           let type: Type = "docker";
 
-          if (messageParts.length === 2) number = Number(messageParts[1]);
+          if (messageParts.length === 2) number = Number(messageParts[1]) || 0;
           else if (messageParts.length > 2) {
             type = messageParts[1] as Type;
-            number = Number(messageParts[2]);
+            number = Number(messageParts[2]) || 0;
           }
 
           if (type !== "all" && !errorKeys.includes(type))
@@ -32,10 +32,10 @@ bot.on("message", async (ctx) => {
 
           for (const t of type === "all" ? errorKeys : [type]) {
             ignore[t].from = new Date();
-            ignore[t].minutes = number || 0;
+            ignore[t].minutes = number;
           }
 
-          return await sendMessage(`Ignoring ${type} for ${number || 0} minutes.`);
+          return await sendMessage(`Ignoring ${type} for ${number} minutes.`);
         }
 
         case "restart":
@@ -71,8 +71,8 @@ bot.on("message", async (ctx) => {
 
           for (const [node, info] of Object.entries(nodesInfo) as [string, Info][])
             text +=
-              `<b>${node}</b>:\n` +
-              `<code>${objectToTableText(info)
+              `<b>Node index ${node}</b>:\n` +
+              `<code>${escapeHtml(objectToTableText(info))
                 .replace(/OFFLINE/g, "🔴")
                 .replace(/ONLINE/g, "🟢")
                 .split("\n")
@@ -80,12 +80,11 @@ bot.on("message", async (ctx) => {
                 .join("</code>\n<code>")}</code>` +
               "\n\n";
 
-          return await sendHTMLMessage(escapeHtml(text.trim()));
+          return await sendHTMLMessage(text.trim());
         }
 
-        default: {
-          await handleTextMessage(ctx.chat.id, ctx.message.text);
-        }
+        default:
+          return await handleTextMessage(ctx.chat.id, ctx.message.text);
       }
     } catch (e) {
       handleError(e);
