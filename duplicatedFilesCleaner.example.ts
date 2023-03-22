@@ -1,4 +1,4 @@
-import { Constants } from "duplicatedFilesCleanerIncognito";
+import DuplicatedFilesCleaner, { Constants } from "duplicatedFilesCleanerIncognito";
 
 const constants: Constants = {
   homePath: "/home/incognito",
@@ -34,4 +34,5 @@ const constants: Constants = {
   ],
 };
 
-export default constants;
+const duplicatedFilesCleaner = new DuplicatedFilesCleaner(constants);
+export default duplicatedFilesCleaner;
