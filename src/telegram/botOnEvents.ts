@@ -72,7 +72,12 @@ bot.on("message", async (ctx) => {
           for (const [node, info] of Object.entries(nodesInfo) as [string, Info][])
             text +=
               `<b>${node}</b>:\n` +
-              `<code>${objectToTableText(info).split("\n").join("</code>\n<code>")}</code>` +
+              `<code>${objectToTableText(info)
+                .replace(/OFFLINE/g, "🔴")
+                .replace(/ONLINE/g, "🟢")
+                .split("\n")
+                .slice(0, -1)
+                .join("</code>\n<code>")}</code>` +
               "\n\n";
 
           return await sendHTMLMessage(escapeHtml(text.trim()));
