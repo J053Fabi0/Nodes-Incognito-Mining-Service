@@ -14,7 +14,7 @@ export default async function ignore(messageParts: string[]) {
     number = Number(messageParts[2]) || 0;
   }
 
-  if (type !== "all" && !errorKeys.includes(type))
+  if ((type !== "all" && !errorKeys.includes(type)) || messageParts[1].toLocaleLowerCase() === "codes")
     return await sendHTMLMessage(
       `Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`
     );
