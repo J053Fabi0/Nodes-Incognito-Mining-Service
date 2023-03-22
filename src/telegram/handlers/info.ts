@@ -1,31 +1,15 @@
 import { escapeHtml } from "escapeHtml";
 import { sendHTMLMessage } from "../sendMessage.ts";
 import objectToTableText from "../objectToTableText.ts";
+import validateNodes from "../../utils/validateNodes.ts";
 import { Info, df } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 
 const { fileSystem } = duplicatedConstants;
 
-export default async function info(messageParts: string[]) {
-  const nodes = [];
-  if (messageParts.length > 1) {
-    // check if the nodes are valid
-    const usedNodes = [...duplicatedFilesCleaner.usedNodes];
-    for (const node of messageParts.slice(1)) {
-      const nodeNumber = Number(node);
-      if (isNaN(nodeNumber))
-        return await sendHTMLMessage(
-          `Invalid node: <code>${node}</code>.\n\n` +
-            `Used nodes:\n- <code>${usedNodes.join("</code>\n- <code>")}</code>`
-        );
-      else if (!usedNodes.includes(nodeNumber))
-        return await sendHTMLMessage(
-          `Node <code>${node}</code> is not found.\n\n` +
-            `Used nodes:\n- <code>${usedNodes.join("</code>\n- <code>")}</code>`
-        );
-      else nodes.push(nodeNumber);
-    }
-  }
+export default async function info(args: string[]) {
+  const nodes = await validateNodes(args).catch(() => undefined);
+  if (!nodes) return;
 
   const nodesInfo = await duplicatedFilesCleaner.getInfo(nodes.length ? nodes : undefined);
 

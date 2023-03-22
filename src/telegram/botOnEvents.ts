@@ -1,10 +1,12 @@
 import bot from "./initBot.ts";
 import info from "./handlers/info.ts";
 import ignore from "./handlers/ignore.ts";
+import sendMessage from "./sendMessage.ts";
+import handleHelp from "./handlers/handleHelp.ts";
 import handleError from "../utils/handleError.ts";
+import handleDocker from "./handlers/handleDocker.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
-import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
 bot.on("message", async (ctx) => {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
@@ -13,20 +15,13 @@ bot.on("message", async (ctx) => {
 
       switch (messageParts[0].toLocaleLowerCase()) {
         case "help":
-          return await sendHTMLMessage(
-            "<b>Available commands</b>\n\n" +
-              [
-                ["ignore [code=docker] [minutes=0]", "Ignore an error code for an amount of minutes"],
-                ["ignore codes", "List the error codes"],
-                ["reset", "Reset the timings of the errors"],
-                ["info [...nodeIndexes=all]", "Get the docker status, files of shards and system info"],
-              ]
-                .map(([command, description]) => `- ${description}.\n<code>${command}</code>`)
-                .join("\n\n")
-          );
+          return await handleHelp();
+
+        case "docker":
+          return handleDocker(messageParts.slice(1));
 
         case "ignore":
-          return ignore(messageParts);
+          return ignore(messageParts.slice(1));
 
         case "restart":
         case "reset": {
@@ -35,7 +30,7 @@ bot.on("message", async (ctx) => {
         }
 
         case "info":
-          return await info(messageParts);
+          return await info(messageParts.slice(1));
 
         default:
           return await handleTextMessage(ctx.chat.id, ctx.message.text);
