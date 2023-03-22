@@ -7,7 +7,7 @@ import emojisCodes, { splitEmoji } from "../../utils/emojisCodes.ts";
 import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 
-const allKeys = ["name", "role", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
+const allKeys = ["name", "role", "shard", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
 const booleanKeys = ["isSlashed", "isOldVersion", "alert"] as const;
 type Keys = typeof allKeys[number];
 
@@ -87,6 +87,8 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
         return "Nex";
       case "alert":
         return "Al";
+      case "shard":
+        return "Sh";
       default:
         return key;
     }
@@ -94,6 +96,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
 
   const normalizedNodes: Record<typeof shorterKeys[number], string | number>[] = nodes.map((node) => ({
     ...node,
+    Sh: node.shard,
     Nex: node.epochsToNextEvent,
     Al: node.alert ? "Yes" : "No",
     Sl: node.isSlashed ? "Yes" : "No",
@@ -191,6 +194,9 @@ function getTableHTML(newKeys: (Keys | "status" | "syncState")[], nodes: NodeSta
 
                         case "alert":
                           return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🐢"]}.svg" class="emoji">`;
+
+                        case "shard":
+                          return "Sh";
 
                         default:
                           return key.charAt(0).toUpperCase() + key.slice(1);
