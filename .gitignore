@@ -4,3 +4,4 @@
 constants.ts
 full.*
 duplicatedFilesCleaner.ts
+deno.lock
