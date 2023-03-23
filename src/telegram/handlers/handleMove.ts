@@ -8,11 +8,7 @@ export default async function handleMove(args: string[]) {
 
   for (const shard of shards) {
     await sendHTMLMessage(`Moving data from node ${fromNodeIndex} to node ${toNodeIndex} on ${shard}...`);
-    await duplicatedFilesCleaner.copyData({
-      from: fromNodeIndex as unknown as string,
-      to: toNodeIndex as unknown as string,
-      shards: [shard],
-    });
+    await duplicatedFilesCleaner.move(fromNodeIndex, toNodeIndex, [shard]);
   }
 
   await sendMessage("Done!");

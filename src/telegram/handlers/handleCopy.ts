@@ -31,7 +31,11 @@ export default async function handleCopy(args: string[]) {
 
   for (const shard of shards) {
     await sendHTMLMessage(`Copying data from node ${fromNodeIndex} to node ${toNodeIndex} on ${shard}...`);
-    await duplicatedFilesCleaner.move(fromNodeIndex, toNodeIndex, [shard]);
+    await duplicatedFilesCleaner.copyData({
+      from: fromNodeIndex as unknown as string,
+      to: toNodeIndex as unknown as string,
+      shards: [shard],
+    });
   }
 
   await sendMessage("Done!");
