@@ -1,17 +1,17 @@
 import { ignore } from "../../utils/variables.ts";
 import validateItems from "../../utils/validateItems.ts";
+import isBeingIgnored from "../../utils/isBeingIgnored.ts";
 import { ShardsNames } from "duplicatedFilesCleanerIncognito";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
-import isBeingIgnored from "../../utils/isBeingIgnored.ts";
 
 export default async function handleCopyOrMove(args: string[], action: "copy" | "move") {
   const [nodesRaw, rawShards] = [args.slice(0, 2), args.slice(2)];
 
   // Validate and get the nodes indexes
-  const [fromNodeIndex, toNodeIndex] = await validateItems({ rawItems: nodesRaw }).catch(() => []);
-  if (!fromNodeIndex || !toNodeIndex) return;
+  const [fromNodeIndex = null, toNodeIndex = null] = await validateItems({ rawItems: nodesRaw }).catch(() => []);
+  if (fromNodeIndex === null || toNodeIndex === null) return;
 
   // Validate and get the shards
   const shards =
