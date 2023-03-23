@@ -7,7 +7,7 @@ export default function objectToTableText(obj: Record<string, string | number>) 
   return keys.reduce(
     (text, key) =>
       (text +=
-        `${key.charAt(0).toUpperCase()}${key.slice(1).toLocaleLowerCase()}:` +
+        `${key.charAt(0).toUpperCase()}${key.slice(1).toLowerCase()}:` +
         `${" ".repeat(maxLength - key.length + 1)}${obj[key]}\n`),
     ""
   );

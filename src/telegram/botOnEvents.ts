@@ -14,7 +14,7 @@ bot.on("message", async (ctx) => {
     try {
       const [command, ...args] = ctx.message.text.split(" ").filter((x) => x.trim());
 
-      switch (command.match(/\/?(\w+)/)?.[1].toLocaleLowerCase()) {
+      switch (command.match(/\/?(\w+)/)?.[1].toLowerCase()) {
         case "help":
           return await handleHelp();
 

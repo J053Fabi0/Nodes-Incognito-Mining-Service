@@ -18,7 +18,7 @@ export default async function ignore(args: string[]) {
     number = Number(args[1]) || number;
   }
 
-  if ((type !== "all" && !errorKeys.includes(type)) || args[0].toLocaleLowerCase() === "codes")
+  if ((type !== "all" && !errorKeys.includes(type)) || type.toLowerCase() === "codes")
     return await sendHTMLMessage(
       `Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`
     );
