@@ -12,7 +12,7 @@ import handleTextMessage from "./handlers/handleTextMessage.ts";
 bot.on("message", async (ctx) => {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
     try {
-      const [command, ...args] = ctx.message.text.split(" ");
+      const [command, ...args] = ctx.message.text.split(" ").filter((x) => x.trim());
 
       switch (command.match(/\/?(\w+)/)?.[1].toLocaleLowerCase()) {
         case "help":
