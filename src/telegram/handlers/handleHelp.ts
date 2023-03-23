@@ -9,7 +9,8 @@ export default function handleHelp() {
         ["reset|restart", "Reset the timings of the errors"],
         ["(info|status) [...nodeIndexes=all]", "Get the docker status, files of shards and system info"],
         ["docker [start|stop] [...nodeIndexes|all]", "Start or stop the docker containers"],
-        ["copy [fromNodeIndex] [toNodeIndex] [...shards=[beacon]]", "Copy files from one node to another"],
+        ["copy [fromNodeIndex] [toNodeIndex] [...shards=beacon]", "Copy files from one node to another"],
+        ["move [fromNodeIndex] [toNodeIndex] [...shards=beacon]", "Move files from one node to another"],
       ]
         .map(([command, description]) => `- ${description}.\n<code>${command}</code>`)
         .join("\n\n")

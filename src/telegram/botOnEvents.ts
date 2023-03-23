@@ -8,6 +8,7 @@ import handleError from "../utils/handleError.ts";
 import handleDocker from "./handlers/handleDocker.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
+import handleMove from "./handlers/handleMove.ts";
 
 bot.on("message", async (ctx) => {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
@@ -24,18 +25,21 @@ bot.on("message", async (ctx) => {
         case "ignore":
           return await ignore(args);
 
-        case "restart":
-        case "reset": {
-          for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
-          return await sendMessage("Reset successful.");
-        }
-
         case "info":
         case "status":
           return await info(args);
 
         case "copy":
           return await handleCopy(args);
+
+        case "move":
+          return await handleMove(args);
+
+        case "reset":
+        case "restart": {
+          for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
+          return await sendMessage("Reset successful.");
+        }
 
         default:
           return await handleTextMessage(ctx.chat.id, ctx.message.text);
