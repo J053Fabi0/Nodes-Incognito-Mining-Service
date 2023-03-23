@@ -3,12 +3,11 @@ import info from "./handlers/info.ts";
 import ignore from "./handlers/ignore.ts";
 import sendMessage from "./sendMessage.ts";
 import handleHelp from "./handlers/handleHelp.ts";
-import handleCopy from "./handlers/handleCopy.ts";
+import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleError from "../utils/handleError.ts";
 import handleDocker from "./handlers/handleDocker.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
-import handleMove from "./handlers/handleMove.ts";
 
 bot.on("message", async (ctx) => {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
@@ -30,10 +29,10 @@ bot.on("message", async (ctx) => {
           return await info(args);
 
         case "copy":
-          return await handleCopy(args);
+          return await handleCopyOrMove(args, "copy");
 
         case "move":
-          return await handleMove(args);
+          return await handleCopyOrMove(args, "move");
 
         case "reset":
         case "restart": {

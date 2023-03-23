@@ -3,11 +3,12 @@ import { escapeHtml } from "escapeHtml";
 import { waitingTimes } from "../constants.ts";
 import sendMessage from "./telegram/sendMessage.ts";
 import { docker, dockerPs } from "./utils/commands.ts";
+import isBeingIgnored from "./utils/isBeingIgnored.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
 import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
-import { ErrorTypes, LastErrorTime, lastErrorTimes, ignore, errorTypes } from "./utils/variables.ts";
+import { ErrorTypes, LastErrorTime, lastErrorTimes, errorTypes } from "./utils/variables.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorKey: ErrorTypes) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();
@@ -27,7 +28,7 @@ export default async function check() {
     // check if the docker is as it should be, and if not, fix it
     if (
       !flags.ignoreDocker &&
-      ignore.docker.from.getTime() + ignore.docker.minutes * 60 * 1000 < Date.now() &&
+      isBeingIgnored("docker") &&
       ((dockerStatuses[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
         (dockerStatuses[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline))
     ) {
@@ -55,7 +56,7 @@ export default async function check() {
           // if it has been present for longer than established
           minutes >= waitingTimes[errorKey] &&
           // if it's not being ignored
-          ignore[errorKey].from.getTime() + ignore[errorKey].minutes * 60 * 1000 <= Date.now()
+          isBeingIgnored(errorKey)
         ) {
           await handleNodeError(errorKey, nodeStatus.name, minutes);
         }
