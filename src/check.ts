@@ -2,11 +2,11 @@ import flags from "./utils/flags.ts";
 import { escapeHtml } from "escapeHtml";
 import { waitingTimes } from "../constants.ts";
 import sendMessage from "./telegram/sendMessage.ts";
-import { docker, dockerPs } from "./utils/commands.ts";
 import isBeingIgnored from "./utils/isBeingIgnored.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
 import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
+import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
 import { ErrorTypes, LastErrorTime, lastErrorTimes, errorTypes } from "./utils/variables.ts";
 
