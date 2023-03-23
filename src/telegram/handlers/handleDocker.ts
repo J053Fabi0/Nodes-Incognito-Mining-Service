@@ -18,7 +18,7 @@ export default async function handleDocker([action, ...rawNodes]: string[]) {
 
   for (const node of nodes) {
     await docker(`inc_mainnet_${node}`, action);
-    await sendHTMLMessage(`Docker <code>${node}</code> ${action}ed.`);
+    await sendHTMLMessage(`Docker <code>${node}</code> ${action === "stop" ? "stopp" : "start"}ed.`);
   }
 
   await sendMessage("Done.");

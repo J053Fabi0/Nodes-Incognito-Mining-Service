@@ -3,10 +3,11 @@ import info from "./handlers/info.ts";
 import ignore from "./handlers/ignore.ts";
 import sendMessage from "./sendMessage.ts";
 import handleHelp from "./handlers/handleHelp.ts";
-import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleError from "../utils/handleError.ts";
 import handleDocker from "./handlers/handleDocker.ts";
+import handleDelete from "./handlers/handleDelete.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
+import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 
 bot.on("message", async (ctx) => {
@@ -33,6 +34,9 @@ bot.on("message", async (ctx) => {
 
         case "move":
           return await handleCopyOrMove(args, "move");
+
+        case "delete":
+          return await handleDelete(args);
 
         case "reset":
         case "restart": {

@@ -36,8 +36,8 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
   if (dockerStatus[fromNodeIndex] === "ONLINE" || dockerStatus[toNodeIndex] === "ONLINE")
     await Promise.all([
       sendMessage("Stopping nodes..."),
-      docker(`inc_mainnet_${toNodeIndex}`, "stop"),
-      docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
+      dockerStatus[toNodeIndex] === "ONLINE" && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
+      dockerStatus[fromNodeIndex] === "ONLINE" && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
 
   for (const shard of shards)
@@ -58,10 +58,14 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
   ignore.docker.minutes = lastIgnoreMinutes;
 
   // start the dockers if they were not being ignored
-  if (isBeingIgnored("docker"))
+  if (
+    isBeingIgnored("docker") &&
+    (dockerStatus[fromNodeIndex] === "ONLINE" || dockerStatus[toNodeIndex] === "ONLINE")
+  )
     await Promise.all([
-      docker(`inc_mainnet_${fromNodeIndex}`, "start"),
-      docker(`inc_mainnet_${toNodeIndex}`, "start"),
+      sendMessage("Starting nodes..."),
+      dockerStatus[toNodeIndex] === "ONLINE" && docker(`inc_mainnet_${toNodeIndex}`, "start"),
+      dockerStatus[fromNodeIndex] === "ONLINE" && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
 
   await sendMessage("Done!");

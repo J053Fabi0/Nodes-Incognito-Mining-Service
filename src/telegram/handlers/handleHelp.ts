@@ -12,6 +12,7 @@ export default function handleHelp() {
         ["docker [start|stop] [...nodeIndexes|all]", "Start or stop the docker containers"],
         ["copy [fromNodeIndex] [toNodeIndex] [...shards=beacon]", "Copy files from one node to another"],
         ["move [fromNodeIndex] [toNodeIndex] [...shards=beacon]", "Move files from one node to another"],
+        ["delete [fromNodeIndex] [...shards=beacon]", "Delete the shards of a node"],
       ]
         .map(([command, description]) => `- ${description}.\n<code>${command}</code>`)
         .join("\n\n")
