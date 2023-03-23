@@ -6,6 +6,7 @@ import isBeingIgnored from "./utils/isBeingIgnored.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
 import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
+import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
 import { ErrorTypes, LastErrorTime, lastErrorTimes, errorTypes } from "./utils/variables.ts";
@@ -17,7 +18,7 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorK
 
 export default async function check() {
   const nodesStatus = await getNodesStatus();
-  const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs();
+  const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.usedNodes);
 
   for (const nodeStatus of nodesStatus) {
     if (!(nodeStatus.publicValidatorKey in lastErrorTimes)) lastErrorTimes[nodeStatus.publicValidatorKey] = {};
