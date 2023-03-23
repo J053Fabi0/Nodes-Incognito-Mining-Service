@@ -1,15 +1,16 @@
 import flags from "./utils/flags.ts";
 import { escapeHtml } from "escapeHtml";
 import { waitingTimes } from "../constants.ts";
-import sendMessage from "./telegram/sendMessage.ts";
 import isBeingIgnored from "./utils/isBeingIgnored.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
+import { sendHTMLMessage } from "./telegram/sendMessage.ts";
 import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
 import { ErrorTypes, LastErrorTime, lastErrorTimes, errorTypes } from "./utils/variables.ts";
+import handleTextMessage from "./telegram/handlers/handleTextMessage.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorKey: ErrorTypes) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();
@@ -19,6 +20,7 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorK
 export default async function check() {
   const nodesStatus = await getNodesStatus();
   const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.usedNodes);
+  const fixes: string[] = [];
 
   for (const nodeStatus of nodesStatus) {
     if (!(nodeStatus.publicValidatorKey in lastErrorTimes)) lastErrorTimes[nodeStatus.publicValidatorKey] = {};
@@ -64,11 +66,12 @@ export default async function check() {
       }
       // if it had a problem before but now it's fixed, report it even if it's being ignored
       else if (prevLastErrorTime[errorKey])
-        await sendMessage(
-          `<b>${nodeStatus.name}</b> - <code>${escapeHtml(errorKey)}</code><code>: Fixed ✅</code>`,
-          undefined,
-          { parse_mode: "HTML" }
-        );
+        fixes.push(`<b>${nodeStatus.name}</b> - <code>${escapeHtml(errorKey)}</code><code>: Fixed ✅</code>`);
     }
+  }
+
+  if (fixes.length) {
+    await sendHTMLMessage(fixes.join("\n"));
+    await handleTextMessage("text");
   }
 }

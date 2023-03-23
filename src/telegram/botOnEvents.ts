@@ -41,7 +41,7 @@ bot.on("message", async (ctx) => {
         }
 
         default:
-          return await handleTextMessage(ctx.chat.id, ctx.message.text);
+          return await handleTextMessage(ctx.message.text);
       }
     } catch (e) {
       handleError(e);

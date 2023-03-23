@@ -16,7 +16,7 @@ let lastPhotoIdTime: number | undefined;
 let lastText = "";
 let lastTextTime: number | undefined;
 
-export default async function handleTextMessage(chatId: number, text: string) {
+export default async function handleTextMessage(text: string) {
   const keys: Keys[] = [];
   let nodes = await getNodesStatus();
 
@@ -42,7 +42,7 @@ export default async function handleTextMessage(chatId: number, text: string) {
 
   // for text-only
   if (/(text|t)$/i.test(text))
-    return await sendMessage(getMessageText(keys, nodes), chatId, { parse_mode: "HTML" });
+    return await sendMessage(getMessageText(keys, nodes), undefined, { parse_mode: "HTML" });
 
   // generate new keys for the table
   const newKeys = [keys[0], "status", ...keys.slice(1)] as (Keys | "status" | "syncState")[];
@@ -56,7 +56,7 @@ export default async function handleTextMessage(chatId: number, text: string) {
   // if the html hasn't changed, send the last photo
   if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html) {
     const timeString = rangeMsToTimeDescription(lastPhotoIdTime);
-    await bot.api.sendPhoto(chatId, lastPhotoId, {
+    await bot.api.sendPhoto("861616600", lastPhotoId, {
       caption: `<i>Nothing changed since last time you checked ${timeString} ago.</i>`,
       parse_mode: "HTML",
     });
@@ -70,7 +70,7 @@ export default async function handleTextMessage(chatId: number, text: string) {
       if (e.message.includes("decrease")) return e.message;
       throw e;
     });
-    const { photo } = await bot.api.sendPhoto(chatId, new InputFile("./full.png"));
+    const { photo } = await bot.api.sendPhoto("861616600", new InputFile("./full.png"));
     lastPhotoId = photo[0].file_id;
     lastPhotoIdTime = Date.now();
   }
