@@ -53,6 +53,7 @@ export default async function check() {
     // report errors if they have been present for longer than established
     for (const errorKey of errorTypes) {
       const date = lastErrorTime[errorKey];
+      const lastDate = prevLastErrorTime[errorKey];
       if (date) {
         const minutes = getMinutesSinceError(date);
         if (
@@ -65,7 +66,7 @@ export default async function check() {
         }
       }
       // if it had a problem before but now it's fixed, report it even if it's being ignored
-      else if (prevLastErrorTime[errorKey])
+      else if (lastDate && getMinutesSinceError(lastDate) >= waitingTimes[errorKey])
         fixes.push(`<b>${nodeStatus.name}</b> - <code>${escapeHtml(errorKey)}</code><code>: Fixed ✅</code>`);
     }
   }
