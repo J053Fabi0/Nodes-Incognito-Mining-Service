@@ -5,9 +5,13 @@ import validateItems from "../../utils/validateItems.ts";
 import { Info, df } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 
-const { fileSystem } = duplicatedConstants;
-
 export default async function info(rawNodes: string[]) {
+  const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
+  if (onlyFilesystem) {
+    if (!duplicatedConstants.fileSystem) return await sendHTMLMessage("File system not configured");
+    return await sendHTMLMessage(await getFileSistemInfo(duplicatedConstants.fileSystem));
+  }
+
   const nodes = await validateItems({ rawItems: rawNodes }).catch(() => null);
   if (!nodes) return;
 
@@ -26,10 +30,14 @@ export default async function info(rawNodes: string[]) {
         .join("</code>\n<code>")}</code>` +
       "\n\n";
 
-  if (fileSystem)
-    text +=
-      `<b>File system</b>:\n` +
-      `<code>${escapeHtml(await df(["-h", fileSystem, "--output=used,avail,pcent"]))}</code>`;
+  if (duplicatedConstants.fileSystem) text += await getFileSistemInfo(duplicatedConstants.fileSystem);
 
   return await sendHTMLMessage(text.trim());
+}
+
+async function getFileSistemInfo(fileSystem: string) {
+  return (
+    `<b>File system</b>:\n` +
+    `<code>${escapeHtml(await df(["-h", fileSystem, "--output=used,avail,pcent"]))}</code>`
+  );
 }
