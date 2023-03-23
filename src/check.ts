@@ -28,7 +28,7 @@ export default async function check() {
     // check if the docker is as it should be, and if not, fix it
     if (
       !flags.ignoreDocker &&
-      isBeingIgnored("docker") &&
+      !isBeingIgnored("docker") &&
       ((dockerStatuses[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
         (dockerStatuses[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline))
     ) {
@@ -56,7 +56,7 @@ export default async function check() {
           // if it has been present for longer than established
           minutes >= waitingTimes[errorKey] &&
           // if it's not being ignored
-          isBeingIgnored(errorKey)
+          !isBeingIgnored(errorKey)
         ) {
           await handleNodeError(errorKey, nodeStatus.name, minutes);
         }
