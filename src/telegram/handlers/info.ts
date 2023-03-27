@@ -39,7 +39,7 @@ export default async function info(rawNodes: string[]) {
   for (const [node, info] of nodesInfo) {
     const status = nodesStatus[node];
     text +=
-      `<b>#${c(node)} S${c(status.shard)} ${c(status.role.charAt(0))} ->${c(status.epochsToNextEvent)}</b>:\n` +
+      `<code>#${node}  S${status.shard}  ${status.role.charAt(0)}  ->${status.epochsToNextEvent}</code>:\n` +
       `<code>${escapeHtml(objectToTableText(info))
         .replace(/OFFLINE/g, "🔴")
         .replace(/ONLINE/g, "🟢")
