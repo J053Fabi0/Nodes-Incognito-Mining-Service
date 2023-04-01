@@ -47,9 +47,9 @@ export default async function check() {
     // check for errors
     for (const errorKey of ["alert", "isSlashed", "isOldVersion"] as const)
       setOrRemoveErrorTime(nodeStatus[errorKey], lastErrorTime, errorKey);
-    setOrRemoveErrorTime(nodeStatus.syncState !== "LATEST", lastErrorTime, "unsynced");
     setOrRemoveErrorTime(nodeStatus.syncState.endsWith("STALL"), lastErrorTime, "stalling");
     setOrRemoveErrorTime(nodeStatus.status === "OFFLINE" && !shouldBeOffline, lastErrorTime, "offline");
+    setOrRemoveErrorTime(nodeStatus.syncState !== "LATEST" && !shouldBeOffline, lastErrorTime, "unsynced");
 
     // report errors if they have been present for longer than established
     for (const errorKey of errorTypes) {
