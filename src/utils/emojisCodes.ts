@@ -14,6 +14,7 @@ const emojisCodes: Record<string, string> = {
   "➡️": "27a1",
   "‼": "203c",
   "⚡": "26a1",
+  "🆕": "1f195",
 };
 
 export default emojisCodes;

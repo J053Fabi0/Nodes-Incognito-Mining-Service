@@ -157,6 +157,8 @@ function getTableHTML(newKeys: (Keys | "status" | "syncState")[], nodes: NodeSta
         ? "⏳"
         : node.role === "COMMITTEE"
         ? "⛏⚡"
+        : node.role === "WAITING"
+        ? "🆕"
         : node.role.charAt(0) + node.role.slice(1).toLowerCase(),
     syncState:
       node.syncState.charAt(0) +
