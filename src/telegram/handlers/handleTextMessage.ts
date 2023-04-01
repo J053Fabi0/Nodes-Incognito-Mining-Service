@@ -88,7 +88,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
       case "alert":
         return "Al";
       case "shard":
-        return "Sh";
+        return "S";
       default:
         return key;
     }
@@ -96,7 +96,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
 
   const normalizedNodes: Record<typeof shorterKeys[number], string | number>[] = nodes.map((node) => ({
     ...node,
-    Sh: node.shard,
+    S: node.shard,
     Nex: node.epochsToNextEvent,
     Al: node.alert ? "Yes" : "No",
     Sl: node.isSlashed ? "Yes" : "No",
