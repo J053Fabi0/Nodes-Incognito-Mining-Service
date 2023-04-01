@@ -7,8 +7,6 @@ import { Info, df } from "duplicatedFilesCleanerIncognito";
 import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 
-const c = (s: string | number) => `<code>${s}</code>`;
-
 export default async function info(rawNodes: string[]) {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {

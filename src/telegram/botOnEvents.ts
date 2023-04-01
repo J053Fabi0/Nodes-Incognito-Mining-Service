@@ -9,8 +9,9 @@ import handleDelete from "./handlers/handleDelete.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
+import { Context, Filter } from "grammy";
 
-bot.on("message", async (ctx) => {
+async function onMessage(ctx: Filter<Context, "message">) {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
     try {
       const [command, ...args] = ctx.message.text.split(" ").filter((x) => x.trim());
@@ -50,4 +51,6 @@ bot.on("message", async (ctx) => {
     } catch (e) {
       handleError(e);
     }
-});
+}
+
+bot.on("message", (ctx) => void onMessage(ctx));
