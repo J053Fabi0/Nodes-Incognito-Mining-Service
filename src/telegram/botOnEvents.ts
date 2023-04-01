@@ -1,7 +1,8 @@
 import bot from "./initBot.ts";
 import info from "./handlers/info.ts";
-import ignore from "./handlers/ignore.ts";
+import { Context, Filter } from "grammy";
 import sendMessage from "./sendMessage.ts";
+import ignore from "./handlers/handleIgnore.ts";
 import handleHelp from "./handlers/handleHelp.ts";
 import handleError from "../utils/handleError.ts";
 import handleDocker from "./handlers/handleDocker.ts";
@@ -9,7 +10,6 @@ import handleDelete from "./handlers/handleDelete.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
-import { Context, Filter } from "grammy";
 
 async function onMessage(ctx: Filter<Context, "message">) {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
