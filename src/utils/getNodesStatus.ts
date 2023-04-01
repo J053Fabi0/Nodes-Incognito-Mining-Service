@@ -31,7 +31,7 @@ export default async function getNodesStatus() {
   >("https://monitor.incognito.org/pubkeystat/stat", { mpk });
 
   return data.map((d) => ({
-    role: d.Role,
+    role: d.Role || "WAITING",
     alert: d.Alert,
     status: d.Status,
     isSlashed: d.IsSlashed,
