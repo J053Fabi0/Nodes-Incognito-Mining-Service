@@ -9,8 +9,8 @@ import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
-import { ErrorTypes, LastErrorTime, lastErrorTimes, errorTypes } from "./utils/variables.ts";
 import handleTextMessage from "./telegram/handlers/handleTextMessage.ts";
+import { ErrorTypes, LastErrorTime, lastErrorTimes, errorTypes } from "./utils/variables.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorKey: ErrorTypes) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();
@@ -47,6 +47,7 @@ export default async function check() {
     // check for errors
     for (const errorKey of ["alert", "isSlashed", "isOldVersion"] as const)
       setOrRemoveErrorTime(nodeStatus[errorKey], lastErrorTime, errorKey);
+    setOrRemoveErrorTime(nodeStatus.syncState !== "LATEST", lastErrorTime, "unsynced");
     setOrRemoveErrorTime(nodeStatus.syncState.endsWith("STALL"), lastErrorTime, "stalling");
     setOrRemoveErrorTime(nodeStatus.status === "OFFLINE" && !shouldBeOffline, lastErrorTime, "offline");
 
