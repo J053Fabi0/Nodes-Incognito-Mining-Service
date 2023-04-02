@@ -49,7 +49,16 @@ export default async function check() {
       setOrRemoveErrorTime(nodeStatus[errorKey], lastErrorTime, errorKey);
     setOrRemoveErrorTime(nodeStatus.syncState.endsWith("STALL"), lastErrorTime, "stalling");
     setOrRemoveErrorTime(nodeStatus.status === "OFFLINE" && !shouldBeOffline, lastErrorTime, "offline");
-    setOrRemoveErrorTime(nodeStatus.syncState !== "LATEST" && !shouldBeOffline, lastErrorTime, "unsynced");
+    setOrRemoveErrorTime(
+      // is not latest
+      nodeStatus.syncState !== "LATEST" &&
+        // should be online
+        !shouldBeOffline &&
+        // and it's online, so don't report it if it's offline
+        nodeStatus.status === "ONLINE",
+      lastErrorTime,
+      "unsynced"
+    );
 
     // report errors if they have been present for longer than established
     for (const errorKey of errorTypes) {
