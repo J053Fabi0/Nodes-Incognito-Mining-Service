@@ -1,5 +1,5 @@
 /** Convert an object to a table text */
-export default function objectToTableText(obj: Record<string, string | number>) {
+export default function objectToTableText(obj: Record<string, string | number | boolean>) {
   const keys = Object.keys(obj);
   // maxLength in the keys
   const maxLength = Math.max(...keys.map((key) => key.length));

@@ -32,8 +32,8 @@ export default async function check() {
     if (
       !flags.ignoreDocker &&
       !isBeingIgnored("docker") &&
-      ((dockerStatuses[nodeStatus.dockerIndex] === "ONLINE" && shouldBeOffline) ||
-        (dockerStatuses[nodeStatus.dockerIndex] === "OFFLINE" && !shouldBeOffline))
+      ((dockerStatuses[nodeStatus.dockerIndex].status === "ONLINE" && shouldBeOffline) ||
+        (dockerStatuses[nodeStatus.dockerIndex].status === "OFFLINE" && !shouldBeOffline))
     ) {
       console.log(
         `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} for node ${nodeStatus.name}.`
