@@ -7,7 +7,7 @@ import { Info, df } from "duplicatedFilesCleanerIncognito";
 import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 
-export default async function info(rawNodes: string[]) {
+export default async function handleInfo(rawNodes: string[]) {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {
     if (!duplicatedConstants.fileSystem) return await sendHTMLMessage("File system not configured");
@@ -15,7 +15,7 @@ export default async function info(rawNodes: string[]) {
   }
 
   const nodes = await validateItems({ rawItems: rawNodes }).catch(() => null);
-  if (!nodes) return;
+  if (!nodes) return Promise.resolve(null);
 
   const nodesStatus = (await getNodesStatus()).reduce(
     (obj, node) => ((obj[node.dockerIndex] = node), obj),
@@ -41,16 +41,24 @@ export default async function info(rawNodes: string[]) {
       `<code>${escapeHtml(objectToTableText(info))
         .replace(/OFFLINE/g, "🔴")
         .replace(/ONLINE/g, "🟢")
-        .replace(/: /g, "</code><code>: </code><code>")
         .split("\n")
         .slice(0, -1)
+        .map((a) =>
+          a.replace(
+            ...(() => {
+              const match = a.match(/: +/);
+              if (match) return [match[0], `</code><code>${match[0]}</code><code>`] as [string, string];
+              else return ["", ""] as [string, string];
+            })()
+          )
+        )
         .join("</code>\n<code>")}</code>` +
       "\n\n";
   }
 
   if (duplicatedConstants.fileSystem) text += await getFileSistemInfo(duplicatedConstants.fileSystem);
 
-  return await sendHTMLMessage(text.trim());
+  return sendHTMLMessage(text.trim());
 }
 
 async function getFileSistemInfo(fileSystem: string) {

@@ -1,15 +1,16 @@
 import bot from "./initBot.ts";
-import info from "./handlers/info.ts";
 import { Context, Filter } from "grammy";
-import sendMessage from "./sendMessage.ts";
-import ignore from "./handlers/handleIgnore.ts";
-import handleHelp from "./handlers/handleHelp.ts";
+import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
+import helpMessage from "../utils/helpMessage.ts";
+import handleIgnore from "./handlers/handleIgnore.ts";
 import handleDocker from "./handlers/handleDocker.ts";
 import handleDelete from "./handlers/handleDelete.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
+import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
+import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
 async function onMessage(ctx: Filter<Context, "message">) {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
@@ -18,17 +19,17 @@ async function onMessage(ctx: Filter<Context, "message">) {
 
       switch (command.match(/\/?(\w+)/)?.[1].toLowerCase()) {
         case "help":
-          return await handleHelp();
+          return await sendHTMLMessage(helpMessage);
 
         case "docker":
           return await handleDocker(args);
 
         case "ignore":
-          return await ignore(args);
+          return await handleIgnore(args);
 
         case "info":
         case "status":
-          return await info(args);
+          return await handleInfo(args);
 
         case "copy":
           return await handleCopyOrMove(args, "copy");
@@ -38,6 +39,9 @@ async function onMessage(ctx: Filter<Context, "message">) {
 
         case "delete":
           return await handleDelete(args);
+
+        case "errors":
+          return await handleErrorsInfo(args);
 
         case "reset":
         case "restart": {

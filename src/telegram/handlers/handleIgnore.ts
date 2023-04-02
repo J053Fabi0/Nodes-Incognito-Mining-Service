@@ -4,7 +4,7 @@ import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 const errorKeys = Object.keys(ignoreObj).sort((a, b) => a.length - b.length) as (keyof typeof ignoreObj)[];
 type Type = typeof errorKeys[number] | "all";
 
-export default async function ignore(args: string[]) {
+export default async function handleIgnore(args: string[]) {
   let number = 0; // default value is 0, to disable the ignore
   let type: Type = "docker";
 

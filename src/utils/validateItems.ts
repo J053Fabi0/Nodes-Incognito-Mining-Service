@@ -36,7 +36,7 @@ export default async function validateItems<T extends string | number = number>(
     // @ts-ignore - numberOrStringItem will always be the same type as validItems
     if (!validItems.includes(numberOrStringItem)) {
       await sendHTMLMessage(
-        `${name.substring(0).toUpperCase() + name.substring(1).toLowerCase()} ` +
+        `${name[0].toUpperCase() + name.substring(1).toLowerCase()} ` +
           `<code>${rawItem}</code> is not found.\n\n` +
           `Valid ${pluralName}:\n- <code>${validItems.join("</code>\n- <code>")}</code>`
       );
