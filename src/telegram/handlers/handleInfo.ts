@@ -34,20 +34,20 @@ export default async function handleInfo(rawNodes: string[]) {
 
   let text = "";
 
-  for (const [node, { docker, ...info }] of nodesInfo) {
+  for (const [node, { docker, beacon, ...info }] of nodesInfo) {
     const status = nodesStatus[node];
     // flatten the info object
     const normalizedInfo = {
-      status: docker.status,
       ...(docker.status === "ONLINE" ? { uptime: docker.uptime } : {}),
       ...(docker.restarting ? { restarting: true } : {}),
+      ...(beacon ? { beacon } : {}),
       ...info,
     };
     text +=
-      `<code>#${node}  S${status.shard}  ${status.role.charAt(0)}  ->${status.epochsToNextEvent}</code>:\n` +
+      `<code>#${node}  S${status.shard}  ${status.role.charAt(0)}  ` +
+      `»${status.epochsToNextEvent.toString().padEnd(4)}` +
+      `${docker.status === "ONLINE" ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>\n` +
       `<code>${escapeHtml(objectToTableText(normalizedInfo))
-        .replace(/OFFLINE/g, "🔴")
-        .replace(/ONLINE/g, "🟢")
         .split("\n")
         .slice(0, -1)
         .map((a) =>
