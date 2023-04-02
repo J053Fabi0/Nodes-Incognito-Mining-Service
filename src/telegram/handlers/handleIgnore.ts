@@ -1,7 +1,7 @@
-import { ignore as ignoreObj } from "../../utils/variables.ts";
+import { ignore as ignore } from "../../utils/variables.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 
-const errorKeys = Object.keys(ignoreObj).sort((a, b) => a.length - b.length) as (keyof typeof ignoreObj)[];
+const errorKeys = Object.keys(ignore).sort((a, b) => a.length - b.length) as (keyof typeof ignore)[];
 type Type = typeof errorKeys[number] | "all";
 
 export default async function handleIgnore(args: string[]) {
@@ -26,8 +26,8 @@ export default async function handleIgnore(args: string[]) {
     );
 
   for (const t of type === "all" ? errorKeys : [type]) {
-    ignoreObj[t].from = new Date();
-    ignoreObj[t].minutes = number;
+    ignore[t].from = new Date();
+    ignore[t].minutes = number;
   }
 
   return await sendMessage(`Ignoring ${type} for ${number} minutes.`);

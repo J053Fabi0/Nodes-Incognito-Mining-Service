@@ -1,5 +1,5 @@
 import Constants from "./src/types/constants.type.ts";
-import { ErrorTypes } from "./src/utils/variables.ts";
+import { AllErrorTypes } from "./src/utils/variables.ts";
 
 const constants: Constants = [
   {
@@ -16,13 +16,16 @@ const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
 // In minutes
-export const waitingTimes: Record<ErrorTypes, number> = {
-  alert: 10 * MINUTE, // alert means that the votes have gone lower than 50% and it could be slashed
+export const waitingTimes: Record<AllErrorTypes, number> = {
+  alert: 10 * MINUTE,
   offline: 15 * MINUTE,
+  unsynced: 20 * MINUTE,
   isOldVersion: 1 * DAY,
   isSlashed: 0 * MINUTE,
   stalling: 5 * MINUTE,
+  lowDiskSpace: 0 * MINUTE,
 };
 
 export const minEpochsToBeOnline = 5;
 export const minEpochsToLetSync = 20;
+export const maxDiskPercentageUsage = 95;

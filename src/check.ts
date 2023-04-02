@@ -1,18 +1,18 @@
 import flags from "./utils/flags.ts";
 import { escapeHtml } from "escapeHtml";
-import { waitingTimes } from "../constants.ts";
 import isBeingIgnored from "./utils/isBeingIgnored.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
 import { sendHTMLMessage } from "./telegram/sendMessage.ts";
 import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
-import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
+import { waitingTimes, maxDiskPercentageUsage } from "../constants.ts";
+import { df, docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import handleTextMessage from "./telegram/handlers/handleTextMessage.ts";
-import { ErrorTypes, LastErrorTime, lastErrorTimes, errorTypes } from "./utils/variables.ts";
+import duplicatedFilesCleaner, { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
+import { ErrorTypes, lastErrorTimes, errorTypes, lastGlobalErrorTimes } from "./utils/variables.ts";
 
-function setOrRemoveErrorTime(set: boolean, lastErrorTime: LastErrorTime, errorKey: ErrorTypes) {
+function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, Date | undefined>, errorKey: string) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();
   else delete lastErrorTime[errorKey];
 }
@@ -22,6 +22,16 @@ export default async function check() {
   const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.usedNodes);
   const fixes: string[] = [];
 
+  // Check for global errors
+  // Check if the file system is at or above the maximum acceptable percentage
+  if (duplicatedConstants.fileSystem) {
+    const percentage = +(
+      (await df(["-h", duplicatedConstants.fileSystem, "--output=pcent"])).match(/\d+(?=%)/)?.[0] ?? 0
+    );
+    setOrRemoveErrorTime(percentage >= maxDiskPercentageUsage, lastGlobalErrorTimes, "lowDiskSpace");
+  }
+
+  // Check for errors in each node
   for (const nodeStatus of nodesStatus) {
     if (!(nodeStatus.publicValidatorKey in lastErrorTimes)) lastErrorTimes[nodeStatus.publicValidatorKey] = {};
     const { [nodeStatus.publicValidatorKey]: lastErrorTime } = lastErrorTimes;
@@ -45,10 +55,14 @@ export default async function check() {
     const prevLastErrorTime = { ...lastErrorTime };
 
     // check for errors
+    // alert, isSlashed, isOldVersion
     for (const errorKey of ["alert", "isSlashed", "isOldVersion"] as const)
       setOrRemoveErrorTime(nodeStatus[errorKey], lastErrorTime, errorKey);
+    // stalling
     setOrRemoveErrorTime(nodeStatus.syncState.endsWith("STALL"), lastErrorTime, "stalling");
+    // offline
     setOrRemoveErrorTime(nodeStatus.status === "OFFLINE" && !shouldBeOffline, lastErrorTime, "offline");
+    // unsynced
     setOrRemoveErrorTime(
       // is not latest
       nodeStatus.syncState !== "LATEST" &&
@@ -61,28 +75,37 @@ export default async function check() {
     );
 
     // report errors if they have been present for longer than established
-    for (const errorKey of errorTypes) {
-      const date = lastErrorTime[errorKey];
-      const lastDate = prevLastErrorTime[errorKey];
-      if (date) {
-        const minutes = getMinutesSinceError(date);
-        if (
-          // if it has been present for longer than established
-          minutes >= waitingTimes[errorKey] &&
-          // if it's not being ignored
-          !isBeingIgnored(errorKey)
-        ) {
-          await handleNodeError(errorKey, nodeStatus.name, minutes);
-        }
-      }
-      // if it had a problem before but now it's fixed, report it even if it's being ignored
-      else if (lastDate && getMinutesSinceError(lastDate) >= waitingTimes[errorKey])
-        fixes.push(`<b>${nodeStatus.name}</b> - <code>${escapeHtml(errorKey)}</code><code>: Fixed ✅</code>`);
-    }
+    for (const errorKey of errorTypes)
+      await handleErrors(fixes, lastErrorTime[errorKey], prevLastErrorTime[errorKey], errorKey, nodeStatus.name);
   }
 
   if (fixes.length) {
     await sendHTMLMessage(fixes.join("\n"));
     await handleTextMessage("text");
   }
+}
+
+async function handleErrors(
+  fixes: string[],
+  date: Date | undefined,
+  lastDate: Date | undefined,
+  errorKey: ErrorTypes,
+  nodeName?: string
+) {
+  if (date) {
+    const minutes = getMinutesSinceError(date);
+    if (
+      // if it has been present for longer than established
+      minutes >= waitingTimes[errorKey] &&
+      // if it's not being ignored
+      !isBeingIgnored(errorKey)
+    ) {
+      await handleNodeError(errorKey, nodeName, minutes);
+    }
+  }
+  // if it had a problem before but now it's fixed, report it even if it's being ignored
+  else if (lastDate && getMinutesSinceError(lastDate) >= waitingTimes[errorKey])
+    fixes.push(
+      (nodeName ? `<b>${nodeName}</b> - ` : "") + `<code>${escapeHtml(errorKey)}</code><code>: Fixed ✅</code>`
+    );
 }
