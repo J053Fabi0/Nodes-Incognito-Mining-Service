@@ -1,9 +1,9 @@
 import { escapeHtml } from "escapeHtml";
-import { ErrorTypes } from "./variables.ts";
+import { AllErrorTypes } from "./variables.ts";
 import sendMessage from "../telegram/sendMessage.ts";
 
 export default async function handleNodeError(
-  errorKey: ErrorTypes,
+  errorKey: AllErrorTypes,
   node: string | undefined,
   minutesSinceError: number
 ) {

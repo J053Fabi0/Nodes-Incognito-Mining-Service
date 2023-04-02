@@ -32,7 +32,7 @@ export default async function handleErrorsInfo(rawErrorCodes: string[]) {
 
   for (const [error, date] of Object.entries(lastGlobalErrorTimes) as [GlobalErrorTypes, Date][]) {
     if (!errorCodesToShow.includes(error)) continue;
-    text += `<code>${error}</code> <code>${getMinutesSinceError(date).toFixed(1)} min</code>\n`;
+    text += `<code>${error}</code><code>: </code><code>${getMinutesSinceError(date).toFixed(1)} min</code>\n`;
   }
   if (text) text += "\n";
 

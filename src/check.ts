@@ -1,3 +1,10 @@
+import {
+  errorTypes,
+  AllErrorTypes,
+  lastErrorTimes,
+  globalErrorTypes,
+  lastGlobalErrorTimes,
+} from "./utils/variables.ts";
 import flags from "./utils/flags.ts";
 import { escapeHtml } from "escapeHtml";
 import isBeingIgnored from "./utils/isBeingIgnored.ts";
@@ -10,7 +17,6 @@ import { waitingTimes, maxDiskPercentageUsage } from "../constants.ts";
 import { df, docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import handleTextMessage from "./telegram/handlers/handleTextMessage.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
-import { ErrorTypes, lastErrorTimes, errorTypes, lastGlobalErrorTimes } from "./utils/variables.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, Date | undefined>, errorKey: string) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();
@@ -22,13 +28,19 @@ export default async function check() {
   const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.usedNodes);
   const fixes: string[] = [];
 
-  // Check for global errors
-  // Check if the file system is at or above the maximum acceptable percentage
-  if (duplicatedConstants.fileSystem) {
-    const percentage = +(
-      (await df(["-h", duplicatedConstants.fileSystem, "--output=pcent"])).match(/\d+(?=%)/)?.[0] ?? 0
-    );
-    setOrRemoveErrorTime(percentage >= maxDiskPercentageUsage, lastGlobalErrorTimes, "lowDiskSpace");
+  {
+    // Check for global errors
+    const prevLastGlobalErrorTime = { ...lastGlobalErrorTimes };
+    // Check if the file system is at or above the maximum acceptable percentage
+    if (duplicatedConstants.fileSystem) {
+      const percentage = +(
+        (await df(["-h", duplicatedConstants.fileSystem, "--output=pcent"])).match(/\d+(?=%)/)?.[0] ?? 0
+      );
+      setOrRemoveErrorTime(percentage >= maxDiskPercentageUsage, lastGlobalErrorTimes, "lowDiskSpace");
+    }
+    // report errors if they have been present for longer than established
+    for (const errorKey of globalErrorTypes)
+      await handleErrors(fixes, lastGlobalErrorTimes[errorKey], prevLastGlobalErrorTime[errorKey], errorKey);
   }
 
   // Check for errors in each node
@@ -89,7 +101,7 @@ async function handleErrors(
   fixes: string[],
   date: Date | undefined,
   lastDate: Date | undefined,
-  errorKey: ErrorTypes,
+  errorKey: AllErrorTypes,
   nodeName?: string
 ) {
   if (date) {
