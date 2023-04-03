@@ -62,7 +62,7 @@ export default async function handleErrorsInfo(rawErrorCodes: string[]) {
           )
         )
         .join("</code>\n<code>")}</code>` +
-      "\n\n";
+      "\n";
   }
 
   await sendHTMLMessage(text.trim() || "No errors found. Send /full or /fulltext to get all the information.");
