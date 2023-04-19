@@ -10,6 +10,8 @@ import { lastErrorTimes } from "../utils/variables.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
+import instructionsToMove from "../utils/instructionsToMove.ts";
+
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
 async function onMessage(ctx: Filter<Context, "message">) {
@@ -42,6 +44,9 @@ async function onMessage(ctx: Filter<Context, "message">) {
 
         case "errors":
           return await handleErrorsInfo(args);
+
+        case "instructions":
+          return await instructionsToMove();
 
         case "reset":
         case "restart": {

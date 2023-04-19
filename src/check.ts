@@ -28,8 +28,8 @@ export default async function check() {
   const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.usedNodes);
   const fixes: string[] = [];
 
+  // Check for global errors
   {
-    // Check for global errors
     const prevLastGlobalErrorTime = { ...lastGlobalErrorTimes };
     // Check if the file system is at or above the maximum acceptable percentage
     if (duplicatedConstants.fileSystem) {
@@ -109,13 +109,12 @@ async function handleErrors(
     if (
       // if it has been present for longer than established
       minutes >= waitingTimes[errorKey] &&
-      // if it's not being ignored
+      // and it's not being ignored
       !isBeingIgnored(errorKey)
-    ) {
+    )
       await handleNodeError(errorKey, nodeName, minutes);
-    }
   }
-  // if it had a problem before but now it's fixed, report it even if it's being ignored
+  // if it had a problem before but it's now fixed, report it even if it's being ignored
   else if (lastDate && getMinutesSinceError(lastDate) >= waitingTimes[errorKey])
     fixes.push(
       (nodeName ? `<b>${nodeName}</b> - ` : "") + `<code>${escapeHtml(errorKey)}</code><code>: Fixed ✅</code>`

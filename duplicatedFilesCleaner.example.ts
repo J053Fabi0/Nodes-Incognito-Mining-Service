@@ -14,6 +14,10 @@ export const duplicatedConstants: Constants = {
   filesToStripIfOnline: -1,
   filesToStripIfOffline: 20_000,
 
+  // The minimum number of files that a shard must have to be considered present, for example when
+  // getting the info of a node. If a shard has less files than this, it will be considered empty.
+  minFilesToConsiderShard: 200,
+
   instructions: [
     {
       shardName: "beacon",

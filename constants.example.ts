@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-unused-vars
 import Constants from "./src/types/constants.type.ts";
 import { AllErrorTypes } from "./src/utils/variables.ts";
 
@@ -12,8 +13,8 @@ const constants: Constants = [
 export default constants;
 
 const MINUTE = 1;
-const HOUR = MINUTE * 60;
-const DAY = HOUR * 24;
+const HOUR = 60;
+const DAY = 1440;
 
 // In minutes
 export const waitingTimes: Record<AllErrorTypes, number> = {

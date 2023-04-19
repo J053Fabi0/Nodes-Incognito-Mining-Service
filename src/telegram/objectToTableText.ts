@@ -1,4 +1,4 @@
-/** Convert an object to a table text */
+/** Converts an object into a readable text format */
 export default function objectToTableText(obj: Record<string, string | number | boolean>) {
   const keys = Object.keys(obj);
   // maxLength in the keys
