@@ -6,6 +6,7 @@ import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
 import handleInfo from "./handleInfo.ts";
+import instructionsToMove from "../../utils/instructionsToMove.ts";
 
 export default async function handleCopyOrMove(args: string[], action: "copy" | "move") {
   const [nodesRaw, rawShards] = [args.slice(0, 2), args.slice(2)];
@@ -72,4 +73,5 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
   await sendMessage("Done!");
 
   await handleInfo();
+  await instructionsToMove();
 }
