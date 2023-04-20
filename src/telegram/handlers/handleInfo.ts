@@ -7,7 +7,7 @@ import { Info, df } from "duplicatedFilesCleanerIncognito";
 import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 
-export default async function handleInfo(rawNodes: string[]) {
+export default async function handleInfo(rawNodes: string[] = []) {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {
     if (!duplicatedConstants.fileSystem) return await sendHTMLMessage("File system not configured");

@@ -5,6 +5,7 @@ import validateItems from "../../utils/validateItems.ts";
 import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
 import { ShardsNames, dockerPs, docker } from "duplicatedFilesCleanerIncognito";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
+import handleInfo from "./handleInfo.ts";
 
 export default async function handleDelete(args: string[]) {
   const [nodeRaw, rawShards] = [args.slice(0, 1), args.slice(1)];
@@ -52,4 +53,6 @@ export default async function handleDelete(args: string[]) {
     await Promise.all([sendMessage("Starting node..."), await docker(`inc_mainnet_${fromNodeIndex}`, "start")]);
 
   await sendMessage("Done!");
+
+  await handleInfo();
 }
