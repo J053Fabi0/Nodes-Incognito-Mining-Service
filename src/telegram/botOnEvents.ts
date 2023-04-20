@@ -14,10 +14,15 @@ import { getTextInstructionsToMoveOrDelete } from "../utils/instructionsToMoveOr
 
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
+let lastMessage = ["full"];
+
 async function onMessage(ctx: Filter<Context, "message">) {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
     try {
-      const [command, ...args] = ctx.message.text.split(" ").filter((x) => x.trim());
+      const text = ctx.message.text;
+      const [command, ...args] =
+        text === "r" || text === "repeat" ? lastMessage : text.split(" ").filter((x) => x.trim());
+      lastMessage = [command, ...args];
 
       switch (command.match(/\/?(\w+)/)?.[1].toLowerCase()) {
         case "help":

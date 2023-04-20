@@ -11,6 +11,8 @@ const helpMessage =
     ["move [fromNodeIndex] [toNodeIndex] [...shards=beacon]", "Move files from one node to another"],
     ["delete [fromNodeIndex] [...shards=beacon]", "Delete the shards of a node"],
     ["errors [...errorCode=all]", "Show the errors' statuses"],
+    ["instructions", "Show the instructions to move or delete files"],
+    ["r", "Repeat the last command"],
   ]
     .map(([command, description]) => `- ${description}.\n<code>${command}</code>`)
     .join("\n\n");
