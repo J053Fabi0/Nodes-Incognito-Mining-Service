@@ -45,11 +45,11 @@ export default async function handleInfo(rawNodes: string[] = []) {
       ...info,
     };
     text +=
-      `<code>#${node}  S${status.shard}  ${status.role.charAt(0)}  ` +
+      `<code>#${node}  Sh${status.shard}  ${status.role.charAt(0)}  ` +
       `»${status.epochsToNextEvent.toString().padEnd(4)}` +
       `${docker.status === "ONLINE" ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>` +
       (Object.keys(normalizedInfo).length
-        ? `\n<code>${escapeHtml(objectToTableText(normalizedInfo))
+        ? `\n<code> </code><code>${escapeHtml(objectToTableText(normalizedInfo))
             .split("\n")
             .slice(0, -1)
             .map((a) =>
@@ -61,7 +61,7 @@ export default async function handleInfo(rawNodes: string[] = []) {
                 })()
               )
             )
-            .join("</code>\n<code>")}</code>`
+            .join("</code>\n<code> </code><code>")}</code>`
         : "") +
       "\n\n";
   }
