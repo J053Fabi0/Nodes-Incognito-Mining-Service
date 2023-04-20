@@ -15,6 +15,20 @@ export type NodeStatusKeys =
   | "epochsToNextEvent"
   | "publicValidatorKey";
 
+export default async function getNodesStatus() {
+  return (await getRawData()).map((d) => ({
+    alert: d.Alert,
+    status: d.Status,
+    isSlashed: d.IsSlashed,
+    shard: d.CommitteeChain,
+    role: d.Role || "WAITING",
+    isOldVersion: d.IsOldVersion,
+    syncState: d.SyncState || "-",
+    epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
+    ...constants.find((c) => c.publicValidatorKey === d.MiningPubkey)!,
+  }));
+}
+
 interface RawData {
   Alert: boolean;
   IsSlashed: boolean;
@@ -27,29 +41,15 @@ interface RawData {
   SyncState: "BEACON SYNCING" | "LATEST" | "-" | "BEACON STALL" | "SHARD SYNCING" | "SHARD STALL";
 }
 
-export default async function getNodesStatus() {
-  return (await getRawData()).map((d) => ({
-    role: d.Role || "WAITING",
-    alert: d.Alert,
-    status: d.Status,
-    isSlashed: d.IsSlashed,
-    shard: d.CommitteeChain,
-    syncState: d.SyncState || "-",
-    isOldVersion: d.IsOldVersion,
-    epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
-    ...constants.find((c) => c.publicValidatorKey === d.MiningPubkey)!,
-  }));
-}
-
-let lastRequestDate = 0;
+let lastRequestTime = 0;
+const minRequestInterval = 5000;
 let lastRequest: RawData[] | undefined = undefined;
-const minRequestInterval = 2000;
 
 async function getRawData() {
-  if (Date.now() - lastRequestDate < minRequestInterval && lastRequest) return lastRequest;
+  if (Date.now() - lastRequestTime < minRequestInterval && lastRequest) return lastRequest;
 
   const { data } = await axiod.post<RawData[]>("https://monitor.incognito.org/pubkeystat/stat", { mpk });
-  lastRequestDate = Date.now();
+  lastRequestTime = Date.now();
   lastRequest = data;
   return data;
 }
