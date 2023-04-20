@@ -14,53 +14,75 @@ import { getTextInstructionsToMoveOrDelete } from "../utils/instructionsToMoveOr
 
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
-let lastMessage = ["full"];
+let lastMessages = ["full"];
 
 async function onMessage(ctx: Filter<Context, "message">) {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
     try {
-      const text = ctx.message.text;
-      const [command, ...args] =
-        text === "r" || text === "repeat" ? lastMessage : text.split(" ").filter((x) => x.trim());
-      lastMessage = [command, ...args];
+      const rawText = ctx.message.text;
+      const texts = /^\/?r(?:epeat)?$/.test(rawText) ? lastMessages : rawText.split("\n").filter((x) => x.trim());
+      lastMessages = texts;
 
-      switch (command.match(/\/?(\w+)/)?.[1].toLowerCase()) {
-        case "help":
-          return await sendHTMLMessage(helpMessage);
+      for (const text of texts) {
+        const [command, ...args] = text.split(" ").filter((x) => x.trim());
 
-        case "docker":
-          return await handleDocker(args);
+        switch (command.match(/\/?(\w+)/)?.[1].toLowerCase()) {
+          case "help": {
+            await sendHTMLMessage(helpMessage);
+            break;
+          }
 
-        case "ignore":
-          return await handleIgnore(args);
+          case "docker": {
+            await handleDocker(args);
+            break;
+          }
 
-        case "info":
-        case "status":
-          return await handleInfo(args);
+          case "ignore": {
+            await handleIgnore(args);
+            break;
+          }
 
-        case "copy":
-          return await handleCopyOrMove(args, "copy");
+          case "info":
+          case "status": {
+            await handleInfo(args);
+            break;
+          }
 
-        case "move":
-          return await handleCopyOrMove(args, "move");
+          case "copy": {
+            await handleCopyOrMove(args, "copy");
+            break;
+          }
 
-        case "delete":
-          return await handleDelete(args);
+          case "move": {
+            await handleCopyOrMove(args, "move");
+            break;
+          }
 
-        case "errors":
-          return await handleErrorsInfo(args);
+          case "delete": {
+            await handleDelete(args);
+            break;
+          }
 
-        case "instructions":
-          return sendHTMLMessage(await getTextInstructionsToMoveOrDelete());
+          case "errors": {
+            await handleErrorsInfo(args);
+            break;
+          }
 
-        case "reset":
-        case "restart": {
-          for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
-          return await sendMessage("Reset successful.");
+          case "instructions": {
+            sendHTMLMessage(await getTextInstructionsToMoveOrDelete());
+            break;
+          }
+
+          case "reset":
+          case "restart": {
+            for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
+            await sendMessage("Reset successful.");
+            break;
+          }
+
+          default:
+            await handleTextMessage(ctx.message.text);
         }
-
-        default:
-          return await handleTextMessage(ctx.message.text);
       }
     } catch (e) {
       handleError(e);
