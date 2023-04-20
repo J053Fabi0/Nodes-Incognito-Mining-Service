@@ -6,6 +6,7 @@ import validateItems from "../../utils/validateItems.ts";
 import { Info, df } from "duplicatedFilesCleanerIncognito";
 import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
+import { getTextInstructionsToMoveOrDelete } from "../../utils/instructionsToMoveOrDelete.ts";
 
 export default async function handleInfo(rawNodes: string[] = []) {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
@@ -63,7 +64,9 @@ export default async function handleInfo(rawNodes: string[] = []) {
       "\n\n";
   }
 
-  if (duplicatedConstants.fileSystem) text += await getFileSistemInfo(duplicatedConstants.fileSystem);
+  if (duplicatedConstants.fileSystem) text += (await getFileSistemInfo(duplicatedConstants.fileSystem)) + "\n\n";
+
+  text += "<b>Instructions</b>:\n" + (await getTextInstructionsToMoveOrDelete());
 
   return sendHTMLMessage(text.trim());
 }

@@ -1,5 +1,5 @@
 import bot from "./initBot.ts";
-import { Context, Filter } from "grammy";
+import { Context, Filter } from "grammy/mod.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
 import helpMessage from "../utils/helpMessage.ts";
@@ -10,7 +10,7 @@ import { lastErrorTimes } from "../utils/variables.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
-import instructionsToMove from "../utils/instructionsToMove.ts";
+import { getTextInstructionsToMoveOrDelete } from "../utils/instructionsToMoveOrDelete.ts";
 
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
@@ -46,7 +46,7 @@ async function onMessage(ctx: Filter<Context, "message">) {
           return await handleErrorsInfo(args);
 
         case "instructions":
-          return await instructionsToMove();
+          return sendHTMLMessage(await getTextInstructionsToMoveOrDelete());
 
         case "reset":
         case "restart": {

@@ -1,10 +1,13 @@
 import { byValues, byNumber, byString } from "sort-es";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
-import sendMessage, { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import { Info, ShardsNames, shardsNames, normalizeShard } from "duplicatedFilesCleanerIncognito";
 
-export default async function instructionsToMove() {
+type InstructionToMoveOrDelete =
+  | { shards: ShardsNames[]; from: string; to: string; action: "move" }
+  | { shards: ShardsNames[]; from: string; to?: undefined; action: "delete" };
+
+export default async function instructionsToMoveOrDelete() {
   const nodesStatus = (await getNodesStatus()).reduce(
     (obj, node) => ((obj[node.dockerIndex] = node), obj),
     {} as Record<string, NodeStatus>
@@ -27,7 +30,7 @@ export default async function instructionsToMove() {
       ])
     );
 
-  const instructions = [] as { shards: ShardsNames[]; from: string; to?: string; action: "move" | "delete" }[];
+  const instructions = [] as InstructionToMoveOrDelete[];
 
   for (const shard of shardsNames) {
     const nodesWithShard = nodesInfo
@@ -53,16 +56,21 @@ export default async function instructionsToMove() {
           ({ to: t, action, from }) => t === to && action === "move" && from === name
         );
         if (existingInstruction) existingInstruction.shards.push(shard);
-        else instructions.push({ to, from: name, shards: [shard], action: to ? "move" : "delete" });
+        else if (to) instructions.push({ to, from: name, shards: [shard], action: "move" });
+        else instructions.push({ from: name, shards: [shard], action: "delete" });
       }
     }
   }
 
+  return instructions;
+}
+
+export async function getTextInstructionsToMoveOrDelete() {
+  const instructions = await instructionsToMoveOrDelete();
+
   if (instructions.length)
-    return sendHTMLMessage(
-      `- <code>${instructions
-        .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
-        .join("</code>\n\n- <code>")}</code>`
-    );
-  else return sendMessage("No moves necessary.");
+    return `- ${instructions
+      .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
+      .join("\n- ")}`;
+  else return "No moves necessary.";
 }
