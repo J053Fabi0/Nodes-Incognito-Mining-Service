@@ -27,7 +27,7 @@ export default async function instructionsToMove() {
       ])
     );
 
-  const instructions = [] as { shard: ShardsNames; from: string; to?: string; action: "move" | "delete" }[];
+  const instructions = [] as { shards: ShardsNames[]; from: string; to?: string; action: "move" | "delete" }[];
 
   for (const shard of shardsNames) {
     const nodesWithShard = nodesInfo
@@ -49,20 +49,19 @@ export default async function instructionsToMove() {
       // if it shouldn't have the shard, add an instruction
       else {
         const to = nodesWhoShouldHaveShard.shift();
-        instructions.push({
-          shard,
-          from: name,
-          to,
-          action: to ? "move" : "delete", // if no more nodes need the shard, delete it
-        });
+        const existingInstruction = instructions.find(
+          ({ to: t, action, from }) => t === to && action === "move" && from === name
+        );
+        if (existingInstruction) existingInstruction.shards.push(shard);
+        else instructions.push({ to, from: name, shards: [shard], action: to ? "move" : "delete" });
       }
     }
   }
 
-  if (instructions)
+  if (instructions.length)
     return sendHTMLMessage(
       `- <code>${instructions
-        .map(({ action, from, to, shard }) => `${action} ${from} ${to ? `${to} ` : ""}${shard}`)
+        .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
         .join("</code>\n\n- <code>")}</code>`
     );
   else return sendMessage("No moves necessary.");
