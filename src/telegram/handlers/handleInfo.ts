@@ -80,6 +80,12 @@ export default async function handleInfo(rawNodes: string[] = []) {
 async function getFileSistemInfo(fileSystem: string) {
   return (
     `<b>File system</b>:\n` +
-    `<code>${escapeHtml(await df(["-h", fileSystem, "--output=used,avail,pcent"]))}</code>`
+    `<code>${escapeHtml(
+      (await df(["-h", fileSystem, "--output=used,avail,pcent"]))
+        // Remove extra spaces
+        .split("\n")
+        .map((t) => t.trim())
+        .join("\n")
+    )}</code>`
   );
 }
