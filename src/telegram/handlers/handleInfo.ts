@@ -64,9 +64,12 @@ export default async function handleInfo(rawNodes: string[] = []) {
       "\n\n";
   }
 
+  // Add file system info
   if (duplicatedConstants.fileSystem) text += (await getFileSistemInfo(duplicatedConstants.fileSystem)) + "\n";
 
-  text += "<b>Instructions</b>:\n" + (await getTextInstructionsToMoveOrDelete());
+  // Add possible instructions
+  const instructions = await getTextInstructionsToMoveOrDelete();
+  if (instructions !== "No moves necessary.") text += "<b>Instructions</b>:\n" + instructions;
 
   return sendHTMLMessage(text.trim());
 }
