@@ -69,8 +69,8 @@ export async function getTextInstructionsToMoveOrDelete() {
   const instructions = await instructionsToMoveOrDelete();
 
   if (instructions.length)
-    return `- ${instructions
+    return `- <code>${instructions
       .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
-      .join("\n- ")}`;
+      .join("</code>\n- <code>")}</code>`;
   else return "No moves necessary.";
 }

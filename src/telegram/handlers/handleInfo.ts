@@ -64,7 +64,7 @@ export default async function handleInfo(rawNodes: string[] = []) {
       "\n\n";
   }
 
-  if (duplicatedConstants.fileSystem) text += (await getFileSistemInfo(duplicatedConstants.fileSystem)) + "\n\n";
+  if (duplicatedConstants.fileSystem) text += (await getFileSistemInfo(duplicatedConstants.fileSystem)) + "\n";
 
   text += "<b>Instructions</b>:\n" + (await getTextInstructionsToMoveOrDelete());
 
