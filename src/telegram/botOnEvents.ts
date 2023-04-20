@@ -84,6 +84,9 @@ async function onMessage(ctx: Filter<Context, "message">) {
             await handleTextMessage(ctx.message.text);
         }
       }
+
+      // if any text was to copy, move or delete, send the info
+      if (texts.some((text) => text.match(/^(copy|move|delete) /))) handleInfo();
     } catch (e) {
       handleError(e);
     }

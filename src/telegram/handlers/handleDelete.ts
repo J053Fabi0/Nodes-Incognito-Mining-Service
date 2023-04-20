@@ -51,6 +51,4 @@ export default async function handleDelete(args: string[]) {
   // start the docker if they were not being ignored
   if (isBeingIgnored("docker") && dockerStatus[fromNodeIndex].status === "ONLINE")
     await Promise.all([sendMessage("Starting node..."), await docker(`inc_mainnet_${fromNodeIndex}`, "start")]);
-
-  await handleInfo();
 }

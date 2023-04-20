@@ -68,6 +68,4 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
       dockerStatus[toNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${toNodeIndex}`, "start"),
       dockerStatus[fromNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
-
-  await handleInfo();
 }
