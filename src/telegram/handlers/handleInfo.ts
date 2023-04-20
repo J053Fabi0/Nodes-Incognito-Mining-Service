@@ -47,20 +47,22 @@ export default async function handleInfo(rawNodes: string[] = []) {
     text +=
       `<code>#${node}  S${status.shard}  ${status.role.charAt(0)}  ` +
       `»${status.epochsToNextEvent.toString().padEnd(4)}` +
-      `${docker.status === "ONLINE" ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>\n` +
-      `<code>${escapeHtml(objectToTableText(normalizedInfo))
-        .split("\n")
-        .slice(0, -1)
-        .map((a) =>
-          a.replace(
-            ...(() => {
-              const match = a.match(/: +/);
-              if (match) return [match[0], `</code><code>${match[0]}</code><code>`] as [string, string];
-              else return ["", ""] as [string, string];
-            })()
-          )
-        )
-        .join("</code>\n<code>")}</code>` +
+      `${docker.status === "ONLINE" ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>` +
+      (Object.keys(normalizedInfo).length
+        ? `\n<code>${escapeHtml(objectToTableText(normalizedInfo))
+            .split("\n")
+            .slice(0, -1)
+            .map((a) =>
+              a.replace(
+                ...(() => {
+                  const match = a.match(/: +/);
+                  if (match) return [match[0], `</code><code>${match[0]}</code><code>`] as [string, string];
+                  else return ["", ""] as [string, string];
+                })()
+              )
+            )
+            .join("</code>\n<code>")}</code>`
+        : "") +
       "\n\n";
   }
 
