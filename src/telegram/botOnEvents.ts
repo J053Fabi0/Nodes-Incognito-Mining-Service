@@ -29,7 +29,6 @@ const commands = [
   "errors",
   "ignore",
   "status",
-  "restart",
   "fulltext",
   "instructions",
 ];
@@ -44,7 +43,7 @@ async function onMessage(ctx: Filter<Context, "message">) {
 
       for (const text of texts) {
         const [command, ...args] = text.split(" ").filter((x) => x.trim());
-        const normalizedCommand = command.replace(/^\/+/, "").toLocaleLowerCase();
+        const normalizedCommand = command.replace(/^\/+/, "").toLowerCase();
 
         // if the command fits exactly with one of the possible commands, it is not ambiguous
         const exactCommand = commands.find((c) => c === normalizedCommand);
@@ -114,8 +113,7 @@ async function onMessage(ctx: Filter<Context, "message">) {
             break;
           }
 
-          case "reset":
-          case "restart": {
+          case "reset": {
             for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
             await sendMessage("Reset successful.");
             break;

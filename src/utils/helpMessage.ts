@@ -3,7 +3,7 @@ const helpMessage =
   [
     ["ignore [code=docker] [minutes=0]", "Ignore an error code for an amount of minutes"],
     ["ignore codes", "List the error codes"],
-    ["reset|restart", "Reset the timings of the errors"],
+    ["reset", "Reset the timings of the errors"],
     ["(info|status) [...nodeIndexes=all]", "Get the docker status, files of shards and system info"],
     ["(info|status) fs", "Get system info"],
     ["docker [start|stop] [...nodeIndexes|all]", "Start or stop the docker containers"],
