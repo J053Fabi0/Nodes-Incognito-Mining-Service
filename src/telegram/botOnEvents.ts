@@ -16,18 +16,22 @@ import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
 let lastMessages = ["full"];
 const commands = [
+  "ft",
   "copy",
+  "full",
+  "help",
+  "info",
+  "move",
+  "text",
+  "reset",
   "delete",
   "docker",
   "errors",
-  "help",
   "ignore",
-  "info",
-  "instructions",
-  "move",
-  "reset",
-  "restart",
   "status",
+  "restart",
+  "fulltext",
+  "instructions",
 ];
 
 async function onMessage(ctx: Filter<Context, "message">) {
@@ -45,7 +49,7 @@ async function onMessage(ctx: Filter<Context, "message">) {
         const matchingCommands = commands.filter((c) => c.startsWith(normalizedCommand));
         if (matchingCommands.length > 1) {
           await sendHTMLMessage(
-            `Command <code>${normalizedCommand}</code> is ambiguous. Did you mean one of these?\n\n- <code>` +
+            `Command <code>${normalizedCommand}</code> is ambiguous. Did you mean one of these?\n- <code>` +
               `${matchingCommands.map((c) => `${c} ${args.join(" ")}`).join("</code>\n- <code>")}</code>`
           );
           continue;
