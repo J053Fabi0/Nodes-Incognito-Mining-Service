@@ -1,5 +1,4 @@
 import { join } from "join";
-import handleInfo from "./handleInfo.ts";
 import sendMessage from "../sendMessage.ts";
 import { ignore } from "../../utils/variables.ts";
 import validateItems from "../../utils/validateItems.ts";
@@ -12,7 +11,7 @@ export default async function handleDelete(args: string[]) {
 
   // Validate and get the nodes indexes
   const [fromNodeIndex = null] = await validateItems({ rawItems: nodeRaw }).catch(() => []);
-  if (fromNodeIndex === null) return;
+  if (fromNodeIndex === null) return false;
 
   // Validate and get the shards
   const shards =
@@ -26,7 +25,7 @@ export default async function handleDelete(args: string[]) {
           // transform shard names to the format beacon or shard[0-7]
           rawItems: rawShards.map((shard) => (/^(shard[0-7]|beacon)$/i.test(shard) ? shard : `shard${shard}`)),
         }).catch(() => null)) as ShardsNames[] | null);
-  if (!shards) return;
+  if (!shards) return false;
 
   // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
   const lastIgnoreMinutes = ignore.docker.minutes;
@@ -51,4 +50,6 @@ export default async function handleDelete(args: string[]) {
   // start the docker if they were not being ignored
   if (isBeingIgnored("docker") && dockerStatus[fromNodeIndex].status === "ONLINE")
     await Promise.all([sendMessage("Starting node..."), await docker(`inc_mainnet_${fromNodeIndex}`, "start")]);
+
+  return true;
 }

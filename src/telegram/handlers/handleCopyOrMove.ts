@@ -1,4 +1,3 @@
-import handleInfo from "./handleInfo.ts";
 import { ignore } from "../../utils/variables.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
@@ -12,7 +11,7 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
 
   // Validate and get the nodes indexes
   const [fromNodeIndex = null, toNodeIndex = null] = await validateItems({ rawItems: nodesRaw }).catch(() => []);
-  if (fromNodeIndex === null || toNodeIndex === null) return;
+  if (fromNodeIndex === null || toNodeIndex === null) return false;
 
   // Validate and get the shards
   const shards =
@@ -26,7 +25,7 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
           rawItems: rawShards.map((shard) => (/^(shard[0-7]|beacon)$/i.test(shard) ? shard : `shard${shard}`)),
           validItems: duplicatedFilesCleaner.usedShards as string[],
         }).catch(() => null)) as ShardsNames[] | null);
-  if (!shards) return;
+  if (!shards) return false;
 
   // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
   const lastIgnoreMinutes = ignore.docker.minutes;
@@ -68,4 +67,6 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
       dockerStatus[toNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${toNodeIndex}`, "start"),
       dockerStatus[fromNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
+
+  return true;
 }

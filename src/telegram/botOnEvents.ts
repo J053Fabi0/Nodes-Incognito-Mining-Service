@@ -15,6 +15,20 @@ import { getTextInstructionsToMoveOrDelete } from "../utils/instructionsToMoveOr
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
 let lastMessages = ["full"];
+const commands = [
+  "copy",
+  "delete",
+  "docker",
+  "errors",
+  "help",
+  "ignore",
+  "info",
+  "instructions",
+  "move",
+  "reset",
+  "restart",
+  "status",
+];
 
 async function onMessage(ctx: Filter<Context, "message">) {
   if (ctx?.chat?.id === 861616600 && ctx.message.text)
@@ -22,11 +36,25 @@ async function onMessage(ctx: Filter<Context, "message">) {
       const rawText = ctx.message.text;
       const texts = /^\/?r(?:epeat)?$/.test(rawText) ? lastMessages : rawText.split("\n").filter((x) => x.trim());
       lastMessages = texts;
+      let sendInfo = false;
 
       for (const text of texts) {
         const [command, ...args] = text.split(" ").filter((x) => x.trim());
+        const normalizedCommand = command.replace(/^\/+/, "").toLocaleLowerCase();
 
-        switch (command.match(/\/?(\w+)/)?.[1].toLowerCase()) {
+        const matchingCommands = commands.filter((c) => c.startsWith(normalizedCommand));
+        if (matchingCommands.length > 1) {
+          await sendHTMLMessage(
+            `Command <code>${normalizedCommand}</code> is ambiguous. Did you mean one of these?\n\n- <code>` +
+              `${matchingCommands.map((c) => `${c} ${args.join(" ")}`).join("</code>\n- <code>")}</code>`
+          );
+          continue;
+        } else if (matchingCommands.length === 0) {
+          await sendHTMLMessage(helpMessage);
+          continue;
+        }
+
+        switch (matchingCommands[0]) {
           case "help": {
             await sendHTMLMessage(helpMessage);
             break;
@@ -49,17 +77,20 @@ async function onMessage(ctx: Filter<Context, "message">) {
           }
 
           case "copy": {
-            await handleCopyOrMove(args, "copy");
+            const successful = await handleCopyOrMove(args, "copy");
+            if (successful) sendInfo = true;
             break;
           }
 
           case "move": {
-            await handleCopyOrMove(args, "move");
+            const successful = await handleCopyOrMove(args, "move");
+            if (successful) sendInfo = true;
             break;
           }
 
           case "delete": {
-            await handleDelete(args);
+            const successful = await handleDelete(args);
+            if (successful) sendInfo = true;
             break;
           }
 
@@ -86,7 +117,7 @@ async function onMessage(ctx: Filter<Context, "message">) {
       }
 
       // if any text was to copy, move or delete, send the info
-      if (texts.some((text) => text.match(/^(copy|move|delete) /))) handleInfo();
+      if (sendInfo) handleInfo();
     } catch (e) {
       handleError(e);
     }
