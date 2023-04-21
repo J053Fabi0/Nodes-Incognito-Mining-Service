@@ -59,7 +59,9 @@ async function onMessage(ctx: Filter<Context, "message">) {
             continue;
           }
         } else if (matchingCommands.length === 0) {
-          await sendHTMLMessage(helpMessage);
+          await sendHTMLMessage(
+            `Command <code>${normalizedCommand}</code> not found. Type /help to see the available commands.`
+          );
           continue;
         }
 
