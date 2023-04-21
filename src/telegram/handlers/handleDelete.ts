@@ -9,6 +9,15 @@ import { ShardsNames, dockerPs, docker } from "duplicatedFilesCleanerIncognito";
 export default async function handleDelete(args: string[]) {
   const [nodeRaw, rawShards] = [args.slice(0, 1), args.slice(1)];
 
+  if (nodeRaw.length === 0) {
+    await sendMessage("Please specify a node.");
+    return false;
+  }
+  if (rawShards.length === 0) {
+    await sendMessage("Please specify a shard.");
+    return false;
+  }
+
   // Validate and get the nodes indexes
   const [fromNodeIndex = null] = await validateItems({ rawItems: nodeRaw }).catch(() => []);
   if (fromNodeIndex === null) return false;
