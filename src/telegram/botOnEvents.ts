@@ -46,18 +46,17 @@ async function onMessage(ctx: Filter<Context, "message">) {
         const [command, ...args] = text.split(" ").filter((x) => x.trim());
         const normalizedCommand = command.replace(/^\/+/, "").toLocaleLowerCase();
 
-        const matchingCommands = commands.filter((c) => c.startsWith(normalizedCommand));
+        // if the command fits exactly with one of the possible commands, it is not ambiguous
+        const exactCommand = commands.find((c) => c === normalizedCommand);
+        const matchingCommands = exactCommand
+          ? [exactCommand]
+          : commands.filter((c) => c.startsWith(normalizedCommand));
         if (matchingCommands.length > 1) {
-          // if the command fits exactly with one of the possible commands, it is not ambiguous
-          const exactCommand = commands.find((c) => c === normalizedCommand);
-          if (exactCommand) matchingCommands.unshift(exactCommand);
-          else {
-            await sendHTMLMessage(
-              `Command <code>${normalizedCommand}</code> is ambiguous. Did you mean one of these?\n- <code>` +
-                `${matchingCommands.map((c) => `${c} ${args.join(" ")}`).join("</code>\n- <code>")}</code>`
-            );
-            continue;
-          }
+          await sendHTMLMessage(
+            `Command <code>${normalizedCommand}</code> is ambiguous. Did you mean one of these?\n- <code>` +
+              `${matchingCommands.map((c) => `${c} ${args.join(" ")}`).join("</code>\n- <code>")}</code>`
+          );
+          continue;
         } else if (matchingCommands.length === 0) {
           await sendHTMLMessage(
             `Command <code>${normalizedCommand}</code> not found. Type /help to see the available commands.`
