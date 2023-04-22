@@ -16,6 +16,7 @@ import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
 let lastMessages = ["full"];
 const commands = [
+  "f",
   "ft",
   "copy",
   "full",
