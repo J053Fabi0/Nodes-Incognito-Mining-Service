@@ -1,5 +1,5 @@
 import bot from "../initBot.ts";
-import { InputFile } from "grammy";
+import { InputFile } from "grammy/mod.ts";
 import sendMessage from "../sendMessage.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
@@ -9,7 +9,7 @@ import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 
 const allKeys = ["name", "role", "shard", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
 const booleanKeys = ["isSlashed", "isOldVersion", "alert"] as const;
-type Keys = typeof allKeys[number];
+type Keys = (typeof allKeys)[number];
 
 let lastPhotoId: string | undefined;
 let lastPhotoIdTime: number | undefined;
@@ -94,7 +94,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
     }
   });
 
-  const normalizedNodes: Record<typeof shorterKeys[number], string | number>[] = nodes.map((node) => ({
+  const normalizedNodes: Record<(typeof shorterKeys)[number], string | number>[] = nodes.map((node) => ({
     ...node,
     S: node.shard,
     Nex: node.epochsToNextEvent,
@@ -111,7 +111,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
       Object.assign(obj, {
         [key]: Math.max(...normalizedNodes.map((node) => `${node[key]}`.length), key.length),
       }),
-    {} as Record<typeof shorterKeys[number], number>
+    {} as Record<(typeof shorterKeys)[number], number>
   );
 
   const text =
@@ -124,7 +124,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
       .map(
         ({ name, ...otherData }) =>
           `${otherData.status} ${name}: ${" ".repeat(maxLength.name - (name as string).length)}` +
-          (shorterKeys.slice(1) as Exclude<typeof shorterKeys[number], "name">[])
+          (shorterKeys.slice(1) as Exclude<(typeof shorterKeys)[number], "name">[])
             .map(
               (key, i) =>
                 otherData[key] +
