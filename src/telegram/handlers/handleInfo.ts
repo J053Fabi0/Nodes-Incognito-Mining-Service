@@ -5,7 +5,7 @@ import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { Info, df } from "duplicatedFilesCleanerIncognito";
 import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
-import instructionsToMoveOrDelete from "../../utils/instructionsToMoveOrDelete.ts";
+import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 
 export default async function handleInfo(rawNodes: string[] = []) {
@@ -70,7 +70,7 @@ export default async function handleInfo(rawNodes: string[] = []) {
   if (duplicatedConstants.fileSystem) text += (await getFileSistemInfo(duplicatedConstants.fileSystem)) + "\n";
 
   // Add possible instructions
-  const instructions = await instructionsToMoveOrDelete();
+  const instructions = await getInstructionsToMoveOrDelete();
   if (instructions.length)
     text += `<b>Instructions</b>:\n<code>${instructions
       .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)

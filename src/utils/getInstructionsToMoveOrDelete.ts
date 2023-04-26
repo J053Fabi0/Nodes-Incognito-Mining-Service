@@ -7,7 +7,7 @@ type InstructionToMoveOrDelete =
   | { shards: ShardsNames[]; from: string; to: string; action: "move" }
   | { shards: ShardsNames[]; from: string; to?: undefined; action: "delete" };
 
-export default async function instructionsToMoveOrDelete() {
+export default async function getInstructionsToMoveOrDelete() {
   const nodesStatus = (await getNodesStatus()).reduce(
     (obj, node) => ((obj[node.dockerIndex] = node), obj),
     {} as Record<string, NodeStatus>
@@ -66,7 +66,7 @@ export default async function instructionsToMoveOrDelete() {
 }
 
 export async function getTextInstructionsToMoveOrDelete() {
-  const instructions = await instructionsToMoveOrDelete();
+  const instructions = await getInstructionsToMoveOrDelete();
 
   if (instructions.length)
     return `- <code>${instructions

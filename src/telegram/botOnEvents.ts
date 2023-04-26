@@ -10,7 +10,7 @@ import { lastErrorTimes } from "../utils/variables.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
-import { getTextInstructionsToMoveOrDelete } from "../utils/instructionsToMoveOrDelete.ts";
+import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
 
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 
