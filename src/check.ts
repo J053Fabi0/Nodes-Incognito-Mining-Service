@@ -10,12 +10,16 @@ import { escapeHtml } from "escapeHtml";
 import isBeingIgnored from "./utils/isBeingIgnored.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
 import handleNodeError from "./utils/handleNodeError.ts";
+import handleInfo from "./telegram/handlers/handleInfo.ts";
 import { sendHTMLMessage } from "./telegram/sendMessage.ts";
 import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
+import handleDelete from "./telegram/handlers/handleDelete.ts";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
 import { waitingTimes, maxDiskPercentageUsage } from "../constants.ts";
 import { df, docker, dockerPs } from "duplicatedFilesCleanerIncognito";
+import handleCopyOrMove from "./telegram/handlers/handleCopyOrMove.ts";
 import handleTextMessage from "./telegram/handlers/handleTextMessage.ts";
+import getInstructionsToMoveOrDelete from "./utils/getInstructionsToMoveOrDelete.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, Date | undefined>, errorKey: string) {
@@ -24,6 +28,17 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, Date |
 }
 
 export default async function check() {
+  // Check if there are shards that need to be moved or deleted
+  const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
+  if (instructionsToMoveOrDelete.length > 0) {
+    for (const instruction of instructionsToMoveOrDelete) {
+      if (instruction.action === "move")
+        await handleCopyOrMove([instruction.from, instruction.to, ...instruction.shards], "move");
+      else await handleDelete([instruction.from, ...instruction.shards]);
+    }
+    await handleInfo();
+  }
+
   const nodesStatus = await getNodesStatus();
   const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.usedNodes);
   const fixes: string[] = [];
