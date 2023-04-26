@@ -1,4 +1,5 @@
 import { join } from "join";
+import bot from "../initBot.ts";
 import sendMessage from "../sendMessage.ts";
 import { ignore } from "../../utils/variables.ts";
 import validateItems from "../../utils/validateItems.ts";
@@ -6,15 +7,18 @@ import isBeingIgnored from "../../utils/isBeingIgnored.ts";
 import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
 import { ShardsNames, dockerPs, docker } from "duplicatedFilesCleanerIncognito";
 
-export default async function handleDelete(args: string[]) {
+export default async function handleDelete(
+  args: string[],
+  options: Parameters<typeof bot.api.sendMessage>[2] = {}
+) {
   const [nodeRaw, rawShards] = [args.slice(0, 1), args.slice(1)];
 
   if (nodeRaw.length === 0) {
-    await sendMessage("Please specify a node.");
+    await sendMessage("Please specify a node.", undefined, options);
     return false;
   }
   if (rawShards.length === 0) {
-    await sendMessage("Please specify a shard.");
+    await sendMessage("Please specify a shard.", undefined, options);
     return false;
   }
 
@@ -43,11 +47,14 @@ export default async function handleDelete(args: string[]) {
   // Stop the docker regardless of the ignore value if at least one of them is online
   const dockerStatus = await dockerPs([fromNodeIndex]);
   if (dockerStatus[fromNodeIndex].status === "ONLINE")
-    await Promise.all([sendMessage("Stopping node..."), docker(`inc_mainnet_${fromNodeIndex}`, "stop")]);
+    await Promise.all([
+      sendMessage("Stopping node...", undefined, options),
+      docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
+    ]);
 
   for (const shard of shards)
     await Promise.all([
-      sendMessage(`Deleting ${shard} from node ${fromNodeIndex}...`),
+      sendMessage(`Deleting ${shard} from node ${fromNodeIndex}...`, undefined, options),
       Deno.remove(join(duplicatedFilesCleaner.homePath, `/node_data_${fromNodeIndex}/mainnet/block/${shard}`), {
         recursive: true,
       }).catch(() => {}),
@@ -58,7 +65,10 @@ export default async function handleDelete(args: string[]) {
 
   // start the docker if they were not being ignored
   if (isBeingIgnored("docker") && dockerStatus[fromNodeIndex].status === "ONLINE")
-    await Promise.all([sendMessage("Starting node..."), await docker(`inc_mainnet_${fromNodeIndex}`, "start")]);
+    await Promise.all([
+      sendMessage("Starting node...", undefined, options),
+      docker(`inc_mainnet_${fromNodeIndex}`, "start"),
+    ]);
 
   return true;
 }

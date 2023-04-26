@@ -1,3 +1,4 @@
+import bot from "../initBot.ts";
 import { ignore } from "../../utils/variables.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
@@ -6,7 +7,11 @@ import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
 
-export default async function handleCopyOrMove(args: string[], action: "copy" | "move") {
+export default async function handleCopyOrMove(
+  args: string[],
+  action: "copy" | "move",
+  options: Parameters<typeof bot.api.sendMessage>[2] = {}
+) {
   const [nodesRaw, rawShards] = [args.slice(0, 2), args.slice(2)];
 
   // Validate and get the nodes indexes
@@ -35,7 +40,7 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
   const dockerStatus = await dockerPs([fromNodeIndex, toNodeIndex]);
   if (dockerStatus[fromNodeIndex].status === "ONLINE" || dockerStatus[toNodeIndex].status === "ONLINE")
     await Promise.all([
-      sendMessage("Stopping nodes..."),
+      sendMessage("Stopping nodes...", undefined, options),
       dockerStatus[toNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
       dockerStatus[fromNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
@@ -43,7 +48,11 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
   for (const shard of shards)
     await Promise.all([
       sendHTMLMessage(
-        `${action === "copy" ? "Copying" : "Moving"} ${shard} from node ${fromNodeIndex} to node ${toNodeIndex}...`
+        `${
+          action === "copy" ? "Copying" : "Moving"
+        } ${shard} from node ${fromNodeIndex} to node ${toNodeIndex}...`,
+        undefined,
+        options
       ),
       action === "copy"
         ? duplicatedFilesCleaner.copyData({
@@ -63,7 +72,7 @@ export default async function handleCopyOrMove(args: string[], action: "copy" | 
     (dockerStatus[fromNodeIndex].status === "ONLINE" || dockerStatus[toNodeIndex].status === "ONLINE")
   )
     await Promise.all([
-      sendMessage("Starting nodes..."),
+      sendMessage("Starting nodes...", undefined, options),
       dockerStatus[toNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${toNodeIndex}`, "start"),
       dockerStatus[fromNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);

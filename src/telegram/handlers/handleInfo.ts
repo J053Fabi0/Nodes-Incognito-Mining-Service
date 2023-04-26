@@ -1,3 +1,4 @@
+import bot from "../initBot.ts";
 import { escapeHtml } from "escapeHtml";
 import { sendHTMLMessage } from "../sendMessage.ts";
 import { byValues, byNumber, byString } from "sort-es";
@@ -8,11 +9,15 @@ import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
 import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 
-export default async function handleInfo(rawNodes: string[] = []) {
+export default async function handleInfo(
+  rawNodes: string[] = [],
+  options: Parameters<typeof bot.api.sendMessage>[2] = {}
+) {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {
-    if (!duplicatedConstants.fileSystem) return await sendHTMLMessage("File system not configured");
-    return await sendHTMLMessage(await getFileSistemInfo(duplicatedConstants.fileSystem));
+    if (!duplicatedConstants.fileSystem)
+      return await sendHTMLMessage("File system not configured", undefined, options);
+    return await sendHTMLMessage(await getFileSistemInfo(duplicatedConstants.fileSystem), undefined, options);
   }
 
   const nodes = await validateItems({ rawItems: rawNodes }).catch(() => null);
@@ -76,7 +81,7 @@ export default async function handleInfo(rawNodes: string[] = []) {
       .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
       .join("\n")}</code>`;
 
-  return sendHTMLMessage(text.trim());
+  return sendHTMLMessage(text.trim(), undefined, options);
 }
 
 async function getFileSistemInfo(fileSystem: string) {
