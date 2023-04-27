@@ -28,19 +28,6 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, Date |
 }
 
 export default async function check() {
-  // Check if there are shards that need to be moved or deleted
-  const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
-  if (instructionsToMoveOrDelete.length > 0) {
-    for (const instruction of instructionsToMoveOrDelete) {
-      if (instruction.action === "move")
-        await handleCopyOrMove([instruction.from, instruction.to, ...instruction.shards], "move", {
-          disable_notification: true,
-        });
-      else await handleDelete([instruction.from, ...instruction.shards], { disable_notification: true });
-    }
-    await handleInfo(undefined, { disable_notification: true });
-  }
-
   const nodesStatus = await getNodesStatus();
   const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.usedNodes);
   const fixes: string[] = [];
@@ -111,6 +98,19 @@ export default async function check() {
   if (fixes.length) {
     await sendHTMLMessage(fixes.join("\n"));
     await handleTextMessage("text");
+  }
+
+  // Check if there are shards that need to be moved or deleted
+  const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
+  if (instructionsToMoveOrDelete.length > 0) {
+    for (const instruction of instructionsToMoveOrDelete) {
+      if (instruction.action === "move")
+        await handleCopyOrMove([instruction.from, instruction.to, ...instruction.shards], "move", {
+          disable_notification: true,
+        });
+      else await handleDelete([instruction.from, ...instruction.shards], { disable_notification: true });
+    }
+    await handleInfo(undefined, { disable_notification: true });
   }
 }
 
