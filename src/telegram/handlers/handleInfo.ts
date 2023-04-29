@@ -1,13 +1,12 @@
 import bot from "../initBot.ts";
 import { escapeHtml } from "escapeHtml";
+import sortNodes from "../../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../sendMessage.ts";
-import { byValues, byNumber, byString } from "sort-es";
+import { df } from "duplicatedFilesCleanerIncognito";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
-import { Info, df } from "duplicatedFilesCleanerIncognito";
-import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
+import { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
-import duplicatedFilesCleaner, { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 
 export default async function handleInfo(
   rawNodes: string[] = [],
@@ -23,20 +22,7 @@ export default async function handleInfo(
   const nodes = await validateItems({ rawItems: rawNodes }).catch(() => null);
   if (!nodes) return Promise.resolve(null);
 
-  const nodesStatus = (await getNodesStatus()).reduce(
-    (obj, node) => ((obj[node.dockerIndex] = node), obj),
-    {} as Record<string, NodeStatus>
-  );
-  const nodesInfo: [string, Info][] = Object.entries(
-    await duplicatedFilesCleaner.getInfo(nodes.length ? nodes : undefined)
-  ).sort(
-    byValues([
-      // Sort first by the role. Commitee goes first.
-      [([a]) => nodesStatus[a].role, byString()],
-      // then by how many epochs to the next event
-      [([a]) => nodesStatus[a].epochsToNextEvent, byNumber()],
-    ])
-  );
+  const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(nodes);
 
   let text = "";
 
