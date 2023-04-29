@@ -26,7 +26,7 @@ export default async function handleInfo(
 
   let text = "";
 
-  for (const [node, { docker, beacon, ...info }] of nodesInfo) {
+  for (const [node, { docker, beacon, shard: _, ...info }] of nodesInfo) {
     const status = nodesStatus[node];
     // flatten the info object
     const normalizedInfo = {
