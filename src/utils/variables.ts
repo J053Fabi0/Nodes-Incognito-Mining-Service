@@ -21,13 +21,14 @@ export const lastErrorTimes: Record<string, LastErrorTime> = {};
 export type LastGlobalErrorTime = Partial<Record<GlobalErrorTypes, Date>>;
 export const lastGlobalErrorTimes: LastGlobalErrorTime = {};
 
-export const ignore: Record<AllErrorTypes | "docker", { minutes: number; from: Date }> = {
+export const ignore: Record<AllErrorTypes | "docker" | "autoMove", { minutes: number; from: Date }> = {
   alert: { minutes: 0, from: new Date() },
   isSlashed: { minutes: 0, from: new Date() },
   isOldVersion: { minutes: 0, from: new Date() },
   offline: { minutes: 0, from: new Date() },
   stalling: { minutes: 0, from: new Date() },
   docker: { minutes: 0, from: new Date() },
+  autoMove: { minutes: 0, from: new Date() },
   unsynced: { minutes: 0, from: new Date() },
   lowDiskSpace: { minutes: 0, from: new Date() },
 };

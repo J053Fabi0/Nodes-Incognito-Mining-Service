@@ -107,16 +107,18 @@ export default async function check() {
   }
 
   // Check if there are shards that need to be moved or deleted
-  const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
-  if (instructionsToMoveOrDelete.length > 0) {
-    for (const instruction of instructionsToMoveOrDelete) {
-      if (instruction.action === "move")
-        await handleCopyOrMove([instruction.from, instruction.to, ...instruction.shards], "move", {
-          disable_notification: true,
-        });
-      else await handleDelete([instruction.from, ...instruction.shards], { disable_notification: true });
+  if (!isBeingIgnored("autoMove")) {
+    const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
+    if (instructionsToMoveOrDelete.length > 0) {
+      for (const instruction of instructionsToMoveOrDelete) {
+        if (instruction.action === "move")
+          await handleCopyOrMove([instruction.from, instruction.to, ...instruction.shards], "move", {
+            disable_notification: true,
+          });
+        else await handleDelete([instruction.from, ...instruction.shards], { disable_notification: true });
+      }
+      await handleInfo(undefined, { disable_notification: true });
     }
-    await handleInfo(undefined, { disable_notification: true });
   }
 }
 
