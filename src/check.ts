@@ -111,11 +111,18 @@ export default async function check() {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
     if (instructionsToMoveOrDelete.length > 0) {
       for (const instruction of instructionsToMoveOrDelete) {
-        if (instruction.action === "move")
-          await handleCopyOrMove([instruction.from, instruction.to, ...instruction.shards], "move", {
-            disable_notification: true,
-          });
-        else await handleDelete([instruction.from, ...instruction.shards], { disable_notification: true });
+        const nodeTo = nodesStatus.find((node) => node.name === instruction.to);
+        const nodeFrom = nodesStatus.find((node) => node.name === instruction.from);
+        const dockerStatusTo = nodeTo ? dockerStatuses[nodeTo.dockerIndex].status : "OFFLINE";
+        const dockerStatusFrom = nodeFrom ? dockerStatuses[nodeFrom.dockerIndex].status : "OFFLINE";
+
+        if (instruction.action === "move") {
+          if (dockerStatusTo === "OFFLINE" && dockerStatusFrom === "OFFLINE")
+            await handleCopyOrMove([instruction.from, instruction.to, ...instruction.shards], "move", {
+              disable_notification: true,
+            });
+        } else if (dockerStatusTo === "OFFLINE")
+          await handleDelete([instruction.from, ...instruction.shards], { disable_notification: true });
       }
       await handleInfo(undefined, { disable_notification: true });
     }
