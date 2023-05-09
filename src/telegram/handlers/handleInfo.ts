@@ -33,7 +33,7 @@ export default async function handleInfo(
     const normalizedInfo = {
       ...(docker.running
         ? { uptime: rangeMsToTimeDescription(docker.startedAt, undefined, { short: true }) }
-        : {}),
+        : { stoped: rangeMsToTimeDescription(docker.finishedAt, undefined, { short: true }) }),
       ...(docker.restarting ? { restarting: true } : {}),
       ...(beacon ? { beacon } : {}),
       ...info,
