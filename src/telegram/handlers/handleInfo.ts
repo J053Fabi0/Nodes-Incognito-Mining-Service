@@ -6,8 +6,8 @@ import { df } from "duplicatedFilesCleanerIncognito";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
-import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
+import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
 
 export default async function handleInfo(
   rawNodes: string[] = [],
@@ -31,7 +31,9 @@ export default async function handleInfo(
     const status = nodesStatus[node];
     // flatten the info object
     const normalizedInfo = {
-      ...(docker.running ? { uptime: rangeMsToTimeDescription(docker.startedAt) } : {}),
+      ...(docker.running
+        ? { uptime: rangeMsToTimeDescription(docker.startedAt, undefined, { short: true }) }
+        : {}),
       ...(docker.restarting ? { restarting: true } : {}),
       ...(beacon ? { beacon } : {}),
       ...info,

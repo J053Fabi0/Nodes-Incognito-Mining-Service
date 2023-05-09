@@ -1,12 +1,36 @@
-function addSingularPlural(value: number) {
+function addSingularPlural(value: number, ignore = false) {
+  if (ignore) return "";
   return value > 1 ? "s" : "";
 }
 
-export function rangeMsToTimeDescription(date1: number | Date, date2: number | Date = Date.now()) {
-  return msToTimeDescription(Math.abs(+date2 - +date1));
+interface Options {
+  short?: boolean;
 }
 
-export default function msToTimeDescription(ms: number | Date) {
+// They have an extra space at the start to avoid the space between the number and the word
+const longWords = {
+  seconds: " second",
+  minutes: " minute",
+  hours: " hour",
+  days: " day",
+};
+
+const shortWords = {
+  seconds: "s",
+  minutes: "m",
+  hours: "h",
+  days: "d",
+};
+
+export function rangeMsToTimeDescription(
+  date1: number | Date,
+  date2: number | Date = Date.now(),
+  options: Options = {}
+) {
+  return msToTimeDescription(Math.abs(+date2 - +date1), options);
+}
+
+export default function msToTimeDescription(ms: number | Date, { short }: Options = {}) {
   const totalTimes = {
     seconds: Math.floor(+ms / 1000),
     minutes: Math.floor(+ms / 60000),
@@ -19,17 +43,21 @@ export default function msToTimeDescription(ms: number | Date) {
     hours: totalTimes.hours - totalTimes.days * 24,
     days: totalTimes.days,
   };
+  const words = short ? shortWords : longWords;
 
   const timeDescription = [];
-  if (leftTimes.days > 0) timeDescription.push(`${leftTimes.days} day${addSingularPlural(leftTimes.days)}`);
-  if (leftTimes.hours > 0) timeDescription.push(`${leftTimes.hours} hour${addSingularPlural(leftTimes.hours)}`);
+  if (leftTimes.days > 0)
+    timeDescription.push(`${leftTimes.days}${words.days}${addSingularPlural(leftTimes.days, short)}`);
+  if (leftTimes.hours > 0)
+    timeDescription.push(`${leftTimes.hours}${words.hours}${addSingularPlural(leftTimes.hours, short)}`);
   if (leftTimes.minutes > 0)
-    timeDescription.push(`${leftTimes.minutes} minute${addSingularPlural(leftTimes.minutes)}`);
+    timeDescription.push(`${leftTimes.minutes}${words.minutes}${addSingularPlural(leftTimes.minutes, short)}`);
   if (leftTimes.seconds > 0)
-    timeDescription.push(`${leftTimes.seconds} second${addSingularPlural(leftTimes.seconds)}`);
+    timeDescription.push(`${leftTimes.seconds}${words.seconds}${addSingularPlural(leftTimes.seconds, short)}`);
 
-  if (timeDescription.length === 0) return "0 seconds";
+  if (timeDescription.length === 0) return `0${words.seconds}${addSingularPlural(0, short)}`;
   else if (timeDescription.length === 1) return timeDescription[0];
+  else if (short) timeDescription.join(" ");
   else return timeDescription.slice(0, -1).join(", ") + " and " + timeDescription.slice(-1);
 }
 
