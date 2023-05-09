@@ -30,7 +30,7 @@ export function rangeMsToTimeDescription(
   return msToTimeDescription(Math.abs(+date2 - +date1), options);
 }
 
-export default function msToTimeDescription(ms: number | Date, { short }: Options = {}) {
+export default function msToTimeDescription(ms: number | Date, { short }: Options = {}): string {
   const totalTimes = {
     seconds: Math.floor(+ms / 1000),
     minutes: Math.floor(+ms / 60000),
@@ -57,7 +57,7 @@ export default function msToTimeDescription(ms: number | Date, { short }: Option
 
   if (timeDescription.length === 0) return `0${words.seconds}${addSingularPlural(0, short)}`;
   else if (timeDescription.length === 1) return timeDescription[0];
-  else if (short) timeDescription.join(" ");
+  else if (short) return timeDescription.join(" ");
   else return timeDescription.slice(0, -1).join(", ") + " and " + timeDescription.slice(-1);
 }
 
@@ -67,4 +67,4 @@ export default function msToTimeDescription(ms: number | Date, { short }: Option
 // past.setDate(past.getDate() - 365);
 // past.setHours(past.getHours() - 23);
 // past.setMinutes(past.getMinutes() - 59);
-// console.log(rangeMsToTimeDescription(past, now));
+// console.log(rangeMsToTimeDescription(past, now, { short: true }));
