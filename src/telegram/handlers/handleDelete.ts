@@ -46,7 +46,7 @@ export default async function handleDelete(
 
   // Stop the docker regardless of the ignore value if at least one of them is online
   const dockerStatus = await dockerPs([fromNodeIndex]);
-  if (dockerStatus[fromNodeIndex].status === "ONLINE")
+  if (dockerStatus[fromNodeIndex].running)
     await Promise.all([
       sendMessage("Stopping node...", undefined, options),
       docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
@@ -64,7 +64,7 @@ export default async function handleDelete(
   ignore.docker.minutes = lastIgnoreMinutes;
 
   // start the docker if they were not being ignored
-  if (isBeingIgnored("docker") && dockerStatus[fromNodeIndex].status === "ONLINE")
+  if (isBeingIgnored("docker") && dockerStatus[fromNodeIndex].running)
     await Promise.all([
       sendMessage("Starting node...", undefined, options),
       docker(`inc_mainnet_${fromNodeIndex}`, "start"),

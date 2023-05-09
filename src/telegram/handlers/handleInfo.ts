@@ -7,6 +7,7 @@ import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
 import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
+import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 
 export default async function handleInfo(
   rawNodes: string[] = [],
@@ -30,7 +31,7 @@ export default async function handleInfo(
     const status = nodesStatus[node];
     // flatten the info object
     const normalizedInfo = {
-      ...(docker.status === "ONLINE" ? { uptime: docker.uptime } : {}),
+      ...(docker.running ? { uptime: rangeMsToTimeDescription(docker.startedAt) } : {}),
       ...(docker.restarting ? { restarting: true } : {}),
       ...(beacon ? { beacon } : {}),
       ...info,
@@ -38,7 +39,7 @@ export default async function handleInfo(
     text +=
       `<code>#${node}  Sh${status.shard}  ${status.role.charAt(0)}  ` +
       `»${status.epochsToNextEvent.toString().padEnd(4)}` +
-      `${docker.status === "ONLINE" ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>` +
+      `${docker.running ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>` +
       (Object.keys(normalizedInfo).length
         ? `\n<code> </code><code>${escapeHtml(objectToTableText(normalizedInfo))
             .split("\n")

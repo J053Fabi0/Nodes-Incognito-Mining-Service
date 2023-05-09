@@ -7,6 +7,6 @@
     "join": "https://deno.land/std@0.186.0/path/mod.ts",
     "dotenv": "https://deno.land/x/dotenv@v3.2.2/load.ts",
     "escapeHtml": "https://deno.land/x/escape_html@1.0.0/mod.ts",
-    "duplicatedFilesCleanerIncognito": "https://deno.land/x/duplicated_files_cleaner_incognito@1.1.8.1/mod.ts"
+    "duplicatedFilesCleanerIncognito": "https://deno.land/x/duplicated_files_cleaner_incognito@1.2/mod.ts"
   }
 }

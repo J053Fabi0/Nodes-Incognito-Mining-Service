@@ -38,11 +38,11 @@ export default async function handleCopyOrMove(
 
   // Stop the dockers regardless of the ignore value if at least one of them is online
   const dockerStatus = await dockerPs([fromNodeIndex, toNodeIndex]);
-  if (dockerStatus[fromNodeIndex].status === "ONLINE" || dockerStatus[toNodeIndex].status === "ONLINE")
+  if (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running)
     await Promise.all([
       sendMessage("Stopping nodes...", undefined, options),
-      dockerStatus[toNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
-      dockerStatus[fromNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
+      dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
+      dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
 
   for (const shard of shards)
@@ -67,14 +67,11 @@ export default async function handleCopyOrMove(
   ignore.docker.minutes = lastIgnoreMinutes;
 
   // start the dockers if they were not being ignored
-  if (
-    isBeingIgnored("docker") &&
-    (dockerStatus[fromNodeIndex].status === "ONLINE" || dockerStatus[toNodeIndex].status === "ONLINE")
-  )
+  if (isBeingIgnored("docker") && (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running))
     await Promise.all([
       sendMessage("Starting nodes...", undefined, options),
-      dockerStatus[toNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${toNodeIndex}`, "start"),
-      dockerStatus[fromNodeIndex].status === "ONLINE" && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
+      dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "start"),
+      dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
 
   return true;
