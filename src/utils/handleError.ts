@@ -1,5 +1,6 @@
 import { escapeHtml } from "escapeHtml";
 import sendMessage from "../telegram/sendMessage.ts";
+import isError from "./isError.ts";
 
 // deno-lint-ignore no-explicit-any
 export default async function handleError(e: any) {
@@ -8,7 +9,10 @@ export default async function handleError(e: any) {
 
   // These are "Wont fix" issues
   if ("response" in e && e.response.status === 502) return;
-  if ("message" in e && e.message.startsWith("error sending request for url")) return;
+  if (isError(e)) {
+    if (e.message.startsWith("error sending request for url")) return;
+    if (e.message.includes("Resource temporarily unavailable")) Deno.exit(1); // exit with error so that PM2 restarts the process
+  }
 
   const sMessage = (message: string) =>
     sendMessage(`<code>${escapeHtml(message)}</code>`, undefined, { parse_mode: "HTML" });
