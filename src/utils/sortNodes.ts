@@ -16,10 +16,15 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
   )
     .map(
       ([dockerIndex, info]) =>
-        [dockerIndex, { ...info, shard: normalizeShard(nodesStatusByDockerIndex[dockerIndex].shard) }] as [
-          string,
-          Info & { shard: ShardsNames }
-        ]
+        [
+          dockerIndex,
+          {
+            ...info,
+            shard: nodesStatusByDockerIndex[dockerIndex].shard
+              ? normalizeShard(nodesStatusByDockerIndex[dockerIndex].shard)
+              : "",
+          },
+        ] as [string, Info & { shard: ShardsNames | "" }]
     )
     .sort(
       byValues([
