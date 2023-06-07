@@ -3,7 +3,7 @@ import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { Info, ShardsNames, normalizeShard } from "duplicatedFilesCleanerIncognito";
 
-export const rolesOrder: NodeStatus["role"][] = ["SYNCING", "COMMITTEE", "PENDING", "WAITING"];
+export const rolesOrder: NodeStatus["role"][] = ["WAITING", "SYNCING", "COMMITTEE", "PENDING"];
 
 export default async function sortNodes(nodes: (string | number)[] = []) {
   const nodesStatusByDockerIndex = (await getNodesStatus()).reduce(
