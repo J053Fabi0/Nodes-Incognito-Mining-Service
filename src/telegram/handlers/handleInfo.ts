@@ -39,7 +39,7 @@ export default async function handleInfo(
       ...info,
     };
     text +=
-      `<code>#${node}  Sh${status.shard}  ${status.role.charAt(0)}  ` +
+      `<code>#${node}  Sh${status.shard || " "}  ${status.role.charAt(0)}  ` +
       `»${status.epochsToNextEvent.toString().padEnd(4)}` +
       `${docker.running ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>` +
       (Object.keys(normalizedInfo).length
