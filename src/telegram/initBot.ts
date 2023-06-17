@@ -1,4 +1,4 @@
-import "dotenv";
+import "std/dotenv/load.ts";
 import { Bot } from "grammy/mod.ts";
 
 const bot = new Bot(Deno.env.get("BOT_TOKEN") as string);
