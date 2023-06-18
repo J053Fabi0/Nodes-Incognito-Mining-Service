@@ -1,17 +1,19 @@
+import "./env.ts";
 import { sleep } from "sleep";
-import "./src/telegram/initBot.ts";
 import check from "./src/check.ts";
+import "./src/telegram/initBots.ts";
 import handleError from "./src/utils/handleError.ts";
+import checkEarnings from "./src/checkEarnings.ts";
 
-const checkEachXSeconds = +Deno.args[0] || 60;
+// Start to check the earnings
+checkEarnings();
 
-// Start to check
+// Start to check the dockers and nodes' status
 while (true)
   try {
     await check();
   } catch (e) {
     handleError(e);
-    console.error(e);
   } finally {
-    await sleep(checkEachXSeconds);
+    await sleep(60);
   }

@@ -1,4 +1,3 @@
-import bot from "./initBot.ts";
 import { Context, Filter } from "grammy/mod.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
@@ -13,6 +12,7 @@ import handleTextMessage from "./handlers/handleTextMessage.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
 
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
+import { ADMIN_ID } from "../../env.ts";
 
 let lastMessages = ["full"];
 const commands = [
@@ -34,8 +34,8 @@ const commands = [
   "instructions",
 ];
 
-async function onMessage(ctx: Filter<Context, "message">) {
-  if (ctx?.chat?.id === 861616600 && ctx.message.text)
+export default async function botOnEvents(ctx: Filter<Context, "message">) {
+  if (ctx?.chat?.id === ADMIN_ID && ctx.message.text)
     try {
       const rawText = ctx.message.text;
       const texts = /^\/?r(?:epeat)?$/.test(rawText) ? lastMessages : rawText.split("\n").filter((x) => x.trim());
@@ -131,5 +131,3 @@ async function onMessage(ctx: Filter<Context, "message">) {
       handleError(e);
     }
 }
-
-bot.on("message", (ctx) => void onMessage(ctx));
