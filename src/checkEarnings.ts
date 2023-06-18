@@ -50,11 +50,16 @@ export default async function checkEarnings() {
           const time = new Date(nodeEarning.time);
 
           if (notionPage)
-            await repeatUntilNoError(
-              () => uploadToNotion(notionPage, epoch, time, earning / prvDecimalsDivisor, number),
-              20,
-              5
-            );
+            try {
+              await repeatUntilNoError(
+                () => uploadToNotion(notionPage, epoch, time, earning / prvDecimalsDivisor, number),
+                20,
+                5
+              );
+            } catch (e) {
+              handleError(e);
+              continue;
+            }
 
           await createNodeEarning({ time, epoch, node: _id, earning });
 
