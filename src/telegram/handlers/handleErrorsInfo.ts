@@ -14,7 +14,7 @@ import { escapeHtml } from "https://deno.land/x/escape_html@1.0.0/mod.ts";
 import getMinutesSinceError from "../../utils/getMinutesSinceError.ts";
 
 const nodesByPublicKey = Object.fromEntries(
-  constants.map(({ publicValidatorKey, ...data }) => [publicValidatorKey, data])
+  constants.map(({ validatorPublic, ...data }) => [validatorPublic, data])
 );
 
 export default async function handleErrorsInfo(rawErrorCodes: string[]) {

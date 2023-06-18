@@ -4,7 +4,7 @@ import { ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { getNodes } from "../controllers/node.controller.ts";
 import Node from "../types/collections/node.type.ts";
 
-const mpk = constants.map((c) => c.publicValidatorKey).join(",");
+const mpk = constants.map((c) => c.validatorPublic).join(",");
 
 export type NodeStatusKeys =
   | "role"
@@ -15,7 +15,7 @@ export type NodeStatusKeys =
   | "isSlashed"
   | "isOldVersion"
   | "epochsToNextEvent"
-  | "publicValidatorKey";
+  | "validatorPublic";
 
 export interface NodeStatus extends Node {
   alert: boolean;
@@ -30,7 +30,7 @@ export interface NodeStatus extends Node {
 }
 
 export default async function getNodesStatus(): Promise<NodeStatus[]> {
-  const nodes = await getNodes({ validatorPublic: { $in: constants.map((c) => c.publicValidatorKey) } });
+  const nodes = await getNodes({ validatorPublic: { $in: constants.map((c) => c.validatorPublic) } });
   const rawData = await getRawData();
 
   return rawData

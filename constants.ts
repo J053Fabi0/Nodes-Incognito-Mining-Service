@@ -1,14 +1,16 @@
 // deno-lint-ignore-file no-unused-vars
+
 import Constants from "./src/types/constants.type.ts";
 import { AllErrorTypes } from "./src/utils/variables.ts";
+import { getNodes } from "./src/controllers/node.controller.ts";
 
-const constants: Constants = [
-  {
-    name: "",
-    dockerIndex: 0,
-    publicValidatorKey: "",
-  },
-];
+const nodes = await getNodes();
+
+const constants: Constants = nodes.map((node) => ({
+  name: node.name,
+  dockerIndex: node.dockerIndex,
+  validatorPublic: node.validatorPublic,
+}));
 
 export default constants;
 
@@ -30,3 +32,4 @@ export const waitingTimes: Record<AllErrorTypes, number> = {
 export const minEpochsToBeOnline = 5;
 export const minEpochsToLetSync = 20;
 export const maxDiskPercentageUsage = 95;
+export const prvDecimalsDivisor = 1_000_000_000;

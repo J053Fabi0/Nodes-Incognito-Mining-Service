@@ -1,7 +1,6 @@
 
 .env
 .vscode
-constants.ts
 full.*
 duplicatedFilesCleaner.ts
 deno.lock

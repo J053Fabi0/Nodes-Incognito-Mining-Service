@@ -1,2 +1,2 @@
-type Constants = { name: string; publicValidatorKey: string; dockerIndex: number }[];
+type Constants = { name: string; validatorPublic: string; dockerIndex: number }[];
 export default Constants;
