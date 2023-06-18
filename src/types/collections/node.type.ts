@@ -10,8 +10,6 @@ export default interface Node extends CommonCollection {
   number: number;
   client: ObjectId;
   dockerIndex: number;
-  /** From NodeEarnings collection */
-  earnings: ObjectId[];
   validatorPublic: string;
   paymentAddress: string;
   /** To whom send notifications. This can or cannot include the owner */

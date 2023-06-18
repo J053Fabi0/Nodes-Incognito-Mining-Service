@@ -1,4 +1,4 @@
-import bot from "../initBot.ts";
+import bot from "../initBots.ts";
 import { escapeHtml } from "escapeHtml";
 import sortNodes from "../../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../sendMessage.ts";

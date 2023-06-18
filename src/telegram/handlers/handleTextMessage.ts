@@ -1,4 +1,4 @@
-import bot from "../initBot.ts";
+import bot from "../initBots.ts";
 import { InputFile } from "grammy/mod.ts";
 import { ADMIN_ID } from "../../../env.ts";
 import sendMessage from "../sendMessage.ts";
@@ -147,9 +147,14 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
   return text;
 }
 
-function getTableHTML(newKeys: (Keys | "status" | "syncState")[], nodes: NodeStatus[]) {
-  const normalizedNodes: Record<string, string | number>[] = nodes.map((node) => ({
-    ...node,
+type NewKeys = Keys | "status" | "syncState";
+type NormalizedNode = Record<NewKeys, string | number>;
+
+function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]) {
+  const normalizedNodes: NormalizedNode[] = nodes.map((node) => ({
+    name: node.name,
+    shard: node.shard,
+    epochsToNextEvent: node.epochsToNextEvent,
     alert: node.alert ? "Yes ⚠️" : "No",
     isSlashed: node.isSlashed ? "Yes ⚠️" : "No",
     isOldVersion: node.isOldVersion ? "Yes ⚠️" : "No",
