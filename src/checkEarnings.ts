@@ -54,7 +54,7 @@ export default async function checkEarnings() {
           if (notionPage)
             await repeatUntilNoError(
               () => uploadToNotion(notionPage, epoch, time, earning / prvDecimalsDivisor, number),
-              5,
+              20,
               5
             );
 
