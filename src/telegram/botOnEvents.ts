@@ -1,4 +1,3 @@
-import bot from "./initBots.ts";
 import { Context, Filter } from "grammy/mod.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
@@ -35,7 +34,7 @@ const commands = [
   "instructions",
 ];
 
-async function onMessage(ctx: Filter<Context, "message">) {
+export default async function botOnEvents(ctx: Filter<Context, "message">) {
   if (ctx?.chat?.id === ADMIN_ID && ctx.message.text)
     try {
       const rawText = ctx.message.text;
@@ -132,5 +131,3 @@ async function onMessage(ctx: Filter<Context, "message">) {
       handleError(e);
     }
 }
-
-bot.on("message", (ctx) => void onMessage(ctx));
