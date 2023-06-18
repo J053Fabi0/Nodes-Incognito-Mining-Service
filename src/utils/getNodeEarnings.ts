@@ -57,16 +57,17 @@ export type NodeEarningRaw = NodeEarningRawComplete | NodeEarningRawIncomplete;
 
 let lastRequestTime = 0;
 const minRequestInterval = 5_000; // 5 seconds
-let lastRequest: NodeEarningRaw[] | undefined = undefined;
+const lastRequest: Record<string, NodeEarningRaw[]> = {};
 
 async function getRawData(validatorPublicKey: string) {
-  if (lastRequest && Date.now() - lastRequestTime < minRequestInterval) return lastRequest;
+  if (lastRequest[validatorPublicKey] && Date.now() - lastRequestTime < minRequestInterval)
+    return lastRequest[validatorPublicKey];
 
   const { data } = await axiod.post<NodeEarningRaw[]>("https://monitor.incognito.org/pubkeystat/committee", {
     mpk: validatorPublicKey,
   });
 
   lastRequestTime = Date.now();
-  lastRequest = data;
+  lastRequest[validatorPublicKey] = data;
   return data;
 }
