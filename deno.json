@@ -6,6 +6,7 @@
     "reload": "pm2 reload nodeschecker && pm2 logs nodeschecker",
 
     "run": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write index.ts",
+    "dev": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write index.ts -i",
     "watch": "deno run --watch --allow-net --allow-read --allow-env --allow-run --allow-write index.ts"
   },
   "imports": {
