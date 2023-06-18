@@ -29,7 +29,7 @@ export default async function getNodesStatus() {
   }));
 }
 
-interface RawData {
+export interface RawData {
   Alert: boolean;
   IsSlashed: boolean;
   MiningPubkey: string;
