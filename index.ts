@@ -1,3 +1,4 @@
+import "./env.ts";
 import { sleep } from "sleep";
 import "./src/telegram/initBot.ts";
 import check from "./src/check.ts";

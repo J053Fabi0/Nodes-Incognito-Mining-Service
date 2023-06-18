@@ -1,5 +1,6 @@
 import bot from "../initBot.ts";
 import { InputFile } from "grammy/mod.ts";
+import { ADMIN_ID } from "../../../env.ts";
 import sendMessage from "../sendMessage.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
@@ -56,7 +57,7 @@ export default async function handleTextMessage(text: string) {
   // if the html hasn't changed, send the last photo
   if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html) {
     const timeString = rangeMsToTimeDescription(lastPhotoIdTime);
-    await bot.api.sendPhoto("861616600", lastPhotoId, {
+    await bot.api.sendPhoto(ADMIN_ID, lastPhotoId, {
       caption: `<i>Nothing changed since last time you checked ${timeString} ago.</i>`,
       parse_mode: "HTML",
     });
@@ -70,7 +71,7 @@ export default async function handleTextMessage(text: string) {
       if (e.message.includes("decrease")) return e.message;
       throw e;
     });
-    const { photo } = await bot.api.sendPhoto("861616600", new InputFile("./full.png"));
+    const { photo } = await bot.api.sendPhoto(ADMIN_ID, new InputFile("./full.png"));
     lastPhotoId = photo[0].file_id;
     lastPhotoIdTime = Date.now();
   }
