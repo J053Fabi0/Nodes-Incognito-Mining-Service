@@ -1,91 +1,81 @@
-import axiod from "axiod";
-import { sleep } from "sleep";
-import nodes from "./utils/nodes.ts";
-import clients from "./utils/clients.ts";
-import sendMessage from "./sendMessage.ts";
-import constants from "./utils/constants.ts";
-import NodeEarning from "./types/nodeEarning.type.ts";
-import NodeStatus from "./types/nodesStatuses.type.ts";
+import { ObjectId } from "mongo";
+import handleError from "./utils/handleError.ts";
+import sendMessage from "./telegram/sendMessage.ts";
+import { prvDecimalsDivisor } from "../constants.ts";
+import getNodesStatus from "./utils/getNodesStatus.ts";
 import uploadToNotion from "./notion/uploadToNotion.ts";
-import repeatUntilNoError from "./utils/repeatUntilNoError.ts";
+import Client from "./types/collections/client.type.ts";
+import getNodeEarnings from "./utils/getNodeEarnings.ts";
+import { getNodes } from "./controllers/node.controller.ts";
+import { getClients } from "./controllers/client.controller.ts";
+import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
+import { getNodeEarning } from "./controllers/nodeEarning.controller.ts";
+import { sleep } from "sleep";
 
-const { prvDecimalsDivisor } = constants;
-
-const second = 1;
-const minute = second * 60;
-
-const nodesToSkip: string[] = [];
 function repeatUntilNoError55<T>(cb: (() => T) | (() => Promise<T>)) {
   return repeatUntilNoError<T>(cb, 5, 5);
 }
 
-export const prvMode = async () => {
+function findClientById(clients: Client[], id: ObjectId) {
+  return clients.find((c) => `${c._id}` === `${id}`)!;
+}
+
+export default async function checkEarnings() {
   while (true) {
     try {
+      const nodes = await getNodes();
+      const clients = await getClients();
+
       // Get nodes status
-      const { data: nodesStatus } = await repeatUntilNoError55(() =>
-        axiod.post<NodeStatus[]>("https://monitor.incognito.org/pubkeystat/stat", {
-          mpk: nodes.map((a) => a.validatorPublic).join(","),
-        })
-      );
+      const nodesStatus = await getNodesStatus();
 
       for (const nodeStatus of nodesStatus) {
-        const { name, validatorPublic, sendTo, owner, number } = nodes.find(
-          (n) => n.validatorPublic === nodeStatus.MiningPubkey
-        )!;
+        const {
+          _id,
+          name,
+          sendTo,
+          number,
+          validatorPublic,
+          client: clientId,
+        } = nodes.find((n) => n.validatorPublic === nodeStatus.validatorPublic)!;
 
-        const { data: nodeEarnings } = await repeatUntilNoError55(() =>
-          axiod.post<NodeEarning[]>("https://monitor.incognito.org/pubkeystat/committee", {
-            mpk: validatorPublic,
-          })
-        );
+        const client = findClientById(clients, clientId);
+
+        const nodeEarnings = await getNodeEarnings(validatorPublic);
 
         for (const nodeEarning of nodeEarnings) {
-          // If the earning is not complete, don't count it yet
-          if (!("Reward" in nodeEarning) || typeof nodeEarning.Reward !== "number") continue;
-
-          const { Epoch, Reward, Time } = nodeEarning;
+          const { epoch, reward, time } = nodeEarning;
 
           // If no earing, continue.
-          if (Reward === 0) continue;
-          // If the earingn is alredy registered, continue.
-          // if (earningsDB.findOne({ name, epoch: Epoch })) continue;
+          if (!reward) continue;
+          // If the earning is alredy registered, continue.
+          if (await getNodeEarning({ node: _id, epoch })) continue;
 
-          await repeatUntilNoError55(() =>
-            uploadToNotion(clients[owner].notion_page, Epoch, new Date(Time), Reward / prvDecimalsDivisor, number)
-          );
+          if (client.notionPage)
+            await repeatUntilNoError55(() =>
+              uploadToNotion(client.notionPage!, epoch, new Date(time), reward / prvDecimalsDivisor, number)
+            );
 
           // Send messages to the destination users
-          for (const ownerID of sendTo)
-            await repeatUntilNoError55(() =>
-              sendMessage(
-                `#${name} - <code>${Reward / prvDecimalsDivisor}</code>.\n` +
-                  `Epoch: <code>${Epoch}</code>.\n` +
-                  `To come: <code>${nodeStatus.NextEventMsg.split(" ")[0]}</code>.`,
-                clients[ownerID].telegram,
-                { parse_mode: "HTML" }
-              )
-            );
+          for (const sendToId of sendTo) {
+            const { telegram } = findClientById(clients, sendToId);
+            if (telegram)
+              await repeatUntilNoError55(() =>
+                sendMessage(
+                  `#${name} - <code>${reward / prvDecimalsDivisor}</code>.\n` +
+                    `Epoch: <code>${epoch}</code>.\n` +
+                    `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
+                  telegram,
+                  { parse_mode: "HTML" }
+                )
+              );
+          }
         }
-
-        // Wait a bit, to not overload the monitor's API
-        await sleep(second);
       }
     } catch (e) {
-      if ("message" in e && e.message) console.error("Message:", e.message);
-      else console.error(e);
-
-      if (e?.message?.endsWith("Temporary failure in name resolution")) return;
-
-      sendMessage("Error general.", "861616600");
+      handleError(e);
     } finally {
-      if (nodesToSkip.length) {
-        console.log("Esperando hasta que no haya nodos enviando PRV.");
-        while (nodesToSkip.length >= 1) await sleep(second);
-      } else {
-        console.log("Esperando 5 minutos.");
-        await sleep(minute * 5);
-      }
+      await sleep(60 * 5); // 5 minutes
     }
   }
-};
+}

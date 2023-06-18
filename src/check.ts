@@ -49,8 +49,8 @@ export default async function check() {
 
   // Check for errors in each node
   for (const nodeStatus of nodesStatus) {
-    if (!(nodeStatus.publicValidatorKey in lastErrorTimes)) lastErrorTimes[nodeStatus.publicValidatorKey] = {};
-    const { [nodeStatus.publicValidatorKey]: lastErrorTime } = lastErrorTimes;
+    if (!(nodeStatus.validatorPublic in lastErrorTimes)) lastErrorTimes[nodeStatus.validatorPublic] = {};
+    const { [nodeStatus.validatorPublic]: lastErrorTime } = lastErrorTimes;
 
     const shouldBeOffline = getShouldBeOffline(nodeStatus);
 

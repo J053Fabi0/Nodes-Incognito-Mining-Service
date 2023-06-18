@@ -1,12 +1,10 @@
 import addItem from "./addItem.ts";
 import getTableID from "./getTableID.ts";
 import createTable from "./createTable.ts";
-import constants from "../utils/constants.ts";
 import nameOfMonth from "../utils/nameOfMonth.ts";
 import updateTablesName from "./updateTablesName.ts";
 import getTableTotalEarnings from "./getTableTotalEarnings.ts";
-
-const { prvDecimalsDivisor } = constants;
+import { prvDecimalsDivisor } from "../../constants.ts";
 
 /**
  * It creates the database if it doesn't exist. It also updates its title.

@@ -1,5 +1,5 @@
-import { type SelectColor } from "https://deno.land/x/notion_sdk@v1.0.4/src/api-endpoints.ts";
 import notion from "./notion.ts";
+import { type SelectColor } from "notion/api-endpoints.ts";
 const colors: SelectColor[] = ["red", "blue", "yellow", "green", "purple", "pink", "orange", "brown", "gray"];
 
 /**

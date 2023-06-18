@@ -1,26 +1,26 @@
+import { syncedNodes } from "./variables.ts";
 import { NodeStatus } from "./getNodesStatus.ts";
 import { minEpochsToBeOnline, minEpochsToLetSync } from "../../constants.ts";
-import { syncedNodes } from "./variables.ts";
 
 const offlineRoles = ["PENDING", "SYNCING"];
 
 const getShouldBeOffline = (
   nodeStatus: Partial<NodeStatus> &
-    Pick<NodeStatus, "epochsToNextEvent" | "role" | "publicValidatorKey" | "syncState">
+    Pick<NodeStatus, "epochsToNextEvent" | "role" | "validatorPublic" | "syncState">
 ) => {
   const inSyncRange =
     minEpochsToLetSync >= nodeStatus.epochsToNextEvent && nodeStatus.epochsToNextEvent > minEpochsToBeOnline;
 
   if (inSyncRange && offlineRoles.includes(nodeStatus.role)) {
     // If it is synced and between the sync range, it should be offline
-    if (syncedNodes[nodeStatus.publicValidatorKey]) return true;
+    if (syncedNodes[nodeStatus.validatorPublic]) return true;
 
     // Determine if the node is synced
-    return (syncedNodes[nodeStatus.publicValidatorKey] = nodeStatus.syncState === "LATEST" && inSyncRange);
+    return (syncedNodes[nodeStatus.validatorPublic] = nodeStatus.syncState === "LATEST" && inSyncRange);
   }
 
   // Reset the synced status of the node
-  syncedNodes[nodeStatus.publicValidatorKey] = false;
+  syncedNodes[nodeStatus.validatorPublic] = false;
 
   nodeStatus.epochsToNextEvent > minEpochsToLetSync;
 
@@ -37,7 +37,7 @@ export default getShouldBeOffline;
 //   getShouldBeOffline({
 //     epochsToNextEvent: 20,
 //     role: "PENDING",
-//     publicValidatorKey: "1",
+//     validatorPublic: "1",
 //     syncState: "LATEST",
 //   }) === true
 // );
@@ -47,7 +47,7 @@ export default getShouldBeOffline;
 //   getShouldBeOffline({
 //     epochsToNextEvent: 20,
 //     role: "PENDING",
-//     publicValidatorKey: "1",
+//     validatorPublic: "1",
 //     syncState: "-",
 //   }) === true
 // );
@@ -57,7 +57,7 @@ export default getShouldBeOffline;
 //   getShouldBeOffline({
 //     epochsToNextEvent: 4,
 //     role: "COMMITTEE",
-//     publicValidatorKey: "1",
+//     validatorPublic: "1",
 //     syncState: "LATEST",
 //   }) === false
 // );
@@ -67,7 +67,7 @@ export default getShouldBeOffline;
 //   getShouldBeOffline({
 //     epochsToNextEvent: 80,
 //     role: "PENDING",
-//     publicValidatorKey: "1",
+//     validatorPublic: "1",
 //     syncState: "LATEST",
 //   }) === true
 // );
@@ -77,7 +77,7 @@ export default getShouldBeOffline;
 //   getShouldBeOffline({
 //     epochsToNextEvent: 20,
 //     role: "PENDING",
-//     publicValidatorKey: "1",
+//     validatorPublic: "1",
 //     syncState: "-",
 //   }) === false
 // );
@@ -87,7 +87,7 @@ export default getShouldBeOffline;
 //   getShouldBeOffline({
 //     epochsToNextEvent: 15,
 //     role: "PENDING",
-//     publicValidatorKey: "1",
+//     validatorPublic: "1",
 //     syncState: "LATEST",
 //   }) === true
 // );
@@ -97,7 +97,7 @@ export default getShouldBeOffline;
 //   getShouldBeOffline({
 //     epochsToNextEvent: 5,
 //     role: "PENDING",
-//     publicValidatorKey: "1",
+//     validatorPublic: "1",
 //     syncState: "-",
 //   }) === false
 // );

@@ -1,5 +1,6 @@
-import "dotenv";
-import { Client } from "notion";
-const notion = new Client({ auth: Deno.env.get("NOTION_KEY") });
+import { Client } from "notion/mod.ts";
+import { NOTION_KEY } from "../../env.ts";
+
+const notion = new Client({ auth: NOTION_KEY });
 
 export default notion;
