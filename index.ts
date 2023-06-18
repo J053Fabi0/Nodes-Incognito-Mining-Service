@@ -1,7 +1,7 @@
 import "./env.ts";
 import { sleep } from "sleep";
-import "./src/telegram/initBot.ts";
 import check from "./src/check.ts";
+import "./src/telegram/initBots.ts";
 import handleError from "./src/utils/handleError.ts";
 import checkEarnings from "./src/checkEarnings.ts";
 

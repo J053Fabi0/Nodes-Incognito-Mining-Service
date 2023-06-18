@@ -1,4 +1,4 @@
-import bot from "./initBot.ts";
+import bot from "./initBots.ts";
 import { Context, Filter } from "grammy/mod.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";

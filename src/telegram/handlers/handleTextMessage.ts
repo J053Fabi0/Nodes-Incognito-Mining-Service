@@ -1,4 +1,4 @@
-import bot from "../initBot.ts";
+import bot from "../initBots.ts";
 import { InputFile } from "grammy/mod.ts";
 import { ADMIN_ID } from "../../../env.ts";
 import sendMessage from "../sendMessage.ts";

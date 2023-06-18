@@ -67,7 +67,8 @@ export default async function checkEarnings() {
                   `Epoch: <code>${epoch}</code>.\n` +
                   `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
                 telegram,
-                { parse_mode: "HTML" }
+                { parse_mode: "HTML" },
+                "notificationsBot"
               );
           }
         }

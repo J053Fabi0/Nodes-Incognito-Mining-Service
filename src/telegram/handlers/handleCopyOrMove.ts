@@ -1,4 +1,4 @@
-import bot from "../initBot.ts";
+import bot from "../initBots.ts";
 import { ignore } from "../../utils/variables.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
