@@ -107,7 +107,7 @@ export default async function check() {
   }
 
   // Check if there are shards that need to be moved or deleted
-  if (!isBeingIgnored("autoMove")) {
+  if (!isBeingIgnored("autoMove") && !flags.ignoreDocker) {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
     if (instructionsToMoveOrDelete.length > 0) {
       for (const instruction of instructionsToMoveOrDelete) {
