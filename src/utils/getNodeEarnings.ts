@@ -11,12 +11,12 @@ interface NodeEarningIncomplete {
 
 interface NodeEarningNull extends NodeEarningIncomplete {
   time: null;
-  reward: null;
+  earning: null;
 }
 
 interface NodeEarningString extends NodeEarningIncomplete {
   time: string;
-  reward: number;
+  earning: number;
 }
 
 export type NodeEarning = NodeEarningString | NodeEarningNull;
@@ -33,9 +33,9 @@ export default async function getNodeEarnings(validatorPublicKey: string): Promi
     };
 
     if ("Time" in d && "Reward" in d)
-      return { ...incomplete, time: d.Time, reward: d.Reward } as NodeEarningString;
+      return { ...incomplete, time: d.Time, earning: d.Reward } as NodeEarningString;
 
-    return { ...incomplete, time: null, reward: null } as NodeEarningNull;
+    return { ...incomplete, time: null, earning: null } as NodeEarningNull;
   });
 }
 

@@ -1,6 +1,8 @@
+import { sleep } from "sleep";
 import { ObjectId } from "mongo";
 import handleError from "./utils/handleError.ts";
 import sendMessage from "./telegram/sendMessage.ts";
+import Node from "./types/collections/node.type.ts";
 import { prvDecimalsDivisor } from "../constants.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
 import uploadToNotion from "./notion/uploadToNotion.ts";
@@ -9,65 +11,63 @@ import getNodeEarnings from "./utils/getNodeEarnings.ts";
 import { getNodes } from "./controllers/node.controller.ts";
 import { getClients } from "./controllers/client.controller.ts";
 import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
-import { getNodeEarning } from "./controllers/nodeEarning.controller.ts";
-import { sleep } from "sleep";
+import { createNodeEarning, getNodeEarning } from "./controllers/nodeEarning.controller.ts";
 
-function repeatUntilNoError55<T>(cb: (() => T) | (() => Promise<T>)) {
-  return repeatUntilNoError<T>(cb, 5, 5);
-}
+const clientsProjection = { projection: { telegram: 1, notionPage: 1 } };
+const nodesProjection = { projection: { name: 1, sendTo: 1, number: 1, client: 1, validatorPublic: 1 } };
+type ProjectedNode = Pick<Node, "_id" | keyof (typeof nodesProjection)["projection"]>;
+type ProjectedClient = Pick<Client, "_id" | keyof (typeof clientsProjection)["projection"]>;
 
-function findClientById(clients: Client[], id: ObjectId) {
+function findClientById(clients: ProjectedClient[], id: ObjectId) {
   return clients.find((c) => `${c._id}` === `${id}`)!;
 }
 
 export default async function checkEarnings() {
   while (true) {
     try {
-      const nodes = await getNodes();
-      const clients = await getClients();
+      const nodes = (await getNodes({}, nodesProjection)) as ProjectedNode[];
+      const clients = (await getClients({}, clientsProjection)) as ProjectedClient[];
 
       // Get nodes status
       const nodesStatus = await getNodesStatus();
 
       for (const nodeStatus of nodesStatus) {
-        const {
-          _id,
-          name,
-          sendTo,
-          number,
-          validatorPublic,
-          client: clientId,
-        } = nodes.find((n) => n.validatorPublic === nodeStatus.validatorPublic)!;
+        const { _id, name, sendTo, number, validatorPublic, client } = nodes.find(
+          (n) => n.validatorPublic === nodeStatus.validatorPublic
+        )!;
 
-        const client = findClientById(clients, clientId);
-
+        const { notionPage } = findClientById(clients, client);
         const nodeEarnings = await getNodeEarnings(validatorPublic);
 
         for (const nodeEarning of nodeEarnings) {
-          const { epoch, reward, time } = nodeEarning;
+          const { epoch, earning } = nodeEarning;
 
-          // If no earing, continue.
-          if (!reward) continue;
+          // If no earing yet, continue.
+          if (!earning) continue;
           // If the earning is alredy registered, continue.
           if (await getNodeEarning({ node: _id, epoch })) continue;
 
-          if (client.notionPage)
-            await repeatUntilNoError55(() =>
-              uploadToNotion(client.notionPage!, epoch, new Date(time), reward / prvDecimalsDivisor, number)
+          const time = new Date(nodeEarning.time);
+
+          await createNodeEarning({ time, epoch, node: _id, earning });
+
+          if (notionPage)
+            await repeatUntilNoError(
+              () => uploadToNotion(notionPage, epoch, time, earning / prvDecimalsDivisor, number),
+              5,
+              5
             );
 
           // Send messages to the destination users
           for (const sendToId of sendTo) {
             const { telegram } = findClientById(clients, sendToId);
             if (telegram)
-              await repeatUntilNoError55(() =>
-                sendMessage(
-                  `#${name} - <code>${reward / prvDecimalsDivisor}</code>.\n` +
-                    `Epoch: <code>${epoch}</code>.\n` +
-                    `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
-                  telegram,
-                  { parse_mode: "HTML" }
-                )
+              sendMessage(
+                `#${name} - <code>${earning / prvDecimalsDivisor}</code>.\n` +
+                  `Epoch: <code>${epoch}</code>.\n` +
+                  `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
+                telegram,
+                { parse_mode: "HTML" }
               );
           }
         }
