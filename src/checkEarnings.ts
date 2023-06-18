@@ -49,14 +49,14 @@ export default async function checkEarnings() {
 
           const time = new Date(nodeEarning.time);
 
-          await createNodeEarning({ time, epoch, node: _id, earning });
-
           if (notionPage)
             await repeatUntilNoError(
               () => uploadToNotion(notionPage, epoch, time, earning / prvDecimalsDivisor, number),
               20,
               5
             );
+
+          await createNodeEarning({ time, epoch, node: _id, earning });
 
           // Send messages to the destination users
           for (const sendToId of sendTo) {
