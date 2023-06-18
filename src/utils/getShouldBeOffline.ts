@@ -2,12 +2,13 @@ import { syncedNodes } from "./variables.ts";
 import { NodeStatus } from "./getNodesStatus.ts";
 import { minEpochsToBeOnline, minEpochsToLetSync } from "../../constants.ts";
 
-const offlineRoles = ["PENDING", "SYNCING"];
-
+const offlineRoles = ["PENDING", "SYNCING", "WAITING"];
 const getShouldBeOffline = (
   nodeStatus: Partial<NodeStatus> &
     Pick<NodeStatus, "epochsToNextEvent" | "role" | "validatorPublic" | "syncState">
 ) => {
+  if (nodeStatus.role === "NOT_STAKED") return false; // If the node is not staked, it should always be online
+
   const inSyncRange =
     minEpochsToLetSync >= nodeStatus.epochsToNextEvent && nodeStatus.epochsToNextEvent > minEpochsToBeOnline;
 

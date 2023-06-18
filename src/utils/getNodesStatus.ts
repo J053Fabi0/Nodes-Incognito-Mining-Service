@@ -22,7 +22,7 @@ export interface NodeStatus extends Node {
   status: "ONLINE" | "OFFLINE";
   isSlashed: boolean;
   shard: ShardsStr;
-  role: "PENDING" | "COMMITTEE" | "WAITING" | "SYNCING";
+  role: "PENDING" | "COMMITTEE" | "WAITING" | "SYNCING" | "NOT_STAKED";
   isOldVersion: boolean;
   syncState: "BEACON SYNCING" | "LATEST" | "-" | "BEACON STALL" | "SHARD SYNCING" | "SHARD STALL";
   epochsToNextEvent: number;
@@ -44,7 +44,7 @@ export default async function getNodesStatus(): Promise<NodeStatus[]> {
         status: d.Status,
         isSlashed: d.IsSlashed,
         shard: d.CommitteeChain,
-        role: d.Role || "WAITING",
+        role: d.Role || "NOT_STAKED",
         isOldVersion: d.IsOldVersion,
         syncState: d.SyncState || "-",
         epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
