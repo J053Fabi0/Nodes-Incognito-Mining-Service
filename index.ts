@@ -4,8 +4,6 @@ import "./src/telegram/initBot.ts";
 import check from "./src/check.ts";
 import handleError from "./src/utils/handleError.ts";
 
-const checkEachXSeconds = +Deno.args[0] || 60;
-
 // Start to check
 while (true)
   try {
@@ -14,5 +12,5 @@ while (true)
     handleError(e);
     console.error(e);
   } finally {
-    await sleep(checkEachXSeconds);
+    await sleep(60);
   }
