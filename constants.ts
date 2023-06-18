@@ -1,10 +1,35 @@
-// deno-lint-ignore-file no-unused-vars
-
+import joi from "joi";
+import { parse } from "std/jsonc/mod.ts";
 import Constants from "./src/types/constants.type.ts";
-import { AllErrorTypes } from "./src/utils/variables.ts";
 import { getNodes } from "./src/controllers/node.controller.ts";
+import { allErrorTypes, AllErrorTypes } from "./src/utils/variables.ts";
 
-const nodes = await getNodes();
+const schema = joi.object<Json>({
+  minEpochsToBeOnline: joi.number().required(),
+  minEpochsToLetSync: joi.number().required(),
+  maxDiskPercentageUsage: joi.number().required(),
+  waitingTimes: joi
+    .object()
+    .pattern(joi.string().valid(...allErrorTypes), joi.number().positive().allow(0))
+    .required(),
+});
+
+interface Json {
+  minEpochsToBeOnline: number;
+  minEpochsToLetSync: number;
+  maxDiskPercentageUsage: number;
+  waitingTimes: Record<AllErrorTypes, number>;
+}
+const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
+
+const { error, value: json } = schema.validate(rawJson, { allowUnknown: true });
+
+if (error) {
+  console.error(error);
+  Deno.exit(1);
+}
+
+const nodes = await getNodes({}, { projection: { name: 1, dockerIndex: 1, validatorPublic: 1, _id: 0 } });
 
 const constants: Constants = nodes.map((node) => ({
   name: node.name,
@@ -14,22 +39,8 @@ const constants: Constants = nodes.map((node) => ({
 
 export default constants;
 
-const MINUTE = 1;
-const HOUR = 60;
-const DAY = 1440;
-
-// In minutes
-export const waitingTimes: Record<AllErrorTypes, number> = {
-  alert: 10 * MINUTE,
-  offline: 15 * MINUTE,
-  unsynced: 20 * MINUTE,
-  isOldVersion: 1 * DAY,
-  isSlashed: 0 * MINUTE,
-  stalling: 5 * MINUTE,
-  lowDiskSpace: 0 * MINUTE,
-};
-
-export const minEpochsToBeOnline = 5;
-export const minEpochsToLetSync = 20;
-export const maxDiskPercentageUsage = 95;
 export const prvDecimalsDivisor = 1_000_000_000;
+export const minEpochsToBeOnline = json.minEpochsToBeOnline;
+export const minEpochsToLetSync = json.minEpochsToLetSync;
+export const maxDiskPercentageUsage = json.maxDiskPercentageUsage;
+export const waitingTimes = json.waitingTimes;

@@ -2,5 +2,5 @@
 .env
 .vscode
 full.*
-duplicatedFilesCleaner.ts
 deno.lock
+constants.jsonc
