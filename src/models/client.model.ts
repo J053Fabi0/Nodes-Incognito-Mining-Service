@@ -1,7 +1,7 @@
 import db from "../initDatabase.ts";
 import Client from "../types/collections/client.type.ts";
 
-const authorModel = db.collection<Client>("clients");
+const clientModel = db.collection<Client>("clients");
 
 // Exmaple of creating indexes
 // authorModel.createIndexes({
@@ -12,4 +12,4 @@ const authorModel = db.collection<Client>("clients");
 //   ],
 // });
 
-export default authorModel;
+export default clientModel;
