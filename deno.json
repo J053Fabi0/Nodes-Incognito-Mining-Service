@@ -7,8 +7,8 @@
     "update": "deno run -A -r https://fresh.deno.dev/update .",
 
     "run": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts",
-    "dev": "deno run --watch=src/static/,src/routes/  --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts -i",
-    "diffuse": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write src/utils/diffuse.ts"
+    "dev": "deno run --watch=static/,routes/  --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts -i",
+    "diffuse": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write utils/diffuse.ts"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
