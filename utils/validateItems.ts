@@ -1,6 +1,6 @@
 import ArrayOfUnion from "../types/ArrayOfUnion.type.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
-import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 
 interface GenericOptions<T> {
   name?: string;

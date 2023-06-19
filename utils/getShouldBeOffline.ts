@@ -1,6 +1,6 @@
 import { syncedNodes } from "./variables.ts";
 import { NodeStatus } from "./getNodesStatus.ts";
-import { minEpochsToBeOnline, minEpochsToLetSync } from "../../constants.ts";
+import { minEpochsToBeOnline, minEpochsToLetSync } from "../constants.ts";
 
 const offlineRoles = ["PENDING", "SYNCING", "WAITING"];
 const getShouldBeOffline = (

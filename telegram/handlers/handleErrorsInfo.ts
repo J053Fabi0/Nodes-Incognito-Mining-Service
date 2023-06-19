@@ -1,4 +1,4 @@
-import constants from "../../../constants.ts";
+import constants from "../../constants.ts";
 import { sendHTMLMessage } from "../sendMessage.ts";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";

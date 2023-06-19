@@ -4,7 +4,7 @@ import createTable from "./createTable.ts";
 import nameOfMonth from "../utils/nameOfMonth.ts";
 import updateTablesName from "./updateTablesName.ts";
 import getTableTotalEarnings from "./getTableTotalEarnings.ts";
-import { prvDecimalsDivisor } from "../../constants.ts";
+import { prvDecimalsDivisor } from "../constants.ts";
 
 /**
  * It creates the database if it doesn't exist. It also updates its title.

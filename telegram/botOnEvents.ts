@@ -1,3 +1,4 @@
+import { ADMIN_ID } from "../env.ts";
 import { Context, Filter } from "grammy/mod.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
@@ -9,10 +10,8 @@ import { lastErrorTimes } from "../utils/variables.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
-import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
-
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
-import { ADMIN_ID } from "../../env.ts";
+import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
 
 let lastMessages = ["full"];
 const commands = [

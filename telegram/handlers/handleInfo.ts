@@ -5,7 +5,7 @@ import { sendHTMLMessage } from "../sendMessage.ts";
 import { df } from "duplicatedFilesCleanerIncognito";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
-import { duplicatedConstants } from "../../../duplicatedFilesCleaner.ts";
+import { duplicatedConstants } from "../../duplicatedFilesCleaner.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
 

@@ -1,5 +1,5 @@
 import axiod from "axiod";
-import constants from "../../constants.ts";
+import constants from "../constants.ts";
 import { ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { getNodes } from "../controllers/node.controller.ts";
 import Node from "../types/collections/node.type.ts";

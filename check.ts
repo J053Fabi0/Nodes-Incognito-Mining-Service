@@ -15,12 +15,12 @@ import { sendHTMLMessage } from "./telegram/sendMessage.ts";
 import getShouldBeOffline from "./utils/getShouldBeOffline.ts";
 import handleDelete from "./telegram/handlers/handleDelete.ts";
 import getMinutesSinceError from "./utils/getMinutesSinceError.ts";
-import { waitingTimes, maxDiskPercentageUsage } from "../constants.ts";
+import { waitingTimes, maxDiskPercentageUsage } from "./constants.ts";
 import { df, docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import handleCopyOrMove from "./telegram/handlers/handleCopyOrMove.ts";
 import handleTextMessage from "./telegram/handlers/handleTextMessage.ts";
 import getInstructionsToMoveOrDelete from "./utils/getInstructionsToMoveOrDelete.ts";
-import duplicatedFilesCleaner, { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner, { duplicatedConstants } from "./duplicatedFilesCleaner.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, Date | undefined>, errorKey: string) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();

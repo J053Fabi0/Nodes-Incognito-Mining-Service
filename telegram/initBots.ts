@@ -1,7 +1,7 @@
 import "std/dotenv/load.ts";
 import { Bot } from "grammy/mod.ts";
 import botOnEvents from "./botOnEvents.ts";
-import { BOT_TOKEN, NOTIFICATIONS_BOT_TOKEN } from "../../env.ts";
+import { BOT_TOKEN, NOTIFICATIONS_BOT_TOKEN } from "../env.ts";
 
 const bot = new Bot(BOT_TOKEN);
 

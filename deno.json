@@ -1,18 +1,21 @@
 {
   "tasks": {
     "stop": "pm2 stop nodeschecker",
-    "start": "pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env --allow-run --allow-write' --name nodeschecker index.ts && pm2 logs nodeschecker",
+    "start": "pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env --allow-run --allow-write' --name nodeschecker dev.ts && pm2 logs nodeschecker",
     "logs": "pm2 logs nodeschecker",
     "reload": "pm2 reload nodeschecker && pm2 logs nodeschecker",
+    "update": "deno run -A -r https://fresh.deno.dev/update .",
 
-    "run": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write index.ts",
-    "dev": "deno run --watch  --allow-net --allow-read --allow-env --allow-run --allow-write index.ts -i",
-    "diffuse": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write src/utils/diffuse.ts",
-    "watch": "deno run --watch --allow-net --allow-read --allow-env --allow-run --allow-write index.ts"
+    "run": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts",
+    "dev": "deno run --watch=src/static/,src/routes/  --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts -i",
+    "diffuse": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write src/utils/diffuse.ts"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
   },
   "imports": {
     "sort-es": "https://esm.sh/sort-es@1.6.11/",
-    "std/": "https://deno.land/std@0.192.0/",
     "mongo": "https://deno.land/x/mongo@v0.31.2/mod.ts",
     "grammy/": "https://deno.land/x/grammy@v1.16.2/",
     "streams": "https://deno.land/std@0.192.0/streams/mod.ts",
@@ -22,6 +25,15 @@
     "joi": "https://esm.sh/joi@17.9.2",
     "join": "https://deno.land/std@0.192.0/path/mod.ts",
     "escapeHtml": "https://deno.land/x/escape_html@1.0.0/mod.ts",
-    "duplicatedFilesCleanerIncognito": "https://deno.land/x/duplicated_files_cleaner_incognito@1.2/mod.ts"
+    "duplicatedFilesCleanerIncognito": "https://deno.land/x/duplicated_files_cleaner_incognito@1.2/mod.ts",
+    "$fresh/": "https://deno.land/x/fresh@1.2.0/",
+    "preact": "https://esm.sh/preact@10.15.1",
+    "preact/": "https://esm.sh/preact@10.15.1/",
+    "preact-render-to-string": "https://esm.sh/*preact-render-to-string@6.1.0",
+    "@preact/signals": "https://esm.sh/*@preact/signals@1.1.3",
+    "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.2.3",
+    "twind": "https://esm.sh/twind@0.16.19",
+    "twind/": "https://esm.sh/twind@0.16.19/",
+    "std/": "https://deno.land/std@0.190.0/"
   }
 }

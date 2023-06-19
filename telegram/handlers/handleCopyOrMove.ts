@@ -5,7 +5,7 @@ import isBeingIgnored from "../../utils/isBeingIgnored.ts";
 import { ShardsNames } from "duplicatedFilesCleanerIncognito";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
-import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 
 export default async function handleCopyOrMove(
   args: string[],

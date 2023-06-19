@@ -1,5 +1,5 @@
 import sortNodes from "./sortNodes.ts";
-import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
 
 type InstructionToMoveOrDelete =

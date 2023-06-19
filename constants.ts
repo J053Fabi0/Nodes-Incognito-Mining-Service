@@ -1,8 +1,8 @@
 import joi from "joi";
 import { parse } from "std/jsonc/mod.ts";
-import Constants from "./src/types/constants.type.ts";
-import { getNodes } from "./src/controllers/node.controller.ts";
-import { allErrorTypes, AllErrorTypes } from "./src/utils/variables.ts";
+import Constants from "./types/constants.type.ts";
+import { getNodes } from "./controllers/node.controller.ts";
+import { allErrorTypes, AllErrorTypes } from "./utils/variables.ts";
 
 const schema = joi.object<Json>({
   minEpochsToBeOnline: joi.number().required(),

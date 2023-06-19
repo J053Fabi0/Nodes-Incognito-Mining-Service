@@ -1,6 +1,6 @@
 import bot from "../initBots.ts";
+import { ADMIN_ID } from "../../env.ts";
 import { InputFile } from "grammy/mod.ts";
-import { ADMIN_ID } from "../../../env.ts";
 import sendMessage from "../sendMessage.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
@@ -181,7 +181,7 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]) {
           <head>
             <meta charset="utf-8">
             <style>
-              ${Deno.readTextFileSync("./src/html/markdown_css.css")}
+              ${Deno.readTextFileSync("./html/markdown_css.css")}
             </style>
           </head>
           <body>

@@ -1,7 +1,7 @@
 import validateItems from "../../utils/validateItems.ts";
 import { docker } from "duplicatedFilesCleanerIncognito";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
-import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 
 export default async function handleDocker([action, ...rawNodes]: string[]) {
   // check if the command is valid

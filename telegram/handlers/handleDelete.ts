@@ -4,7 +4,7 @@ import sendMessage from "../sendMessage.ts";
 import { ignore } from "../../utils/variables.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
-import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { ShardsNames, dockerPs, docker } from "duplicatedFilesCleanerIncognito";
 
 export default async function handleDelete(

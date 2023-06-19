@@ -3,7 +3,7 @@ import { ObjectId } from "mongo";
 import handleError from "./utils/handleError.ts";
 import sendMessage from "./telegram/sendMessage.ts";
 import Node from "./types/collections/node.type.ts";
-import { prvDecimalsDivisor } from "../constants.ts";
+import { prvDecimalsDivisor } from "./constants.ts";
 import getNodesStatus from "./utils/getNodesStatus.ts";
 import uploadToNotion from "./notion/uploadToNotion.ts";
 import Client from "./types/collections/client.type.ts";

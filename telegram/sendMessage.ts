@@ -1,4 +1,4 @@
-import { ADMIN_ID } from "../../env.ts";
+import { ADMIN_ID } from "../env.ts";
 import bot, { notificationsBot } from "./initBots.ts";
 
 const sendMessage = (

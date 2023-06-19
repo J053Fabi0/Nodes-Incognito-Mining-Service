@@ -1,5 +1,5 @@
 import { MongoClient } from "mongo";
-import { MONGO_URI } from "../env.ts";
+import { MONGO_URI } from "./env.ts";
 
 // Connect to MongoDB
 export const client = new MongoClient();

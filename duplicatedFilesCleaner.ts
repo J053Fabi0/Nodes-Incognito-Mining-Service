@@ -1,6 +1,6 @@
 import joi from "joi";
 import { parse } from "std/jsonc/mod.ts";
-import { getNodes } from "./src/controllers/node.controller.ts";
+import { getNodes } from "./controllers/node.controller.ts";
 import DuplicatedFilesCleaner, { Constants } from "duplicatedFilesCleanerIncognito";
 
 const schema = joi.object<Json>({

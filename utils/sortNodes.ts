@@ -1,6 +1,6 @@
 import { byNumber, byValues } from "sort-es";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
-import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { Info, ShardsNames, normalizeShard } from "duplicatedFilesCleanerIncognito";
 
 export const rolesOrder: NodeStatus["role"][] = ["NOT_STAKED", "COMMITTEE", "PENDING", "WAITING", "SYNCING"];
