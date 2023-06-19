@@ -10,8 +10,8 @@ const getShouldBeOffline = (
   nodeStatus: Partial<NodeStatus> &
     Pick<NodeStatus, "epochsToNextEvent" | "role" | "validatorPublic" | "syncState">
 ) => {
-  if (alwaysOfflineRoles.includes(nodeStatus.role)) return false; // If the node is not staked, it should always be online
-  if (alwaysOnlineRoles.includes(nodeStatus.role)) return true; // If the node is syncing, it should always be offline
+  if (alwaysOfflineRoles.includes(nodeStatus.role)) return true;
+  if (alwaysOnlineRoles.includes(nodeStatus.role)) return false;
 
   const inSyncRange =
     minEpochsToLetSync >= nodeStatus.epochsToNextEvent && nodeStatus.epochsToNextEvent > minEpochsToBeOnline;
