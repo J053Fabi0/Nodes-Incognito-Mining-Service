@@ -61,7 +61,7 @@ export default async function checkEarnings() {
               continue;
             }
 
-          await createNodeEarning({ time, epoch, node: _id, earning });
+          await createNodeEarning({ time, epoch, node: _id, earning: earning / prvDecimalsDivisor });
 
           // Send messages to the destination users
           for (const sendToId of sendTo) {
