@@ -43,19 +43,19 @@ export default async function handleInfo(
       `»${status.epochsToNextEvent.toString().padEnd(4)}` +
       `${docker.running ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>` +
       (Object.keys(normalizedInfo).length
-        ? `\n<code> </code><code>${escapeHtml(objectToTableText(normalizedInfo))
+        ? `\n<code> ${escapeHtml(objectToTableText(normalizedInfo))
             .split("\n")
             .slice(0, -1)
-            .map((a) =>
-              a.replace(
-                ...(() => {
-                  const match = a.match(/: +/);
-                  if (match) return [match[0], `</code><code>${match[0]}</code><code>`] as [string, string];
-                  else return ["", ""] as [string, string];
-                })()
-              )
-            )
-            .join("</code>\n<code> </code><code>")}</code>`
+            // .map((a) =>
+            //   a.replace(
+            //     ...(() => {
+            //       const match = a.match(/: +/);
+            //       if (match) return [match[0], `</code><code>${match[0]}</code><code>`] as [string, string];
+            //       else return ["", ""] as [string, string];
+            //     })()
+            //   )
+            // )
+            .join("</code>\n<code> ")}</code>`
         : "") +
       "\n\n";
   }
