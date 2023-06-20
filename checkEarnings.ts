@@ -22,67 +22,63 @@ function findClientById(clients: ProjectedClient[], id: ObjectId) {
 }
 
 export default async function checkEarnings() {
-  try {
-    const nodes = (await getNodes({}, nodesProjection)) as ProjectedNode[];
-    const clients = (await getClients({}, clientsProjection)) as ProjectedClient[];
+  const nodes = (await getNodes({}, nodesProjection)) as ProjectedNode[];
+  const clients = (await getClients({}, clientsProjection)) as ProjectedClient[];
 
-    // Get nodes status
-    const nodesStatus = await getNodesStatus();
+  // Get nodes status
+  const nodesStatus = await getNodesStatus();
 
-    for (const nodeStatus of nodesStatus) {
-      const { _id, name, sendTo, number, validatorPublic, client } = nodes.find(
-        (n) => n.validatorPublic === nodeStatus.validatorPublic
-      )!;
+  for (const nodeStatus of nodesStatus) {
+    const { _id, name, sendTo, number, validatorPublic, client } = nodes.find(
+      (n) => n.validatorPublic === nodeStatus.validatorPublic
+    )!;
 
-      const { notionPage } = findClientById(clients, client);
-      const nodeEarnings = await getNodeEarnings(validatorPublic);
+    const { notionPage } = findClientById(clients, client);
+    const nodeEarnings = await getNodeEarnings(validatorPublic);
 
-      for (const nodeEarning of nodeEarnings) {
-        const { epoch, earning } = nodeEarning;
+    for (const nodeEarning of nodeEarnings) {
+      const { epoch, earning } = nodeEarning;
 
-        // If no earing yet, continue.
-        if (!earning) continue;
+      // If no earing yet, continue.
+      if (!earning) continue;
 
-        const time = new Date(nodeEarning.time);
+      const time = new Date(nodeEarning.time);
 
-        const created = await createNodeEarning({
-          time,
-          epoch,
-          node: _id,
-          earning: earning / prvDecimalsDivisor,
-        }).catch(() => false as false);
-        // If the earning was alredy registered, continue.
-        if (created === false) continue;
+      const created = await createNodeEarning({
+        time,
+        epoch,
+        node: _id,
+        earning: earning / prvDecimalsDivisor,
+      }).catch(() => false as false);
+      // If the earning was alredy registered, continue.
+      if (created === false) continue;
 
-        if (notionPage)
-          try {
-            await repeatUntilNoError(
-              () => uploadToNotion(notionPage, epoch, time, earning / prvDecimalsDivisor, number),
-              20,
-              5
-            );
-          } catch (e) {
-            handleError(e);
-            await deleteNodeEarning({ _id: created._id });
-            continue;
-          }
-
-        // Send messages to the destination users
-        for (const sendToId of sendTo) {
-          const { telegram } = findClientById(clients, sendToId);
-          if (telegram)
-            sendMessage(
-              `#${name} - <code>${earning / prvDecimalsDivisor}</code>.\n` +
-                `Epoch: <code>${epoch}</code>.\n` +
-                `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
-              telegram,
-              { parse_mode: "HTML" },
-              "notificationsBot"
-            );
+      if (notionPage)
+        try {
+          await repeatUntilNoError(
+            () => uploadToNotion(notionPage, epoch, time, earning / prvDecimalsDivisor, number),
+            20,
+            5
+          );
+        } catch (e) {
+          handleError(e);
+          await deleteNodeEarning({ _id: created._id });
+          continue;
         }
+
+      // Send messages to the destination users
+      for (const sendToId of sendTo) {
+        const { telegram } = findClientById(clients, sendToId);
+        if (telegram)
+          sendMessage(
+            `#${name} - <code>${earning / prvDecimalsDivisor}</code>.\n` +
+              `Epoch: <code>${epoch}</code>.\n` +
+              `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
+            telegram,
+            { parse_mode: "HTML" },
+            "notificationsBot"
+          );
       }
     }
-  } catch (e) {
-    handleError(e);
   }
 }
