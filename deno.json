@@ -1,7 +1,7 @@
 {
   "tasks": {
     "stop": "pm2 stop nodeschecker",
-    "start": "pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env --allow-run --allow-write' --name nodeschecker dev.ts && pm2 logs nodeschecker",
+    "start": "DENO_DEPLOYMENT_ID=\"$(git rev-parse HEAD)\" pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env --allow-run --allow-write' --name nodeschecker dev.ts && pm2 logs nodeschecker",
     "logs": "pm2 logs nodeschecker",
     "reload": "pm2 reload nodeschecker && pm2 logs nodeschecker",
     "update": "deno run -A -r https://fresh.deno.dev/update .",
