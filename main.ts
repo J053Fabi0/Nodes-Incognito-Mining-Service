@@ -17,7 +17,7 @@ import manifest from "./fresh.gen.ts";
 import twindPlugin from "$fresh/plugins/twind.ts";
 import twindConfig from "./twind.config.ts";
 
-start(manifest, { plugins: [twindPlugin(twindConfig)], router: {} });
+start(manifest, { plugins: [twindPlugin(twindConfig)] });
 
 // Start to check the earnings
 checkEarnings();

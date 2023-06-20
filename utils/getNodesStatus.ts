@@ -17,12 +17,13 @@ export type NodeStatusKeys =
   | "epochsToNextEvent"
   | "validatorPublic";
 
+export type NodeRoles = "PENDING" | "COMMITTEE" | "WAITING" | "SYNCING" | "NOT_STAKED";
 export interface NodeStatus extends Node {
   alert: boolean;
   status: "ONLINE" | "OFFLINE";
   isSlashed: boolean;
   shard: ShardsStr;
-  role: "PENDING" | "COMMITTEE" | "WAITING" | "SYNCING" | "NOT_STAKED";
+  role: NodeRoles;
   isOldVersion: boolean;
   syncState: "BEACON SYNCING" | "LATEST" | "-" | "BEACON STALL" | "SHARD SYNCING" | "SHARD STALL";
   epochsToNextEvent: number;
