@@ -1,16 +1,16 @@
 import { ObjectId } from "mongo";
-import handleError from "./utils/handleError.ts";
-import sendMessage from "./telegram/sendMessage.ts";
-import Node from "./types/collections/node.type.ts";
-import { prvDecimalsDivisor } from "./constants.ts";
-import getNodesStatus from "./utils/getNodesStatus.ts";
-import uploadToNotion from "./notion/uploadToNotion.ts";
-import Client from "./types/collections/client.type.ts";
-import getNodeEarnings from "./utils/getNodeEarnings.ts";
-import { getNodes } from "./controllers/node.controller.ts";
-import { getClients } from "./controllers/client.controller.ts";
+import handleError from "./handleError.ts";
+import getNodesStatus from "./getNodesStatus.ts";
+import getNodeEarnings from "./getNodeEarnings.ts";
+import sendMessage from "../telegram/sendMessage.ts";
+import Node from "../types/collections/node.type.ts";
+import { prvDecimalsDivisor } from "../constants.ts";
+import uploadToNotion from "../notion/uploadToNotion.ts";
+import Client from "../types/collections/client.type.ts";
+import { getNodes } from "../controllers/node.controller.ts";
+import { getClients } from "../controllers/client.controller.ts";
 import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
-import { createNodeEarning, deleteNodeEarning } from "./controllers/nodeEarning.controller.ts";
+import { createNodeEarning, deleteNodeEarning } from "../controllers/nodeEarning.controller.ts";
 
 const clientsProjection = { projection: { telegram: 1, notionPage: 1 } };
 const nodesProjection = { projection: { name: 1, sendTo: 1, number: 1, client: 1, validatorPublic: 1 } };

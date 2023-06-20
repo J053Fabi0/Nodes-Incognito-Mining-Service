@@ -1,11 +1,11 @@
 import Cron from "croner";
-import checkNodes from "./checkNodes.ts";
-import checkEarnings from "./checkEarnings.ts";
+import checkNodes from "./utils/checkNodes.ts";
 import handleError from "./utils/handleError.ts";
+import checkEarnings from "./utils/checkEarnings.ts";
 
-new Cron("*/5 * * * * *", runningWrapper(checkEarnings));
+new Cron("*/5 * * * *", runningWrapper(checkEarnings));
 
-new Cron("*/1 * * * * *", runningWrapper(checkNodes));
+new Cron("*/1 * * * *", runningWrapper(checkNodes));
 
 function runningWrapper(fn: () => Promise<void>) {
   let running = false;
