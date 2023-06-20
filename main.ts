@@ -7,7 +7,6 @@
 import "./env.ts";
 import "./telegram/initBots.ts";
 
-import "./crons.ts";
 import { start } from "$fresh/server.ts";
 import manifest from "./fresh.gen.ts";
 
