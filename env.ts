@@ -9,3 +9,4 @@ export const MONGO_URI = env.MONGO_URI;
 export const ADMIN_ID = +env.ADMIN_ID;
 export const NOTION_KEY = env.NOTION_KEY;
 export const NOTION_DATABASE_ID = env.NOTION_DATABASE_ID;
+export const WEBSITE_URL = env.WEBSITE_URL;
