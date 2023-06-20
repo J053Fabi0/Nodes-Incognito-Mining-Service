@@ -14,10 +14,10 @@ import handleError from "./utils/handleError.ts";
 import { start } from "$fresh/server.ts";
 import manifest from "./fresh.gen.ts";
 
-import twindPlugin from "$fresh/plugins/twind.ts";
+import twindPlugin, { Options } from "$fresh/plugins/twindv1.ts";
 import twindConfig from "./twind.config.ts";
 
-start(manifest, { plugins: [twindPlugin(twindConfig)] });
+start(manifest, { plugins: [twindPlugin(twindConfig as unknown as Options)] });
 
 // Start to check the earnings
 checkEarnings();
