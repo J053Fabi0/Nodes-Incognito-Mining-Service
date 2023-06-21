@@ -1,16 +1,21 @@
 import { Head } from "$fresh/runtime.ts";
-import { Handlers, PageProps } from "$fresh/server.ts";
-import Metas from "../components/Metas.tsx";
-import Typography from "../components/Typography.tsx";
-import { countNodes } from "../controllers/node.controller.ts";
-import { countNodeEarnings } from "../controllers/nodeEarning.controller.ts";
 import State from "../types/state.type.ts";
+import Metas from "../components/Metas.tsx";
+import { Chart } from "fresh-charts/mod.ts";
+import { BAR_COLORS } from "../constants.ts";
+import Typography from "../components/Typography.tsx";
+import { Handlers, PageProps } from "$fresh/server.ts";
+import { countNodes } from "../controllers/node.controller.ts";
+import getNodesStatistics from "../utils/getNodesStatistics.ts";
+import { countNodeEarnings } from "../controllers/nodeEarning.controller.ts";
 
 const styles = {
   td: "border border-slate-300 py-2 px-3",
 };
 
 interface HomeProps {
+  data: number[];
+  months: string[];
   nodesCount: number;
   earningsCount: number;
 }
@@ -20,12 +25,19 @@ export const handler: Handlers<HomeProps, State> = {
     const nodesCount = await countNodes();
     const earningsCount = await countNodeEarnings();
 
-    return ctx.render({ nodesCount, earningsCount });
+    const { averageTotalEarningsByMonth, monthsLabels } = await getNodesStatistics();
+
+    return ctx.render({
+      nodesCount,
+      earningsCount,
+      months: monthsLabels,
+      data: [...averageTotalEarningsByMonth.values()],
+    });
   },
 };
 
 export default function Home({ data }: PageProps<HomeProps>) {
-  const { nodesCount, earningsCount } = data;
+  const { nodesCount, earningsCount, months, data: chartData } = data;
 
   return (
     <>
@@ -33,11 +45,11 @@ export default function Home({ data }: PageProps<HomeProps>) {
         <Metas title="Home" description="Incognito nodes service" />
       </Head>
 
-      <Typography variant="h1" class="mb-5">
+      <Typography variant="h1" class="mt-3 mb-10">
         Hosting service for Incognito nodes
       </Typography>
 
-      <table class="table-auto border-collapse border border-slate-400">
+      <table class="table-auto border-collapse border border-slate-400 mb-5">
         <tbody>
           <tr>
             <td class={styles.td}>
@@ -61,6 +73,16 @@ export default function Home({ data }: PageProps<HomeProps>) {
           </tr>
         </tbody>
       </table>
+
+      <Chart
+        type="bar"
+        options={{ devicePixelRatio: 1 }}
+        width={500}
+        data={{
+          labels: months,
+          datasets: [{ data: chartData, backgroundColor: BAR_COLORS, label: "Average monthly earnings per node" }],
+        }}
+      />
     </>
   );
 }
