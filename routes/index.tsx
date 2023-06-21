@@ -3,6 +3,7 @@ import State from "../types/state.type.ts";
 import Metas from "../components/Metas.tsx";
 import { Chart } from "fresh-charts/mod.ts";
 import { BAR_COLORS } from "../constants.ts";
+import { toFixedS } from "../utils/numbersString.ts";
 import Typography from "../components/Typography.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { countNodes } from "../controllers/node.controller.ts";
@@ -38,6 +39,7 @@ export const handler: Handlers<HomeProps, State> = {
 
 export default function Home({ data }: PageProps<HomeProps>) {
   const { nodesCount, earningsCount, months, data: chartData } = data;
+  const totalAverage = chartData.reduce((acc, curr) => acc + curr, 0) / chartData.length;
 
   return (
     <>
@@ -80,7 +82,13 @@ export default function Home({ data }: PageProps<HomeProps>) {
         width={500}
         data={{
           labels: months,
-          datasets: [{ data: chartData, backgroundColor: BAR_COLORS, label: "Average monthly earnings per node" }],
+          datasets: [
+            {
+              data: chartData,
+              backgroundColor: BAR_COLORS,
+              label: `Average monthly earnings per node. ${toFixedS(totalAverage, 2)} final average.`,
+            },
+          ],
         }}
       />
     </>
