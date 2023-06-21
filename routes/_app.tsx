@@ -33,7 +33,7 @@ export default function App({ Component, data, url }: AppProps) {
             <a href="mailto:jf@josefabio.com" target="_blank" title="Email">
               <IoIosMail size={20} class="cursor-pointer" />
             </a>
-            <a href="https://we.incognito.org/u/j053" target="_blank" title="Incognito Forum">
+            <a href="https://we.incognito.org/u/J053/summary" target="_blank" title="Incognito Forum">
               <BsFillCircleFill size={16} class="cursor-pointer" />
             </a>
           </div>
