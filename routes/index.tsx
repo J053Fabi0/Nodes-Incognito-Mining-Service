@@ -76,7 +76,7 @@ export default function Home({ data }: PageProps<HomeProps>) {
         </tbody>
       </table>
 
-      <div class="overflow-scroll">
+      <div class="overflow-x-auto">
         <Chart
           type="bar"
           options={{ devicePixelRatio: 1 }}
