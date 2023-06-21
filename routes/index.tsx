@@ -76,21 +76,23 @@ export default function Home({ data }: PageProps<HomeProps>) {
         </tbody>
       </table>
 
-      <Chart
-        type="bar"
-        options={{ devicePixelRatio: 1 }}
-        width={500}
-        data={{
-          labels: months,
-          datasets: [
-            {
-              data: chartData,
-              backgroundColor: BAR_COLORS,
-              label: `Average monthly earnings per node. ${toFixedS(totalAverage, 2)} final average.`,
-            },
-          ],
-        }}
-      />
+      <div class="overflow-scroll">
+        <Chart
+          type="bar"
+          options={{ devicePixelRatio: 1 }}
+          width={500}
+          data={{
+            labels: months,
+            datasets: [
+              {
+                data: chartData,
+                backgroundColor: BAR_COLORS,
+                label: `Average monthly earnings per node. ${toFixedS(totalAverage, 2)} final average.`,
+              },
+            ],
+          }}
+        />
+      </div>
     </>
   );
 }
