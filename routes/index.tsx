@@ -44,7 +44,7 @@ export default function Home({ data }: PageProps<HomeProps>) {
   return (
     <>
       <Head>
-        <Metas title="Home" description="Incognito nodes service" />
+        <Metas title="Hosting nodes Incognito" description="Incognito nodes service" />
       </Head>
 
       <Typography variant="h1" class="mt-3 mb-10">
