@@ -8,7 +8,7 @@ import { isAdminPage } from "../utils/isAdminPage.tsx";
 import { BsTelegram, BsFillCircleFill } from "react-icons/bs";
 
 export default function App({ Component, data, url }: AppProps) {
-  const isAdmin = (data || {}).isAdmin ?? isAdminPage(url.href);
+  const loggedIn = (data || {}).loggedIn ?? isAdminPage(url.href);
 
   return (
     <>
@@ -17,7 +17,7 @@ export default function App({ Component, data, url }: AppProps) {
       </Head>
 
       <body class="min-h-screen flex flex-col">
-        <Navbar loggedIn={isAdmin} />
+        <Navbar loggedIn={loggedIn} />
 
         <div class="px-4 pt-4 mx-auto w-full max-w-screen-lg flex-1">
           <Component />
