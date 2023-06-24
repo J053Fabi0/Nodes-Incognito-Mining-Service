@@ -2,11 +2,19 @@ import Button from "./Button.tsx";
 import Typography from "./Typography.tsx";
 
 interface Page {
-  href: string;
   name: string;
+  href: string;
+  onlyLoggedIn?: true;
+  onlyLoggedOut?: true;
 }
 
-const pages: Page[] = [];
+const pages: Page[] = [
+  {
+    name: "My nodes",
+    href: "/nodes",
+    onlyLoggedIn: true,
+  },
+];
 
 export default function Navbar({ loggedIn = false }) {
   const signInOrOut = loggedIn ? (
@@ -24,14 +32,20 @@ export default function Navbar({ loggedIn = false }) {
   );
 
   const pagesElement = pages.length > 0 && (
-    <ul class="hidden items-center gap-6 lg:flex">
-      {pages.map((page) => (
-        <li class="block p-1 font-sans text-sm font-normal leading-normal text-inherit antialiased">
-          <a class="flex items-center" href={page.href}>
-            {page.name}
-          </a>
-        </li>
-      ))}
+    <ul class="items-center gap-6 lg:flex">
+      {pages
+        .filter((p) => {
+          if (p.onlyLoggedIn) return loggedIn;
+          if (p.onlyLoggedOut) return !loggedIn;
+          return true;
+        })
+        .map((page) => (
+          <li class="block font-sans text-md font-normal leading-normal text-inherit antialiased hover:underline">
+            <a class="flex items-center" href={page.href}>
+              {page.name}
+            </a>
+          </li>
+        ))}
     </ul>
   );
 
@@ -45,7 +59,7 @@ export default function Navbar({ loggedIn = false }) {
             </Typography>
           </a>
 
-          {pagesElement}
+          <div class="hidden lg:inline-block">{pagesElement}</div>
 
           <div class="hidden lg:inline-block">{signInOrOut}</div>
 
@@ -71,9 +85,10 @@ export default function Navbar({ loggedIn = false }) {
           class="block h-0 w-full basis-full overflow-hidden text-blue-gray-900 transition-all duration-300 ease-in lg:hidden"
           data-collapse="navbar"
         >
-          <div class="container mx-auto pb-2 pt-5">
+          <div class="container mx-auto pb-2 pt-5 flex items-start flex-col w-full">
             {pagesElement}
-            {signInOrOut}
+            <hr class="my-5 border-gray-400 w-full" />
+            <div class="self-end">{signInOrOut}</div>
           </div>
         </div>
       </div>

@@ -43,6 +43,7 @@ export const handler: Handlers<HomeProps, State> = {
 export default function Home({ data }: PageProps<HomeProps>) {
   const { nodesCount, earningsCount, months, data: chartData } = data;
   const totalAverage = chartData.reduce((acc, curr) => acc + curr, 0) / chartData.length;
+  const liStyle = getTypographyClass("lead");
 
   return (
     <>
@@ -56,13 +57,11 @@ export default function Home({ data }: PageProps<HomeProps>) {
       </Typography>
 
       <ul class="list-disc list-inside checkUL mb-5">
-        <li class={getTypographyClass("lead")}>You provide the stake, we the infrastructure.</li>
-        <li class={getTypographyClass("lead")}>
-          Earnings and stake in your control, we don't ask for any private keys.
-        </li>
-        <li class={getTypographyClass("lead")}>
+        <li class={liStyle}>You provide the stake, we the infrastructure.</li>
+        <li class={liStyle}>Earnings and stake in your control, we don't ask for any private keys.</li>
+        <li class={liStyle}>
           Monthly fee is based on earnings: 10%, no more.
-          <li class={getTypographyClass("lead")}>5 USD for each node's initial setup.</li>
+          <li class={liStyle}>5 USD for each node's initial setup.</li>
         </li>
       </ul>
 
