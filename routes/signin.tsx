@@ -29,6 +29,8 @@ export const handler: Handlers<undefined, State> = {
         });
         ctx.state.session.set("userId", newUser._id.toString());
       }
+
+      return redirect("/");
     }
 
     return ctx.render();
@@ -50,8 +52,8 @@ export default function SignIn() {
           data-size="large"
           data-auth-url="signin"
           data-request-access="write"
-          data-telegram-login={NOTIFICATIONS_BOT_USERNAME.toLowerCase()}
           src="https://telegram.org/js/telegram-widget.js?22"
+          data-telegram-login={NOTIFICATIONS_BOT_USERNAME.toLowerCase()}
         />
       </div>
     </div>
