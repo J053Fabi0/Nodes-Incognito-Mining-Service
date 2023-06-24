@@ -1,6 +1,6 @@
 import { JSX } from "preact";
 
-const commonStyles = "font-sans text-inherit antialiased";
+const commonStyles = "font-sans antialiased";
 const headersCommonStyles = "font-semibold tracking-normal leading-tight";
 
 const textStyles = {
@@ -21,7 +21,7 @@ interface TypographyProps {
 }
 
 const Typography = ({ variant = "p", ...props }: JSX.HTMLAttributes<HTMLHeadingElement> & TypographyProps) => {
-  props.class = `${getTypographyClass(variant)} ${props.class ?? ""}`;
+  props.class = `${props.class ?? ""} ${getTypographyClass(variant)}`;
 
   switch (variant) {
     case "h1":

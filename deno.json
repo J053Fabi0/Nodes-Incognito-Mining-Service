@@ -23,6 +23,8 @@
     "croner": "https://deno.land/x/croner@6.0.4/dist/croner.js",
     "mongo": "https://deno.land/x/mongo@v0.31.2/mod.ts",
     "grammy/": "https://deno.land/x/grammy@v1.16.2/",
+    "grammy_validator": "https://deno.land/x/grammy_validator@v1.0.1/mod.ts",
+    "fresh-session/": "https://deno.land/x/fresh_session@0.2.1/",
     "streams": "https://deno.land/std@0.192.0/streams/mod.ts",
     "notion/": "https://deno.land/x/notion_sdk@v2.2.3/src/",
     "axiod": "https://deno.land/x/axiod@0.26.2/mod.ts",
