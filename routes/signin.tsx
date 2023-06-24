@@ -50,7 +50,7 @@ export default function SignIn() {
           data-size="large"
           data-auth-url="signin"
           data-request-access="write"
-          data-telegram-login={NOTIFICATIONS_BOT_USERNAME}
+          data-telegram-login={NOTIFICATIONS_BOT_USERNAME.toLowerCase()}
           src="https://telegram.org/js/telegram-widget.js?22"
         />
       </div>
