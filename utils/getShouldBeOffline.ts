@@ -2,14 +2,18 @@ import { syncedNodes } from "./variables.ts";
 import { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 import { minEpochsToBeOnline, minEpochsToLetSync } from "../constants.ts";
 
-const offlineRoles: NodeRoles[] = ["PENDING"];
+// These roles will be offline if they are not near the next event.
+const offlineRoles: NodeRoles[] = ["PENDING", "SYNCING"];
 const alwaysOnlineRoles: NodeRoles[] = ["NOT_STAKED"];
-const alwaysOfflineRoles: NodeRoles[] = ["SYNCING", "WAITING"];
+const alwaysOfflineRoles: NodeRoles[] = ["WAITING", "SYNCING"];
 
 const getShouldBeOffline = (
   nodeStatus: Partial<NodeStatus> &
     Pick<NodeStatus, "epochsToNextEvent" | "role" | "validatorPublic" | "syncState">
 ) => {
+  // SYNCING is important because it must be online to move to PENDING.
+  if (nodeStatus.role === "SYNCING" && nodeStatus.epochsToNextEvent <= 1) return false;
+
   if (alwaysOfflineRoles.includes(nodeStatus.role)) return true;
   if (alwaysOnlineRoles.includes(nodeStatus.role)) return false;
 

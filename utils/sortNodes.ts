@@ -1,9 +1,16 @@
 import { byNumber, byValues } from "sort-es";
-import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
+import getNodesStatus, { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { Info, ShardsNames, normalizeShard } from "duplicatedFilesCleanerIncognito";
 
-export const rolesOrder: NodeStatus["role"][] = ["NOT_STAKED", "COMMITTEE", "PENDING", "WAITING", "SYNCING"];
+export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
+  "NOT_STAKED",
+  // SYNCING is important because it must be online to move to PENDING
+  // But committe will get the priority if they have less epochs to the next event
+  ["COMMITTEE", "SYNCING"],
+  "PENDING",
+  "WAITING",
+];
 
 export default async function sortNodes(nodes: (string | number)[] = []) {
   const nodesStatusByDockerIndex = (await getNodesStatus()).reduce(
@@ -31,7 +38,11 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
         // Sort first by the role by the order defined in sortOrder
         [
           ([dockerIndex]) => {
-            const roleIndex = rolesOrder.indexOf(nodesStatusByDockerIndex[dockerIndex].role);
+            const roleIndex = rolesOrder.findIndex((roles) =>
+              Array.isArray(roles)
+                ? roles.includes(nodesStatusByDockerIndex[dockerIndex].role)
+                : roles === nodesStatusByDockerIndex[dockerIndex].role
+            );
             return roleIndex === -1 ? rolesOrder.length : roleIndex;
           },
           byNumber(),
