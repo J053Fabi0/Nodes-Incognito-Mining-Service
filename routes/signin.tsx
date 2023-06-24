@@ -2,10 +2,10 @@ import State from "../types/state.type.ts";
 import { Handlers } from "$fresh/server.ts";
 import redirect from "../utils/redirect.ts";
 import { checkSignature } from "grammy_validator";
-import { NOTIFICATIONS_BOT_TOKEN } from "../env.ts";
 import getQueryParams from "../utils/getQueryParams.ts";
 import { isTelegramPayload } from "../types/telegramPayload.type.ts";
 import { createClient, getClient } from "../controllers/client.controller.ts";
+import { NOTIFICATIONS_BOT_TOKEN, NOTIFICATIONS_BOT_USERNAME } from "../env.ts";
 
 export const handler: Handlers<undefined, State> = {
   async GET(req, ctx) {
@@ -50,7 +50,7 @@ export default function SignIn() {
           data-size="large"
           data-auth-url="signin"
           data-request-access="write"
-          data-telegram-login="pruebaDeScratchBot"
+          data-telegram-login={NOTIFICATIONS_BOT_USERNAME}
           src="https://telegram.org/js/telegram-widget.js?22"
         />
       </div>
