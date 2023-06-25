@@ -7,12 +7,10 @@ import Pagination from "../../components/Pagination.tsx";
 import Typography from "../../components/Typography.tsx";
 import RelativeDate from "../../islands/RelativeDate.tsx";
 import getQueryParams from "../../utils/getQueryParams.ts";
-import Pill, { PillProps } from "../../components/Pill.tsx";
+import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
 import NodeEarning from "../../types/collections/nodeEarning.type.ts";
 import { countNodeEarnings, getNodeEarnings } from "../../controllers/nodeEarning.controller.ts";
-
-const colors: PillProps["color"][] = ["red", "orange", "yellow", "green", "blue", "purple", "gray"];
 
 const styles = {
   th: "border border-slate-300 py-2 px-3",
@@ -70,11 +68,7 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
     <>
       <div class="flex flex-wrap gap-2 mt-1">
         {nodeNumbers.map((n) => (
-          <a href={`nodes/${n}?${relative ? "relative&" : ""}`} class="cursor-pointer mr-2">
-            <Pill color={colors[(n - 1) % colors.length]}>
-              <code>{n}</code>
-            </Pill>
-          </a>
+          <NodePill nodeNumber={n} relative={relative} />
         ))}
       </div>
 
@@ -91,31 +85,25 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
             </tr>
           </thead>
           <tbody>
-            {earnings.map((e) => {
-              const nodeNumber = nodes[`${e.node}`];
+            {earnings.map((e) => (
+              <tr>
+                <td class={styles.td}>
+                  <code>{e.epoch}</code>
+                </td>
 
-              return (
-                <tr>
-                  <td class={styles.td}>
-                    <code>{e.epoch}</code>
-                  </td>
+                <td class={styles.td}>
+                  {relative ? <RelativeDate date={+e.time} /> : <LocaleDate date={+e.time} />}
+                </td>
 
-                  <td class={styles.td}>
-                    {relative ? <RelativeDate date={+e.time} /> : <LocaleDate date={+e.time} />}
-                  </td>
+                <td class={styles.td}>
+                  <NodePill nodeNumber={nodes[`${e.node}`]} relative={relative} />
+                </td>
 
-                  <td class={styles.td}>
-                    <Pill color={colors[(nodeNumber - 1) % colors.length]}>
-                      <code>{nodeNumber}</code>
-                    </Pill>
-                  </td>
-
-                  <td class={styles.td}>
-                    <code>{e.earning}</code>
-                  </td>
-                </tr>
-              );
-            })}
+                <td class={styles.td}>
+                  <code>{e.earning}</code>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
