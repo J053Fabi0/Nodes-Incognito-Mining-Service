@@ -4,12 +4,14 @@ import { ShadedColors } from "../twind.config.ts";
 interface SwitchProps {
   checked: boolean;
   size?: number;
+  label?: string;
   color?: ShadedColors;
 }
 
 export default function Switch({
-  size = 20,
+  label,
   checked,
+  size = 20,
   color = "blue",
   class: classes = "",
   ...props
@@ -30,9 +32,13 @@ export default function Switch({
 
   return (
     <div class={classes}>
-      <button {...props} class={buttonClass}>
-        <div class={circleClass} />
-      </button>
+      <div class="flex items-top">
+        <button {...props} class={buttonClass}>
+          <div class={circleClass} />
+        </button>
+
+        {label && <p class="ml-2 leading-none">{label}</p>}
+      </div>
     </div>
   );
 }
