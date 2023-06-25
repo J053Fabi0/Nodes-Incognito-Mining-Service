@@ -11,3 +11,4 @@ export const ADMIN_ID = +env.ADMIN_ID;
 export const NOTION_KEY = env.NOTION_KEY;
 export const NOTION_DATABASE_ID = env.NOTION_DATABASE_ID;
 export const WEBSITE_URL = env.WEBSITE_URL;
+export const IS_PRODUCTION = Boolean(Deno.env.get("DENO_DEPLOYMENT_ID"));

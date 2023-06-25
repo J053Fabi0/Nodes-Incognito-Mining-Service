@@ -1,9 +1,11 @@
+import { IS_PRODUCTION } from "../env.ts";
+
 export const adminURLs = [
   //
   "/credentials",
 ].map((pathname) => new URLPattern({ pathname }));
 
-export const allowedForLocalhost = [
+export const allowedForDevelopment = [
   //
   "/credentials",
 ].map((pathname) => new URLPattern({ pathname }));
@@ -12,10 +14,8 @@ export const allowedForLocalhost = [
  * @param url The full URL of the page, including the domain name and protocol
  */
 export default function isAdminPage(url: string) {
-  const urlObj = new URL(url);
-
-  // localhost is allowed for development for some pages
-  if (urlObj.hostname === "localhost" && allowedForLocalhost.some((pattern) => pattern.test(url))) return false;
+  // some pages are allowed for development
+  if (IS_PRODUCTION === false && allowedForDevelopment.some((pattern) => pattern.test(url))) return false;
 
   return adminURLs.some((pattern) => pattern.test(url));
 }
