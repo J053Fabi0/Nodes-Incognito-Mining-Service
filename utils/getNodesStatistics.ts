@@ -1,9 +1,9 @@
 import dayjs from "dayjs/mod.ts";
-import { getNodes } from "../controllers/node.controller.ts";
-import { getNodeEarnings } from "../controllers/nodeEarning.controller.ts";
-import Node from "../types/collections/node.type.ts";
-import NodeEarning from "../types/collections/nodeEarning.type.ts";
 import nameOfMonth from "./nameOfMonth.ts";
+import Node from "../types/collections/node.type.ts";
+import { getNodes } from "../controllers/node.controller.ts";
+import NodeEarning from "../types/collections/nodeEarning.type.ts";
+import { getNodeEarnings } from "../controllers/nodeEarning.controller.ts";
 
 const nodesProjection = { projection: { createdAt: 1 } };
 const nodeEarnignsProjection = { projection: { time: 1, earning: 1, node: 1 } };
@@ -15,7 +15,6 @@ export default async function getNodesStatistics() {
     .map((_, i) =>
       dayjs()
         .subtract(i + 1, "month")
-        .startOf("month")
         .toDate()
     )
     .reverse();

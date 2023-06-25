@@ -1,4 +1,4 @@
-import { moment } from "moment";
+import dayjs from "dayjs/mod.ts";
 import { ObjectId } from "mongo";
 import * as a from "./dbUtils.ts";
 import Model from "../models/nodeEarning.model.ts";
@@ -27,10 +27,10 @@ export const aggregateNodeEarning = a.aggregate(Model);
  */
 export async function getTotalEarnings(nodeOrNodes: ObjectId | ObjectId[] | null, monthsToSubtract: number) {
   const time: { $gte: Date; $lte?: Date } = {
-    $gte: moment().subtract(monthsToSubtract, "month").startOf("month").toDate(),
+    $gte: dayjs().subtract(monthsToSubtract, "month").startOf("month").toDate(),
   };
   // if the monthsToSubtract is 0, we don't need to add the $lte
-  if (monthsToSubtract !== 0) time.$lte = moment().subtract(monthsToSubtract, "month").endOf("month").toDate();
+  if (monthsToSubtract !== 0) time.$lte = dayjs().subtract(monthsToSubtract, "month").endOf("month").toDate();
 
   const match: { node?: ObjectId | { $in: ObjectId[] }; time: typeof time } = { time };
 
