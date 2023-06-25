@@ -4,6 +4,7 @@ import redirect from "../../utils/redirect.ts";
 import LocaleDate from "../../islands/LocaleDate.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Pagination from "../../components/Pagination.tsx";
+import Typography from "../../components/Typography.tsx";
 import RelativeDate from "../../islands/RelativeDate.tsx";
 import getQueryParams from "../../utils/getQueryParams.ts";
 import Pill, { PillProps } from "../../components/Pill.tsx";
@@ -61,11 +62,14 @@ export const handler: Handlers<NodesProps, State> = {
 
 export default function Nodes({ data }: PageProps<NodesProps>) {
   const { nodes, earnings, pages, page, relative } = data;
+  const nodeNumbers = Object.values(nodes);
+
+  if (nodeNumbers.length === 0) return <Typography variant="h3">You don't have any nodes yet.</Typography>;
 
   return (
     <>
       <div class="mt-2">
-        {Object.values(nodes).map((n) => (
+        {nodeNumbers.map((n) => (
           <a href={`nodes/${n}?${relative ? "relative&" : ""}page=`} class="cursor-pointer mr-2">
             <Pill color={colors[(n - 1) % colors.length]}>
               <code>{n}</code>
