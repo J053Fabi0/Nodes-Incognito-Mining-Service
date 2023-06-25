@@ -70,7 +70,7 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
     <>
       <div class="flex flex-wrap gap-2 mt-1">
         {nodeNumbers.map((n) => (
-          <a href={`nodes/${n}?${relative ? "relative&" : ""}page=`} class="cursor-pointer mr-2">
+          <a href={`nodes/${n}?${relative ? "relative&" : ""}`} class="cursor-pointer mr-2">
             <Pill color={colors[(n - 1) % colors.length]}>
               <code>{n}</code>
             </Pill>
