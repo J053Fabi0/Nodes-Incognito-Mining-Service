@@ -15,7 +15,7 @@ export default function Switch({
   color = "blue",
   class: classes = "",
   ...props
-}: JSX.HTMLAttributes<HTMLButtonElement> & SwitchProps) {
+}: JSX.HTMLAttributes<HTMLDivElement> & SwitchProps) {
   const buttonClass = `
     h-[${size * 0.7}px] w-[${size * 2}px] relative
     my-[${(size - size * 0.7) / 2}px] rounded-full
@@ -33,9 +33,9 @@ export default function Switch({
   return (
     <div class={classes}>
       <div class="flex items-center">
-        <button {...props} class={buttonClass}>
+        <div {...props} class={buttonClass}>
           <div class={circleClass} />
-        </button>
+        </div>
 
         {label && <p class="ml-2 leading-none">{label}</p>}
       </div>

@@ -25,7 +25,7 @@ export default function NodePill({
   const style = `${classes ?? ""} cursor-pointer`;
 
   return (
-    <a href={`nodes/${nodeNumber}${relative ? "?relative" : ""}`} class={style} {...props}>
+    <a href={`earnings/${nodeNumber}${relative ? "?relative" : ""}`} class={style} {...props}>
       <Pill color={NODE_PILL_COLORS[(nodeNumber - 1) % NODE_PILL_COLORS.length]}>
         <code>{nodeNumber}</code>
       </Pill>

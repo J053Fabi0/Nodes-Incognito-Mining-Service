@@ -1,4 +1,4 @@
-import Typography from "../../components/Typography.tsx";
+import Typography from "../../../components/Typography.tsx";
 
 export default function IndividualNode() {
   return (
