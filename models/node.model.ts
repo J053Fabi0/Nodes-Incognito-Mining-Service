@@ -6,6 +6,7 @@ const nodeModel = db.collection<Node>("nodes");
 nodeModel.createIndexes({
   indexes: [
     { key: { client: 1 }, name: "nodes_client" },
+    { key: { client: 1, inactive: 1 }, name: "nodes_client_inactive" },
     { key: { client: 1, name: 1 }, name: "nodes_client_name", unique: true },
     { key: { client: 1, number: 1 }, name: "nodes_client_number", unique: true },
 

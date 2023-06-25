@@ -7,6 +7,7 @@ nodeEarningModel.createIndexes({
   indexes: [
     { key: { node: 1 }, name: "nodeEarningss_node" },
     { key: { node: 1, epoch: 1 }, name: "nodeEarningss_node_epoch", unique: true },
+    { key: { node: 1, time: 1 }, name: "nodeEarningss_node_time" },
   ],
 });
 

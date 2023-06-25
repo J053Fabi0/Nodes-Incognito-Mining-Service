@@ -11,7 +11,8 @@ import getQueryParams from "../../../utils/getQueryParams.ts";
 import NodePill from "../../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../../controllers/node.controller.ts";
 import NodeEarning from "../../../types/collections/nodeEarning.type.ts";
-import { countNodeEarnings, getNodeEarnings } from "../../../controllers/nodeEarning.controller.ts";
+import { getTotalEarnings } from "../../../controllers/nodeEarning.controller.ts";
+import { getNodeEarnings, countNodeEarnings } from "../../../controllers/nodeEarning.controller.ts";
 
 const styles = {
   th: "border border-slate-300 py-2 px-3",
@@ -23,6 +24,8 @@ interface NodesProps {
   pages: number[];
   relative: boolean;
   earnings: NodeEarning[];
+  thisMonthsEarnings: number;
+  lastMonthsEarnings: number;
   nodes: Record<string, number>;
 }
 
@@ -42,17 +45,18 @@ export const handler: Handlers<NodesProps, State> = {
       { inactive: { $ne: true }, client: new ObjectId(ctx.state.userId!) },
       { projection: { _id: 1, number: 1 } }
     );
+    const nodesIds = nodes.map((node) => node._id);
     const nodesByNumber: NodesProps["nodes"] = {};
     for (const node of nodes) nodesByNumber[`${node._id}`] = node.number;
 
-    const earningsCount = await countNodeEarnings({ node: { $in: nodes.map((node) => node._id) } });
+    const earningsCount = await countNodeEarnings({ node: { $in: nodesIds } });
     const pages = Array.from({ length: Math.ceil(earningsCount / LIMIT) }, (_, i) => i + 1);
 
     if (page > pages.length)
       return redirect(`/nodes/earnings/?${relative ? "relative&" : ""}page=${pages.length}`);
 
     const earnings = await getNodeEarnings(
-      { node: { $in: nodes.map((node) => node._id) } },
+      { node: { $in: nodesIds } },
       {
         limit: LIMIT,
         sort: { epoch: -1 },
@@ -60,7 +64,18 @@ export const handler: Handlers<NodesProps, State> = {
       }
     );
 
-    return ctx.render({ earnings, nodes: nodesByNumber, pages, page, relative });
+    const thisMonthsEarnings = await getTotalEarnings(nodesIds, 0);
+    const lastMonthsEarnings = await getTotalEarnings(nodesIds, 1);
+
+    return ctx.render({
+      page,
+      pages,
+      earnings,
+      relative,
+      thisMonthsEarnings,
+      lastMonthsEarnings,
+      nodes: nodesByNumber,
+    });
   },
 };
 
@@ -73,6 +88,19 @@ export default function NodesEarnings({ data }: PageProps<NodesProps>) {
 
   return (
     <>
+      <Typography variant="h3">
+        This month's earnings:&nbsp;
+        <code>{data.thisMonthsEarnings}</code>
+      </Typography>
+      {data.lastMonthsEarnings !== 0 && (
+        <Typography variant="h3">
+          Last month's earnings:&nbsp;
+          <code>{data.lastMonthsEarnings}</code>
+        </Typography>
+      )}
+
+      <hr class="my-5" />
+
       <div class="flex flex-wrap items-center gap-3 mt-1">
         {nodeNumbers.map((n, i) => (
           <NodePill nodeNumber={n} relative={relative} class={i === nodesCount - 1 ? "mr-3" : ""} />
