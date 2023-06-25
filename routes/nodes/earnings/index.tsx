@@ -2,8 +2,9 @@ import { ObjectId } from "mongo";
 import State from "../../../types/state.type.ts";
 import redirect from "../../../utils/redirect.ts";
 import Switch from "../../../components/Switch.tsx";
-import LocaleDate from "../../../islands/LocaleDate.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
+import LocaleDate from "../../../islands/LocaleDate.tsx";
+import { toFixedS } from "../../../utils/numbersString.ts";
 import Pagination from "../../../components/Pagination.tsx";
 import Typography from "../../../components/Typography.tsx";
 import RelativeDate from "../../../islands/RelativeDate.tsx";
@@ -24,8 +25,8 @@ interface NodesProps {
   pages: number[];
   relative: boolean;
   earnings: NodeEarning[];
-  thisMonthsEarnings: number;
-  lastMonthsEarnings: number;
+  thisMonthsEarnings: string;
+  lastMonthsEarnings: string;
   nodes: Record<string, number>;
 }
 
@@ -64,8 +65,8 @@ export const handler: Handlers<NodesProps, State> = {
       }
     );
 
-    const thisMonthsEarnings = await getTotalEarnings(nodesIds, 0);
-    const lastMonthsEarnings = await getTotalEarnings(nodesIds, 1);
+    const thisMonthsEarnings = toFixedS(await getTotalEarnings(nodesIds, 0), 9);
+    const lastMonthsEarnings = toFixedS(await getTotalEarnings(nodesIds, 1), 9);
 
     return ctx.render({
       page,
@@ -92,7 +93,7 @@ export default function NodesEarnings({ data }: PageProps<NodesProps>) {
         This month's earnings:&nbsp;
         <code>{data.thisMonthsEarnings}</code>
       </Typography>
-      {data.lastMonthsEarnings !== 0 && (
+      {data.lastMonthsEarnings !== "0" && (
         <Typography variant="h3">
           Last month's earnings:&nbsp;
           <code>{data.lastMonthsEarnings}</code>
