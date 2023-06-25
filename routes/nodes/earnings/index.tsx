@@ -47,6 +47,10 @@ export const handler: Handlers<NodesProps, State> = {
 
     const earningsCount = await countNodeEarnings({ node: { $in: nodes.map((node) => node._id) } });
     const pages = Array.from({ length: Math.ceil(earningsCount / LIMIT) }, (_, i) => i + 1);
+
+    if (page > pages.length)
+      return redirect(`/nodes/earnings/?${relative ? "relative&" : ""}page=${pages.length}`);
+
     const earnings = await getNodeEarnings(
       { node: { $in: nodes.map((node) => node._id) } },
       {
