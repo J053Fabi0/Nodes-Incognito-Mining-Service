@@ -4,8 +4,8 @@ import redirect from "../utils/redirect.ts";
 import isAdminPage from "../utils/isAdminPage.tsx";
 import { cookieSession } from "fresh-session/mod.ts";
 import { Middleware } from "$fresh/src/server/types.ts";
-import { getClient } from "../controllers/client.controller.ts";
 import isLoggedInPage from "../utils/isLoggedInPage.tsx";
+import { getClient } from "../controllers/client.controller.ts";
 
 const session = cookieSession({
   secure: true,
@@ -22,6 +22,7 @@ export const { handler }: Middleware<State> = {
     // parse the session data
     (_, ctx) => {
       ctx.state.userId = ctx.state.session.get("userId");
+      ctx.state.supplanting = Boolean(ctx.state.session.get("supplanting"));
       return ctx.next();
     },
 
@@ -37,7 +38,7 @@ export const { handler }: Middleware<State> = {
         ctx.state.session.set("userId", null);
       } else {
         ctx.state.user = user;
-        ctx.state.isAdmin = user.role === "admin";
+        ctx.state.isAdmin = user.role === "admin" || Boolean(ctx.state.supplanting);
       }
 
       return ctx.next();

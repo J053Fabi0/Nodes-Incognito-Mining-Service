@@ -6,10 +6,11 @@ import * as $0 from "./routes/_404.tsx";
 import * as $1 from "./routes/_500.tsx";
 import * as $2 from "./routes/_app.tsx";
 import * as $3 from "./routes/_middleware.tsx";
-import * as $4 from "./routes/index.tsx";
-import * as $5 from "./routes/nodes/index.tsx";
-import * as $6 from "./routes/signin.tsx";
-import * as $7 from "./routes/signout.tsx";
+import * as $4 from "./routes/credentials.tsx";
+import * as $5 from "./routes/index.tsx";
+import * as $6 from "./routes/nodes/index.tsx";
+import * as $7 from "./routes/signin.tsx";
+import * as $8 from "./routes/signout.tsx";
 import * as $$0 from "./islands/LocaleDate.tsx";
 import * as $$1 from "./islands/RelativeDate.tsx";
 
@@ -19,10 +20,11 @@ const manifest = {
     "./routes/_500.tsx": $1,
     "./routes/_app.tsx": $2,
     "./routes/_middleware.tsx": $3,
-    "./routes/index.tsx": $4,
-    "./routes/nodes/index.tsx": $5,
-    "./routes/signin.tsx": $6,
-    "./routes/signout.tsx": $7,
+    "./routes/credentials.tsx": $4,
+    "./routes/index.tsx": $5,
+    "./routes/nodes/index.tsx": $6,
+    "./routes/signin.tsx": $7,
+    "./routes/signout.tsx": $8,
   },
   islands: {
     "./islands/LocaleDate.tsx": $$0,
