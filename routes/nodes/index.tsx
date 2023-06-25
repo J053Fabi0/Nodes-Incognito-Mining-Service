@@ -68,7 +68,7 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
 
   return (
     <>
-      <div class="mt-2">
+      <div class="flex flex-wrap gap-2 mt-1">
         {nodeNumbers.map((n) => (
           <a href={`nodes/${n}?${relative ? "relative&" : ""}page=`} class="cursor-pointer mr-2">
             <Pill color={colors[(n - 1) % colors.length]}>
@@ -80,52 +80,52 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
 
       <hr class="my-5" />
 
-      <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
-        <thead>
-          <tr>
-            <th class={styles.th}>Epoch</th>
-            <th class={styles.th}>Date</th>
-            <th class={styles.th}>Node</th>
-            <th class={styles.th}>Earning</th>
-          </tr>
-        </thead>
-        <tbody>
-          {earnings.map((e) => {
-            const nodeNumber = nodes[`${e.node}`];
+      <div class="overflow-x-auto">
+        <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
+          <thead>
+            <tr>
+              <th class={styles.th}>Epoch</th>
+              <th class={styles.th}>Date</th>
+              <th class={styles.th}>Node</th>
+              <th class={styles.th}>Earning</th>
+            </tr>
+          </thead>
+          <tbody>
+            {earnings.map((e) => {
+              const nodeNumber = nodes[`${e.node}`];
 
-            return (
-              <tr>
-                <td class={styles.td}>
-                  <code>{e.epoch}</code>
-                </td>
+              return (
+                <tr>
+                  <td class={styles.td}>
+                    <code>{e.epoch}</code>
+                  </td>
 
-                <td class={styles.td}>
-                  {relative ? <RelativeDate date={+e.time} /> : <LocaleDate date={+e.time} />}
-                </td>
+                  <td class={styles.td}>
+                    {relative ? <RelativeDate date={+e.time} /> : <LocaleDate date={+e.time} />}
+                  </td>
 
-                <td class={styles.td}>
-                  <Pill color={colors[(nodeNumber - 1) % colors.length]}>
-                    <code>{nodeNumber}</code>
-                  </Pill>
-                </td>
+                  <td class={styles.td}>
+                    <Pill color={colors[(nodeNumber - 1) % colors.length]}>
+                      <code>{nodeNumber}</code>
+                    </Pill>
+                  </td>
 
-                <td class={styles.td}>
-                  <code>{e.earning}</code>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      <div class="flex justify-center mt-5">
-        <Pagination
-          maxPages={7}
-          pages={pages}
-          currentPage={page}
-          baseUrl={`nodes/?${relative ? "relative&" : ""}page=`}
-        />
+                  <td class={styles.td}>
+                    <code>{e.earning}</code>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
+
+      <Pagination
+        maxPages={7}
+        pages={pages}
+        currentPage={page}
+        baseUrl={`nodes/?${relative ? "relative&" : ""}page=`}
+      />
     </>
   );
 }

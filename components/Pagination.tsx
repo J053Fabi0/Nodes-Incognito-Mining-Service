@@ -1,7 +1,6 @@
 import { BsCaretLeftFill, BsCaretRightFill } from "react-icons/bs";
 
-const commonClasses =
-  "mx-1 flex h-9 w-9 items-center justify-center rounded-full p-0 text-sm transition duration-150 ease-in-out";
+const commonClasses = "flex h-9 w-9 items-center justify-center rounded-full p-0 text-sm";
 
 const classes = {
   active: `${commonClasses} bg-pink-500 text-white shadow-md`,
@@ -49,60 +48,46 @@ export default function Pagination({ baseUrl, pages, currentPage, maxPages = 5 }
 
   return (
     <nav>
-      <ul class="flex">
+      <div class="flex flex-wrap gap-2 justify-center">
         {/* Previous button */}
         {pagesToTheLeft.length > 0 ? (
-          <li>
-            <a
-              aria-label="Previous"
-              class={classes.inactive}
-              href={`${baseUrl}${pagesToTheLeft[pagesToTheLeft.length - 1]}`}
-            >
-              <BsCaretLeftFill size={16} />
-            </a>
-          </li>
+          <a
+            aria-label="Previous"
+            class={classes.inactive}
+            href={`${baseUrl}${pagesToTheLeft[pagesToTheLeft.length - 1]}`}
+          >
+            <BsCaretLeftFill size={16} />
+          </a>
         ) : (
-          <li class="invisible">
-            <span class={classes.inactive} />
-          </li>
+          <span class={"invisible " + classes.inactive} />
         )}
 
         {/* Pages to the left */}
         {pagesToTheLeft.map((page) => (
-          <li>
-            <a class={classes.inactive} href={`${baseUrl}${page}`}>
-              {page}
-            </a>
-          </li>
+          <a class={classes.inactive} href={`${baseUrl}${page}`}>
+            {page}
+          </a>
         ))}
 
         {/* Current page */}
-        <li>
-          <span class={`${classes.active} select-none`}>{currentPage}</span>
-        </li>
+        <span class={`${classes.active} select-none`}>{currentPage}</span>
 
         {/* Pages to the right */}
         {pagesToTheRight.map((page) => (
-          <li>
-            <a class={classes.inactive} href={`${baseUrl}${page}`}>
-              {page}
-            </a>
-          </li>
+          <a class={classes.inactive} href={`${baseUrl}${page}`}>
+            {page}
+          </a>
         ))}
 
         {/* Next button */}
         {pagesToTheRight.length > 0 ? (
-          <li>
-            <a aria-label="Next" class={classes.inactive} href={`${baseUrl}${pagesToTheRight[0]}`}>
-              <BsCaretRightFill size={16} />
-            </a>
-          </li>
+          <a aria-label="Next" class={classes.inactive} href={`${baseUrl}${pagesToTheRight[0]}`}>
+            <BsCaretRightFill size={16} />
+          </a>
         ) : (
-          <li class="invisible">
-            <span class={classes.inactive} />
-          </li>
+          <span class={"invisible " + classes.inactive} />
         )}
-      </ul>
+      </div>
     </nav>
   );
 }
