@@ -66,14 +66,14 @@ export default function Home({ data }: PageProps<HomeProps>) {
       </ul>
 
       <Typography variant="h2" class="mb-5">
-        Some statistics
+        Some statistics from all our hosted nodes
       </Typography>
 
       <table class="table-auto border-collapse border border-slate-400 mb-5">
         <tbody>
           <tr>
             <td class={styles.td}>
-              <Typography variant="h4">Hosted nodes</Typography>
+              <Typography variant="h4">Nodes</Typography>
             </td>
             <td class={styles.td}>
               <Typography variant="h4">
@@ -83,11 +83,21 @@ export default function Home({ data }: PageProps<HomeProps>) {
           </tr>
           <tr>
             <td class={styles.td}>
-              <Typography variant="h4">Total earnings count</Typography>
+              <Typography variant="h4">Earnings count</Typography>
             </td>
             <td class={styles.td}>
               <Typography variant="h4">
                 <code>{earningsCount}</code>
+              </Typography>
+            </td>
+          </tr>
+          <tr>
+            <td class={styles.td}>
+              <Typography variant="h4">Average monthly earnings per node</Typography>
+            </td>
+            <td class={styles.td}>
+              <Typography variant="h4">
+                <code>{toFixedS(totalAverage, 2)} PRV</code>
               </Typography>
             </td>
           </tr>
@@ -105,7 +115,7 @@ export default function Home({ data }: PageProps<HomeProps>) {
               {
                 data: chartData,
                 backgroundColor: BAR_COLORS,
-                label: `Average monthly earnings per node. ${toFixedS(totalAverage, 2)} final average.`,
+                label: `Average monthly earnings per node.`,
               },
             ],
           }}
