@@ -3,24 +3,18 @@ import State from "../../../types/state.type.ts";
 import redirect from "../../../utils/redirect.ts";
 import Switch from "../../../components/Switch.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
-import LocaleDate from "../../../islands/LocaleDate.tsx";
 import { toFixedS } from "../../../utils/numbersString.ts";
 import Pagination from "../../../components/Pagination.tsx";
 import Typography from "../../../components/Typography.tsx";
-import RelativeDate from "../../../islands/RelativeDate.tsx";
 import getQueryParams from "../../../utils/getQueryParams.ts";
 import NodePill from "../../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../../controllers/node.controller.ts";
+import EarningsTable from "../../../components/Nodes/EarningsTable.tsx";
 import NodeEarning from "../../../types/collections/nodeEarning.type.ts";
 import { getTotalEarnings } from "../../../controllers/nodeEarning.controller.ts";
 import { getNodeEarnings, countNodeEarnings } from "../../../controllers/nodeEarning.controller.ts";
 
-const styles = {
-  th: "border border-slate-300 py-2 px-3",
-  td: "border border-slate-300 py-2 px-3 text-center",
-};
-
-interface NodesProps {
+interface NodesEarningsProps {
   page: number;
   pages: number[];
   relative: boolean;
@@ -32,7 +26,7 @@ interface NodesProps {
 
 const LIMIT = 30;
 
-export const handler: Handlers<NodesProps, State> = {
+export const handler: Handlers<NodesEarningsProps, State> = {
   async GET(req, ctx) {
     const params = getQueryParams(req.url);
 
@@ -47,7 +41,7 @@ export const handler: Handlers<NodesProps, State> = {
       { projection: { _id: 1, number: 1 } }
     );
     const nodesIds = nodes.map((node) => node._id);
-    const nodesByNumber: NodesProps["nodes"] = {};
+    const nodesByNumber: NodesEarningsProps["nodes"] = {};
     for (const node of nodes) nodesByNumber[`${node._id}`] = node.number;
 
     const earningsCount = await countNodeEarnings({ node: { $in: nodesIds } });
@@ -80,7 +74,7 @@ export const handler: Handlers<NodesProps, State> = {
   },
 };
 
-export default function NodesEarnings({ data }: PageProps<NodesProps>) {
+export default function NodesEarnings({ data }: PageProps<NodesEarningsProps>) {
   const { nodes, earnings, pages, page, relative } = data;
   const nodeNumbers = Object.values(nodes);
   const nodesCount = nodeNumbers.length;
@@ -114,39 +108,7 @@ export default function NodesEarnings({ data }: PageProps<NodesProps>) {
 
       <hr class="my-5" />
 
-      <div class="overflow-x-auto">
-        <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
-          <thead>
-            <tr>
-              <th class={styles.th}>Epoch</th>
-              <th class={styles.th}>Date</th>
-              <th class={styles.th}>Node</th>
-              <th class={styles.th}>Earning</th>
-            </tr>
-          </thead>
-          <tbody>
-            {earnings.map((e) => (
-              <tr>
-                <td class={styles.td}>
-                  <code>{e.epoch}</code>
-                </td>
-
-                <td class={styles.td}>
-                  {relative ? <RelativeDate date={+e.time} /> : <LocaleDate date={+e.time} />}
-                </td>
-
-                <td class={styles.td}>
-                  <NodePill nodeNumber={nodes[`${e.node}`]} relative={relative} />
-                </td>
-
-                <td class={styles.td}>
-                  <code>{e.earning}</code>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <EarningsTable earnings={earnings} nodes={nodes} relative={relative} />
 
       {pages.length > 1 && (
         <Pagination
