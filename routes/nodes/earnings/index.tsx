@@ -12,6 +12,7 @@ import { getNodes } from "../../../controllers/node.controller.ts";
 import EarningsTable from "../../../components/Nodes/EarningsTable.tsx";
 import NodeEarning from "../../../types/collections/nodeEarning.type.ts";
 import { getTotalEarnings } from "../../../controllers/nodeEarning.controller.ts";
+import MonthlyEarningsTable from "../../../components/Nodes/MonthlyEarningsTable.tsx";
 import { getNodeEarnings, countNodeEarnings } from "../../../controllers/nodeEarning.controller.ts";
 
 interface NodesEarningsProps {
@@ -19,8 +20,7 @@ interface NodesEarningsProps {
   pages: number[];
   relative: boolean;
   earnings: NodeEarning[];
-  thisMonthsEarnings: string;
-  lastMonthsEarnings: string;
+  monthEarnings: string[];
   nodes: Record<string, number>;
 }
 
@@ -59,16 +59,19 @@ export const handler: Handlers<NodesEarningsProps, State> = {
       }
     );
 
-    const thisMonthsEarnings = toFixedS(await getTotalEarnings(nodesIds, 0), 9);
-    const lastMonthsEarnings = toFixedS(await getTotalEarnings(nodesIds, 1), 9);
+    const monthEarnings: string[] = [];
+    for (let i = 0; i < 2; i++) {
+      const earning = await getTotalEarnings(nodesIds, i);
+      if (earning) monthEarnings.push(toFixedS(earning, 2));
+      else break;
+    }
 
     return ctx.render({
       page,
       pages,
       earnings,
       relative,
-      thisMonthsEarnings,
-      lastMonthsEarnings,
+      monthEarnings,
       nodes: nodesByNumber,
     });
   },
@@ -83,22 +86,23 @@ export default function NodesEarnings({ data }: PageProps<NodesEarningsProps>) {
 
   return (
     <>
-      <Typography variant="h3">
-        This month's earnings:&nbsp;
-        <code>{data.thisMonthsEarnings}</code>
-      </Typography>
-      {data.lastMonthsEarnings !== "0" && (
-        <Typography variant="h3">
-          Last month's earnings:&nbsp;
-          <code>{data.lastMonthsEarnings}</code>
+      <MonthlyEarningsTable monthEarnings={data.monthEarnings} horizontal />
+      <a href="earnings/monthly">
+        <Typography variant="p" class="my-2 hover:underline after:content-['_↗'] text-blue-600">
+          View more
         </Typography>
-      )}
+      </a>
 
-      <hr class="my-5" />
+      <hr class="mb-5" />
 
       <div class="flex flex-wrap items-center gap-3 mt-1">
         {nodeNumbers.map((n, i) => (
-          <NodePill nodeNumber={n} relative={relative} class={i === nodesCount - 1 ? "mr-3" : ""} />
+          <NodePill
+            nodeNumber={n}
+            baseURL="earnings"
+            relative={relative}
+            class={i === nodesCount - 1 ? "mr-3" : ""}
+          />
         ))}
 
         <a href={`earnings/?${relative ? "" : "relative&"}page=${page}`}>
@@ -108,7 +112,7 @@ export default function NodesEarnings({ data }: PageProps<NodesEarningsProps>) {
 
       <hr class="my-5" />
 
-      <EarningsTable earnings={earnings} nodes={nodes} relative={relative} />
+      <EarningsTable baseURL="earnings" earnings={earnings} nodes={nodes} relative={relative} />
 
       {pages.length > 1 && (
         <Pagination

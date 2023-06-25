@@ -13,7 +13,10 @@ export default function Nodes() {
 
       <ul class="list-disc list-inside mb-5">
         <li class={styles.li}>
-          <a href="nodes/earnings?relative">Earnings</a>
+          <a href="nodes/earnings?relative">All earnings records</a>
+        </li>
+        <li class={styles.li}>
+          <a href="nodes/earnings/monthly">Monthly earnings statistics</a>
         </li>
       </ul>
     </>

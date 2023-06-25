@@ -10,9 +10,10 @@ import * as $4 from "./routes/credentials.tsx";
 import * as $5 from "./routes/index.tsx";
 import * as $6 from "./routes/nodes/earnings/[number].tsx";
 import * as $7 from "./routes/nodes/earnings/index.tsx";
-import * as $8 from "./routes/nodes/index.tsx";
-import * as $9 from "./routes/signin.tsx";
-import * as $10 from "./routes/signout.tsx";
+import * as $8 from "./routes/nodes/earnings/monthly.tsx";
+import * as $9 from "./routes/nodes/index.tsx";
+import * as $10 from "./routes/signin.tsx";
+import * as $11 from "./routes/signout.tsx";
 import * as $$0 from "./islands/LocaleDate.tsx";
 import * as $$1 from "./islands/RelativeDate.tsx";
 
@@ -26,9 +27,10 @@ const manifest = {
     "./routes/index.tsx": $5,
     "./routes/nodes/earnings/[number].tsx": $6,
     "./routes/nodes/earnings/index.tsx": $7,
-    "./routes/nodes/index.tsx": $8,
-    "./routes/signin.tsx": $9,
-    "./routes/signout.tsx": $10,
+    "./routes/nodes/earnings/monthly.tsx": $8,
+    "./routes/nodes/index.tsx": $9,
+    "./routes/signin.tsx": $10,
+    "./routes/signout.tsx": $11,
   },
   islands: {
     "./islands/LocaleDate.tsx": $$0,

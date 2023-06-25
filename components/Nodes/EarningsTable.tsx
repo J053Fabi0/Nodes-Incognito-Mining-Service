@@ -1,5 +1,5 @@
-import NodePill from "./NodePill.tsx";
 import LocaleDate from "../../islands/LocaleDate.tsx";
+import NodePill, { NodePillProps } from "./NodePill.tsx";
 import RelativeDate from "../../islands/RelativeDate.tsx";
 import NodeEarning from "../../types/collections/nodeEarning.type.ts";
 
@@ -12,11 +12,19 @@ interface EarninsTableProps {
   /** Wether or not to use relative time */
   relative: boolean;
   earnings: NodeEarning[];
+
   /** Id as key and node number as value */
   nodes: Record<string, number>;
+
+  /**
+   * The base URL to use for the nodes' pills.
+   * If it's null, the node pill will not be clickable.
+   * `baseURL + "/${nodeNumber}"`
+   * */
+  baseURL: NodePillProps["baseURL"];
 }
 
-export default function EarningsTable({ relative, earnings, nodes }: EarninsTableProps) {
+export default function EarningsTable({ relative, earnings, nodes, baseURL }: EarninsTableProps) {
   return (
     <div class="overflow-x-auto">
       <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
@@ -40,7 +48,7 @@ export default function EarningsTable({ relative, earnings, nodes }: EarninsTabl
               </td>
 
               <td class={styles.td}>
-                <NodePill nodeNumber={nodes[`${e.node}`]} relative={relative} />
+                <NodePill baseURL={baseURL} nodeNumber={nodes[`${e.node}`]} relative={relative} />
               </td>
 
               <td class={styles.td}>

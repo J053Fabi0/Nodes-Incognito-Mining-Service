@@ -11,24 +11,33 @@ export const NODE_PILL_COLORS: PillProps["color"][] = [
   "gray",
 ];
 
-interface NodePillProps {
+export interface NodePillProps extends JSX.HTMLAttributes<HTMLAnchorElement & HTMLSpanElement> {
   nodeNumber: number;
   relative: boolean;
+  /**
+   * The base URL to use for the node pill.
+   * If it's null, the node pill will not be clickable.
+   * `baseURL + "/${nodeNumber}"`
+   * */
+  baseURL: string | null;
 }
 
-export default function NodePill({
-  relative,
-  nodeNumber,
-  class: classes,
-  ...props
-}: JSX.HTMLAttributes<HTMLAnchorElement> & NodePillProps) {
-  const style = `${classes ?? ""} cursor-pointer`;
+export default function NodePill({ baseURL, relative, nodeNumber, class: classes, ...props }: NodePillProps) {
+  const style = `${classes ?? ""} ${baseURL === null ? "" : "cursor-pointer"}`;
 
-  return (
-    <a href={`earnings/${nodeNumber}${relative ? "?relative" : ""}`} class={style} {...props}>
-      <Pill color={NODE_PILL_COLORS[(nodeNumber - 1) % NODE_PILL_COLORS.length]}>
-        <code>{nodeNumber}</code>
-      </Pill>
+  const pill = (
+    <Pill color={NODE_PILL_COLORS[(nodeNumber - 1) % NODE_PILL_COLORS.length]}>
+      <code>{nodeNumber}</code>
+    </Pill>
+  );
+
+  return baseURL === null ? (
+    <span class={style} {...(props as unknown as JSX.HTMLAttributes<HTMLSpanElement>)}>
+      {pill}
+    </span>
+  ) : (
+    <a href={`${baseURL}/${nodeNumber}${relative ? "?relative" : ""}`} class={style} {...props}>
+      {pill}
     </a>
   );
 }
