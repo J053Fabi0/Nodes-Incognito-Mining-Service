@@ -1,6 +1,7 @@
 import { ObjectId } from "mongo";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
+import Switch from "../../components/Switch.tsx";
 import LocaleDate from "../../islands/LocaleDate.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Pagination from "../../components/Pagination.tsx";
@@ -61,15 +62,20 @@ export const handler: Handlers<NodesProps, State> = {
 export default function Nodes({ data }: PageProps<NodesProps>) {
   const { nodes, earnings, pages, page, relative } = data;
   const nodeNumbers = Object.values(nodes);
+  const nodesCount = nodeNumbers.length;
 
-  if (nodeNumbers.length === 0) return <Typography variant="h3">You don't have any nodes yet.</Typography>;
+  if (nodesCount === 0) return <Typography variant="h3">You don't have any nodes yet.</Typography>;
 
   return (
     <>
-      <div class="flex flex-wrap gap-2 mt-1">
-        {nodeNumbers.map((n) => (
-          <NodePill nodeNumber={n} relative={relative} />
+      <div class="flex flex-wrap items-center gap-3 mt-1">
+        {nodeNumbers.map((n, i) => (
+          <NodePill nodeNumber={n} relative={relative} class={i === nodesCount - 1 ? "mr-3" : ""} />
         ))}
+
+        <a href={`nodes?${relative ? "" : "relative&"}page=${page}`}>
+          <Switch checked={relative} size={20} color="sky" label="Relative dates" />
+        </a>
       </div>
 
       <hr class="my-5" />
