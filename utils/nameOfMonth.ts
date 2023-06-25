@@ -1,5 +1,5 @@
 const nameOfMonth = (date = new Date()) => {
-  switch (date.getMonth()) {
+  switch (date.getUTCMonth()) {
     case 0:
       return "January";
     case 1:
