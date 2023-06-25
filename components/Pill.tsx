@@ -6,7 +6,9 @@ const colors = {
   orange: "bg-orangePastel",
   yellow: "bg-yellowPastel",
   green: "bg-greenPastel",
-  blue: "bg-bluePastel text-sky-800",
+  blue: "bg-bluePastel",
+  purple: "bg-purplePastel",
+  gray: "bg-slate-300 text-slate-800",
 };
 
 export interface PillProps {

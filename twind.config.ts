@@ -13,6 +13,7 @@ export default {
           yellowPastel: "#fafa9e",
           greenPastel: "#baffc9",
           bluePastel: "#bae1ff",
+          purplePastel: "#e6beff",
         },
       },
     },

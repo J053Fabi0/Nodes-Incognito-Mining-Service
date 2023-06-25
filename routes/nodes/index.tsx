@@ -1,17 +1,17 @@
 import { ObjectId } from "mongo";
 import State from "../../types/state.type.ts";
+import redirect from "../../utils/redirect.ts";
 import LocaleDate from "../../islands/LocaleDate.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
+import Pagination from "../../components/Pagination.tsx";
 import RelativeDate from "../../islands/RelativeDate.tsx";
 import getQueryParams from "../../utils/getQueryParams.ts";
 import Pill, { PillProps } from "../../components/Pill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
 import NodeEarning from "../../types/collections/nodeEarning.type.ts";
 import { countNodeEarnings, getNodeEarnings } from "../../controllers/nodeEarning.controller.ts";
-import Pagination from "../../components/Pagination.tsx";
-import redirect from "../../utils/redirect.ts";
 
-const colors: PillProps["color"][] = ["red", "orange", "yellow", "green", "blue"];
+const colors: PillProps["color"][] = ["red", "orange", "yellow", "green", "blue", "purple", "gray"];
 
 const styles = {
   th: "border border-slate-300 py-2 px-3",
@@ -64,6 +64,18 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
 
   return (
     <>
+      <div class="mt-2">
+        {Object.values(nodes).map((n) => (
+          <a href={`nodes/${n}?${relative ? "relative&" : ""}page=`} class="cursor-pointer mr-2">
+            <Pill color={colors[(n - 1) % colors.length]}>
+              <code>{n}</code>
+            </Pill>
+          </a>
+        ))}
+      </div>
+
+      <hr class="my-5" />
+
       <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
         <thead>
           <tr>
@@ -88,7 +100,7 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
                 </td>
 
                 <td class={styles.td}>
-                  <Pill color={colors[Math.max(nodeNumber - 1, 0) % colors.length]}>
+                  <Pill color={colors[(nodeNumber - 1) % colors.length]}>
                     <code>{nodeNumber}</code>
                   </Pill>
                 </td>
@@ -105,8 +117,8 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
       <div class="flex justify-center mt-5">
         <Pagination
           maxPages={7}
-          pages={data.pages}
-          currentPage={data.page}
+          pages={pages}
+          currentPage={page}
           baseUrl={`nodes/?${relative ? "relative&" : ""}page=`}
         />
       </div>
