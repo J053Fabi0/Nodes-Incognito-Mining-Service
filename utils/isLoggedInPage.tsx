@@ -1,4 +1,8 @@
-export const loggedInURLs = ["/nodes"].map((pathname) => new URLPattern({ pathname }));
+export const loggedInURLs = [
+  //
+  "/nodes",
+  "/nodes/*",
+].map((pathname) => new URLPattern({ pathname }));
 
 /**
  * @param url The full URL of the page, including the domain name and protocol
