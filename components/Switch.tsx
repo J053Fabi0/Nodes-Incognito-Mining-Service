@@ -27,12 +27,12 @@ export default function Switch({
     h-[${size}px] w-[${size}px]
     bg-${checked ? `${color}-400` : "slate-500"}
     rounded-full
-    absolute top-[-${size * 0.15}px] ${checked ? "left" : "right"}-0
+    absolute top-[-${size * 0.15}px] ${checked ? "right" : "left"}-0
   `;
 
   return (
     <div class={classes}>
-      <div class="flex items-top">
+      <div class="flex items-center">
         <button {...props} class={buttonClass}>
           <div class={circleClass} />
         </button>
