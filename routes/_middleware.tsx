@@ -1,10 +1,11 @@
 import { ObjectId } from "mongo";
 import State from "../types/state.type.ts";
 import redirect from "../utils/redirect.ts";
+import isAdminPage from "../utils/isAdminPage.tsx";
 import { cookieSession } from "fresh-session/mod.ts";
-import { isAdminPage } from "../utils/isAdminPage.tsx";
 import { Middleware } from "$fresh/src/server/types.ts";
 import { getClient } from "../controllers/client.controller.ts";
+import isLoggedInPage from "../utils/isLoggedInPage.tsx";
 
 const session = cookieSession({
   secure: true,
@@ -42,19 +43,21 @@ export const { handler }: Middleware<State> = {
       return ctx.next();
     },
 
-    // check if the user is trying to access an admin page
+    // check if the user is trying to access a page he's not supposed to
     async (req, ctx) => {
       const url = new URL(req.url);
       if (url.pathname === "") return await ctx.next();
 
+      // admin pages
       if (!ctx.state.isAdmin) {
         if (url.pathname === "/signin") return ctx.next();
 
         // redirect to signin page if the user is trying to access an admin page
         if (isAdminPage(req.url)) return redirect("/signin");
-
-        return ctx.next();
       }
+
+      // logged-in pages
+      if (!ctx.state.user && isLoggedInPage(req.url)) return redirect("/signin");
 
       return ctx.next();
     },

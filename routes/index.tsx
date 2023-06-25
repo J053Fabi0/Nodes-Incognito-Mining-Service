@@ -12,6 +12,7 @@ import { countNodeEarnings } from "../controllers/nodeEarning.controller.ts";
 import Typography, { getTypographyClass } from "../components/Typography.tsx";
 
 const styles = {
+  li: getTypographyClass("lead"),
   td: "border border-slate-300 py-2 px-3",
 };
 
@@ -43,7 +44,6 @@ export const handler: Handlers<HomeProps, State> = {
 export default function Home({ data }: PageProps<HomeProps>) {
   const { nodesCount, earningsCount, months, data: chartData } = data;
   const totalAverage = chartData.reduce((acc, curr) => acc + curr, 0) / chartData.length;
-  const liStyle = getTypographyClass("lead");
 
   return (
     <>
@@ -57,11 +57,11 @@ export default function Home({ data }: PageProps<HomeProps>) {
       </Typography>
 
       <ul class="list-disc list-inside checkUL mb-5">
-        <li class={liStyle}>You provide the stake, we the infrastructure.</li>
-        <li class={liStyle}>Earnings and stake in your control, we don't ask for any private keys.</li>
-        <li class={liStyle}>
+        <li class={styles.li}>You provide the stake, we the infrastructure.</li>
+        <li class={styles.li}>Earnings and stake in your control, we don't ask for any private keys.</li>
+        <li class={styles.li}>
           Monthly fee is based on earnings: 10%, no more.
-          <li class={liStyle}>5 USD for each node's initial setup.</li>
+          <li class={styles.li}>5 USD for each node's initial setup.</li>
         </li>
       </ul>
 

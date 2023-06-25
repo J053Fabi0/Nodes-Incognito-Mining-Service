@@ -3,15 +3,12 @@ import CommonCollection from "./commonCollection.type.ts";
 
 export default interface Node extends CommonCollection {
   name: string;
-  /**
-   * Its identifier for the tables
-   * @deprecated Use name instead
-   */
   number: number;
   client: ObjectId;
+  inactive: boolean;
   dockerIndex: number;
-  validatorPublic: string;
   paymentAddress: string;
+  validatorPublic: string;
   /** To whom send notifications. This can or cannot include the owner */
   sendTo: ObjectId[];
 }
