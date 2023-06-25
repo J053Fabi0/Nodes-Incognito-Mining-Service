@@ -13,7 +13,7 @@ export default function Nodes() {
 
       <ul class="list-disc list-inside mb-5">
         <li class={styles.li}>
-          <a href="nodes/earnings">Earnings</a>
+          <a href="nodes/earnings?relative">Earnings</a>
         </li>
       </ul>
     </>
