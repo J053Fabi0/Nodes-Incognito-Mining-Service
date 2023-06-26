@@ -1,7 +1,7 @@
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 
 const styles = {
-  li: `${getTypographyClass("lead")} underline`,
+  li: `${getTypographyClass("lead")}`,
 };
 
 export default function Nodes() {
@@ -13,10 +13,14 @@ export default function Nodes() {
 
       <ul class="list-disc list-inside mb-5">
         <li class={styles.li}>
-          <a href="nodes/earnings?relative">All earnings records</a>
+          <a href="nodes/earnings?relative" class="underline">
+            All earnings records
+          </a>
         </li>
         <li class={styles.li}>
-          <a href="nodes/earnings/monthly">Monthly earnings statistics</a>
+          <a href="nodes/earnings/monthly" class="underline">
+            Monthly earnings statistics
+          </a>
         </li>
       </ul>
     </>
