@@ -52,7 +52,7 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
               <th class={styles.th}>Node</th>
               <th class={styles.th}>Docker</th>
               <th class={styles.th}>Online</th>
-              <th class={styles.th}>Sync state</th>
+              <th class={styles.th}>Sync</th>
               <th class={styles.th}>Role</th>
               <th class={styles.th}>Shard</th>
               {isAdmin && <th class={styles.th}>Beacon</th>}
@@ -62,6 +62,7 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
             {nodesInfo.map(([node, { docker, beacon, ...shards }]) => {
               const status = nodesStatus[node];
               const shard = shards[`shard${status.shard}`] ?? 0;
+              const sync = status.syncState[0] + status.syncState.slice(1).toLowerCase();
               return (
                 <tr>
                   <td class={styles.td}>
@@ -89,7 +90,17 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
                   </td>
 
                   <td class={styles.td}>
-                    <code>{status.syncState[0] + status.syncState.slice(1).toLowerCase()}</code>
+                    <code>
+                      {sync === "-" || sync === "Latest" ? (
+                        sync
+                      ) : (
+                        <>
+                          {sync.split(" ")[0]}
+                          <br />
+                          {sync.split(" ")[1]}
+                        </>
+                      )}
+                    </code>
                   </td>
 
                   <td class={styles.td}>
