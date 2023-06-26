@@ -29,6 +29,9 @@ export const handler: Handlers<NodesStatusProps, State> = {
       nodes.map((n) => n.dockerIndex)
     );
 
+    console.log(JSON.stringify(nodesInfo));
+    console.log(JSON.stringify(nodesStatus));
+
     return ctx.render({ nodesInfo, nodesStatus, isAdmin: ctx.state.isAdmin });
   },
 };
