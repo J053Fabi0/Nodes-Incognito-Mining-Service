@@ -67,14 +67,14 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
                   </td>
 
                   <td class={styles.td}>
-                    <code>{docker.running ? "🟢 Running" : "🔴 Stopped"}</code>
-                    <br />
                     {docker.restarting && isAdmin && (
-                      <code class="text-red-600">
-                        "Restarting ⚠️"
+                      <code class="text-red-600 font-bold">
+                        ⚠️ Restarting ⚠️
                         <br />
                       </code>
                     )}
+                    <code>{docker.running ? "🟢 Running" : "🔴 Stopped"}</code>
+                    <br />
                     <code>
                       {docker.running
                         ? rangeMsToTimeDescription(docker.startedAt, undefined, { short: true })
