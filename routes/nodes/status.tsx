@@ -40,11 +40,6 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
           <tr>
             <th class={styles.th}>Node</th>
             <th class={styles.th}>Docker</th>
-            <th class={styles.th}>
-              Epochs to
-              <br />
-              next event
-            </th>
             <th class={styles.th}>Online</th>
             <th class={styles.th}>Sync state</th>
             <th class={styles.th}>Role</th>
@@ -71,10 +66,6 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
                 </td>
 
                 <td class={styles.td}>
-                  <code>{status.epochsToNextEvent}</code>
-                </td>
-
-                <td class={styles.td}>
                   <code>{status.status === "ONLINE" ? "🟢" : "🔴"}</code>
                 </td>
 
@@ -84,6 +75,8 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
 
                 <td class={styles.td}>
                   <code>{status.role[0] + status.role.slice(1).toLowerCase()}</code>
+                  <br />
+                  For <code>{status.epochsToNextEvent}</code> epochs
                 </td>
 
                 <td class={styles.td}>
