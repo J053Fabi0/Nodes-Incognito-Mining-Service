@@ -13,6 +13,7 @@ export const NODE_PILL_COLORS: PillProps["color"][] = [
 
 export interface NodePillProps extends JSX.HTMLAttributes<HTMLAnchorElement & HTMLSpanElement> {
   nodeNumber: number;
+  /** Wether or not to add a relative param to the URL */
   relative: boolean;
   /**
    * The base URL to use for the node pill.

@@ -3,6 +3,7 @@ import State from "../../types/state.type.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
+import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
 
 const styles = {
@@ -52,11 +53,17 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
             return (
               <tr>
                 <td class={styles.td}>
-                  <NodePill baseURL={null} nodeNumber={+node} relative={false} />
+                  <NodePill baseURL={null} nodeNumber={+node} relative />
                 </td>
 
                 <td class={styles.td}>
                   <code>{docker.running ? "🟢 Running" : "🔴 Stopped"}</code>
+                  <br />
+                  <code>
+                    {docker.running
+                      ? rangeMsToTimeDescription(docker.startedAt, undefined, { short: true })
+                      : rangeMsToTimeDescription(docker.finishedAt, undefined, { short: true })}
+                  </code>
                 </td>
 
                 <td class={styles.td}>
@@ -76,7 +83,7 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
                 </td>
 
                 <td class={styles.td}>
-                  <code>{status.shard}</code>
+                  <NodePill baseURL={null} nodeNumber={+status.shard} relative />
                 </td>
               </tr>
             );
