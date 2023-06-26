@@ -43,7 +43,7 @@ export async function getTotalEarnings(nodeOrNodes: ObjectId | ObjectId[] | null
   const totalEarnings = (await aggregateNodeEarning([
     { $match: match },
     { $group: { _id: null, total: { $sum: "$earning" } } },
-  ])) as unknown as [{ _id: null; total: number }];
+  ])) as unknown as [{ _id: null; total: number }] | [];
 
-  return totalEarnings[0].total || 0;
+  return totalEarnings[0]?.total || 0;
 }

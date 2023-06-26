@@ -8,17 +8,18 @@ interface MonthlyEarningsProps {
 
 const styles = {
   th: "border border-slate-300 py-2 px-3",
-  td: "border border-slate-300 py-2 px-3 text-center",
+  td: "border border-slate-300 py-2 px-3",
 };
 
 export default function MonthlyEarningsTable({ monthEarnings, horizontal }: MonthlyEarningsProps) {
-  const months = Array.from({ length: monthEarnings.length })
+  const numberOfMonths = monthEarnings.length;
+  const months = Array.from({ length: numberOfMonths })
     .map((_, i) =>
       dayjs()
         .subtract(i + 1, "month")
         .toDate()
     )
-    .map((m) => nameOfMonth(m));
+    .map((m) => nameOfMonth(m) + (numberOfMonths >= 13 ? ` ${m.getFullYear()}` : ""));
 
   return (
     <div class="overflow-x-auto">
@@ -56,7 +57,7 @@ export default function MonthlyEarningsTable({ monthEarnings, horizontal }: Mont
                 <tr>
                   <td class={styles.td}>{months[i]}</td>
 
-                  <td class={styles.th}>
+                  <td class={styles.td}>
                     <code>{earning}</code>
                   </td>
                 </tr>
