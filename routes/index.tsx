@@ -81,6 +81,7 @@ export default function Home({ data }: PageProps<HomeProps>) {
               </Typography>
             </td>
           </tr>
+
           <tr>
             <td class={styles.td}>
               <Typography variant="h4">Earnings count</Typography>
@@ -91,6 +92,7 @@ export default function Home({ data }: PageProps<HomeProps>) {
               </Typography>
             </td>
           </tr>
+
           <tr>
             <td class={styles.td}>
               <Typography variant="h4">Average monthly earnings per node</Typography>
@@ -107,8 +109,8 @@ export default function Home({ data }: PageProps<HomeProps>) {
       <div class="overflow-x-auto">
         <Chart
           type="bar"
-          options={{ devicePixelRatio: 1 }}
           width={500}
+          options={{ devicePixelRatio: 1 }}
           data={{
             labels: months,
             datasets: [
