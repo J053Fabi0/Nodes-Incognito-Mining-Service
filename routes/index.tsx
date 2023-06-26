@@ -84,7 +84,7 @@ export default function Home({ data }: PageProps<HomeProps>) {
 
           <tr>
             <td class={styles.td}>
-              <Typography variant="h4">Earnings count</Typography>
+              <Typography variant="h4">Total earnings count</Typography>
             </td>
             <td class={styles.td}>
               <Typography variant="h4">
