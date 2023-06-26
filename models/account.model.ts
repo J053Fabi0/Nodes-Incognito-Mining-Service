@@ -1,7 +1,7 @@
 import db from "../initDatabase.ts";
 import Account from "../types/collections/account.type.ts";
 
-const accountModel = db.collection<Account>("clients");
+const accountModel = db.collection<Account>("accounts");
 
 accountModel.createIndexes({
   indexes: [
