@@ -1,6 +1,7 @@
 import { ObjectId } from "mongo";
 import State from "../../types/state.type.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
+import Typography from "../../components/Typography.tsx";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
@@ -12,6 +13,7 @@ const styles = {
 };
 
 interface NodesStatusProps {
+  isAdmin: boolean;
   nodesInfo: NodeInfoByDockerIndex[];
   nodesStatus: NodesStatusByDockerIndex;
 }
@@ -27,66 +29,89 @@ export const handler: Handlers<NodesStatusProps, State> = {
       nodes.map((n) => n.dockerIndex)
     );
 
-    return ctx.render({ nodesInfo, nodesStatus });
+    return ctx.render({ nodesInfo, nodesStatus, isAdmin: ctx.state.isAdmin });
   },
 };
 
 export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
-  const { nodesInfo, nodesStatus } = data;
+  const { nodesInfo, nodesStatus, isAdmin } = data;
   return (
-    <div class="overflow-x-auto">
-      <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
-        <thead>
-          <tr>
-            <th class={styles.th}>Node</th>
-            <th class={styles.th}>Docker</th>
-            <th class={styles.th}>Online</th>
-            <th class={styles.th}>Sync state</th>
-            <th class={styles.th}>Role</th>
-            <th class={styles.th}>Shard</th>
-          </tr>
-        </thead>
-        <tbody>
-          {nodesInfo.map(([node, { docker, beacon, shard: _, ...info }]) => {
-            const status = nodesStatus[node];
-            return (
-              <tr>
-                <td class={styles.td}>
-                  <NodePill baseURL={null} nodeNumber={+node} relative />
-                </td>
+    <>
+      <Typography variant="h1" class="mt-3">
+        Nodes status.
+      </Typography>
+      <Typography variant="h3" class="mt-1 mb-5">
+        Sorted by docker index.
+      </Typography>
 
-                <td class={styles.td}>
-                  <code>{docker.running ? "🟢 Running" : "🔴 Stopped"}</code>
-                  <br />
-                  <code>
-                    {docker.running
-                      ? rangeMsToTimeDescription(docker.startedAt, undefined, { short: true })
-                      : rangeMsToTimeDescription(docker.finishedAt, undefined, { short: true })}
-                  </code>
-                </td>
+      <div class="overflow-x-auto">
+        <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
+          <thead>
+            <tr>
+              <th class={styles.th}>Node</th>
+              <th class={styles.th}>Docker</th>
+              <th class={styles.th}>Online</th>
+              <th class={styles.th}>Sync state</th>
+              <th class={styles.th}>Role</th>
+              <th class={styles.th}>Shard</th>
+              {isAdmin && <th class={styles.th}>Beacon</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {nodesInfo.map(([node, { docker, beacon }]) => {
+              const status = nodesStatus[node];
+              return (
+                <tr>
+                  <td class={styles.td}>
+                    <NodePill baseURL={null} nodeNumber={+node} relative />
+                  </td>
 
-                <td class={styles.td}>
-                  <code>{status.status === "ONLINE" ? "🟢" : "🔴"}</code>
-                </td>
+                  <td class={styles.td}>
+                    <code>{docker.running ? "🟢 Running" : "🔴 Stopped"}</code>
+                    <br />
+                    {docker.restarting && isAdmin && (
+                      <code class="text-red-600">
+                        "Restarting ⚠️"
+                        <br />
+                      </code>
+                    )}
+                    <code>
+                      {docker.running
+                        ? rangeMsToTimeDescription(docker.startedAt, undefined, { short: true })
+                        : rangeMsToTimeDescription(docker.finishedAt, undefined, { short: true })}
+                    </code>
+                  </td>
 
-                <td class={styles.td}>
-                  <code>{status.syncState[0] + status.syncState.slice(1).toLowerCase()}</code>
-                </td>
+                  <td class={styles.td}>
+                    <code>{status.status === "ONLINE" ? "🟢" : "🔴"}</code>
+                  </td>
 
-                <td class={styles.td}>
-                  <code>{status.role[0] + status.role.slice(1).toLowerCase()}</code>
-                  <br />
-                  For <code>{status.epochsToNextEvent}</code> epochs
-                </td>
+                  <td class={styles.td}>
+                    <code>{status.syncState[0] + status.syncState.slice(1).toLowerCase()}</code>
+                  </td>
 
-                <td class={styles.td}>
-                  <NodePill baseURL={null} nodeNumber={+status.shard} relative />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                  <td class={styles.td}>
+                    <code>{status.role[0] + status.role.slice(1).toLowerCase()}</code>
+                    <br />
+                    For <code>{status.epochsToNextEvent}</code> epochs
+                  </td>
+
+                  <td class={styles.td}>
+                    <NodePill baseURL={null} nodeNumber={+status.shard} relative />
+                  </td>
+
+                  {isAdmin && (
+                    <td class={styles.td}>
+                      {beacon > 0 ? "🟢 " : "🔴 "}
+                      <code>{beacon}</code>
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
