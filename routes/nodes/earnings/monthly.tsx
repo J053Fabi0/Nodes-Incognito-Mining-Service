@@ -87,11 +87,9 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
 
   return (
     <>
-      <Typography variant="h3" class="mb-5">
-        Monthly earnings
-      </Typography>
+      <Typography variant="h3">Monthly earnings</Typography>
       <div class="flex flex-wrap gap-8 justify-center">
-        <MonthlyEarningsTable monthEarnings={monthEarnings} />
+        <MonthlyEarningsTable class="mt-8" monthEarnings={monthEarnings} />
 
         <div class="overflow-x-auto">
           <Chart
