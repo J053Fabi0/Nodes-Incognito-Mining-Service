@@ -20,10 +20,12 @@ interface NodesStatusProps {
 
 export const handler: Handlers<NodesStatusProps, State> = {
   async GET(_, ctx) {
-    const nodes = await getNodes(
-      { _id: new ObjectId(ctx.state.userId!) },
-      { projection: { dockerIndex: 1, _id: 0 } }
-    );
+    const { isAdmin, supplanting } = ctx.state;
+
+    // if it's an admin and not supplanting, get all nodes
+    const nodes = await getNodes(isAdmin && !supplanting ? {} : { _id: new ObjectId(ctx.state.userId!) }, {
+      projection: { dockerIndex: 1, _id: 0 },
+    });
 
     const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(
       nodes.map((n) => n.dockerIndex)
