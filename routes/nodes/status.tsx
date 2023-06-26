@@ -53,14 +53,13 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
                 <td class={styles.td}>
                   <NodePill baseURL={null} nodeNumber={+node} relative={false} />
                 </td>
+
+                <td class={styles.td}>
+                  <code>{docker.running ? "🟢 Running" : "🔴 Stopped"}</code>
+                </td>
               </tr>
             );
           })}
-          <tr>
-            <td class={styles.td}>
-              <NodePill baseURL={null} nodeNumber={1} relative={false} />
-            </td>
-          </tr>
         </tbody>
       </table>
     </div>
