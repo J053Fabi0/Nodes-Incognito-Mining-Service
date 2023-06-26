@@ -85,9 +85,7 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
                     </code>
                   </td>
 
-                  <td class={styles.td}>
-                    <code>{status.status === "ONLINE" ? "🟢" : "🔴"}</code>
-                  </td>
+                  <td class={styles.td}>{status.status === "ONLINE" ? "🟢" : "🔴"}</td>
 
                   <td class={styles.td}>
                     <code>
@@ -121,8 +119,15 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
 
                   {isAdmin && (
                     <td class={styles.td}>
-                      {beacon && beacon > 0 ? "🟢 " : "🔴 "}
-                      <code>{beacon}</code>
+                      {beacon && beacon > 0 ? (
+                        <>
+                          🟢
+                          <br />
+                          <code>{beacon}</code>
+                        </>
+                      ) : (
+                        "🔴"
+                      )}
                     </td>
                   )}
                 </tr>
