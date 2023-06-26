@@ -1,4 +1,4 @@
-import IncognitoCli from "./IncognitoCli.ts";
+import IncognitoCli from "../IncognitoCli.ts";
 
 interface Options {
   /** The number of shards (default: 8) */
