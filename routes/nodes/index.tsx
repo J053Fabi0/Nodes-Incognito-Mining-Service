@@ -25,8 +25,8 @@ export default function Nodes() {
         </li>
 
         <li class={styles.li}>
-          <a href="nodes/status" class="underline">
-            Statuses
+          <a href="nodes/monitor" class="underline">
+            Monitor
           </a>
         </li>
       </ul>

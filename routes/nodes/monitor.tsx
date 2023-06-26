@@ -12,13 +12,13 @@ const styles = {
   td: "border border-slate-300 py-2 px-3 text-center",
 };
 
-interface NodesStatusProps {
+interface MonitorProps {
   isAdmin: boolean;
   nodesInfo: NodeInfoByDockerIndex[];
   nodesStatus: NodesStatusByDockerIndex;
 }
 
-export const handler: Handlers<NodesStatusProps, State> = {
+export const handler: Handlers<MonitorProps, State> = {
   async GET(_, ctx) {
     const { isAdmin, supplanting } = ctx.state;
 
@@ -35,12 +35,12 @@ export const handler: Handlers<NodesStatusProps, State> = {
   },
 };
 
-export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
+export default function Monitor({ data }: PageProps<MonitorProps>) {
   const { nodesInfo, nodesStatus, isAdmin } = data;
 
   return (
     <>
-      <Typography variant="h1">Nodes status.</Typography>
+      <Typography variant="h1">Monitor</Typography>
       <Typography variant="h3" class="mt-1 mb-5">
         Sorted by epochs to next event and role.
       </Typography>
