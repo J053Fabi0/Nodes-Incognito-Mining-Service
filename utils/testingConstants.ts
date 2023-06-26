@@ -159,7 +159,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     shard: "5",
     role: "PENDING",
     isOldVersion: false,
-    syncState: "-",
+    syncState: "BEACON SYNCING",
     epochsToNextEvent: 46,
     inactive: false,
   },
