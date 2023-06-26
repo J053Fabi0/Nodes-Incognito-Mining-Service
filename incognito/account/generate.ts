@@ -11,6 +11,7 @@ interface Options {
   submitKey?: boolean;
 }
 
+/** Generated account */
 export interface Account {
   Index: number;
   PrivateKey: string;

@@ -1,3 +1,4 @@
+import keyInfo from "./account/keyInfo.ts";
 import balanceAccount from "./account/balance.ts";
 import generateAccount from "./account/generate.ts";
 import submitKeyAccount from "./account/submitKey.ts";
@@ -36,8 +37,12 @@ export default class IncognitoCli {
    */
   // @ts-expect-error - This works
   static submitKeyAccount = submitKeyAccount.bind(IncognitoCli);
+
+  /** Print all related-keys of a private key. */
+  declare keyInfo: OmitThisParameter<typeof keyInfo>;
 }
 
 IncognitoCli.prototype.balanceAccount = balanceAccount;
 IncognitoCli.prototype.generateAccount = generateAccount;
 IncognitoCli.prototype.submitKeyAccount = submitKeyAccount;
+IncognitoCli.prototype.keyInfo = keyInfo;

@@ -67,3 +67,11 @@ Deno.test("Submit key", async () => {
   const result = await incognitoCli.submitKeyAccount({ otaKey: account.OTAPrivateKey });
   assertEquals(result, true);
 });
+
+Deno.test("Key info", async () => {
+  const incognitoCli = new IncognitoCli(account.PrivateKey);
+  const result = await incognitoCli.keyInfo();
+
+  const { Index: _, ...noIndexAccount } = account;
+  assertEquals(result, noIndexAccount);
+});
