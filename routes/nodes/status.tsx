@@ -105,7 +105,7 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
 
                   {isAdmin && (
                     <td class={styles.td}>
-                      {beacon > 0 ? "🟢 " : "🔴 "}
+                      {beacon && beacon > 0 ? "🟢 " : "🔴 "}
                       <code>{beacon}</code>
                     </td>
                   )}
