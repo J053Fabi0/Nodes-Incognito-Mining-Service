@@ -25,11 +25,7 @@ const account = {
 Deno.test("Generate account", async () => {
   const incognitoCli = new IncognitoCli();
 
-  const accounts = await incognitoCli.generateAccount({
-    shardID: 4,
-    numAccounts: 2,
-  });
-
+  const accounts = await incognitoCli.generateAccount({ shardID: 4, numAccounts: 2 });
   const keys = Object.keys(accounts);
 
   assertEquals(keys, ["Mnemonic", "Accounts"]);

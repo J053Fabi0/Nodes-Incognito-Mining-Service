@@ -7,6 +7,8 @@ interface Options {
   shardID?: number;
   /** The number of accounts (default: 1) */
   numAccounts?: number;
+  /** Send its otaKey to the server after creation */
+  submitKey?: boolean;
 }
 
 export interface Account {
@@ -34,6 +36,10 @@ export default async function generateAccount(this: IncognitoCli, options?: Opti
   if (options?.shardID) args.push("--shardID", options.shardID.toString());
   if (options?.numAccounts) args.push("--numAccounts", options.numAccounts.toString());
 
-  const a = await this.incognitoCli(args);
-  return JSON.parse(a) as GenerateAccount;
+  const a = JSON.parse(await this.incognitoCli(args)) as GenerateAccount;
+
+  if (options?.submitKey)
+    for (const { OTAPrivateKey } of a.Accounts) await this.submitKeyAccount({ otaKey: OTAPrivateKey });
+
+  return a;
 }
