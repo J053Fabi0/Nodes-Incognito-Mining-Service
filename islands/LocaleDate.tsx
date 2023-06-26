@@ -1,4 +1,9 @@
-export default function LocaleDate({ date }: { date: string | number }) {
+interface LocaleDateProps {
+  date: string | number;
+  method?: "toLocaleString" | "toLocaleDateString" | "toLocaleTimeString";
+}
+
+export default function LocaleDate({ date, method = "toLocaleString" }: LocaleDateProps) {
   const dateObj = new Date(date);
-  return <>{dateObj.toLocaleString()}</>;
+  return <>{dateObj[method]()}</>;
 }
