@@ -46,8 +46,16 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
     const monthEarnings: MonthlyNodesEarningsProps["monthEarnings"] = [];
     for (let i = 0; i <= (all ? months : MAX_MONTHS); i++) {
       const total = toFixedS(await getTotalEarnings(nodesIds, i), 9);
-      if (total !== "0") monthEarnings.push(total);
-      else if (!all) break;
+
+      if (all) {
+        // add all months, even if the earnings are 0
+        monthEarnings.push(total);
+      } else {
+        // add only months with earnings
+        if (total !== "0") monthEarnings.push(total);
+        // and break when any month has 0 earnings
+        else break;
+      }
     }
 
     const monthsLeft = Math.max(0, dayjs().diff(oldestEarning, "month") - monthEarnings.length);
@@ -82,24 +90,26 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
       <Typography variant="h3" class="mb-5">
         Monthly earnings
       </Typography>
-      <MonthlyEarningsTable monthEarnings={monthEarnings} />
+      <div class="flex flex-wrap gap-8 justify-center">
+        <MonthlyEarningsTable monthEarnings={monthEarnings} />
 
-      <div class="overflow-x-auto">
-        <Chart
-          type="bar"
-          options={{ devicePixelRatio: 1 }}
-          width={Math.max(34 * numberOfMonths, 500)}
-          data={{
-            labels: months.reverse(),
-            datasets: [
-              {
-                data: monthEarnings.reverse().map(Number),
-                backgroundColor: BAR_COLORS,
-                label: `Average monthly earnings per node.`,
-              },
-            ],
-          }}
-        />
+        <div class="overflow-x-auto">
+          <Chart
+            type="bar"
+            options={{ devicePixelRatio: 1 }}
+            width={Math.max((numberOfMonths + 1) * 10.38 + 23 * numberOfMonths, 500)}
+            data={{
+              labels: months.reverse(),
+              datasets: [
+                {
+                  data: monthEarnings.reverse().map(Number),
+                  backgroundColor: BAR_COLORS,
+                  label: "Monthly earnings",
+                },
+              ],
+            }}
+          />
+        </div>
       </div>
 
       {monthsLeft > 0 ? (
