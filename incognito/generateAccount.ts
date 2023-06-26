@@ -30,9 +30,9 @@ export interface GenerateAccount {
 
 export default async function generateAccount(this: IncognitoCli, options?: Options) {
   const args = ["account", "generate"];
-  if (options?.numShards) args.push("--numshards", options.numShards.toString());
-  if (options?.shardID) args.push("--shardid", options.shardID.toString());
-  if (options?.numAccounts) args.push("--numaccounts", options.numAccounts.toString());
+  if (options?.numShards) args.push("--numShards", options.numShards.toString());
+  if (options?.shardID) args.push("--shardID", options.shardID.toString());
+  if (options?.numAccounts) args.push("--numAccounts", options.numAccounts.toString());
 
   const a = await this.incognitoCli(args);
   return JSON.parse(a) as GenerateAccount;
