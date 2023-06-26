@@ -1,7 +1,9 @@
+import { IS_PRODUCTION } from "../env.ts";
 import { byNumber, byValues } from "sort-es";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import getNodesStatus, { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 import { Info, ShardsNames, normalizeShard } from "duplicatedFilesCleanerIncognito";
+import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 
 export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
   "NOT_STAKED",
@@ -16,6 +18,13 @@ export type NodeInfoByDockerIndex = [string, Info & { shard: ShardsNames | "" }]
 export type NodesStatusByDockerIndex = Record<string, NodeStatus>;
 
 export default async function sortNodes(nodes: (string | number)[] = []) {
+  if (!IS_PRODUCTION) {
+    return {
+      nodesStatusByDockerIndex: nodesStatusByDockerIndexTest,
+      nodesInfoByDockerIndex: nodesInfoByDockerIndexTest,
+    };
+  }
+
   const nodesStatusByDockerIndex: NodesStatusByDockerIndex = (await getNodesStatus()).reduce(
     (obj, node) => ((obj[node.dockerIndex] = node), obj),
     {} as Record<string, NodeStatus>
