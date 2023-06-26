@@ -4,8 +4,11 @@ dayjs.extend(relativeTime);
 
 interface RelativeDateProps {
   date: string | number;
+  /** Capitalize the first letter */
+  capitalize?: boolean;
 }
 
-export default function RelativeDate({ date }: RelativeDateProps) {
-  return <>{dayjs(date).fromNow()}.</>;
+export default function RelativeDate({ date, capitalize }: RelativeDateProps) {
+  const t = dayjs(date).fromNow();
+  return <>{capitalize ? `${t[0].toUpperCase()}${t.slice(1)}` : t}.</>;
 }
