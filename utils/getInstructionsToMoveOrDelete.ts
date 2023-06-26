@@ -13,7 +13,7 @@ export default async function getInstructionsToMoveOrDelete() {
 
   for (const shard of shardsNames) {
     const nodesWithShard = nodesInfo
-      .filter(([, { [shard]: a }]) => a > duplicatedFilesCleaner.minFilesToConsiderShard)
+      .filter(([, { [shard]: a }]) => a && a > duplicatedFilesCleaner.minFilesToConsiderShard)
       .map(([dockerIndex]) => dockerIndex);
     if (nodesWithShard.length === 0) continue;
 

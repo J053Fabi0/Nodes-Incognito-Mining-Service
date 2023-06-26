@@ -17,9 +17,16 @@ export default function Nodes() {
             All earnings records
           </a>
         </li>
+
         <li class={styles.li}>
           <a href="nodes/earnings/monthly" class="underline">
             Monthly earnings statistics
+          </a>
+        </li>
+
+        <li class={styles.li}>
+          <a href="nodes/status" class="underline">
+            Statuses
           </a>
         </li>
       </ul>
