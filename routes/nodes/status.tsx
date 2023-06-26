@@ -35,6 +35,7 @@ export const handler: Handlers<NodesStatusProps, State> = {
 
 export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
   const { nodesInfo, nodesStatus, isAdmin } = data;
+
   return (
     <>
       <Typography variant="h1" class="mt-3">
@@ -58,8 +59,9 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
             </tr>
           </thead>
           <tbody>
-            {nodesInfo.map(([node, { docker, beacon }]) => {
+            {nodesInfo.map(([node, { docker, beacon, ...shards }]) => {
               const status = nodesStatus[node];
+              const shard = shards[`shard${status.shard}`] ?? 0;
               return (
                 <tr>
                   <td class={styles.td}>
@@ -98,6 +100,12 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
 
                   <td class={styles.td}>
                     <NodePill baseURL={null} nodeNumber={+status.shard} relative />
+                    {isAdmin && (
+                      <code>
+                        <br />
+                        {shard}
+                      </code>
+                    )}
                   </td>
 
                   {isAdmin && (
