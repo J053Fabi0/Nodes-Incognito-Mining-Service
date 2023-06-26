@@ -14,6 +14,7 @@ import EarningsTable from "../../../components/Nodes/EarningsTable.tsx";
 import NodeEarning from "../../../types/collections/nodeEarning.type.ts";
 import MonthlyEarningsTable from "../../../components/Nodes/MonthlyEarningsTable.tsx";
 import { getNodeEarnings, getTotalEarnings } from "../../../controllers/nodeEarning.controller.ts";
+import reverse from "../../../utils/reverse.ts";
 
 interface MonthlyNodesEarningsProps {
   monthsLeft: number;
@@ -83,6 +84,7 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
         .subtract(i + 1, "month")
         .toDate()
     )
+    .reverse()
     .map((m) => nameOfMonth(m) + (numberOfMonths >= 13 ? ` ${m.getFullYear()}` : ""));
 
   return (
@@ -97,10 +99,10 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
             options={{ devicePixelRatio: 1 }}
             width={Math.max((numberOfMonths + 1) * 10.38 + 23 * numberOfMonths, 500)}
             data={{
-              labels: months.reverse(),
+              labels: months,
               datasets: [
                 {
-                  data: monthEarnings.reverse().map(Number),
+                  data: reverse(monthEarnings).map(Number),
                   backgroundColor: BAR_COLORS,
                   label: "Monthly earnings",
                 },
