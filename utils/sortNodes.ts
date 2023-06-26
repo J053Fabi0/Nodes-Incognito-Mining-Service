@@ -1,6 +1,6 @@
 import { byNumber, byValues } from "sort-es";
-import getNodesStatus, { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
+import getNodesStatus, { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 import { Info, ShardsNames, normalizeShard } from "duplicatedFilesCleanerIncognito";
 
 export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
@@ -12,13 +12,16 @@ export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
   "WAITING",
 ];
 
+export type NodeInfoByDockerIndex = [string, Info & { shard: ShardsNames | "" }];
+export type NodesStatusByDockerIndex = Record<string, NodeStatus>;
+
 export default async function sortNodes(nodes: (string | number)[] = []) {
-  const nodesStatusByDockerIndex = (await getNodesStatus()).reduce(
+  const nodesStatusByDockerIndex: NodesStatusByDockerIndex = (await getNodesStatus()).reduce(
     (obj, node) => ((obj[node.dockerIndex] = node), obj),
     {} as Record<string, NodeStatus>
   );
 
-  const nodesInfoByDockerIndex = Object.entries(
+  const nodesInfoByDockerIndex: NodeInfoByDockerIndex[] = Object.entries(
     await duplicatedFilesCleaner.getInfo(nodes.length ? nodes : undefined)
   )
     .map(
@@ -31,7 +34,7 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
               ? normalizeShard(nodesStatusByDockerIndex[dockerIndex].shard)
               : "",
           },
-        ] as [string, Info & { shard: ShardsNames | "" }]
+        ] as NodeInfoByDockerIndex
     )
     .sort(
       byValues([

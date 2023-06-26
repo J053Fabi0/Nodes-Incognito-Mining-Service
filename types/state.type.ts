@@ -1,6 +1,9 @@
 import { WithSession } from "fresh-session/src/stores/interface.ts";
 import Client from "./collections/client.type.ts";
 
+/**
+ * State of the application
+ */
 export default interface State extends WithSession {
   user: Client | null;
   isAdmin: boolean;
