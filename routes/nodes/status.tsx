@@ -40,11 +40,9 @@ export default function NodesStatus({ data }: PageProps<NodesStatusProps>) {
 
   return (
     <>
-      <Typography variant="h1" class="mt-3">
-        Nodes status.
-      </Typography>
+      <Typography variant="h1">Nodes status.</Typography>
       <Typography variant="h3" class="mt-1 mb-5">
-        Sorted by docker index.
+        Sorted by epochs to next event and role.
       </Typography>
 
       <div class="overflow-x-auto">
