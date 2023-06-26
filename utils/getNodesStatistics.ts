@@ -15,6 +15,7 @@ export default async function getNodesStatistics() {
     .map((_, i) =>
       dayjs()
         .subtract(i + 1, "month")
+        .startOf("month")
         .toDate()
     )
     .reverse();
