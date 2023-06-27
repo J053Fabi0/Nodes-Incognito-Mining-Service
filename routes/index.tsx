@@ -70,8 +70,8 @@ export default function Home({ data }: PageProps<HomeProps>) {
       </ul>
 
       <p class="mb-5">
-        <a href="/signin?create" class={getButtonClasses("green")}>
-          Create an account
+        <a href={loggedIn ? "/nodes" : "/signin?create"} class={getButtonClasses("green")}>
+          {loggedIn ? "Your nodes" : "Create an account"}
         </a>
       </p>
 
