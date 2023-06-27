@@ -24,7 +24,7 @@
     "croner": "https://deno.land/x/croner@6.0.4/dist/croner.js",
     "mongo/": "https://deno.land/x/mongo@v0.31.2/",
     "grammy/": "https://deno.land/x/grammy@v1.16.2/",
-    "grammy_validator": "https://deno.land/x/grammy_validator@v1.0.1/mod.ts",
+    "grammy_validator": "https://raw.githubusercontent.com/J053Fabi0/validator/71d6c3f4b60a705e3718a3081e3f5c61cb1ca06f/src/mod.ts",
     "fresh-session/": "https://deno.land/x/fresh_session@0.2.1/",
     "streams": "https://deno.land/std@0.192.0/streams/mod.ts",
     "notion/": "https://deno.land/x/notion_sdk@v2.2.3/src/",

@@ -1,3 +1,5 @@
+import joi from "joi";
+
 export default interface TelegramPayload {
   id: string;
   hash: string;
@@ -8,18 +10,17 @@ export default interface TelegramPayload {
   first_name?: string;
 }
 
+const schema = joi.object<TelegramPayload>({
+  id: joi.string().required(),
+  hash: joi.string().required(),
+  auth_date: joi.string().required(),
+  username: joi.string().optional(),
+  last_name: joi.string().optional(),
+  photo_url: joi.string().optional(),
+  first_name: joi.string().optional(),
+});
+
 export function isTelegramPayload(arg: any): arg is TelegramPayload {
-  const keys = Object.keys(arg);
-  return (
-    arg &&
-    typeof arg.id === "string" &&
-    typeof arg.hash === "string" &&
-    typeof arg.auth_date === "string" &&
-    (typeof arg.username === "string" || typeof arg.username === "undefined") &&
-    (typeof arg.last_name === "string" || typeof arg.last_name === "undefined") &&
-    (typeof arg.photo_url === "string" || typeof arg.photo_url === "undefined") &&
-    (typeof arg.first_name === "string" || typeof arg.first_name === "undefined") &&
-    keys.length <= 8 &&
-    keys.length >= 3
-  );
+  const { error } = schema.validate(arg, { allowUnknown: true });
+  return !error;
 }

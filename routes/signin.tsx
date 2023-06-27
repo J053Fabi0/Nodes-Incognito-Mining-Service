@@ -12,15 +12,19 @@ import { createClient, getClient } from "../controllers/client.controller.ts";
 import { NOTIFICATIONS_BOT_TOKEN, NOTIFICATIONS_BOT_USERNAME } from "../env.ts";
 
 interface SigninProps {
-  creating: boolean;
+  create: boolean;
 }
 
 export const handler: Handlers<SigninProps, State> = {
   async GET(req, ctx) {
-    if (ctx.state.user) return redirect("/");
-
     const params = getQueryParams(req.url);
-    if (isTelegramPayload(params)) {
+    const create = "create" in params;
+    const redirectTo = create ? "/nodes/new" : "/";
+
+    if (ctx.state.user) return redirect(redirectTo);
+
+    const telegamPayload = isTelegramPayload(params);
+    if (telegamPayload) {
       const good = checkSignature(NOTIFICATIONS_BOT_TOKEN, params);
       if (!good) throw new Error("Bad signature");
 
@@ -57,24 +61,24 @@ export const handler: Handlers<SigninProps, State> = {
         ctx.state.session.set("userId", newUser._id.toString());
       }
 
-      return redirect("/");
+      return redirect(redirectTo);
     }
 
-    return ctx.render({ creating: "create" in params });
+    return ctx.render({ create: "create" in params });
   },
 };
 
 export default function SignIn({ data }: PageProps<SigninProps>) {
-  const { creating } = data;
+  const { create } = data;
 
   return (
     <>
       <Typography variant="h1" class="mb-5">
-        {creating ? "Create an account with Telegram" : "Sign in or create an account"}
+        {create ? "Create an account with Telegram" : "Sign in or create an account"}
       </Typography>
 
       <Typography variant="h4" class="mb-5">
-        {creating ? "Start hosting your nodes with us today" : "Both with the same button"}.
+        {create ? "Start hosting your nodes with us today" : "Both with the same button"}.
       </Typography>
 
       <div class="w-full flex flex-col flex-wrap items-center mt-10">
@@ -88,9 +92,9 @@ export default function SignIn({ data }: PageProps<SigninProps>) {
           <script
             async
             data-size="large"
-            data-auth-url="signin"
             data-request-access="write"
             src="https://telegram.org/js/telegram-widget.js?22"
+            data-auth-url={"signin" + (create ? `/?create` : "")}
             data-telegram-login={NOTIFICATIONS_BOT_USERNAME.toLowerCase()}
           />
         </div>
