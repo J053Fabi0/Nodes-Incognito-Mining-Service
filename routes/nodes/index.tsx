@@ -1,3 +1,4 @@
+import { Head } from "$fresh/runtime.ts";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 
 const styles = {
@@ -7,14 +8,18 @@ const styles = {
 export default function Nodes() {
   return (
     <>
+      <Head>
+        <link rel="prefetch" href="nodes/monitor" as="document" />
+      </Head>
+
       <Typography variant="h1" class="mt-3 mb-5">
         Your nodes
       </Typography>
 
       <ul class="list-disc list-inside mb-5">
         <li class={styles.li}>
-          <a href="nodes/earnings?relative" class="underline">
-            All earnings records
+          <a href="nodes/monitor" class="underline">
+            Monitor
           </a>
         </li>
 
@@ -25,8 +30,8 @@ export default function Nodes() {
         </li>
 
         <li class={styles.li}>
-          <a href="nodes/monitor" class="underline">
-            Monitor
+          <a href="nodes/earnings?relative" class="underline">
+            All earnings records
           </a>
         </li>
       </ul>
