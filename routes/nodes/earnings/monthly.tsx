@@ -2,7 +2,6 @@ import dayjs from "dayjs/mod.ts";
 import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
 import { Chart } from "fresh-charts/mod.ts";
-import reverse from "../../../utils/reverse.ts";
 import State from "../../../types/state.type.ts";
 import { BAR_COLORS } from "../../../constants.ts";
 import Button from "../../../components/Button.tsx";
@@ -97,7 +96,6 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
         .subtract(i + 1, "month")
         .toDate()
     )
-    .reverse()
     .map((m) => nameOfMonth(m) + (numberOfMonths >= 13 ? ` ${m.getFullYear()}` : ""));
 
   return (
@@ -114,10 +112,10 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
             options={{ devicePixelRatio: 1 }}
             width={Math.max((numberOfMonths + 1) * 10.38 + 23 * numberOfMonths, 500)}
             data={{
-              labels: months,
+              labels: months.toReversed(),
               datasets: [
                 {
-                  data: reverse(monthEarnings).map(Number),
+                  data: monthEarnings.toReversed().map(Number),
                   backgroundColor: BAR_COLORS,
                   label: "Monthly earnings",
                 },

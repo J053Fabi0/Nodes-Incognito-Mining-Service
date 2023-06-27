@@ -1,6 +1,5 @@
 import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
-import reverse from "../../utils/reverse.ts";
 import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
@@ -94,7 +93,7 @@ export default function Monitor({ data }: PageProps<MonitorProps>) {
       {isAdmin && (
         <>
           <form method="post">
-            {reverse(lastMessages).map((m) => (
+            {lastMessages.toReversed().map((m) => (
               <div class="flex gap-3 mt-1 mb-5">
                 <Typography variant="lead">
                   <code>{m}</code>
