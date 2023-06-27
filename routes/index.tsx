@@ -5,6 +5,7 @@ import { Chart } from "fresh-charts/mod.ts";
 import { BAR_COLORS } from "../constants.ts";
 import { toFixedS } from "../utils/numbersString.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
+import { getButtonClasses } from "../components/Button.tsx";
 import { countNodes } from "../controllers/node.controller.ts";
 import getNodesStatistics from "../utils/getNodesStatistics.ts";
 import { countNodeEarnings } from "../controllers/nodeEarning.controller.ts";
@@ -59,7 +60,7 @@ export default function Home({ data }: PageProps<HomeProps>) {
         Hosting service for Incognito nodes
       </Typography>
 
-      <ul class="list-disc list-inside checkUL mb-5">
+      <ul class="list-disc list-inside checkUL mb-3">
         <li class={styles.li}>You provide the stake, we the infrastructure.</li>
         <li class={styles.li}>Earnings and stake in your control, we don't ask for any private keys.</li>
         <li class={styles.li}>
@@ -67,6 +68,12 @@ export default function Home({ data }: PageProps<HomeProps>) {
           <li class={styles.li}>5 USD for each node's initial setup.</li>
         </li>
       </ul>
+
+      <p class="mb-5">
+        <a href="/signin?create" class={getButtonClasses("green")}>
+          Create an account
+        </a>
+      </p>
 
       <Typography variant="h2" class="mb-5">
         Some statistics from all our hosted nodes
