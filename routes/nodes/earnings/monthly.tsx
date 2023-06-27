@@ -1,6 +1,8 @@
 import dayjs from "dayjs/mod.ts";
 import { ObjectId } from "mongo/mod.ts";
+import { Head } from "$fresh/runtime.ts";
 import { Chart } from "fresh-charts/mod.ts";
+import reverse from "../../../utils/reverse.ts";
 import State from "../../../types/state.type.ts";
 import { BAR_COLORS } from "../../../constants.ts";
 import Button from "../../../components/Button.tsx";
@@ -14,7 +16,6 @@ import EarningsTable from "../../../components/Nodes/EarningsTable.tsx";
 import NodeEarning from "../../../types/collections/nodeEarning.type.ts";
 import MonthlyEarningsTable from "../../../components/Nodes/MonthlyEarningsTable.tsx";
 import { getNodeEarnings, getTotalEarnings } from "../../../controllers/nodeEarning.controller.ts";
-import reverse from "../../../utils/reverse.ts";
 
 interface MonthlyNodesEarningsProps {
   monthsLeft: number;
@@ -75,7 +76,19 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
   const nodeNumbers = Object.values(nodes);
   const nodesCount = nodeNumbers.length;
 
-  if (nodesCount === 0) return <Typography variant="h3">You don't have any nodes yet.</Typography>;
+  const head = (
+    <Head>
+      <link rel="prefetch" href="/nodes" as="document" />
+    </Head>
+  );
+
+  if (nodesCount === 0)
+    return (
+      <>
+        {head}
+        <Typography variant="h3">You don't have any nodes yet.</Typography>
+      </>
+    );
 
   const numberOfMonths = monthEarnings.length;
   const months = Array.from({ length: numberOfMonths })
@@ -89,6 +102,8 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
 
   return (
     <>
+      {head}
+
       <Typography variant="h3">Monthly earnings</Typography>
       <div class="flex flex-wrap gap-8 justify-center">
         <MonthlyEarningsTable class="mt-8" monthEarnings={monthEarnings} />

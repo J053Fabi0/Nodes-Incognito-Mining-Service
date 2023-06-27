@@ -1,4 +1,5 @@
 import { ObjectId } from "mongo/mod.ts";
+import { Head } from "$fresh/runtime.ts";
 import State from "../../../types/state.type.ts";
 import redirect from "../../../utils/redirect.ts";
 import Switch from "../../../components/Switch.tsx";
@@ -47,8 +48,8 @@ export const handler: Handlers<NodesEarningsProps, State> = {
     const earningsCount = await countNodeEarnings({ node: { $in: nodesIds } });
     const pages = Array.from({ length: Math.ceil(earningsCount / LIMIT) }, (_, i) => i + 1);
 
-    if (page > pages.length)
-      return redirect(`/nodes/earnings/?${relative ? "relative&" : ""}page=${pages.length}`);
+    if (page > pages.length && pages.length)
+      return redirect(`/nodes/earnings?${relative ? "relative&" : ""}page=${pages.length}`);
 
     const earnings = await getNodeEarnings(
       { node: { $in: nodesIds } },
@@ -82,10 +83,24 @@ export default function NodesEarnings({ data }: PageProps<NodesEarningsProps>) {
   const nodeNumbers = Object.values(nodes);
   const nodesCount = nodeNumbers.length;
 
-  if (nodesCount === 0) return <Typography variant="h3">You don't have any nodes yet.</Typography>;
+  const head = (
+    <Head>
+      <link rel="prefetch" href="/nodes" as="document" />
+    </Head>
+  );
+
+  if (nodesCount === 0)
+    return (
+      <>
+        {head}
+        <Typography variant="h3">You don't have any nodes yet.</Typography>
+      </>
+    );
 
   return (
     <>
+      {head}
+
       <MonthlyEarningsTable monthEarnings={data.monthEarnings} horizontal />
       <a href="earnings/monthly">
         <Typography variant="p" class="my-2 hover:underline after:content-['_↗'] text-blue-600">

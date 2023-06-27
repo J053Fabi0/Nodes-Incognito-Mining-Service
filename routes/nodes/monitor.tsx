@@ -1,4 +1,5 @@
 import { ObjectId } from "mongo/mod.ts";
+import { Head } from "$fresh/runtime.ts";
 import reverse from "../../utils/reverse.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
@@ -56,8 +57,24 @@ export const handler: Handlers<MonitorProps, State> = {
 export default function Monitor({ data }: PageProps<MonitorProps>) {
   const { nodesInfo, nodesStatus, isAdmin } = data;
 
+  const head = (
+    <Head>
+      <link rel="prefetch" href="/nodes" as="document" />
+    </Head>
+  );
+
+  if (nodesInfo.length === 0)
+    return (
+      <>
+        {head}
+        <Typography variant="h3">You don't have any nodes yet.</Typography>
+      </>
+    );
+
   return (
     <>
+      {head}
+
       {!isAdmin && (
         <>
           <Typography variant="h1">Monitor</Typography>
