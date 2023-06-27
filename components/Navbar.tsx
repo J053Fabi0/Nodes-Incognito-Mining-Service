@@ -14,6 +14,11 @@ const pages: Page[] = [
     href: "/nodes",
     onlyLoggedIn: true,
   },
+  {
+    name: "New node",
+    href: "/nodes/new",
+    onlyLoggedIn: true,
+  },
 ];
 
 export default function Navbar({ loggedIn = false }) {
