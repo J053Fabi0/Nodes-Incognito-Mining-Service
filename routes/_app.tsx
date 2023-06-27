@@ -1,12 +1,13 @@
 import { Head } from "$fresh/runtime.ts";
 import { IoIosMail } from "react-icons/io";
 import { AppProps } from "$fresh/server.ts";
+import Metas from "../components/Metas.tsx";
 import Navbar from "../components/Navbar.tsx";
 import { Links } from "../components/Links.tsx";
 import isAdminPage from "../utils/isAdminPage.tsx";
 import Typography from "../components/Typography.tsx";
-import { BsTelegram, BsFillCircleFill } from "react-icons/bs";
 import isLoggedInPage from "../utils/isLoggedInPage.tsx";
+import { BsTelegram, BsFillCircleFill } from "react-icons/bs";
 
 export default function App({ Component, data, url }: AppProps) {
   const loggedIn = (data || {}).loggedIn ?? (isAdminPage(url.href) || isLoggedInPage(url.href));
@@ -14,6 +15,7 @@ export default function App({ Component, data, url }: AppProps) {
   return (
     <>
       <Head>
+        <Metas title="Hosting nodes Incognito" description="Incognito nodes service" />
         <Links />
       </Head>
 

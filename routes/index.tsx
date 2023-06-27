@@ -1,7 +1,6 @@
 import { Head } from "$fresh/runtime.ts";
 import { asset } from "$fresh/runtime.ts";
 import State from "../types/state.type.ts";
-import Metas from "../components/Metas.tsx";
 import { Chart } from "fresh-charts/mod.ts";
 import { BAR_COLORS } from "../constants.ts";
 import { toFixedS } from "../utils/numbersString.ts";
@@ -48,7 +47,6 @@ export default function Home({ data }: PageProps<HomeProps>) {
   return (
     <>
       <Head>
-        <Metas title="Hosting nodes Incognito" description="Incognito nodes service" />
         <link href={asset("/styles/checkUL.css")} rel="stylesheet" />
         {loggedIn ? (
           <link rel="prefetch" href="/nodes" as="document" />
