@@ -1,8 +1,8 @@
-import { ignore as ignore } from "../../utils/variables.ts";
+import { ignore } from "../../utils/variables.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 
+type Type = (typeof errorKeys)[number] | "all";
 const errorKeys = Object.keys(ignore).sort((a, b) => a.length - b.length) as (keyof typeof ignore)[];
-type Type = typeof errorKeys[number] | "all";
 
 export default async function handleIgnore(args: string[]) {
   let number = 0; // default value is 0, to disable the ignore

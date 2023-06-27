@@ -35,3 +35,5 @@ export const ignore: Record<AllErrorTypes | "docker" | "autoMove", { minutes: nu
 
 // Node's public validator key as key
 export const syncedNodes: Record<string | number, boolean> = {};
+
+export const lastMessages: string[] = [];

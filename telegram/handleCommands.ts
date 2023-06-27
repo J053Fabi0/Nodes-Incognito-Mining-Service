@@ -6,14 +6,13 @@ import helpMessage from "../utils/helpMessage.ts";
 import handleIgnore from "./handlers/handleIgnore.ts";
 import handleDocker from "./handlers/handleDocker.ts";
 import handleDelete from "./handlers/handleDelete.ts";
-import { lastErrorTimes } from "../utils/variables.ts";
+import { lastErrorTimes, lastMessages } from "../utils/variables.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
 
-let lastMessages = ["full"];
 const commands = [
   "f",
   "ft",
@@ -39,8 +38,14 @@ export function botOnEvents(ctx: Filter<Context, "message">) {
 
 export default async function handleCommands(command: string) {
   try {
-    const texts = /^\/?r(?:epeat)?$/.test(command) ? lastMessages : command.split("\n").filter((x) => x.trim());
-    lastMessages = texts;
+    const repeat = /^\/?r(?:epeat)?$/.test(command);
+    if (repeat && lastMessages.length === 0) return await sendMessage("No previous messages to repeat.");
+
+    const texts = repeat ? lastMessages[0] : command.split("\n").filter((x) => x.trim());
+    for (const text of texts) {
+      lastMessages.unshift(text);
+      if (lastMessages.length > 5) lastMessages.pop();
+    }
     let sendInfo = false;
 
     for (const text of texts) {

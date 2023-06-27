@@ -1,8 +1,14 @@
 import { ObjectId } from "mongo";
+import reverse from "../../utils/reverse.ts";
 import State from "../../types/state.type.ts";
+import redirect from "../../utils/redirect.ts";
+import { BsFillPlayFill } from "react-icons/bs";
+import Button from "../../components/Button.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
+import { lastMessages } from "../../utils/variables.ts";
 import Typography from "../../components/Typography.tsx";
 import NodePill from "../../components/Nodes/NodePill.tsx";
+import handleCommands from "../../telegram/handleCommands.ts";
 import { getNodes } from "../../controllers/node.controller.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
@@ -33,6 +39,17 @@ export const handler: Handlers<MonitorProps, State> = {
 
     return ctx.render({ nodesInfo, nodesStatus, isAdmin: ctx.state.isAdmin });
   },
+
+  async POST(req, ctx) {
+    if (!ctx.state.isAdmin) return redirect(req.url);
+
+    const form = await req.formData();
+    const command = form.get("command")?.toString();
+
+    if (command) await handleCommands(command);
+
+    return redirect(req.url);
+  },
 };
 
 export default function Monitor({ data }: PageProps<MonitorProps>) {
@@ -40,10 +57,40 @@ export default function Monitor({ data }: PageProps<MonitorProps>) {
 
   return (
     <>
-      <Typography variant="h1">Monitor</Typography>
-      <Typography variant="h3" class="mt-1 mb-5">
-        Sorted by epochs to next event and role.
-      </Typography>
+      {!isAdmin && (
+        <>
+          <Typography variant="h1">Monitor</Typography>
+          <Typography variant="h3" class="mt-1 mb-5">
+            Sorted by epochs to next event and role.
+          </Typography>
+        </>
+      )}
+
+      {isAdmin && (
+        <>
+          <form method="post">
+            {reverse(lastMessages).map((m) => (
+              <div class="flex gap-3 mt-1 mb-5">
+                <Typography variant="lead">
+                  <code>{m}</code>
+                </Typography>
+
+                <Button type="submit" class="py-0 px-2" name="command" value={m}>
+                  <BsFillPlayFill size={20} />
+                </Button>
+              </div>
+            ))}
+          </form>
+          <form method="post">
+            <input
+              type="text"
+              name="command"
+              placeholder="Command"
+              class="mb-2 p-2 border border-gray-300 rounded w-full"
+            />
+          </form>
+        </>
+      )}
 
       <div class="overflow-x-auto">
         <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
