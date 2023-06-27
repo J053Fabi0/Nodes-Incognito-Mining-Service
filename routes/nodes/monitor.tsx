@@ -48,7 +48,8 @@ export const handler: Handlers<MonitorProps, State> = {
 
     if (command) await handleCommands(command);
 
-    return redirect(req.url);
+    if (handler.GET) return handler.GET(req, ctx);
+    else return redirect(req.url);
   },
 };
 
