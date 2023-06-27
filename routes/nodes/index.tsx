@@ -1,4 +1,3 @@
-import { Head } from "$fresh/runtime.ts";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 
 const styles = {
@@ -8,10 +7,6 @@ const styles = {
 export default function Nodes() {
   return (
     <>
-      <Head>
-        <link rel="prefetch" href="nodes/monitor" as="document" />
-      </Head>
-
       <Typography variant="h1" class="mt-3 mb-5">
         Your nodes
       </Typography>
