@@ -1,5 +1,5 @@
 import dayjs from "dayjs/mod.ts";
-import { ObjectId } from "mongo";
+import { ObjectId } from "mongo/mod.ts";
 import { Chart } from "fresh-charts/mod.ts";
 import State from "../../../types/state.type.ts";
 import { BAR_COLORS } from "../../../constants.ts";

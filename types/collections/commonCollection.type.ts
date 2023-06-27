@@ -1,4 +1,4 @@
-import { ObjectId } from "mongo";
+import { ObjectId } from "mongo/mod.ts";
 
 export default interface CommonCollection {
   _id: ObjectId;

@@ -1,4 +1,4 @@
-import { ObjectId } from "mongo";
+import { ObjectId } from "mongo/mod.ts";
 import CommonCollection from "./commonCollection.type.ts";
 
 export default interface NodeEarning extends CommonCollection {

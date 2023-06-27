@@ -1,5 +1,5 @@
 import dayjs from "dayjs/mod.ts";
-import { ObjectId } from "mongo";
+import { ObjectId } from "mongo/mod.ts";
 import * as a from "./dbUtils.ts";
 import Model from "../models/nodeEarning.model.ts";
 

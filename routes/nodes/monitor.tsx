@@ -1,4 +1,4 @@
-import { ObjectId } from "mongo";
+import { ObjectId } from "mongo/mod.ts";
 import reverse from "../../utils/reverse.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";

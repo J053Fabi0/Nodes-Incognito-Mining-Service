@@ -10,7 +10,7 @@ import {
   InsertDocument,
   AggregateOptions,
   AggregatePipeline,
-} from "mongo";
+} from "mongo/mod.ts";
 import CommonCollection from "../types/collections/commonCollection.type.ts";
 
 export type InsertDoc<T = CommonCollection> = InsertDocument<

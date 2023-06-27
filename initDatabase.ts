@@ -1,4 +1,4 @@
-import { MongoClient } from "mongo";
+import { MongoClient } from "mongo/mod.ts";
 import { MONGO_URI } from "./env.ts";
 
 // Connect to MongoDB

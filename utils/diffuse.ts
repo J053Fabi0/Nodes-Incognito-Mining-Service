@@ -1,4 +1,4 @@
-import { ObjectId } from "mongo";
+import { ObjectId } from "mongo/mod.ts";
 import nameOfMonth from "./nameOfMonth.ts";
 import getTable from "../notion/getTable.ts";
 import getTableID from "../notion/getTableID.ts";

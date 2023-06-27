@@ -1,4 +1,4 @@
-import { ObjectId } from "mongo";
+import { ObjectId } from "mongo/mod.ts";
 import { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "./sortNodes.ts";
 
 export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {

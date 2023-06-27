@@ -1,6 +1,7 @@
+import isError from "./isError.ts";
 import { escapeHtml } from "escapeHtml";
 import sendMessage from "../telegram/sendMessage.ts";
-import isError from "./isError.ts";
+import isMongoServerError from "./isMongoServerError.ts";
 
 // deno-lint-ignore no-explicit-any
 export default async function handleError(e: any) {
@@ -13,6 +14,7 @@ export default async function handleError(e: any) {
     if (e.message.startsWith("error sending request for url")) return;
     if (e.message.includes("Resource temporarily unavailable")) Deno.exit(1); // exit with error so that PM2 restarts the process
   }
+  if (isMongoServerError(e) && e.codeName === "NotPrimaryNoSecondaryOk") Deno.exit(1); // exit with error so that PM2 restarts the process
 
   const sMessage = (message: string) =>
     sendMessage(`<code>${escapeHtml(message)}</code>`, undefined, { parse_mode: "HTML" });

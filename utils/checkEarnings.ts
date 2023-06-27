@@ -1,4 +1,4 @@
-import { ObjectId } from "mongo";
+import { ObjectId } from "mongo/mod.ts";
 import handleError from "./handleError.ts";
 import getNodesStatus from "./getNodesStatus.ts";
 import getNodeEarnings from "./getNodeEarnings.ts";
