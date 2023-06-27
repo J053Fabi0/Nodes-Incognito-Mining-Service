@@ -1,6 +1,7 @@
 import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
 import reverse from "../../utils/reverse.ts";
+import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import { BsFillPlayFill } from "react-icons/bs";
@@ -25,20 +26,26 @@ interface MonitorProps {
   nodesStatus: NodesStatusByDockerIndex;
 }
 
+// Only change the last boolean value if you want to test
+const testingClient = !IS_PRODUCTION && false;
+
 export const handler: Handlers<MonitorProps, State> = {
   async GET(_, ctx) {
-    const { isAdmin, supplanting } = ctx.state;
+    const { isAdmin, supplanting, userId } = ctx.state;
 
     // if it's an admin and not supplanting, get all nodes
-    const nodes = await getNodes(isAdmin && !supplanting ? {} : { _id: new ObjectId(ctx.state.userId!) }, {
-      projection: { dockerIndex: 1, _id: 0 },
-    });
+    const shouldGetAll = (isAdmin || supplanting) && !testingClient;
 
-    const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(
-      nodes.map((n) => n.dockerIndex)
-    );
+    const nodes = shouldGetAll
+      ? null
+      : await getNodes({ client: new ObjectId(userId!) }, { projection: { dockerIndex: 1, _id: 0 } });
 
-    return ctx.render({ nodesInfo, nodesStatus, isAdmin: ctx.state.isAdmin });
+    const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } =
+      shouldGetAll || nodes!.length
+        ? await sortNodes(shouldGetAll ? [] : nodes!.map((n) => n.dockerIndex))
+        : { nodesInfoByDockerIndex: [], nodesStatusByDockerIndex: {} };
+
+    return ctx.render({ nodesInfo, nodesStatus, isAdmin: shouldGetAll });
   },
 
   async POST(req, ctx) {
