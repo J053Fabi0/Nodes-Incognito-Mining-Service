@@ -17,16 +17,15 @@ interface ButtonProps {
   color?: keyof typeof colors;
 }
 
-export function getButtonClasses(color: keyof typeof colors = "blue") {
-  return `${common} ${colors[color]}`;
+export function getButtonClasses(color: keyof typeof colors = "blue", addPadding = true) {
+  return `${common} ${colors[color]} ${addPadding ? padding : ""}`;
 }
 
 export default function Button(props: JSX.HTMLAttributes<HTMLButtonElement> & ButtonProps) {
   const setsPadding =
     typeof props.class === "string" && props.class.split(" ").some((c) => /^(p|py|px|pt|pb|pr|pl)-/.test(c));
-  const color = colors[props.color ?? "blue"];
 
-  const style = `${common} ${color} ${props.class ?? ""} ${setsPadding ? "" : padding}`;
+  const style = `${getButtonClasses(props.color, !setsPadding)} ${props.class ?? ""}`;
 
   return (
     <button {...props} class={style}>
