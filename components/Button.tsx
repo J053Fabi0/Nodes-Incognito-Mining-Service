@@ -1,6 +1,7 @@
 import { JSX } from "preact";
 
-const common = `middle none center rounded-lg py-3 px-6 font-sans text-xs font-bold uppercase text-white
+const padding = "py-2 px-4";
+const common = `middle none center rounded-lg font-sans text-xs font-bold uppercase text-white
   shadow-md transition-all hover:shadow-lg focus:opacity-[0.85] focus:shadow-none
   active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50
   disabled:shadow-none`;
@@ -21,10 +22,14 @@ export function getButtonClasses(color: keyof typeof colors = "blue") {
 }
 
 export default function Button(props: JSX.HTMLAttributes<HTMLButtonElement> & ButtonProps) {
+  const setsPadding =
+    typeof props.class === "string" && props.class.split(" ").some((c) => /^(p|py|px|pt|pb|pr|pl)-/.test(c));
   const color = colors[props.color ?? "blue"];
 
+  const style = `${common} ${color} ${props.class ?? ""} ${setsPadding ? "" : padding}`;
+
   return (
-    <button {...props} class={`${common} ${color} ${props.class ?? ""}`}>
+    <button {...props} class={style}>
       {props.children}
     </button>
   );
