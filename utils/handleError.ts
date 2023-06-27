@@ -1,7 +1,7 @@
-import isError from "./isError.ts";
 import { escapeHtml } from "escapeHtml";
+import isError from "../types/guards/isError.ts";
 import sendMessage from "../telegram/sendMessage.ts";
-import isMongoServerError from "./isMongoServerError.ts";
+import isMongoServerError from "../types/guards/isMongoServerError.ts";
 
 // deno-lint-ignore no-explicit-any
 export default async function handleError(e: any) {
