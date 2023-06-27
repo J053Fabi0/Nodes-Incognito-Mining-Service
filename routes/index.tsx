@@ -42,7 +42,7 @@ export const handler: Handlers<HomeProps, State> = {
 };
 
 export default function Home({ data }: PageProps<HomeProps>) {
-  const { nodesCount, earningsCount, months, data: chartData } = data;
+  const { nodesCount, earningsCount, months, data: chartData, loggedIn } = data;
   const totalAverage = chartData.reduce((acc, curr) => acc + curr, 0) / chartData.length;
 
   return (
@@ -50,6 +50,11 @@ export default function Home({ data }: PageProps<HomeProps>) {
       <Head>
         <Metas title="Hosting nodes Incognito" description="Incognito nodes service" />
         <link href={asset("/styles/checkUL.css")} rel="stylesheet" />
+        {loggedIn ? (
+          <link rel="prefetch" href="/nodes" as="document" />
+        ) : (
+          <link rel="prefetch" href="/signin" as="document" />
+        )}
       </Head>
 
       <Typography variant="h1" class="mt-3 mb-5">

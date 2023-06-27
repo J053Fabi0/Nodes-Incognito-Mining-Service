@@ -8,6 +8,7 @@
 
     "run": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts",
     "dev": "deno run --watch=static/,routes/  --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts -i",
+    "check": "deno check main.ts",
     "diffuse": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write utils/diffuse.ts"
   },
   "compilerOptions": {
@@ -34,6 +35,7 @@
     "escapeHtml": "https://deno.land/x/escape_html@1.0.0/mod.ts",
     "duplicatedFilesCleanerIncognito": "https://deno.land/x/duplicated_files_cleaner_incognito@1.2.2/mod.ts",
     "$fresh/": "https://deno.land/x/fresh@1.2.0/",
+    "prefetch": "https://deno.land/x/prefetch@0.1.0/mod.ts",
     "preact": "https://esm.sh/preact@10.15.1",
     "preact/": "https://esm.sh/preact@10.15.1/",
     "preact-render-to-string": "https://esm.sh/*preact-render-to-string@6.1.0",
