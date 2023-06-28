@@ -59,7 +59,7 @@ export default async function handleTextMessage(text: "text" | "full" | "fulltex
   const shouldShowSyncState = nodes.every((node) => node.syncState === "-") === false;
   if (shouldShowSyncState) newKeys.push("syncState" as const);
 
-  const html = getTableHTML(newKeys, nodes);
+  const { html, table } = getTableHTML(newKeys, nodes);
 
   // if the html hasn't changed, send the last photo
   if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html) {
@@ -83,7 +83,7 @@ export default async function handleTextMessage(text: "text" | "full" | "fulltex
     lastPhotoIdTime = Date.now();
   }
 
-  return { successful: true, response: html };
+  return { successful: true, response: table };
 }
 
 function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
@@ -159,7 +159,12 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
 type NewKeys = Keys | "status" | "syncState";
 type NormalizedNode = Record<NewKeys, string | number>;
 
-function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]) {
+const styles = {
+  th: "border border-slate-300 py-2 px-3",
+  td: "border border-slate-300 py-2 px-3 text-center",
+};
+const emojiURL = "https://abs.twimg.com/emoji/v2";
+function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; table: string } {
   const normalizedNodes: NormalizedNode[] = nodes.map((node) => ({
     name: node.name,
     shard: node.shard,
@@ -185,6 +190,59 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]) {
     status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
   }));
 
+  const table = `
+    <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
+      <tr>
+        <th class="${styles.th}">
+          ${newKeys
+            .map((key) => {
+              switch (key) {
+                case "isOldVersion":
+                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["👴"]}.svg" class="emoji">`;
+
+                case "status":
+                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["🔌"]}.svg" class="emoji">`;
+
+                case "isSlashed":
+                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["🔪"]}.svg" class="emoji">`;
+
+                case "epochsToNextEvent":
+                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["➡️"]}.svg" class="emoji">`;
+
+                case "alert":
+                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["🐢"]}.svg" class="emoji">`;
+
+                case "shard":
+                  return "Sh";
+
+                default:
+                  return key.charAt(0).toUpperCase() + key.slice(1);
+              }
+            })
+            .join(`</th>\n<th class="${styles.th}">`)}
+        </th>
+      </tr>
+      <tr>
+        <td class="${styles.td}">
+          ${normalizedNodes
+            .map((data) =>
+              newKeys
+                .map((key) =>
+                  splitEmoji(data[key].toString())
+                    .map((char) =>
+                      emojisCodes[char]
+                        ? `<img src="${emojiURL}/svg/${emojisCodes[char]}.svg" class="emoji">`
+                        : char
+                    )
+                    .join("")
+                )
+                .join(`</td>\n<td class="${styles.td}">`)
+            )
+            .join(`</td>\n</tr>\n<tr>\n<td class="${styles.td}">`)}
+        </td>
+      </tr>
+    </table>`;
+
   const html = `
     <!DOCTYPE html>
       <html>
@@ -195,63 +253,19 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]) {
           </style>
         </head>
         <body>
-          <table>
-            <tr>
-              <th>
-                ${newKeys
-                  .map((key) => {
-                    switch (key) {
-                      case "isOldVersion":
-                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["👴"]}.svg" class="emoji">`;
-
-                      case "status":
-                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🔌"]}.svg" class="emoji">`;
-
-                      case "isSlashed":
-                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🔪"]}.svg" class="emoji">`;
-
-                      case "epochsToNextEvent":
-                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["➡️"]}.svg" class="emoji">`;
-
-                      case "alert":
-                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🐢"]}.svg" class="emoji">`;
-
-                      case "shard":
-                        return "Sh";
-
-                      default:
-                        return key.charAt(0).toUpperCase() + key.slice(1);
-                    }
-                  })
-                  .join("</th>\n<th>")}
-              </th>
-            </tr>
-            <tr>
-              <td>
-                ${normalizedNodes
-                  .map((data) =>
-                    newKeys
-                      .map((key) =>
-                        splitEmoji(data[key].toString())
-                          .map((char) =>
-                            emojisCodes[char]
-                              ? `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes[char]}.svg" class="emoji">`
-                              : char
-                          )
-                          .join("")
-                      )
-                      .join("</td>\n<td>")
-                  )
-                  .join("</td>\n</tr>\n<tr>\n<td>")}
-              </td>
-            </tr>
-          </table>
+          ${table}
         </body>
       </html>`;
 
   // replace all new lines with nothing and trim every line
-  return html
-    .split("\n")
-    .map((line) => line.trim())
-    .join("");
+  return {
+    html: html
+      .split("\n")
+      .map((line) => line.trim())
+      .join(""),
+    table: table
+      .split("\n")
+      .map((line) => line.trim())
+      .join(""),
+  };
 }
