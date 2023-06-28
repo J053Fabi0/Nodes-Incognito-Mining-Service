@@ -164,6 +164,8 @@ const styles = {
   td: "border border-slate-300 py-2 px-3 text-center",
 };
 const emojiURL = "https://abs.twimg.com/emoji/v2";
+const img = (emoji: string, key = "") =>
+  `<img title="${key}" src="${emojiURL}/svg/${emojisCodes[emoji]}.svg" class="emoji" width="27" style="display: inline">`;
 function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; table: string } {
   const normalizedNodes: NormalizedNode[] = nodes.map((node) => ({
     name: node.name,
@@ -198,19 +200,19 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; 
             .map((key) => {
               switch (key) {
                 case "isOldVersion":
-                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["👴"]}.svg" class="emoji">`;
+                  return img("👴", key);
 
                 case "status":
-                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["🔌"]}.svg" class="emoji">`;
+                  return img("🔌", key);
 
                 case "isSlashed":
-                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["🔪"]}.svg" class="emoji">`;
+                  return img("🔪", key);
 
                 case "epochsToNextEvent":
-                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["➡️"]}.svg" class="emoji">`;
+                  return img("➡️", key);
 
                 case "alert":
-                  return `<img title="${key}" src="${emojiURL}/svg/${emojisCodes["🐢"]}.svg" class="emoji">`;
+                  return img("🐢", key);
 
                 case "shard":
                   return "Sh";
@@ -229,11 +231,7 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; 
               newKeys
                 .map((key) =>
                   splitEmoji(data[key].toString())
-                    .map((char) =>
-                      emojisCodes[char]
-                        ? `<img src="${emojiURL}/svg/${emojisCodes[char]}.svg" class="emoji">`
-                        : char
-                    )
+                    .map((char) => (emojisCodes[char] ? img(char) : char))
                     .join("")
                 )
                 .join(`</td>\n<td class="${styles.td}">`)
