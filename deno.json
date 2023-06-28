@@ -18,6 +18,7 @@
   "imports": {
     "react-icons/bs": "https://cdn.jsdelivr.net/gh/urielch/react-icons-bs@1.0.9/mod.ts",
     "react-icons/io": "https://cdn.jsdelivr.net/gh/urielch/react-icons-io@1.0.9/mod.ts",
+    "react-icons/tb": "https://cdn.jsdelivr.net/gh/urielch/react-icons-tb@1.0.9/mod.ts",
     "fresh-charts/": "https://deno.land/x/fresh_charts@0.2.1/",
     "sort-es": "https://esm.sh/sort-es@1.6.11/",
     "dayjs/": "https://deno.land/x/deno_dayjs@v0.3.0/",

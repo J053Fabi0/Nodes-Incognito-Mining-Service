@@ -1,14 +1,15 @@
 import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
+import { TbReload } from "react-icons/tb";
 import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import { BsFillPlayFill } from "react-icons/bs";
-import Button from "../../components/Button.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Typography from "../../components/Typography.tsx";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
+import Button, { getButtonClasses } from "../../components/Button.tsx";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import submitCommand, { CommandResponse, commands } from "../../telegram/submitCommand.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
@@ -60,7 +61,7 @@ export const handler: Handlers<MonitorProps, State> = {
   },
 };
 
-export default function Monitor({ data }: PageProps<MonitorProps>) {
+export default function Monitor({ data, route }: PageProps<MonitorProps>) {
   const { nodesInfo, nodesStatus, isAdmin, commandResponse } = data;
 
   const head = (
@@ -110,12 +111,17 @@ export default function Monitor({ data }: PageProps<MonitorProps>) {
               ))}
           </form>
           <form method="post">
-            <input
-              type="text"
-              name="command"
-              placeholder="Command"
-              class="mb-2 p-2 border border-gray-300 rounded w-full"
-            />
+            <div class="flex w-full mb-2 items-center gap-2">
+              <input
+                type="text"
+                name="command"
+                placeholder="Command"
+                class="p-2 border border-gray-300 rounded w-full"
+              />
+              <a href={route} class={getButtonClasses("blue") + " h-min"}>
+                <TbReload size={20} />
+              </a>
+            </div>
           </form>
           {commandResponse && (
             <>
