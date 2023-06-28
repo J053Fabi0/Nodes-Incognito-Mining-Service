@@ -29,9 +29,10 @@ export default class EventedArray<Type = any> extends Array {
   }
 
   pop() {
-    const item = super.pop() as Type;
-    this.handler({ array: this, added: null, removed: [item], method: "pop" });
-    return item;
+    const length = this.length; // this.length gets the length before the pop. Using super.length gets the length after the pop.
+    const removed = length > 0 ? [super.pop() as Type] : [];
+    this.handler({ array: this, added: null, removed, method: "pop" });
+    return length > 0 ? removed[0] : undefined;
   }
 
   unshift(...items: Type[]) {
@@ -41,9 +42,10 @@ export default class EventedArray<Type = any> extends Array {
   }
 
   shift() {
-    const item = super.shift() as Type;
-    this.handler({ array: this, added: null, removed: [item], method: "shift" });
-    return item;
+    const length = this.length; // this.length gets the length before the shift. Using super.length gets the length after the shift.
+    const removed = length > 0 ? [super.shift() as Type] : [];
+    this.handler({ array: this, added: null, removed, method: "shift" });
+    return length > 0 ? removed[0] : undefined;
   }
 
   splice(start: number, deleteCount?: number): Type[];
