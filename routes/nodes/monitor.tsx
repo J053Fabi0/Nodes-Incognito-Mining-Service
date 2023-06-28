@@ -11,6 +11,7 @@ import MonitorCommands from "../../components/Nodes/MonitorCommands.tsx";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import submitCommand, { CommandResponse } from "../../telegram/submitCommand.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
+import { roleToEmoji } from "../../telegram/handlers/handleTextMessage.ts";
 
 const styles = {
   th: "border border-slate-300 py-2 px-3",
@@ -156,7 +157,11 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
                   </td>
 
                   <td class={styles.td}>
-                    <code>{status.role[0] + status.role.slice(1).toLowerCase()}</code>
+                    <code>
+                      {roleToEmoji(status.role)}
+                      &nbsp;
+                      {status.role[0] + status.role.slice(1).toLowerCase().replace(/_/g, " ")}
+                    </code>
                     <br />
                     For <code class="font-semibold">{status.epochsToNextEvent}</code> epochs
                   </td>

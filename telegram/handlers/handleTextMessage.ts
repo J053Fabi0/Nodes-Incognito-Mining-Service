@@ -6,7 +6,7 @@ import { CommandResponse } from "../submitCommand.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
 import emojisCodes, { splitEmoji } from "../../utils/emojisCodes.ts";
-import getNodesStatus, { NodeStatus } from "../../utils/getNodesStatus.ts";
+import getNodesStatus, { NodeRoles, NodeStatus } from "../../utils/getNodesStatus.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 
 const allKeys = ["name", "role", "shard", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
@@ -166,6 +166,22 @@ const styles = {
 const emojiURL = "https://abs.twimg.com/emoji/v2";
 const img = (emoji: string, key = "") =>
   `<img title="${key}" src="${emojiURL}/svg/${emojisCodes[emoji]}.svg" class="emoji" width="27" style="display: inline">`;
+export function roleToEmoji(role: NodeRoles) {
+  switch (role) {
+    case "PENDING":
+      return "⏳";
+    case "COMMITTEE":
+      return "⛏⚡";
+    case "WAITING":
+      return "🆕";
+    case "SYNCING":
+      return "⏳⏳";
+    case "NOT_STAKED":
+      return "⚠️";
+    default:
+      return "❔";
+  }
+}
 function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; table: string } {
   const normalizedNodes: NormalizedNode[] = nodes.map((node) => ({
     name: node.name,
@@ -174,17 +190,7 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; 
     alert: node.alert ? "Yes ⚠️" : "No",
     isSlashed: node.isSlashed ? "Yes ⚠️" : "No",
     isOldVersion: node.isOldVersion ? "Yes ⚠️" : "No",
-    role:
-      node.role === "PENDING"
-        ? "⏳"
-        : node.role === "COMMITTEE"
-        ? "⛏⚡"
-        : node.role === "WAITING"
-        ? "🆕"
-        : node.role === "SYNCING"
-        ? "⏳⏳"
-        : // : node.role.charAt(0) + node.role.slice(1).toLowerCase(),
-          "",
+    role: roleToEmoji(node.role),
     syncState:
       node.syncState.charAt(0) +
       node.syncState.slice(1).toLowerCase() +
