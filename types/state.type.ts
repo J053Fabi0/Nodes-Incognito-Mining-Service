@@ -1,5 +1,6 @@
-import { WithSession } from "fresh-session/src/stores/interface.ts";
 import Client from "./collections/client.type.ts";
+import { CommandResponse } from "../telegram/submitCommand.ts";
+import { WithSession } from "fresh-session/src/stores/interface.ts";
 
 /**
  * State of the application
@@ -7,6 +8,7 @@ import Client from "./collections/client.type.ts";
 export default interface State extends WithSession {
   user: Client | null;
   isAdmin: boolean;
+  commandResponse?: CommandResponse;
 
   // saved in cookies
   userId?: string | null;

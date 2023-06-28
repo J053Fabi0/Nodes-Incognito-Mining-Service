@@ -2,26 +2,38 @@ import bot from "../initBots.ts";
 import { escapeHtml } from "escapeHtml";
 import sortNodes from "../../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../sendMessage.ts";
+import isError from "../../types/guards/isError.ts";
 import { df } from "duplicatedFilesCleanerIncognito";
+import { CommandResponse } from "../submitCommand.ts";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { duplicatedConstants } from "../../duplicatedFilesCleaner.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
 
+/**
+ * @param rawNodes Leave empty to get info about all nodes
+ */
 export default async function handleInfo(
   rawNodes: string[] = [],
   options: Parameters<typeof bot.api.sendMessage>[2] = {}
-) {
+): Promise<CommandResponse> {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {
-    if (!duplicatedConstants.fileSystem)
-      return await sendHTMLMessage("File system not configured", undefined, options);
-    return await sendHTMLMessage(await getFileSistemInfo(duplicatedConstants.fileSystem), undefined, options);
+    if (!duplicatedConstants.fileSystem) {
+      await sendHTMLMessage("File system not configured", undefined, options);
+      return { successful: false, error: "File system not configured" };
+    }
+    const response = await getFileSistemInfo(duplicatedConstants.fileSystem);
+    await sendHTMLMessage(response, undefined, options);
+    return { successful: true, response };
   }
 
-  const nodes = await validateItems({ rawItems: rawNodes }).catch(() => null);
-  if (!nodes) return Promise.resolve(null);
+  const nodes = await validateItems({ rawItems: rawNodes }).catch((e) => {
+    if (isError(e)) return e;
+    throw e;
+  });
+  if (isError(nodes)) return { successful: false, error: nodes.message };
 
   const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(nodes);
 
@@ -46,15 +58,6 @@ export default async function handleInfo(
         ? `\n<code> ${escapeHtml(objectToTableText(normalizedInfo))
             .split("\n")
             .slice(0, -1)
-            // .map((a) =>
-            //   a.replace(
-            //     ...(() => {
-            //       const match = a.match(/: +/);
-            //       if (match) return [match[0], `</code><code>${match[0]}</code><code>`] as [string, string];
-            //       else return ["", ""] as [string, string];
-            //     })()
-            //   )
-            // )
             .join("</code>\n<code> ")}</code>`
         : "") +
       "\n\n";
@@ -70,18 +73,16 @@ export default async function handleInfo(
       .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
       .join("\n")}</code>`;
 
-  return sendHTMLMessage(text.trim(), undefined, options);
+  await sendHTMLMessage(text.trim(), undefined, options);
+  return { successful: true, response: text.trim() };
 }
 
-async function getFileSistemInfo(fileSystem: string) {
-  return (
-    `<b>File system</b>:\n` +
-    `<code>${escapeHtml(
-      (await df(["-h", fileSystem, "--output=used,avail,pcent"]))
-        // Remove extra spaces
-        .split("\n")
-        .map((t) => t.trim())
-        .join("\n")
-    )}</code>`
-  );
-}
+const getFileSistemInfo = async (fileSystem: string) =>
+  `<b>File system</b>:\n` +
+  `<code>${escapeHtml(
+    (await df(["-h", fileSystem, "--output=used,avail,pcent"]))
+      // Remove extra spaces
+      .split("\n")
+      .map((t) => t.trim())
+      .join("\n")
+  )}</code>`;

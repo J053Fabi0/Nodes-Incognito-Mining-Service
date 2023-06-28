@@ -1,10 +1,11 @@
 import { ignore } from "../../utils/variables.ts";
+import { CommandResponse } from "../submitCommand.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 
 type Type = (typeof errorKeys)[number] | "all";
 const errorKeys = Object.keys(ignore).sort((a, b) => a.length - b.length) as (keyof typeof ignore)[];
 
-export default async function handleIgnore(args: string[]) {
+export default async function handleIgnore(args: string[]): Promise<CommandResponse> {
   let number = 0; // default value is 0, to disable the ignore
   let type: Type = "docker";
 
@@ -18,17 +19,24 @@ export default async function handleIgnore(args: string[]) {
     number = Number(args[1]) || number;
   }
 
-  if (number < 0) return await sendHTMLMessage("The number of minutes must be positive.");
+  if (number < 0) {
+    const error = "The number of minutes must be positive.";
+    await sendHTMLMessage(error);
+    return { successful: false, error };
+  }
 
-  if ((type !== "all" && !errorKeys.includes(type)) || type.toLowerCase() === "codes")
-    return await sendHTMLMessage(
-      `Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`
-    );
+  if ((type !== "all" && !errorKeys.includes(type)) || type.toLowerCase() === "codes") {
+    const error = `Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`;
+    await sendHTMLMessage(error);
+    return { successful: false, error };
+  }
 
   for (const t of type === "all" ? errorKeys : [type]) {
     ignore[t].from = new Date();
     ignore[t].minutes = number;
   }
 
-  return await sendMessage(`Ignoring ${type} for ${number} minutes.`);
+  const response = `Ignoring ${type} for ${number} minutes.`;
+  await sendMessage(response);
+  return { successful: true, response };
 }

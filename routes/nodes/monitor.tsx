@@ -1,17 +1,18 @@
 import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
+import { FiClock } from "react-icons/fi";
+import { TbReload } from "react-icons/tb";
 import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import { BsFillPlayFill } from "react-icons/bs";
-import Button from "../../components/Button.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
-import { lastMessages } from "../../utils/variables.ts";
 import Typography from "../../components/Typography.tsx";
 import NodePill from "../../components/Nodes/NodePill.tsx";
-import handleCommands from "../../telegram/handleCommands.ts";
 import { getNodes } from "../../controllers/node.controller.ts";
+import Button, { getButtonClasses } from "../../components/Button.tsx";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
+import submitCommand, { CommandResponse, commands } from "../../telegram/submitCommand.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
 
 const styles = {
@@ -21,6 +22,7 @@ const styles = {
 
 interface MonitorProps {
   isAdmin: boolean;
+  commandResponse?: CommandResponse;
   nodesInfo: NodeInfoByDockerIndex[];
   nodesStatus: NodesStatusByDockerIndex;
 }
@@ -30,7 +32,7 @@ const testingClient = !IS_PRODUCTION && false;
 
 export const handler: Handlers<MonitorProps, State> = {
   async GET(_, ctx) {
-    const { isAdmin, supplanting, userId } = ctx.state;
+    const { isAdmin, supplanting, userId, commandResponse } = ctx.state;
 
     // if it's an admin and not supplanting, get all nodes
     const shouldGetAll = (isAdmin || supplanting) && !testingClient;
@@ -44,7 +46,7 @@ export const handler: Handlers<MonitorProps, State> = {
         ? await sortNodes(shouldGetAll ? [] : nodes!.map((n) => n.dockerIndex))
         : { nodesInfoByDockerIndex: [], nodesStatusByDockerIndex: {} };
 
-    return ctx.render({ nodesInfo, nodesStatus, isAdmin: shouldGetAll });
+    return ctx.render({ nodesInfo, nodesStatus, isAdmin: shouldGetAll, commandResponse });
   },
 
   async POST(req, ctx) {
@@ -52,16 +54,16 @@ export const handler: Handlers<MonitorProps, State> = {
 
     const form = await req.formData();
     const command = form.get("command")?.toString();
+    if (!command) return handler.GET ? handler.GET(req, ctx) : redirect(req.url);
 
-    if (command) await handleCommands(command);
+    ctx.state.commandResponse = (await submitCommand(command))[0];
 
-    if (handler.GET) return handler.GET(req, ctx);
-    else return redirect(req.url);
+    return handler.GET ? handler.GET(req, ctx) : redirect(req.url);
   },
 };
 
-export default function Monitor({ data }: PageProps<MonitorProps>) {
-  const { nodesInfo, nodesStatus, isAdmin } = data;
+export default function Monitor({ data, route }: PageProps<MonitorProps>) {
+  const { nodesInfo, nodesStatus, isAdmin, commandResponse } = data;
 
   const head = (
     <Head>
@@ -93,26 +95,57 @@ export default function Monitor({ data }: PageProps<MonitorProps>) {
       {isAdmin && (
         <>
           <form method="post">
-            {lastMessages.toReversed().map((m) => (
-              <div class="flex gap-3 mt-1 mb-5">
-                <Typography variant="lead">
-                  <code>{m}</code>
-                </Typography>
+            {commands.resolved
+              .toReversed()
+              .slice(0, 5)
+              .toReversed()
+              .map((m) => (
+                <div class="flex gap-3 mt-1 mb-5">
+                  <Typography variant="lead">
+                    <code>{m}</code>
+                  </Typography>
 
-                <Button type="submit" class="py-0 px-2" name="command" value={m}>
-                  <BsFillPlayFill size={20} />
-                </Button>
+                  <Button type="submit" class="py-0 px-2" name="command" value={m}>
+                    <BsFillPlayFill size={20} />
+                  </Button>
+                </div>
+              ))}
+            {commands.pending.map((c) => (
+              <div class="mt-1 mb-5">
+                <Typography variant="lead" class="flex gap-3 items-center">
+                  <code>{c.command}</code>
+                  <FiClock size={20} />
+                </Typography>
               </div>
             ))}
           </form>
           <form method="post">
-            <input
-              type="text"
-              name="command"
-              placeholder="Command"
-              class="mb-2 p-2 border border-gray-300 rounded w-full"
-            />
+            <div class="flex w-full mb-2 items-center gap-2">
+              <input
+                type="text"
+                name="command"
+                placeholder="Command"
+                class="p-2 border border-gray-300 rounded w-full"
+              />
+              <a href={route} class={getButtonClasses("blue") + " h-min"}>
+                <TbReload size={20} />
+              </a>
+            </div>
           </form>
+          {commandResponse && (
+            <>
+              <Typography variant="lead">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: (commandResponse.successful ? commandResponse.response : commandResponse.error)
+                      // replace all newlines with <br />
+                      .replace(/\n/g, "<br />"),
+                  }}
+                />
+              </Typography>
+              <div class="mb-2" />
+            </>
+          )}
         </>
       )}
 
