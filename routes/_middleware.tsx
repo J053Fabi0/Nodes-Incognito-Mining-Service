@@ -1,27 +1,33 @@
+import { connect } from "redis/mod.ts";
 import { ObjectId } from "mongo/mod.ts";
 import State from "../types/state.type.ts";
 import redirect from "../utils/redirect.ts";
 import isAdminPage from "../utils/isAdminPage.tsx";
-import { cookieSession } from "fresh-session/mod.ts";
+import { redisSession } from "fresh-session/mod.ts";
+import { REDIS_HOSTNAME, REDIS_PORT } from "../env.ts";
 import { Middleware } from "$fresh/src/server/types.ts";
 import isLoggedInPage from "../utils/isLoggedInPage.tsx";
 import { getClient } from "../controllers/client.controller.ts";
 
-const session = cookieSession({
-  secure: true,
-  httpOnly: true,
-  sameSite: "Strict",
-  maxAge: Number.MAX_SAFE_INTEGER,
+const redis = await connect({
+  port: REDIS_PORT,
+  hostname: REDIS_HOSTNAME,
 });
 
 export const { handler }: Middleware<State> = {
   handler: [
     // implement fresh-session
-    (req, ctx) => session(req, ctx),
+    redisSession(redis, {
+      secure: true,
+      httpOnly: true,
+      sameSite: "Strict",
+      maxAge: Number.MAX_SAFE_INTEGER,
+    }),
 
     // parse the session data
     (_, ctx) => {
       ctx.state.userId = ctx.state.session.get("userId");
+      ctx.state.commandResponse = ctx.state.session.get("commandResponse");
       ctx.state.supplanting = Boolean(ctx.state.session.get("supplanting"));
       return ctx.next();
     },
