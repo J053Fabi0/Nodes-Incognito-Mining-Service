@@ -50,10 +50,12 @@ export const handler: Handlers<MonitorProps, State> = {
     if (!ctx.state.isAdmin) return redirect(req.url);
 
     const form = await req.formData();
+
     const command = form.get("command")?.toString();
     if (!command) return redirect(req.url);
 
-    ctx.state.commandResponse = (await submitCommand(command))[0];
+    const [commandResponse] = await submitCommand(command);
+    ctx.state.session.set("commandResponse", commandResponse);
 
     return redirect(req.url);
   },

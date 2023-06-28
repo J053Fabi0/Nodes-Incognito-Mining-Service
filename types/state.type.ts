@@ -8,9 +8,9 @@ import { WithSession } from "fresh-session/src/stores/interface.ts";
 export default interface State extends WithSession {
   user: Client | null;
   isAdmin: boolean;
-  commandResponse?: CommandResponse;
 
   // saved in cookies
   userId?: string | null;
   supplanting: boolean; // if true, an admin is supplanting a user
+  commandResponse?: CommandResponse;
 }
