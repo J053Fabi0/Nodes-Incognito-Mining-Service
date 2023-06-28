@@ -93,17 +93,21 @@ export default function Monitor({ data }: PageProps<MonitorProps>) {
       {isAdmin && (
         <>
           <form method="post">
-            {commands.resolved.slice(0, 5).map((m) => (
-              <div class="flex gap-3 mt-1 mb-5">
-                <Typography variant="lead">
-                  <code>{m}</code>
-                </Typography>
+            {commands.resolved
+              .toReversed()
+              .slice(0, 5)
+              .toReversed()
+              .map((m) => (
+                <div class="flex gap-3 mt-1 mb-5">
+                  <Typography variant="lead">
+                    <code>{m}</code>
+                  </Typography>
 
-                <Button type="submit" class="py-0 px-2" name="command" value={m}>
-                  <BsFillPlayFill size={20} />
-                </Button>
-              </div>
-            ))}
+                  <Button type="submit" class="py-0 px-2" name="command" value={m}>
+                    <BsFillPlayFill size={20} />
+                  </Button>
+                </div>
+              ))}
           </form>
           <form method="post">
             <input
