@@ -12,5 +12,5 @@ export default interface State extends WithSession {
   // saved in cookies
   userId?: string | null;
   supplanting: boolean; // if true, an admin is supplanting a user
-  commandResponse?: CommandResponse;
+  commandResponse?: CommandResponse | null;
 }

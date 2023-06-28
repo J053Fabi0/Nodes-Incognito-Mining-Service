@@ -2,12 +2,13 @@ import { FiClock } from "react-icons/fi";
 import { TbReload } from "react-icons/tb";
 import Typography from "../Typography.tsx";
 import { BsFillPlayFill } from "react-icons/bs";
+import { MdScheduleSend } from "react-icons/md";
 import Button, { getButtonClasses } from "../Button.tsx";
 import { CommandResponse, commands } from "../../telegram/submitCommand.ts";
 
 interface MonitorCommandsProps {
   route: string;
-  commandResponse?: CommandResponse;
+  commandResponse?: CommandResponse | null;
 }
 
 export default function MonitorCommands({ route, commandResponse }: MonitorCommandsProps) {
@@ -41,11 +42,20 @@ export default function MonitorCommands({ route, commandResponse }: MonitorComma
       <form method="post">
         <div class="flex w-full mb-2 items-center gap-2">
           <input
+            required
             type="text"
             name="command"
             placeholder="Command"
             class="p-2 border border-gray-300 rounded w-full"
           />
+
+          {/* This hidden button is necessary to submit the form without sending "noWait", but instead sending "submit" */}
+          <button name="submit" value="submit" class="invisible p-0 ml-[-0.5rem]" />
+
+          <Button name="submit" value="noWait" color="red" title="Send without waiting for result">
+            <MdScheduleSend size={20} />
+          </Button>
+
           <a href={route} class={getButtonClasses("blue") + " h-min"} title="Reload page without resending form">
             <TbReload size={20} />
           </a>

@@ -19,9 +19,9 @@ const styles = {
 
 interface MonitorProps {
   isAdmin: boolean;
-  commandResponse?: CommandResponse;
   nodesInfo: NodeInfoByDockerIndex[];
   nodesStatus: NodesStatusByDockerIndex;
+  commandResponse?: CommandResponse | null;
 }
 
 // Only change the last boolean value if you want to test
@@ -52,10 +52,16 @@ export const handler: Handlers<MonitorProps, State> = {
     const form = await req.formData();
 
     const command = form.get("command")?.toString();
+    const submit = form.get("submit")?.toString() || "submit";
     if (!command) return redirect(req.url);
 
-    const [commandResponse] = await submitCommand(command);
-    ctx.state.session.set("commandResponse", commandResponse);
+    if (submit === "noWait") {
+      submitCommand(command);
+      ctx.state.session.set("commandResponse", null);
+    } else {
+      const [commandResponse] = await submitCommand(command);
+      ctx.state.session.set("commandResponse", commandResponse);
+    }
 
     return redirect(req.url);
   },
