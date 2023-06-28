@@ -6,9 +6,9 @@ import redirect from "../../utils/redirect.ts";
 import { BsFillPlayFill } from "react-icons/bs";
 import Button from "../../components/Button.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
-import { lastMessages } from "../../utils/variables.ts";
 import Typography from "../../components/Typography.tsx";
 import NodePill from "../../components/Nodes/NodePill.tsx";
+import { commands } from "../../telegram/handleCommands.ts";
 import handleCommands from "../../telegram/handleCommands.ts";
 import { getNodes } from "../../controllers/node.controller.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
@@ -93,7 +93,7 @@ export default function Monitor({ data }: PageProps<MonitorProps>) {
       {isAdmin && (
         <>
           <form method="post">
-            {lastMessages.toReversed().map((m) => (
+            {commands.resolved.map((m) => (
               <div class="flex gap-3 mt-1 mb-5">
                 <Typography variant="lead">
                   <code>{m}</code>
