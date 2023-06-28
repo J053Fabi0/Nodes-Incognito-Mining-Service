@@ -113,7 +113,7 @@ async function handleCommands(fullCommand: string): Promise<CommandResponse> {
 }
 
 /** Pushes a command to the queue and waits for it to be executed. */
-export default async function submitCommand(command: string) {
+export default async function submitCommand(command: string): Promise<CommandResponse[]> {
   const fullCommands = command
     .toLowerCase()
     .split("\n")
@@ -155,5 +155,11 @@ export default async function submitCommand(command: string) {
     }
   }
 
-  await Promise.allSettled(promises);
+  const settledResults = await Promise.allSettled(promises);
+  const results: CommandResponse[] = settledResults.map((result) => {
+    if (result.status === "fulfilled") return result.value;
+    else return { successful: false, error: "Unknown error." };
+  });
+
+  return results;
 }

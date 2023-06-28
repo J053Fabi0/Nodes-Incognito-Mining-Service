@@ -9,8 +9,8 @@ import { Handlers, PageProps } from "$fresh/server.ts";
 import Typography from "../../components/Typography.tsx";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
-import submitCommand, { commands } from "../../telegram/submitCommand.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
+import submitCommand, { CommandResponse, commands } from "../../telegram/submitCommand.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
 
 const styles = {
@@ -20,6 +20,7 @@ const styles = {
 
 interface MonitorProps {
   isAdmin: boolean;
+  commandResponse?: CommandResponse;
   nodesInfo: NodeInfoByDockerIndex[];
   nodesStatus: NodesStatusByDockerIndex;
 }
@@ -29,7 +30,7 @@ const testingClient = !IS_PRODUCTION && false;
 
 export const handler: Handlers<MonitorProps, State> = {
   async GET(_, ctx) {
-    const { isAdmin, supplanting, userId } = ctx.state;
+    const { isAdmin, supplanting, userId, commandResponse } = ctx.state;
 
     // if it's an admin and not supplanting, get all nodes
     const shouldGetAll = (isAdmin || supplanting) && !testingClient;
@@ -43,7 +44,7 @@ export const handler: Handlers<MonitorProps, State> = {
         ? await sortNodes(shouldGetAll ? [] : nodes!.map((n) => n.dockerIndex))
         : { nodesInfoByDockerIndex: [], nodesStatusByDockerIndex: {} };
 
-    return ctx.render({ nodesInfo, nodesStatus, isAdmin: shouldGetAll });
+    return ctx.render({ nodesInfo, nodesStatus, isAdmin: shouldGetAll, commandResponse });
   },
 
   async POST(req, ctx) {
@@ -51,16 +52,16 @@ export const handler: Handlers<MonitorProps, State> = {
 
     const form = await req.formData();
     const command = form.get("command")?.toString();
+    if (!command) return handler.GET ? handler.GET(req, ctx) : redirect(req.url);
 
-    if (command) await submitCommand(command);
+    ctx.state.commandResponse = (await submitCommand(command))[0];
 
-    if (handler.GET) return handler.GET(req, ctx);
-    else return redirect(req.url);
+    return handler.GET ? handler.GET(req, ctx) : redirect(req.url);
   },
 };
 
 export default function Monitor({ data }: PageProps<MonitorProps>) {
-  const { nodesInfo, nodesStatus, isAdmin } = data;
+  const { nodesInfo, nodesStatus, isAdmin, commandResponse } = data;
 
   const head = (
     <Head>
@@ -112,6 +113,20 @@ export default function Monitor({ data }: PageProps<MonitorProps>) {
               class="mb-2 p-2 border border-gray-300 rounded w-full"
             />
           </form>
+          {commandResponse && (
+            <>
+              <Typography variant="lead">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: (commandResponse.successful ? commandResponse.response : commandResponse.error)
+                      // replace all newlines with <br />
+                      .replace(/\n/g, "<br />"),
+                  }}
+                />
+              </Typography>
+              <div class="mb-2" />
+            </>
+          )}
         </>
       )}
 
