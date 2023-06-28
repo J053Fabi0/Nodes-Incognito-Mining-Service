@@ -9,6 +9,8 @@ import {
 import { escapeHtml } from "escapeHtml";
 import constants from "../../constants.ts";
 import { sendHTMLMessage } from "../sendMessage.ts";
+import isError from "../../types/guards/isError.ts";
+import { CommandResponse } from "../submitCommand.ts";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
 import getMinutesSinceError from "../../utils/getMinutesSinceError.ts";
@@ -17,16 +19,19 @@ const nodesByPublicKey = Object.fromEntries(
   constants.map(({ validatorPublic, ...data }) => [validatorPublic, data])
 );
 
-export default async function handleErrorsInfo(rawErrorCodes: string[]) {
-  const errorCodesToShow =
+export default async function handleErrorsInfo(rawErrorCodes: string[]): Promise<CommandResponse> {
+  const errorCodesToShow: AllErrorTypes[] | Error =
     rawErrorCodes.length === 0
       ? allErrorTypes
       : ((await validateItems({
           name: "error code",
           rawItems: rawErrorCodes,
           validItems: allErrorTypes as unknown as string[],
-        }).catch(() => null)) as AllErrorTypes[] | null);
-  if (!errorCodesToShow) return false;
+        }).catch((e) => {
+          if (isError(e)) return e;
+          throw e;
+        })) as AllErrorTypes[] | Error);
+  if (isError(errorCodesToShow)) return { successful: false, error: errorCodesToShow.message };
 
   let text = "";
 
@@ -65,6 +70,7 @@ export default async function handleErrorsInfo(rawErrorCodes: string[]) {
       "\n";
   }
 
-  await sendHTMLMessage(text.trim() || "No errors found. Send /full or /fulltext to get all the information.");
-  return true;
+  const response = text.trim() || "No errors found. Send /full or /fulltext to get all the information.";
+  await sendHTMLMessage(response);
+  return { successful: true, response };
 }

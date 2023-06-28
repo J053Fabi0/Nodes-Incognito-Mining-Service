@@ -2,6 +2,7 @@ import bot from "../initBots.ts";
 import { ADMIN_ID } from "../../env.ts";
 import { InputFile } from "grammy/mod.ts";
 import sendMessage from "../sendMessage.ts";
+import { CommandResponse } from "../submitCommand.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
 import emojisCodes, { splitEmoji } from "../../utils/emojisCodes.ts";
@@ -17,7 +18,7 @@ let lastPhotoIdTime: number | undefined;
 let lastText = "";
 let lastTextTime: number | undefined;
 
-export default async function handleTextMessage(text: "text" | "full" | "fulltext") {
+export default async function handleTextMessage(text: "text" | "full" | "fulltext"): Promise<CommandResponse> {
   const keys: Keys[] = [];
   let nodes = await getNodesStatus();
 
@@ -39,14 +40,16 @@ export default async function handleTextMessage(text: "text" | "full" | "fulltex
   }
 
   if (!nodes.length) {
-    await sendMessage("Everything is alright. Send /full or /fulltext to get all the information.");
-    return true;
+    const response = "Everything is alright. Send /full or /fulltext to get all the information.";
+    await sendMessage(response);
+    return { successful: true, response };
   }
 
   // for text-only
   if (text === "text") {
-    await sendMessage(getMessageText(keys, nodes), undefined, { parse_mode: "HTML" });
-    return true;
+    const response = getMessageText(keys, nodes);
+    await sendMessage(response, undefined, { parse_mode: "HTML" });
+    return { successful: true, response };
   }
 
   // generate new keys for the table
@@ -80,7 +83,7 @@ export default async function handleTextMessage(text: "text" | "full" | "fulltex
     lastPhotoIdTime = Date.now();
   }
 
-  return true;
+  return { successful: true, response: html };
 }
 
 function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
@@ -182,66 +185,73 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]) {
     status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
   }));
 
-  return `<!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              ${Deno.readTextFileSync("./html/markdown_css.css")}
-            </style>
-          </head>
-          <body>
-            <table>
-              <tr>
-                <th>
-                  ${newKeys
-                    .map((key) => {
-                      switch (key) {
-                        case "isOldVersion":
-                          return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["👴"]}.svg" class="emoji">`;
+  const html = `
+    <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            ${Deno.readTextFileSync("./html/markdown_css.css")}
+          </style>
+        </head>
+        <body>
+          <table>
+            <tr>
+              <th>
+                ${newKeys
+                  .map((key) => {
+                    switch (key) {
+                      case "isOldVersion":
+                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["👴"]}.svg" class="emoji">`;
 
-                        case "status":
-                          return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🔌"]}.svg" class="emoji">`;
+                      case "status":
+                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🔌"]}.svg" class="emoji">`;
 
-                        case "isSlashed":
-                          return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🔪"]}.svg" class="emoji">`;
+                      case "isSlashed":
+                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🔪"]}.svg" class="emoji">`;
 
-                        case "epochsToNextEvent":
-                          return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["➡️"]}.svg" class="emoji">`;
+                      case "epochsToNextEvent":
+                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["➡️"]}.svg" class="emoji">`;
 
-                        case "alert":
-                          return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🐢"]}.svg" class="emoji">`;
+                      case "alert":
+                        return `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes["🐢"]}.svg" class="emoji">`;
 
-                        case "shard":
-                          return "Sh";
+                      case "shard":
+                        return "Sh";
 
-                        default:
-                          return key.charAt(0).toUpperCase() + key.slice(1);
-                      }
-                    })
-                    .join("</th>\n<th>")}
-                </th>
-              </tr>
-              <tr>
-                <td>
-                  ${normalizedNodes
-                    .map((data) =>
-                      newKeys
-                        .map((key) =>
-                          splitEmoji(data[key].toString())
-                            .map((char) =>
-                              emojisCodes[char]
-                                ? `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes[char]}.svg" class="emoji">`
-                                : char
-                            )
-                            .join("")
-                        )
-                        .join("</td>\n<td>")
-                    )
-                    .join("</td>\n</tr>\n<tr>\n<td>")}
-                </td>
-              </tr>
-            </table>
-          </body>
-        </html>`;
+                      default:
+                        return key.charAt(0).toUpperCase() + key.slice(1);
+                    }
+                  })
+                  .join("</th>\n<th>")}
+              </th>
+            </tr>
+            <tr>
+              <td>
+                ${normalizedNodes
+                  .map((data) =>
+                    newKeys
+                      .map((key) =>
+                        splitEmoji(data[key].toString())
+                          .map((char) =>
+                            emojisCodes[char]
+                              ? `<img src="https://abs.twimg.com/emoji/v2/svg/${emojisCodes[char]}.svg" class="emoji">`
+                              : char
+                          )
+                          .join("")
+                      )
+                      .join("</td>\n<td>")
+                  )
+                  .join("</td>\n</tr>\n<tr>\n<td>")}
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>`;
+
+  // replace all new lines with nothing and trim every line
+  return html
+    .split("\n")
+    .map((line) => line.trim())
+    .join("");
 }

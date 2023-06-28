@@ -1,3 +1,4 @@
+import isError from "../types/guards/isError.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
 import helpMessage from "../utils/helpMessage.ts";
@@ -15,7 +16,7 @@ import getCommandOrPossibilities, { AllowedCommands } from "../utils/getCommandO
 
 interface Command {
   command: string;
-  resolve: (successful: boolean) => void;
+  resolve: (response: CommandResponse) => void;
 }
 export const commands: {
   /** The first one is the oldest */
@@ -47,15 +48,16 @@ export const commands: {
   };
 })();
 
+export type CommandResponse = { response: string; successful: true } | { successful: false; error: string };
 /**
  * @returns true if the command was handled successfully
  */
-async function handleCommands(fullCommand: string): Promise<boolean> {
+async function handleCommands(fullCommand: string): Promise<CommandResponse> {
   try {
     const repeating = fullCommand.startsWith("repeat");
     if (repeating && commands.resolved.lengths === 0) {
       await sendMessage("No previous messages to repeat.");
-      return false;
+      return { successful: false, error: "No previous messages to repeat." };
     }
 
     const [command, ...args] = fullCommand.split(" ") as [Exclude<AllowedCommands, "repeat">, ...string[]];
@@ -63,7 +65,7 @@ async function handleCommands(fullCommand: string): Promise<boolean> {
     switch (command) {
       case "help":
         await sendHTMLMessage(helpMessage);
-        return true;
+        return { successful: true, response: helpMessage };
 
       case "docker":
         return handleDocker(args);
@@ -86,14 +88,16 @@ async function handleCommands(fullCommand: string): Promise<boolean> {
       case "errors":
         return handleErrorsInfo(args);
 
-      case "instructions":
-        await sendHTMLMessage(await getTextInstructionsToMoveOrDelete());
-        return true;
+      case "instructions": {
+        const response = await getTextInstructionsToMoveOrDelete();
+        await sendHTMLMessage(response);
+        return { successful: true, response };
+      }
 
       case "reset":
         for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
         await sendMessage("Reset successful.");
-        return true;
+        return { successful: true, response: "Reset successful." };
 
       case "full":
       case "text":
@@ -103,7 +107,8 @@ async function handleCommands(fullCommand: string): Promise<boolean> {
     }
   } catch (e) {
     handleError(e);
-    return false;
+    if (isError(e)) return { successful: false, error: e.message };
+    return { successful: false, error: "Unknown error." };
   }
 }
 
@@ -114,35 +119,37 @@ export default async function submitCommand(command: string) {
     .split("\n")
     .filter((x) => x.trim());
 
-  const promises: Promise<void | boolean>[] = [];
+  const promises: Promise<CommandResponse>[] = [];
 
   for (const fullCommand of fullCommands) {
     const [commandText, ...args] = fullCommand.split(" ").filter((x) => x.trim());
     const commandOrPossibilities = getCommandOrPossibilities(commandText);
 
     // if command was ambiguous
-    if (commandOrPossibilities.possibleCommands)
-      promises.push(
-        sendHTMLMessage(
-          commandOrPossibilities.possibleCommands.length > 1
-            ? `Command <code>${fullCommand}</code> is ambiguous. Did you mean one of these?\n- <code>` +
-                `${commandOrPossibilities.possibleCommands
-                  .map((c) => `${c} ${args.join(" ")}`)
-                  .join("</code>\n- <code>")}</code>`
-            : `Command <code>${fullCommand}</code> not found. Type /help to see the available commands.`
-        ).then(() => undefined)
-      );
+    if (commandOrPossibilities.possibleCommands) {
+      const response =
+        commandOrPossibilities.possibleCommands.length > 1
+          ? `Command <code>${fullCommand}</code> is ambiguous. Did you mean one of these?\n- <code>` +
+            `${commandOrPossibilities.possibleCommands
+              .map((c) => `${c} ${args.join(" ")}`)
+              .join("</code>\n- <code>")}</code>`
+          : `Command <code>${fullCommand}</code> not found. Type /help to see the available commands.`;
+
+      promises.push(sendHTMLMessage(response).then(() => ({ successful: false, error: response })));
+    }
     // push the command to the queue
     else {
       const finalFullCommand = [commandOrPossibilities.command, ...args].join(" ");
 
       promises.push(
-        new Promise<boolean>((resolve) => {
+        new Promise<CommandResponse>((resolve) => {
           commands.pending.push({ resolve, command: finalFullCommand });
-        }).then((successful) => {
-          if (successful)
+        }).then((response) => {
+          if (response.successful)
             // add the command to the list of resolved commands
             commands.resolved.push(finalFullCommand);
+
+          return response;
         })
       );
     }

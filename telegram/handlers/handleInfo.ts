@@ -2,7 +2,9 @@ import bot from "../initBots.ts";
 import { escapeHtml } from "escapeHtml";
 import sortNodes from "../../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../sendMessage.ts";
+import isError from "../../types/guards/isError.ts";
 import { df } from "duplicatedFilesCleanerIncognito";
+import { CommandResponse } from "../submitCommand.ts";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { duplicatedConstants } from "../../duplicatedFilesCleaner.ts";
@@ -15,19 +17,23 @@ import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDe
 export default async function handleInfo(
   rawNodes: string[] = [],
   options: Parameters<typeof bot.api.sendMessage>[2] = {}
-) {
+): Promise<CommandResponse> {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {
     if (!duplicatedConstants.fileSystem) {
       await sendHTMLMessage("File system not configured", undefined, options);
-      return false;
+      return { successful: false, error: "File system not configured" };
     }
-    await sendHTMLMessage(await getFileSistemInfo(duplicatedConstants.fileSystem), undefined, options);
-    return true;
+    const response = await getFileSistemInfo(duplicatedConstants.fileSystem);
+    await sendHTMLMessage(response, undefined, options);
+    return { successful: true, response };
   }
 
-  const nodes = await validateItems({ rawItems: rawNodes }).catch(() => null);
-  if (!nodes) return false;
+  const nodes = await validateItems({ rawItems: rawNodes }).catch((e) => {
+    if (isError(e)) return e;
+    throw e;
+  });
+  if (isError(nodes)) return { successful: false, error: nodes.message };
 
   const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(nodes);
 
@@ -68,7 +74,7 @@ export default async function handleInfo(
       .join("\n")}</code>`;
 
   await sendHTMLMessage(text.trim(), undefined, options);
-  return true;
+  return { successful: true, response: text.trim() };
 }
 
 const getFileSistemInfo = async (fileSystem: string) =>

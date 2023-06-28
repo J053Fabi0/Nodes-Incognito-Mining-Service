@@ -1,5 +1,7 @@
 import bot from "../initBots.ts";
 import { ignore } from "../../utils/variables.ts";
+import isError from "../../types/guards/isError.ts";
+import { CommandResponse } from "../submitCommand.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
 import { ShardsNames } from "duplicatedFilesCleanerIncognito";
@@ -11,15 +13,22 @@ export default async function handleCopyOrMove(
   args: string[],
   action: "copy" | "move",
   options: Parameters<typeof bot.api.sendMessage>[2] = {}
-) {
+): Promise<CommandResponse> {
   const [nodesRaw, rawShards] = [args.slice(0, 2), args.slice(2)];
 
   // Validate and get the nodes indexes
-  const [fromNodeIndex = null, toNodeIndex = null] = await validateItems({ rawItems: nodesRaw }).catch(() => []);
-  if (fromNodeIndex === null || toNodeIndex === null) return false;
+  const nodesOrError = await validateItems({ rawItems: nodesRaw }).catch((e) => {
+    if (isError(e)) return e;
+    throw e;
+  });
+  if (isError(nodesOrError)) return { successful: false, error: nodesOrError.message };
+
+  const [fromNodeIndex = null, toNodeIndex = null] = nodesOrError;
+  if (fromNodeIndex === null) return { successful: false, error: "Missing 1st argument: from node index." };
+  if (toNodeIndex === null) return { successful: false, error: "Missing 2nd argument: to node index." };
 
   // Validate and get the shards
-  const shards =
+  const shards: ShardsNames[] | Error =
     rawShards.length === 0
       ? // if no shards are specified, use the beacon
         ["beacon" as const]
@@ -29,31 +38,36 @@ export default async function handleCopyOrMove(
           // transform shard names to the format beacon or shard[0-7]
           rawItems: rawShards.map((shard) => (/^(shard[0-7]|beacon)$/i.test(shard) ? shard : `shard${shard}`)),
           validItems: duplicatedFilesCleaner.usedShards as string[],
-        }).catch(() => null)) as ShardsNames[] | null);
-  if (!shards) return false;
+        }).catch((e) => {
+          if (isError(e)) return e;
+          throw e;
+        })) as ShardsNames[] | Error);
+  if (isError(shards)) return { successful: false, error: shards.message };
 
   // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
   const lastIgnoreMinutes = ignore.docker.minutes;
   ignore.docker.minutes = Infinity;
 
+  const responses: string[] = [];
+
   // Stop the dockers regardless of the ignore value if at least one of them is online
   const dockerStatus = await dockerPs([fromNodeIndex, toNodeIndex]);
-  if (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running)
+  if (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running) {
     await Promise.all([
       sendMessage("Stopping nodes...", undefined, options),
       dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
       dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
+    responses.push("Stopping nodes...");
+  }
 
-  for (const shard of shards)
+  for (const shard of shards) {
+    const response =
+      `${action === "copy" ? "Copying" : "Moving"} ${shard} ` +
+      `from node ${fromNodeIndex} to node ${toNodeIndex}...`;
+
     await Promise.all([
-      sendHTMLMessage(
-        `${
-          action === "copy" ? "Copying" : "Moving"
-        } ${shard} from node ${fromNodeIndex} to node ${toNodeIndex}...`,
-        undefined,
-        options
-      ),
+      sendHTMLMessage(response, undefined, options),
       action === "copy"
         ? duplicatedFilesCleaner.copyData({
             from: fromNodeIndex as unknown as string,
@@ -63,16 +77,21 @@ export default async function handleCopyOrMove(
         : duplicatedFilesCleaner.move(fromNodeIndex, toNodeIndex, [shard]),
     ]);
 
+    responses.push(response);
+  }
+
   // restore the ignore value
   ignore.docker.minutes = lastIgnoreMinutes;
 
   // start the dockers if they were not being ignored
-  if (isBeingIgnored("docker") && (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running))
+  if (isBeingIgnored("docker") && (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running)) {
     await Promise.all([
       sendMessage("Starting nodes...", undefined, options),
       dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "start"),
       dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
+    responses.push("Starting nodes...");
+  }
 
-  return true;
+  return { successful: true, response: responses.join("\n") };
 }

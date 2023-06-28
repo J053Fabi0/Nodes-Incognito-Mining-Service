@@ -35,12 +35,13 @@ export default async function validateItems<T extends string | number = number>(
     const numberOrStringItem = typeof validItems[0] === "number" ? Number(rawItem) : (rawItem as string);
     // @ts-ignore - numberOrStringItem will always be the same type as validItems
     if (!validItems.includes(numberOrStringItem)) {
-      await sendHTMLMessage(
+      const error =
         `${name[0].toUpperCase() + name.substring(1).toLowerCase()} ` +
-          `<code>${rawItem}</code> is not found.\n\n` +
-          `Valid ${pluralName}:\n- <code>${validItems.join("</code>\n- <code>")}</code>`
-      );
-      throw new Error(`Node ${rawItem} not found`);
+        `<code>${rawItem}</code> is not found.\n\n` +
+        `Valid ${pluralName}:\n- <code>${validItems.join("</code>\n- <code>")}</code>`;
+
+      await sendHTMLMessage(error);
+      throw new Error(error);
     }
 
     // @ts-ignore - numberOrStringItem will always be the same type as items
