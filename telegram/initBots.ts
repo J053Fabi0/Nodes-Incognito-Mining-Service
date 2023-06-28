@@ -1,6 +1,6 @@
 import "std/dotenv/load.ts";
 import { Bot } from "grammy/mod.ts";
-import handleCommands from "./handleCommands.ts";
+import submitCommand from "./submitCommand.ts";
 import { ADMIN_ID, BOT_TOKEN, NOTIFICATIONS_BOT_TOKEN } from "../env.ts";
 
 const bot = new Bot(BOT_TOKEN);
@@ -8,7 +8,7 @@ const bot = new Bot(BOT_TOKEN);
 export default bot;
 
 bot.on("message", (ctx) => {
-  if (ctx.message.text && ctx?.chat?.id === ADMIN_ID) handleCommands(ctx.message.text);
+  if (ctx.message.text && ctx?.chat?.id === ADMIN_ID) submitCommand(ctx.message.text);
 });
 
 bot.start();

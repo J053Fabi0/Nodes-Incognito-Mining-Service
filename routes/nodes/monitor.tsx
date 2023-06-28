@@ -8,9 +8,8 @@ import Button from "../../components/Button.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Typography from "../../components/Typography.tsx";
 import NodePill from "../../components/Nodes/NodePill.tsx";
-import { commands } from "../../telegram/handleCommands.ts";
-import handleCommands from "../../telegram/handleCommands.ts";
 import { getNodes } from "../../controllers/node.controller.ts";
+import submitCommand, { commands } from "../../telegram/submitCommand.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
 
@@ -53,7 +52,7 @@ export const handler: Handlers<MonitorProps, State> = {
     const form = await req.formData();
     const command = form.get("command")?.toString();
 
-    if (command) await handleCommands(command);
+    if (command) await submitCommand(command);
 
     if (handler.GET) return handler.GET(req, ctx);
     else return redirect(req.url);
