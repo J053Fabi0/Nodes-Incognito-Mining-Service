@@ -17,11 +17,11 @@ let lastPhotoIdTime: number | undefined;
 let lastText = "";
 let lastTextTime: number | undefined;
 
-export default async function handleTextMessage(text: string) {
+export default async function handleTextMessage(text: "text" | "full" | "fulltext") {
   const keys: Keys[] = [];
   let nodes = await getNodesStatus();
 
-  if (/^\/?(full|completo|todo|all|f)/gi.test(text || "")) keys.push(...allKeys);
+  if (text === "full" || text === "fulltext") keys.push(...allKeys);
   else {
     // minimal information to show
     keys.push("name", "role", "epochsToNextEvent");
@@ -38,12 +38,16 @@ export default async function handleTextMessage(text: string) {
     });
   }
 
-  if (!nodes.length)
-    return await sendMessage("Everything is alright. Send /full or /fulltext to get all the information.");
+  if (!nodes.length) {
+    await sendMessage("Everything is alright. Send /full or /fulltext to get all the information.");
+    return true;
+  }
 
   // for text-only
-  if (/(text|t)$/i.test(text))
-    return await sendMessage(getMessageText(keys, nodes), undefined, { parse_mode: "HTML" });
+  if (text === "text") {
+    await sendMessage(getMessageText(keys, nodes), undefined, { parse_mode: "HTML" });
+    return true;
+  }
 
   // generate new keys for the table
   const newKeys = [keys[0], "status", ...keys.slice(1)] as (Keys | "status" | "syncState")[];
@@ -75,6 +79,8 @@ export default async function handleTextMessage(text: string) {
     lastPhotoId = photo[0].file_id;
     lastPhotoIdTime = Date.now();
   }
+
+  return true;
 }
 
 function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {

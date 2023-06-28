@@ -1,16 +1,16 @@
+import {
+  ErrorTypes,
+  AllErrorTypes,
+  allErrorTypes,
+  lastErrorTimes,
+  GlobalErrorTypes,
+  lastGlobalErrorTimes,
+} from "../../utils/variables.ts";
+import { escapeHtml } from "escapeHtml";
 import constants from "../../constants.ts";
 import { sendHTMLMessage } from "../sendMessage.ts";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
-import {
-  AllErrorTypes,
-  ErrorTypes,
-  GlobalErrorTypes,
-  allErrorTypes,
-  lastErrorTimes,
-  lastGlobalErrorTimes,
-} from "../../utils/variables.ts";
-import { escapeHtml } from "https://deno.land/x/escape_html@1.0.0/mod.ts";
 import getMinutesSinceError from "../../utils/getMinutesSinceError.ts";
 
 const nodesByPublicKey = Object.fromEntries(
@@ -26,7 +26,7 @@ export default async function handleErrorsInfo(rawErrorCodes: string[]) {
           rawItems: rawErrorCodes,
           validItems: allErrorTypes as unknown as string[],
         }).catch(() => null)) as AllErrorTypes[] | null);
-  if (!errorCodesToShow) return;
+  if (!errorCodesToShow) return false;
 
   let text = "";
 
@@ -66,4 +66,5 @@ export default async function handleErrorsInfo(rawErrorCodes: string[]) {
   }
 
   await sendHTMLMessage(text.trim() || "No errors found. Send /full or /fulltext to get all the information.");
+  return true;
 }

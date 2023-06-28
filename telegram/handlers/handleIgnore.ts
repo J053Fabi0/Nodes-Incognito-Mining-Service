@@ -18,17 +18,21 @@ export default async function handleIgnore(args: string[]) {
     number = Number(args[1]) || number;
   }
 
-  if (number < 0) return await sendHTMLMessage("The number of minutes must be positive.");
+  if (number < 0) {
+    await sendHTMLMessage("The number of minutes must be positive.");
+    return false;
+  }
 
-  if ((type !== "all" && !errorKeys.includes(type)) || type.toLowerCase() === "codes")
-    return await sendHTMLMessage(
-      `Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`
-    );
+  if ((type !== "all" && !errorKeys.includes(type)) || type.toLowerCase() === "codes") {
+    await sendHTMLMessage(`Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`);
+    return false;
+  }
 
   for (const t of type === "all" ? errorKeys : [type]) {
     ignore[t].from = new Date();
     ignore[t].minutes = number;
   }
 
-  return await sendMessage(`Ignoring ${type} for ${number} minutes.`);
+  await sendMessage(`Ignoring ${type} for ${number} minutes.`);
+  return true;
 }

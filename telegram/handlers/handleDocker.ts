@@ -5,16 +5,18 @@ import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 
 export default async function handleDocker([action, ...rawNodes]: string[]) {
   // check if the command is valid
-  if ((action !== "start" && action !== "stop") || rawNodes.length === 0)
-    return sendHTMLMessage(
+  if ((action !== "start" && action !== "stop") || rawNodes.length === 0) {
+    await sendHTMLMessage(
       "Invalid command. Use <code>start</code> or <code>stop</code> followed by the indexes of the nodes or <code>all</code>."
     );
+    return false;
+  }
 
   const nodes =
     rawNodes.length === 1 && rawNodes[0] === "all"
       ? duplicatedFilesCleaner.usedNodes
       : await validateItems({ rawItems: rawNodes }).catch(() => null);
-  if (!nodes) return;
+  if (!nodes) return false;
 
   for (const node of nodes) {
     await docker(`inc_mainnet_${node}`, action);
@@ -22,4 +24,6 @@ export default async function handleDocker([action, ...rawNodes]: string[]) {
   }
 
   await sendMessage("Done.");
+
+  return true;
 }

@@ -9,19 +9,25 @@ import { duplicatedConstants } from "../../duplicatedFilesCleaner.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
 
+/**
+ * @param rawNodes Leave empty to get info about all nodes
+ */
 export default async function handleInfo(
   rawNodes: string[] = [],
   options: Parameters<typeof bot.api.sendMessage>[2] = {}
 ) {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {
-    if (!duplicatedConstants.fileSystem)
-      return await sendHTMLMessage("File system not configured", undefined, options);
-    return await sendHTMLMessage(await getFileSistemInfo(duplicatedConstants.fileSystem), undefined, options);
+    if (!duplicatedConstants.fileSystem) {
+      await sendHTMLMessage("File system not configured", undefined, options);
+      return false;
+    }
+    await sendHTMLMessage(await getFileSistemInfo(duplicatedConstants.fileSystem), undefined, options);
+    return true;
   }
 
   const nodes = await validateItems({ rawItems: rawNodes }).catch(() => null);
-  if (!nodes) return Promise.resolve(null);
+  if (!nodes) return false;
 
   const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(nodes);
 
@@ -46,15 +52,6 @@ export default async function handleInfo(
         ? `\n<code> ${escapeHtml(objectToTableText(normalizedInfo))
             .split("\n")
             .slice(0, -1)
-            // .map((a) =>
-            //   a.replace(
-            //     ...(() => {
-            //       const match = a.match(/: +/);
-            //       if (match) return [match[0], `</code><code>${match[0]}</code><code>`] as [string, string];
-            //       else return ["", ""] as [string, string];
-            //     })()
-            //   )
-            // )
             .join("</code>\n<code> ")}</code>`
         : "") +
       "\n\n";
@@ -70,18 +67,16 @@ export default async function handleInfo(
       .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
       .join("\n")}</code>`;
 
-  return sendHTMLMessage(text.trim(), undefined, options);
+  await sendHTMLMessage(text.trim(), undefined, options);
+  return true;
 }
 
-async function getFileSistemInfo(fileSystem: string) {
-  return (
-    `<b>File system</b>:\n` +
-    `<code>${escapeHtml(
-      (await df(["-h", fileSystem, "--output=used,avail,pcent"]))
-        // Remove extra spaces
-        .split("\n")
-        .map((t) => t.trim())
-        .join("\n")
-    )}</code>`
-  );
-}
+const getFileSistemInfo = async (fileSystem: string) =>
+  `<b>File system</b>:\n` +
+  `<code>${escapeHtml(
+    (await df(["-h", fileSystem, "--output=used,avail,pcent"]))
+      // Remove extra spaces
+      .split("\n")
+      .map((t) => t.trim())
+      .join("\n")
+  )}</code>`;
