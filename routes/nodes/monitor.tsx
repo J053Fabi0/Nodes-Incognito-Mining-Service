@@ -158,7 +158,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
                   <td class={styles.td}>
                     <code>{status.role[0] + status.role.slice(1).toLowerCase()}</code>
                     <br />
-                    For <code>{status.epochsToNextEvent}</code> epochs
+                    For <code class="font-semibold">{status.epochsToNextEvent}</code> epochs
                   </td>
 
                   <td class={styles.td}>
