@@ -63,10 +63,8 @@ export default function Home({ data }: PageProps<HomeProps>) {
       <ul class="list-disc list-inside checkUL mb-3">
         <li class={styles.li}>You provide the stake, we the infrastructure.</li>
         <li class={styles.li}>Earnings and stake in your control, we don't ask for any private keys.</li>
-        <li class={styles.li}>
-          Monthly fee is based on earnings: 10%, no more.
-          <li class={styles.li}>5 USD for each node's initial setup.</li>
-        </li>
+        <li class={styles.li}>Monthly fee is based on earnings: 10%, no more.</li>
+        <li class={styles.li}>5 USD for each node's initial setup.</li>
       </ul>
 
       <p class="mb-5">
