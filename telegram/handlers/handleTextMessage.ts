@@ -171,7 +171,7 @@ export function roleToEmoji(role: NodeRoles) {
     case "PENDING":
       return "⏳";
     case "COMMITTEE":
-      return "⛏⚡";
+      return "⚡";
     case "WAITING":
       return "🆕";
     case "SYNCING":
