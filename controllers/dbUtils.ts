@@ -5,8 +5,10 @@ import {
   Collection,
   FindOptions,
   UpdateFilter,
+  CountOptions,
   InsertOptions,
   UpdateOptions,
+  DeleteOptions,
   InsertDocument,
   AggregateOptions,
   AggregatePipeline,
@@ -23,25 +25,51 @@ type DocumentOfCollection<T extends Collection<CommonCollection>> = Exclude<
   undefined
 >;
 
-export function find<T extends Collection<CommonCollection>>(collection: T) {
-  return (filter?: Filter<DocumentOfCollection<T>>, options?: FindOptions) =>
-    collection.find(filter, options).toArray() as Promise<DocumentOfCollection<T>[]>;
+// given a collection, return a type that has a projection property
+type Projection<Collection extends CommonCollection> = {
+  projection?: Partial<{
+    [key in keyof Collection]: boolean | 0 | 1;
+  }>;
+};
+
+type OnlyTruthy<P extends Record<keyof P, boolean | 0 | 1 | undefined>> = {
+  [K in keyof P]: P[K] extends 1 | true ? K : never;
+}[keyof P];
+
+// const nodesProjection = { projection: { _id: 0, dockerIndex: 1 } } satisfies Projection<Node>;
+type Projected<C extends CommonCollection, P extends Projection<C>> = P["projection"] extends undefined
+  ? C
+  : Pick<C, Extract<OnlyTruthy<Exclude<P["projection"], undefined>>, keyof C>>;
+
+/** FindOptions with a well typed projection option */
+type FindOptionsExtended<C extends Collection<CommonCollection>> = Omit<FindOptions, "projection"> &
+  Partial<Projection<DocumentOfCollection<C>>>;
+
+export function find<C extends Collection<CommonCollection>>(collection: C) {
+  return function <O extends FindOptionsExtended<C>>(filter?: Filter<DocumentOfCollection<C>>, options?: O) {
+    return collection.find(filter, options).toArray() as Promise<Projected<DocumentOfCollection<C>, O>[]>;
+  };
 }
 
-export function findOne<T extends Collection<CommonCollection>>(collection: T) {
-  return (filter?: Filter<DocumentOfCollection<T>>, options?: FindOptions) =>
-    collection.findOne(filter, options).then((v) => v ?? null) as Promise<DocumentOfCollection<T> | null>;
+export function findOne<C extends Collection<CommonCollection>>(collection: C) {
+  return function <O extends FindOptionsExtended<C>>(filter?: Filter<DocumentOfCollection<C>>, options?: O) {
+    return collection.findOne(filter, options).then((v) => v ?? null) as Promise<Projected<
+      DocumentOfCollection<C>,
+      O
+    > | null>;
+  };
 }
 
-export function findById<T extends Collection<CommonCollection>>(collection: T) {
-  return (id: string | ObjectId, options?: FindOptions) =>
-    collection
+export function findById<C extends Collection<CommonCollection>>(collection: C) {
+  return function <O extends FindOptionsExtended<C>>(id: string | ObjectId, options?: O) {
+    return collection
       .findOne({ _id: typeof id === "string" ? new ObjectId(id) : id }, options)
-      .then((v) => v ?? null) as Promise<DocumentOfCollection<T> | null>;
+      .then((v) => v ?? null) as Promise<Projected<DocumentOfCollection<C>, O> | null>;
+  };
 }
 
-export function insertOne<T extends Collection<CommonCollection>>(collection: T) {
-  return async (doc: InsertDoc<DocumentOfCollection<T>>, options?: InsertOptions) => {
+export function insertOne<C extends Collection<CommonCollection>>(collection: C) {
+  return async (doc: InsertDoc<DocumentOfCollection<C>>, options?: InsertOptions) => {
     // set createdAt and modifiedAt if they are not present
     const date = new Date();
     if (!doc.createdAt || typeof doc.createdAt !== "object" || !(doc.createdAt instanceof Date))
@@ -55,8 +83,8 @@ export function insertOne<T extends Collection<CommonCollection>>(collection: T)
   };
 }
 
-export function insertMany<T extends Collection<CommonCollection>>(collection: T) {
-  return async (docs: InsertDoc<DocumentOfCollection<T>>[], options?: InsertOptions) => {
+export function insertMany<C extends Collection<CommonCollection>>(collection: C) {
+  return async (docs: InsertDoc<DocumentOfCollection<C>>[], options?: InsertOptions) => {
     // set createdAt and modifiedAt if they are not present
     const date = new Date();
     for (const doc of docs) {
@@ -72,8 +100,8 @@ export function insertMany<T extends Collection<CommonCollection>>(collection: T
   };
 }
 
-export function count<T extends Collection<CommonCollection>>(collection: T) {
-  return (filter?: Filter<DocumentOfCollection<T>>, options?: FindOptions) =>
+export function count<C extends Collection<CommonCollection>>(collection: C) {
+  return (filter?: Filter<DocumentOfCollection<C>>, options?: CountOptions) =>
     collection.countDocuments(filter, options);
 }
 
@@ -82,10 +110,10 @@ function addTimestamps(update: UpdateFilter<CommonCollection>) {
   else if (!update.$set) update.$set = { modifiedAt: new Date() };
 }
 
-export function updateOne<T extends Collection<CommonCollection>>(collection: T) {
+export function updateOne<C extends Collection<CommonCollection>>(collection: C) {
   return (
-    filter: Filter<DocumentOfCollection<T>>,
-    update: UpdateFilter<DocumentOfCollection<T>>,
+    filter: Filter<DocumentOfCollection<C>>,
+    update: UpdateFilter<DocumentOfCollection<C>>,
     options?: UpdateOptions
   ) => {
     addTimestamps(update);
@@ -93,10 +121,10 @@ export function updateOne<T extends Collection<CommonCollection>>(collection: T)
   };
 }
 
-export function updateMany<T extends Collection<CommonCollection>>(collection: T) {
+export function updateMany<C extends Collection<CommonCollection>>(collection: C) {
   return (
-    filter: Filter<DocumentOfCollection<T>>,
-    update: UpdateFilter<DocumentOfCollection<T>>,
+    filter: Filter<DocumentOfCollection<C>>,
+    update: UpdateFilter<DocumentOfCollection<C>>,
     options?: UpdateOptions
   ) => {
     addTimestamps(update);
@@ -105,12 +133,12 @@ export function updateMany<T extends Collection<CommonCollection>>(collection: T
 }
 
 export function deleteOne<T extends Collection<CommonCollection>>(collection: T) {
-  return (filter: Filter<DocumentOfCollection<T>>, options?: UpdateOptions) =>
+  return (filter: Filter<DocumentOfCollection<T>>, options?: DeleteOptions) =>
     collection.deleteOne(filter, options);
 }
 
 export function deleteMany<T extends Collection<CommonCollection>>(collection: T) {
-  return (filter: Filter<DocumentOfCollection<T>>, options?: UpdateOptions) =>
+  return (filter: Filter<DocumentOfCollection<T>>, options?: DeleteOptions) =>
     collection.deleteMany(filter, options);
 }
 
