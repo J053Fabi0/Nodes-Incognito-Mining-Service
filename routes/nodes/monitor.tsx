@@ -93,7 +93,7 @@ export default function Monitor({ data }: PageProps<MonitorProps>) {
       {isAdmin && (
         <>
           <form method="post">
-            {commands.resolved.map((m) => (
+            {commands.resolved.slice(0, 5).map((m) => (
               <div class="flex gap-3 mt-1 mb-5">
                 <Typography variant="lead">
                   <code>{m}</code>
