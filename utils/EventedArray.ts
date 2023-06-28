@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 export type Methods = "push" | "pop" | "unshift" | "shift" | "splice" | "length";
 
 /** Handler for EventedArray */

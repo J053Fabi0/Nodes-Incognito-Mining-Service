@@ -34,11 +34,13 @@ export const commands: {
         working = true;
         // Resolve the pending commands.
         while (pending.lengths > 0) {
-          // remove and get the first command
-          const command = pending.shiftNoEvent();
+          // get the first command
+          const command = pending[0];
           if (!command) continue;
           // execute the command
           const successful = await handleCommands(command.command);
+          // remove it
+          pending.shiftNoEvent();
           // resolve the promise
           command.resolve(successful);
         }

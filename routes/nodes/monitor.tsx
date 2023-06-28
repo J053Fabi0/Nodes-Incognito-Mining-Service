@@ -1,5 +1,6 @@
 import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
+import { FiClock } from "react-icons/fi";
 import { TbReload } from "react-icons/tb";
 import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
@@ -109,6 +110,14 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
                   </Button>
                 </div>
               ))}
+            {commands.pending.map((c) => (
+              <div class="mt-1 mb-5">
+                <Typography variant="lead" class="flex gap-3 items-center">
+                  <code>{c.command}</code>
+                  <FiClock size={20} />
+                </Typography>
+              </div>
+            ))}
           </form>
           <form method="post">
             <div class="flex w-full mb-2 items-center gap-2">
