@@ -1,6 +1,7 @@
 import { ObjectId } from "mongo/mod.ts";
 import CommonCollection from "./commonCollection.type.ts";
 
+/** Incognito Node */
 export default interface Node extends CommonCollection {
   name: string;
   number: number;

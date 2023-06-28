@@ -4,14 +4,15 @@ import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
+import Node from "../../types/collections/node.type.ts";
 import Typography from "../../components/Typography.tsx";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
 import MonitorCommands from "../../components/Nodes/MonitorCommands.tsx";
+import { roleToEmoji } from "../../telegram/handlers/handleTextMessage.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import submitCommand, { CommandResponse } from "../../telegram/submitCommand.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
-import { roleToEmoji } from "../../telegram/handlers/handleTextMessage.ts";
 
 const styles = {
   th: "border border-slate-300 py-2 px-3",
@@ -28,6 +29,9 @@ interface MonitorProps {
 // Only change the last boolean value if you want to test
 const testingClient = !IS_PRODUCTION && false;
 
+const nodesProjection = { projection: { _id: 0, dockerIndex: 1 } } satisfies Parameters<typeof getNodes>[1];
+type ProjectedNode = Pick<Node, "_id" | keyof (typeof nodesProjection)["projection"]>;
+
 export const handler: Handlers<MonitorProps, State> = {
   async GET(_, ctx) {
     const { isAdmin, supplanting, userId, commandResponse } = ctx.state;
@@ -35,14 +39,14 @@ export const handler: Handlers<MonitorProps, State> = {
     // if it's an admin and not supplanting, get all nodes
     const shouldGetAll = (isAdmin || supplanting) && !testingClient;
 
-    const nodes = shouldGetAll
-      ? null
-      : await getNodes({ client: new ObjectId(userId!) }, { projection: { dockerIndex: 1, _id: 0 } });
+    const nodesQuery: Parameters<typeof getNodes>[0] = shouldGetAll
+      ? { inactive: false }
+      : { client: new ObjectId(userId!), inactive: false };
+    const nodes: ProjectedNode[] = await getNodes(nodesQuery, nodesProjection);
 
-    const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } =
-      shouldGetAll || nodes!.length
-        ? await sortNodes(shouldGetAll ? [] : nodes!.map((n) => n.dockerIndex))
-        : { nodesInfoByDockerIndex: [], nodesStatusByDockerIndex: {} };
+    const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = nodes.length
+      ? await sortNodes(nodes!.map((n) => n.dockerIndex))
+      : { nodesInfoByDockerIndex: [], nodesStatusByDockerIndex: {} };
 
     return ctx.render({ nodesInfo, nodesStatus, isAdmin: shouldGetAll, commandResponse });
   },
