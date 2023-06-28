@@ -51,11 +51,11 @@ export const handler: Handlers<MonitorProps, State> = {
 
     const form = await req.formData();
     const command = form.get("command")?.toString();
-    if (!command) return handler.GET ? handler.GET(req, ctx) : redirect(req.url);
+    if (!command) return redirect(req.url);
 
     ctx.state.commandResponse = (await submitCommand(command))[0];
 
-    return handler.GET ? handler.GET(req, ctx) : redirect(req.url);
+    return redirect(req.url);
   },
 };
 
