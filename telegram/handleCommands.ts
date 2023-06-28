@@ -38,8 +38,6 @@ export const commands: {
           if (!command) continue;
           // execute the command
           const successful = await handleCommands(command.command);
-          // add the command to the list of resolved commands
-          commands.resolved.push(command.command);
           // resolve the promise
           command.resolve(successful);
         }
@@ -131,16 +129,23 @@ export default async function submitCommand(command: string) {
                 `${commandOrPossibilities.possibleCommands
                   .map((c) => `${c} ${args.join(" ")}`)
                   .join("</code>\n- <code>")}</code>`
-            : `Command <code>${commandText}</code> not found. Type /help to see the available commands.`
+            : `Command <code>${fullCommand}</code> not found. Type /help to see the available commands.`
         ).then(() => undefined)
       );
     // push the command to the queue
-    else
+    else {
+      const finalFullCommand = [commandOrPossibilities.command, ...args].join(" ");
+
       promises.push(
         new Promise<boolean>((resolve) => {
-          commands.pending.push({ resolve, command: [commandOrPossibilities.command, ...args].join(" ") });
+          commands.pending.push({ resolve, command: finalFullCommand });
+        }).then((successful) => {
+          if (successful)
+            // add the command to the list of resolved commands
+            commands.resolved.push(finalFullCommand);
         })
       );
+    }
   }
 
   await Promise.allSettled(promises);
