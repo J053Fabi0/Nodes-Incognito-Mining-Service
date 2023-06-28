@@ -1,3 +1,5 @@
+export type Methods = "push" | "pop" | "unshift" | "shift" | "splice" | "length";
+
 /** Handler for EventedArray */
 export type Handler<Type = any> = ({}: {
   /** The items added, if aplicable */
@@ -5,8 +7,8 @@ export type Handler<Type = any> = ({}: {
   /** The items removed, if aplicable */
   removed: Type[] | null;
   /** The array itself */
-  array: EventedArray<Type>;
-  method: "push" | "pop" | "unshift" | "shift" | "splice" | "length";
+  array: Omit<EventedArray<Type>, Methods>;
+  method: Methods;
 }) => void;
 
 export default class EventedArray<Type = any> extends Array {
