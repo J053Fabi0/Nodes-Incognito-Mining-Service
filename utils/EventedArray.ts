@@ -11,7 +11,7 @@ export type Handler<Type = any> = ({}: {
   method: Methods;
 }) => void;
 
-export default class EventedArray<Type = any> extends Array {
+export default class EventedArray<Type = any> extends Array<Type> {
   private handler: Handler<Type>;
 
   /**
@@ -20,7 +20,7 @@ export default class EventedArray<Type = any> extends Array {
    * @param items Items to add to the array or the initial length of the array.
    */
   constructor(handler: Handler<Type>, ...items: [number] | Type[]) {
-    super(...(items as number[]));
+    super(...(items as Type[]));
     this.handler = handler;
   }
 
