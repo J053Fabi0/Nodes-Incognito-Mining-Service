@@ -1,10 +1,10 @@
 import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
-import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Typography from "../../components/Typography.tsx";
+import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
 import MonitorCommands from "../../components/Nodes/MonitorCommands.tsx";
@@ -27,6 +27,7 @@ interface MonitorProps {
 
 // Only change the last boolean value if you want to test
 const testingClient = !IS_PRODUCTION && false;
+const URL = `${WEBSITE_URL}/nodes/monitor`;
 
 export const handler: Handlers<MonitorProps, State> = {
   async GET(_, ctx) {
@@ -48,13 +49,13 @@ export const handler: Handlers<MonitorProps, State> = {
   },
 
   async POST(req, ctx) {
-    if (!ctx.state.isAdmin) return redirect(req.url);
+    if (!ctx.state.isAdmin) return redirect(URL);
 
     const form = await req.formData();
 
     const command = form.get("command")?.toString();
     const submit = form.get("submit")?.toString() || "submit";
-    if (!command) return redirect(req.url);
+    if (!command) return redirect(URL);
 
     if (submit === "noWait") {
       submitCommand(command);
@@ -64,7 +65,7 @@ export const handler: Handlers<MonitorProps, State> = {
       ctx.state.session.set("commandResponse", commandResponse);
     }
 
-    return redirect(req.url);
+    return redirect(URL);
   },
 };
 
