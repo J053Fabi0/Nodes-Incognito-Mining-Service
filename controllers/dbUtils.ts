@@ -25,40 +25,43 @@ type DocumentOfCollection<T extends Collection<CommonCollection>> = Exclude<
   undefined
 >;
 
-// given a collection, return a type that has a projection property
-type Projection<Collection extends CommonCollection> = {
-  projection?: Partial<{
-    [key in keyof Collection]: boolean | 0 | 1;
-  }>;
-};
+/** given a collection, return a type that has a projection property */
+export type Projection<Collection extends CommonCollection> = Partial<{
+  [key in keyof Collection]: boolean | 0 | 1;
+}>;
 
 type OnlyTruthy<P extends { [key in keyof P]?: boolean | 0 | 1 }> = {
   [K in keyof P]: P[K] extends 1 | true ? K : never;
 }[keyof P];
 
-type Projected<C extends CommonCollection, P extends Projection<C>> = P["projection"] extends Exclude<
-  Projection<C>["projection"],
-  undefined
->
-  ? Pick<C, Extract<OnlyTruthy<P["projection"]>, keyof C>>
+/** given a collection and a projection of that collection, returns the collection projected */
+export type Projected<C extends CommonCollection, P extends Projection<C> | undefined> = P extends Projection<C>
+  ? Pick<C, Extract<OnlyTruthy<P>, keyof C>>
   : C;
 
 /** FindOptions with a well typed projection option */
-type FindOptionsExtended<C extends Collection<CommonCollection>> = Omit<FindOptions, "projection"> &
-  Projection<DocumentOfCollection<C>>;
+type FindOptionsExtended<C extends Collection<CommonCollection>> = Omit<FindOptions, "projection"> & {
+  projection?: Projection<DocumentOfCollection<C>>;
+};
 
 export function find<C extends Collection<CommonCollection>>(collection: C) {
   return function <O extends FindOptionsExtended<C>>(filter?: Filter<DocumentOfCollection<C>>, options?: O) {
-    return collection.find(filter, options).toArray() as Promise<Projected<DocumentOfCollection<C>, O>[]>;
+    return collection.find(filter, options).toArray() as Promise<
+      O extends { projection: Projection<DocumentOfCollection<C>> }
+        ? Projected<DocumentOfCollection<C>, O["projection"]>[]
+        : DocumentOfCollection<C>[]
+    >;
   };
 }
 
 export function findOne<C extends Collection<CommonCollection>>(collection: C) {
   return function <O extends FindOptionsExtended<C>>(filter?: Filter<DocumentOfCollection<C>>, options?: O) {
-    return collection.findOne(filter, options).then((v) => v ?? null) as Promise<Projected<
-      DocumentOfCollection<C>,
-      O
-    > | null>;
+    return collection.findOne(filter, options).then((v) => v ?? null) as Promise<
+      | (O extends { projection: Projection<DocumentOfCollection<C>> }
+          ? Projected<DocumentOfCollection<C>, O["projection"]>
+          : DocumentOfCollection<C>)
+      | null
+    >;
   };
 }
 
@@ -66,7 +69,12 @@ export function findById<C extends Collection<CommonCollection>>(collection: C) 
   return function <O extends FindOptionsExtended<C>>(id: string | ObjectId, options?: O) {
     return collection
       .findOne({ _id: typeof id === "string" ? new ObjectId(id) : id }, options)
-      .then((v) => v ?? null) as Promise<Projected<DocumentOfCollection<C>, O> | null>;
+      .then((v) => v ?? null) as Promise<
+      | (O extends { projection: Projection<DocumentOfCollection<C>> }
+          ? Projected<DocumentOfCollection<C>, O["projection"]>
+          : DocumentOfCollection<C>)
+      | null
+    >;
   };
 }
 
