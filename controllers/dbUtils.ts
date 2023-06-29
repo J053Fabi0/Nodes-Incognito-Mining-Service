@@ -36,10 +36,12 @@ type OnlyTruthy<P extends Record<keyof P, boolean | 0 | 1 | undefined>> = {
   [K in keyof P]: P[K] extends 1 | true ? K : never;
 }[keyof P];
 
-// const nodesProjection = { projection: { _id: 0, dockerIndex: 1 } } satisfies Projection<Node>;
-type Projected<C extends CommonCollection, P extends Projection<C>> = P["projection"] extends undefined
-  ? C
-  : Pick<C, Extract<OnlyTruthy<Exclude<P["projection"], undefined>>, keyof C>>;
+type Projected<C extends CommonCollection, P extends Projection<C>> = P["projection"] extends Exclude<
+  Projection<C>["projection"],
+  undefined
+>
+  ? Pick<C, Extract<OnlyTruthy<P["projection"]>, keyof C>>
+  : C;
 
 /** FindOptions with a well typed projection option */
 type FindOptionsExtended<C extends Collection<CommonCollection>> = Omit<FindOptions, "projection"> &
