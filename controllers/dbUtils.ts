@@ -152,19 +152,20 @@ export function deleteMany<T extends Collection<CommonCollection>>(collection: T
     collection.deleteMany(filter, options);
 }
 
-export interface AggregateOptionsExtended extends AggregateOptions {
+export interface AggregateOptionsExtended<C extends CommonCollection, P extends Projection<C>>
+  extends AggregateOptions {
   skip?: number;
   limit?: number;
   /**
    * The sort is done before the projection.
    */
   sort?: Document;
-  projection?: Document;
+  projection?: P;
 }
 export function aggregate<T extends Collection<CommonCollection>>(collection: T) {
   return (
     pipeline: AggregatePipeline<DocumentOfCollection<T>> | AggregatePipeline<DocumentOfCollection<T>>[],
-    options?: AggregateOptionsExtended
+    options?: AggregateOptionsExtended<DocumentOfCollection<T>, Projection<DocumentOfCollection<T>>>
   ) => {
     const finalPipeline = pipeline instanceof Array ? pipeline : [pipeline];
 
