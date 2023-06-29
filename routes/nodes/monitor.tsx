@@ -121,7 +121,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
               return (
                 <tr>
                   <td class={styles.td}>
-                    <NodePill baseURL={null} nodeNumber={+node} relative />
+                    <NodePill baseURL={null} nodeNumber={status.number} relative />
                   </td>
 
                   <td class={styles.td}>
