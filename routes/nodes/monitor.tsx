@@ -122,6 +122,14 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
                 <tr>
                   <td class={styles.td}>
                     <NodePill baseURL={null} nodeNumber={status.number} relative />
+                    {isAdmin && (
+                      <>
+                        <br />
+                        <code>
+                          Docker: <b>{node}</b>
+                        </code>
+                      </>
+                    )}
                   </td>
 
                   <td class={styles.td}>
