@@ -1,14 +1,7 @@
 import dayjs from "dayjs/mod.ts";
 import nameOfMonth from "./nameOfMonth.ts";
-import Node from "../types/collections/node.type.ts";
 import { getNodes } from "../controllers/node.controller.ts";
-import NodeEarning from "../types/collections/nodeEarning.type.ts";
 import { getNodeEarnings } from "../controllers/nodeEarning.controller.ts";
-
-const nodesProjection = { projection: { createdAt: 1 } };
-const nodeEarnignsProjection = { projection: { time: 1, earning: 1, node: 1 } };
-type ProjectedNode = Pick<Node, "_id" | keyof (typeof nodesProjection)["projection"]>;
-type ProjectedNodeEarning = Pick<NodeEarning, "_id" | keyof (typeof nodeEarnignsProjection)["projection"]>;
 
 export default async function getNodesStatistics() {
   const months = Array.from({ length: 5 })
@@ -22,14 +15,14 @@ export default async function getNodesStatistics() {
   const [to] = months.slice(-1);
   const [from] = months;
 
-  const earnings = (await getNodeEarnings(
+  const earnings = await getNodeEarnings(
     { time: { $gte: from } },
-    nodeEarnignsProjection
-  )) as ProjectedNodeEarning[];
+    { projection: { time: 1, earning: 1, node: 1 } }
+  );
 
-  const nodes = (await getNodes({ createdAt: { $lte: to } }, nodesProjection)) as ProjectedNode[];
+  const nodes = await getNodes({ createdAt: { $lte: to } }, { projection: { createdAt: 1, _id: 1 } });
 
-  const nodesByMonth = new Map<Date, ProjectedNode[]>();
+  const nodesByMonth = new Map<Date, typeof nodes>();
   for (const month of months) {
     // if the node was created before the month, add it to the array.
     for (const node of nodes)
@@ -39,7 +32,7 @@ export default async function getNodesStatistics() {
       }
   }
 
-  const earningsByMonth = new Map<Date, (ProjectedNode & { earnings: number[]; total: number })[]>();
+  const earningsByMonth = new Map<Date, ((typeof nodes)[number] & { earnings: number[]; total: number })[]>();
   for (const month of months) {
     if (!nodesByMonth.has(month)) continue;
     const monthNumber = month.getMonth();

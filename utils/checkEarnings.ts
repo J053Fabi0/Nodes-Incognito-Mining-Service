@@ -3,7 +3,6 @@ import handleError from "./handleError.ts";
 import getNodesStatus from "./getNodesStatus.ts";
 import getNodeEarnings from "./getNodeEarnings.ts";
 import sendMessage from "../telegram/sendMessage.ts";
-import Node from "../types/collections/node.type.ts";
 import { prvDecimalsDivisor } from "../constants.ts";
 import uploadToNotion from "../notion/uploadToNotion.ts";
 import Client from "../types/collections/client.type.ts";
@@ -12,18 +11,16 @@ import { getClients } from "../controllers/client.controller.ts";
 import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 import { createNodeEarning, deleteNodeEarning } from "../controllers/nodeEarning.controller.ts";
 
-const clientsProjection = { projection: { telegram: 1, notionPage: 1 } };
-const nodesProjection = { projection: { name: 1, sendTo: 1, number: 1, client: 1, validatorPublic: 1 } };
-type ProjectedNode = Pick<Node, "_id" | keyof (typeof nodesProjection)["projection"]>;
-type ProjectedClient = Pick<Client, "_id" | keyof (typeof clientsProjection)["projection"]>;
-
-function findClientById(clients: ProjectedClient[], id: ObjectId) {
+function findClientById(clients: Pick<Client, "_id" | "notionPage" | "telegram">[], id: ObjectId) {
   return clients.find((c) => `${c._id}` === `${id}`)!;
 }
 
 export default async function checkEarnings() {
-  const nodes = (await getNodes({}, nodesProjection)) as ProjectedNode[];
-  const clients = (await getClients({}, clientsProjection)) as ProjectedClient[];
+  const nodes = await getNodes(
+    {},
+    { projection: { name: 1, sendTo: 1, number: 1, client: 1, validatorPublic: 1, _id: 1 } }
+  );
+  const clients = await getClients({}, { projection: { telegram: 1, notionPage: 1, _id: 1 } });
 
   // Get nodes status
   const nodesStatus = await getNodesStatus();

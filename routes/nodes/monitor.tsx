@@ -4,7 +4,6 @@ import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
-import Node from "../../types/collections/node.type.ts";
 import Typography from "../../components/Typography.tsx";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
@@ -29,9 +28,6 @@ interface MonitorProps {
 // Only change the last boolean value if you want to test
 const testingClient = !IS_PRODUCTION && false;
 
-const nodesProjection = { projection: { _id: 0, dockerIndex: 1 } } satisfies Parameters<typeof getNodes>[1];
-type ProjectedNode = Pick<Node, "_id" | keyof (typeof nodesProjection)["projection"]>;
-
 export const handler: Handlers<MonitorProps, State> = {
   async GET(_, ctx) {
     const { isAdmin, supplanting, userId, commandResponse } = ctx.state;
@@ -42,10 +38,10 @@ export const handler: Handlers<MonitorProps, State> = {
     const nodesQuery: Parameters<typeof getNodes>[0] = shouldGetAll
       ? { inactive: false }
       : { client: new ObjectId(userId!), inactive: false };
-    const nodes: ProjectedNode[] = await getNodes(nodesQuery, nodesProjection);
+    const nodes = await getNodes(nodesQuery, { projection: { _id: 0, dockerIndex: 1 } });
 
     const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = nodes.length
-      ? await sortNodes(nodes!.map((n) => n.dockerIndex))
+      ? await sortNodes(nodes.map((n) => n.dockerIndex))
       : { nodesInfoByDockerIndex: [], nodesStatusByDockerIndex: {} };
 
     return ctx.render({ nodesInfo, nodesStatus, isAdmin: shouldGetAll, commandResponse });
