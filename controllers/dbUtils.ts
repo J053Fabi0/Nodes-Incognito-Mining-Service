@@ -32,7 +32,7 @@ type Projection<Collection extends CommonCollection> = {
   }>;
 };
 
-type OnlyTruthy<P extends Record<keyof P, boolean | 0 | 1 | undefined>> = {
+type OnlyTruthy<P extends { [key in keyof P]?: boolean | 0 | 1 }> = {
   [K in keyof P]: P[K] extends 1 | true ? K : never;
 }[keyof P];
 
@@ -45,7 +45,7 @@ type Projected<C extends CommonCollection, P extends Projection<C>> = P["project
 
 /** FindOptions with a well typed projection option */
 type FindOptionsExtended<C extends Collection<CommonCollection>> = Omit<FindOptions, "projection"> &
-  Partial<Projection<DocumentOfCollection<C>>>;
+  Projection<DocumentOfCollection<C>>;
 
 export function find<C extends Collection<CommonCollection>>(collection: C) {
   return function <O extends FindOptionsExtended<C>>(filter?: Filter<DocumentOfCollection<C>>, options?: O) {
