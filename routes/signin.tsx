@@ -34,21 +34,21 @@ export const handler: Handlers<SigninProps, State> = {
         ctx.state.session.set("userId", user._id.toString());
       } else {
         const {
-          Mnemonic,
-          Accounts: [newAccount],
+          mnemonic,
+          accounts: [newAccount],
         } = await IncognitoCli.generateAccount({ submitKey: true });
         const submittedAccount = await createAccount({
-          shardID: newAccount.ShardID,
-          miningKey: newAccount.MiningKey,
-          publicKey: newAccount.PublicKey,
-          mnemonic: await cryptr.encrypt(Mnemonic),
-          paymentAddress: newAccount.PaymentAddress,
-          miningPublicKey: newAccount.MiningPublicKey,
-          paymentAddressV1: newAccount.PaymentAddressV1,
-          validatorPublicKey: newAccount.ValidatorPublicKey,
-          privateKey: await cryptr.encrypt(newAccount.PrivateKey),
-          readOnlyKey: await cryptr.encrypt(newAccount.ReadOnlyKey),
-          otaPrivateKey: await cryptr.encrypt(newAccount.OTAPrivateKey),
+          shardID: newAccount.shardID,
+          miningKey: newAccount.miningKey,
+          publicKey: newAccount.publicKey,
+          mnemonic: await cryptr.encrypt(mnemonic),
+          paymentAddress: newAccount.paymentAddress,
+          miningPublicKey: newAccount.miningPublicKey,
+          paymentAddressV1: newAccount.paymentAddressV1,
+          validatorPublicKey: newAccount.validatorPublicKey,
+          privateKey: await cryptr.encrypt(newAccount.privateKey),
+          readOnlyKey: await cryptr.encrypt(newAccount.readOnlyKey),
+          otaPrivateKey: await cryptr.encrypt(newAccount.otaPrivateKey),
         });
 
         const newUser = await createClient({

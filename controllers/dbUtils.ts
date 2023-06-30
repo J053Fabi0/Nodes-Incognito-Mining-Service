@@ -25,10 +25,12 @@ type DocumentOfCollection<T extends Collection<CommonCollection>> = Exclude<
   undefined
 >;
 
+type ProjectionValues = boolean | 1 | 0;
+
 /** given a collection, return a type that has a projection property */
-export type Projection<Collection extends CommonCollection> = Partial<{
-  [key in keyof Collection]: boolean | 0 | 1;
-}>;
+export type Projection<Collection extends CommonCollection> = {
+  [key in keyof Collection]?: ProjectionValues;
+};
 
 type OnlyTruthy<P extends { [key in keyof P]?: boolean | 0 | 1 }> = {
   [K in keyof P]: P[K] extends 1 | true ? K : never;

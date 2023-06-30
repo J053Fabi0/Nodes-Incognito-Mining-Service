@@ -1,4 +1,5 @@
 import IncognitoCli from "../IncognitoCli.ts";
+import UncapitalizeObject from "../../types/uncapitalizeObject.ts";
 
 interface Options {
   /** The number of shards (default: 8) */
@@ -11,8 +12,8 @@ interface Options {
   submitKey?: boolean;
 }
 
-/** Generated account */
-export interface Account {
+/** Capitalized Generated account */
+export interface CapAccount {
   Index: number;
   PrivateKey: string;
   PublicKey: string;
@@ -26,21 +27,45 @@ export interface Account {
   ShardID: number;
 }
 
-export interface GenerateAccount {
+export type Account = Omit<UncapitalizeObject<CapAccount>, "oTAPrivateKey"> & {
+  otaPrivateKey: CapAccount["OTAPrivateKey"];
+};
+
+/** Capitalized Generated accounts */
+export interface CapGenerateAccount {
   Mnemonic: string;
-  Accounts: Account[];
+  Accounts: CapAccount[];
 }
 
-export default async function generateAccount(this: IncognitoCli, options?: Options) {
+export type GenerateAccount = Omit<UncapitalizeObject<CapGenerateAccount>, "accounts"> & {
+  accounts: Account[];
+};
+
+export default async function generateAccount(this: IncognitoCli, options?: Options): Promise<GenerateAccount> {
   const args = ["account", "generate"];
-  if (options?.numShards) args.push("--numShards", options.numShards.toString());
   if (options?.shardID) args.push("--shardID", options.shardID.toString());
+  if (options?.numShards) args.push("--numShards", options.numShards.toString());
   if (options?.numAccounts) args.push("--numAccounts", options.numAccounts.toString());
 
-  const a = JSON.parse(await this.incognitoCli(args)) as GenerateAccount;
+  const { Mnemonic, Accounts } = JSON.parse(await this.incognitoCli(args)) as CapGenerateAccount;
 
   if (options?.submitKey)
-    for (const { OTAPrivateKey } of a.Accounts) await this.submitKeyAccount({ otaKey: OTAPrivateKey });
+    for (const { OTAPrivateKey } of Accounts) await this.submitKeyAccount({ otaKey: OTAPrivateKey });
 
-  return a;
+  return {
+    mnemonic: Mnemonic,
+    accounts: Accounts.map((a) => ({
+      index: a.Index,
+      privateKey: a.PrivateKey,
+      publicKey: a.PublicKey,
+      paymentAddressV1: a.PaymentAddressV1,
+      paymentAddress: a.PaymentAddress,
+      readOnlyKey: a.ReadOnlyKey,
+      otaPrivateKey: a.OTAPrivateKey,
+      miningKey: a.MiningKey,
+      miningPublicKey: a.MiningPublicKey,
+      validatorPublicKey: a.ValidatorPublicKey,
+      shardID: a.ShardID,
+    })),
+  };
 }
