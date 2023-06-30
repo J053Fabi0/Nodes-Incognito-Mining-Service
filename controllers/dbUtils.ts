@@ -13,6 +13,7 @@ import {
   AggregateOptions,
   AggregatePipeline,
 } from "mongo/mod.ts";
+import FilteredKeys from "../types/FilteredKeys.type.ts";
 import CommonCollection from "../types/collections/commonCollection.type.ts";
 
 export type InsertDoc<T = CommonCollection> = InsertDocument<
@@ -32,13 +33,9 @@ export type Projection<Collection extends CommonCollection> = {
   [key in keyof Collection]?: ProjectionValues;
 };
 
-type OnlyTruthy<P extends { [key in keyof P]?: boolean | 0 | 1 }> = {
-  [K in keyof P]: P[K] extends 1 | true ? K : never;
-}[keyof P];
-
 /** given a collection and a projection of that collection, returns the collection projected */
 export type Projected<C extends CommonCollection, P extends Projection<C> | undefined> = P extends Projection<C>
-  ? Pick<C, Extract<OnlyTruthy<P>, keyof C>>
+  ? Pick<C, FilteredKeys<P, true | 1> & keyof C>
   : C;
 
 /** FindOptions with a well typed projection option */
