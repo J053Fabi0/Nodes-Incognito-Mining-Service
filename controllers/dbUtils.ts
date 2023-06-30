@@ -35,7 +35,7 @@ export type Projection<Collection extends CommonCollection> = {
 
 /** given a collection and a projection of that collection, returns the collection projected */
 export type Projected<C extends CommonCollection, P extends Projection<C> | undefined> = P extends Projection<C>
-  ? Pick<C, FilteredKeys<P, true | 1> & keyof C>
+  ? Pick<C, (P["_id"] extends number ? FilteredKeys<P, true | 1> : FilteredKeys<P, true | 1> | "_id") & keyof C>
   : C;
 
 /** FindOptions with a well typed projection option */
