@@ -40,6 +40,14 @@ export default class IncognitoCli {
 
   /** Print all related-keys of a private key. */
   declare keyInfo: OmitThisParameter<typeof keyInfo>;
+
+  static isValidatorKey(key: string) {
+    return /[a-z0-9A-Z]{49,51}/.test(key);
+  }
+
+  static isValidatorPublicKey(key: string) {
+    return /[a-z0-9A-Z]{180,181}/.test(key);
+  }
 }
 
 IncognitoCli.prototype.balanceAccount = balanceAccount;
