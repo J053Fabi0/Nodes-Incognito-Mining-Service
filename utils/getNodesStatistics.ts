@@ -1,12 +1,16 @@
 import dayjs from "dayjs/mod.ts";
+import utc from "dayjs/plugin/utc.ts";
 import nameOfMonth from "./nameOfMonth.ts";
 import { getNodes } from "../controllers/node.controller.ts";
 import { getNodeEarnings } from "../controllers/nodeEarning.controller.ts";
+
+dayjs.extend(utc);
 
 export default async function getNodesStatistics() {
   const months = Array.from({ length: 5 })
     .map((_, i) =>
       dayjs()
+        .utc()
         .subtract(i + 1, "month")
         .startOf("month")
         .toDate()

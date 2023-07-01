@@ -24,7 +24,7 @@
     "redis/": "https://deno.land/x/redis@v0.30.0/",
     "fresh-charts/": "https://deno.land/x/fresh_charts@0.2.1/",
     "sort-es": "https://esm.sh/sort-es@1.6.11/",
-    "dayjs/": "https://deno.land/x/deno_dayjs@v0.3.0/",
+    "dayjs/": "https://deno.land/x/deno_dayjs@v0.4.0/",
     "croner": "https://deno.land/x/croner@6.0.4/dist/croner.js",
     "mongo/": "https://deno.land/x/mongo@v0.31.2/",
     "grammy/": "https://deno.land/x/grammy@v1.16.2/",

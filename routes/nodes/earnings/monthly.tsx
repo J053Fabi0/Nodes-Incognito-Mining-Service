@@ -1,4 +1,5 @@
 import dayjs from "dayjs/mod.ts";
+import utc from "dayjs/plugin/utc.ts";
 import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
 import { Chart } from "fresh-charts/mod.ts";
@@ -15,6 +16,8 @@ import EarningsTable from "../../../components/Nodes/EarningsTable.tsx";
 import NodeEarning from "../../../types/collections/nodeEarning.type.ts";
 import MonthlyEarningsTable from "../../../components/Nodes/MonthlyEarningsTable.tsx";
 import { getNodeEarnings, getTotalEarnings } from "../../../controllers/nodeEarning.controller.ts";
+
+dayjs.extend(utc);
 
 interface MonthlyNodesEarningsProps {
   monthsLeft: number;
@@ -42,7 +45,7 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
     const earnings = await getNodeEarnings({ node: { $in: nodesIds } }, { limit: LIMIT, sort: { epoch: -1 } });
 
     const oldestEarning = dayjs(Math.min(...nodes.map((n) => +n.createdAt)));
-    const months = dayjs().diff(oldestEarning, "month");
+    const months = dayjs().utc().diff(oldestEarning, "month");
 
     const monthEarnings: MonthlyNodesEarningsProps["monthEarnings"] = [];
     for (let i = 0; i <= (all ? months : MAX_MONTHS); i++) {
@@ -53,13 +56,13 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
         monthEarnings.push(total);
       } else {
         // add only months with earnings
-        if (total !== "0") monthEarnings.push(total);
+        if (total !== "0" || i === 0) monthEarnings.push(total);
         // and break when any month has 0 earnings
         else break;
       }
     }
 
-    const monthsLeft = Math.max(0, dayjs().diff(oldestEarning, "month") - monthEarnings.length);
+    const monthsLeft = Math.max(0, dayjs().utc().diff(oldestEarning, "month") - monthEarnings.length);
 
     return ctx.render({
       earnings,
@@ -91,11 +94,7 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
 
   const numberOfMonths = monthEarnings.length;
   const months = Array.from({ length: numberOfMonths })
-    .map((_, i) =>
-      dayjs()
-        .subtract(i + 1, "month")
-        .toDate()
-    )
+    .map((_, i) => dayjs().utc().subtract(i, "month").startOf("month").toDate())
     .map((m) => nameOfMonth(m) + (numberOfMonths >= 13 ? ` ${m.getFullYear()}` : ""));
 
   return (
