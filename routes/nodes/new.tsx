@@ -1,16 +1,18 @@
 import { qrcode } from "qrcode";
 import dayjs from "dayjs/mod.ts";
 import utc from "dayjs/plugin/utc.ts";
+import { WEBSITE_URL } from "../../env.ts";
 import State from "../../types/state.type.ts";
+import redirect from "../../utils/redirect.ts";
+import Balance from "../../islands/Balance.tsx";
 import TimeLeft from "../../islands/TimeLeft.tsx";
 import getPRVPrice from "../../utils/getPRVPrice.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { toFixedS } from "../../utils/numbersString.ts";
 import Typography from "../../components/Typography.tsx";
+import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
 import { minutesOfPriceStability, setupFeeUSD } from "../../constants.ts";
-import Balance from "../../islands/Balance.tsx";
-import { WEBSITE_URL } from "../../env.ts";
 
 dayjs.extend(utc);
 
@@ -33,10 +35,18 @@ export const handler: Handlers<NewNodeProps, State> = {
       { projection: { balance: 1, paymentAddress: 1, _id: 0 } }
     ))!;
 
-    if (
-      savedPrvPrice.expires < Date.now() ||
-      Math.abs(dayjs(savedPrvPrice.expires).utc().diff(dayjs(), "minute")) > minutesOfPriceStability
-    ) {
+    // the confirmation expires in the previous time plus an exatra minutesOfPriceStability
+    const confirmationExpires = dayjs(savedPrvPrice.expires)
+      .utc()
+      .add(minutesOfPriceStability, "minute")
+      .valueOf();
+
+    // if it is enough balance to pay for the node and the confirmation hasn't expired,
+    // redirect to the confirmation page
+    if (account.balance >= savedPrvPrice.prvToPay * 1e9 && confirmationExpires > Date.now())
+      return redirect("/nodes/new-confirm");
+
+    if (savedPrvPrice.expires <= Date.now()) {
       savedPrvPrice.usd = await getPRVPrice();
       savedPrvPrice.prvToPay = +toFixedS(setupFeeUSD / savedPrvPrice.usd, 2);
       savedPrvPrice.expires = dayjs().utc().add(minutesOfPriceStability, "minute").valueOf();
@@ -89,10 +99,10 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         <b>
           <code>
             <Balance
-              initialBalance={data.balance}
-              websiteUrl={WEBSITE_URL}
               goal={prvToPay}
-              redirectTo="/nodes/new-confirm"
+              websiteUrl={WEBSITE_URL}
+              initialBalance={data.balance}
+              redirectsTo="/nodes/new-confirm"
             />
           </code>
         </b>{" "}
@@ -111,11 +121,11 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         This address is unique to your account and it'll never change. You can save it for future use.
       </Typography>
 
-      <Typography variant="h3" class="mt-7">
+      {/* Why XX PRV? */}
+      <Typography variant="h3" class="mt-7 mb-2">
         Why <code>{prvToPay}</code> PRV?
       </Typography>
-
-      <Typography variant="lead" class="mb-3">
+      <Typography variant="lead">
         The <code>{prvToPay}</code> PRV is a one-time fee to cover the cost of setting up a new node. It's
         equivalent to {setupFeeUSD} USD at the current PRV price of <code>{prvPrice}</code> USD, fetched from{" "}
         <a class="underline" href="https://www.coingecko.com/en/coins/incognito">
@@ -123,6 +133,9 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         </a>
         .
       </Typography>
+
+      {/* After you pay */}
+      <AfterYouPay class="mt-5" />
     </>
   );
 }

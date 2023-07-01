@@ -16,11 +16,11 @@ const textStyles = {
   smallP: "text-sm font-light leading-normal",
 };
 
-interface TypographyProps {
+export interface TypographyProps extends JSX.HTMLAttributes<HTMLHeadingElement> {
   variant?: keyof typeof textStyles;
 }
 
-const Typography = ({ variant = "p", ...props }: JSX.HTMLAttributes<HTMLHeadingElement> & TypographyProps) => {
+const Typography = ({ variant = "p", ...props }: TypographyProps) => {
   props.class = `${props.class ?? ""} ${getTypographyClass(variant)}`;
 
   switch (variant) {

@@ -16,7 +16,7 @@ export default interface State extends WithSession {
   prvPrice?: {
     usd: number;
     expires: number; // timestamp
-    /** The prv it needs to give to host a new node */
+    /** The prv it needs to give to host a new node. Decimal format */
     prvToPay: number;
   };
 }
