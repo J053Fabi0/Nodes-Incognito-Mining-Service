@@ -37,7 +37,7 @@ export default function Navbar({ loggedIn = false }) {
   );
 
   const pagesElement = pages.length > 0 && (
-    <ul class="items-center gap-6 lg:flex">
+    <ul class="items-center gap-3 lg:gap-6 flex flex-col lg:flex-row">
       {pages
         .filter((p) => {
           if (p.onlyLoggedIn) return loggedIn;
