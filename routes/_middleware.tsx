@@ -1,18 +1,12 @@
-import { connect } from "redis/mod.ts";
 import { ObjectId } from "mongo/mod.ts";
 import State from "../types/state.type.ts";
+import { redis } from "../initDatabase.ts";
 import redirect from "../utils/redirect.ts";
 import isAdminPage from "../utils/isAdminPage.tsx";
 import { redisSession } from "fresh-session/mod.ts";
-import { REDIS_HOSTNAME, REDIS_PORT } from "../env.ts";
 import { Middleware } from "$fresh/src/server/types.ts";
 import isLoggedInPage from "../utils/isLoggedInPage.tsx";
 import { getClient } from "../controllers/client.controller.ts";
-
-const redis = await connect({
-  port: REDIS_PORT,
-  hostname: REDIS_HOSTNAME,
-});
 
 export const { handler }: Middleware<State> = {
   handler: [
