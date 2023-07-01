@@ -1,8 +1,8 @@
 import axiod from "axiod";
 import constants from "../constants.ts";
+import Node from "../types/collections/node.type.ts";
 import { ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { getNodes } from "../controllers/node.controller.ts";
-import Node from "../types/collections/node.type.ts";
 
 const mpk = constants.map((c) => c.validatorPublic).join(",");
 
@@ -22,7 +22,7 @@ export interface NodeStatus extends Node {
   alert: boolean;
   status: "ONLINE" | "OFFLINE";
   isSlashed: boolean;
-  shard: ShardsStr;
+  shard: ShardsStr | "";
   role: NodeRoles;
   isOldVersion: boolean;
   syncState: "BEACON SYNCING" | "LATEST" | "-" | "BEACON STALL" | "SHARD SYNCING" | "SHARD STALL";
@@ -60,7 +60,7 @@ export interface NodeStatusRawData {
   MiningPubkey: string;
   NextEventMsg: string;
   IsOldVersion: boolean;
-  CommitteeChain: ShardsStr;
+  CommitteeChain: ShardsStr | "";
   Status: "ONLINE" | "OFFLINE";
   Role: "PENDING" | "COMMITTEE" | "WAITING" | "SYNCING" | "";
   SyncState: "BEACON SYNCING" | "LATEST" | "-" | "BEACON STALL" | "SHARD SYNCING" | "SHARD STALL" | "";

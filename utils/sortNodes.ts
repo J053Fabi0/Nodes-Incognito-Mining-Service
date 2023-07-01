@@ -2,7 +2,7 @@ import { IS_PRODUCTION } from "../env.ts";
 import { byNumber, byValues } from "sort-es";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import getNodesStatus, { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
-import { Info, ShardsNames, normalizeShard } from "duplicatedFilesCleanerIncognito";
+import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 
 export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
@@ -42,9 +42,10 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
               dockerIndex,
               {
                 ...info,
-                shard: nodesStatusByDockerIndex[dockerIndex].shard
-                  ? normalizeShard(nodesStatusByDockerIndex[dockerIndex].shard)
-                  : "",
+                shard:
+                  nodesStatusByDockerIndex[dockerIndex].shard !== ""
+                    ? normalizeShard(nodesStatusByDockerIndex[dockerIndex].shard as ShardsStr)
+                    : "",
               },
             ] as NodeInfoByDockerIndex
         )

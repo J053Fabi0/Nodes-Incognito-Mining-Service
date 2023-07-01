@@ -176,12 +176,18 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
                   </td>
 
                   <td class={styles.td}>
-                    <NodePill baseURL={null} nodeNumber={+status.shard} relative />
-                    {isAdmin && (
-                      <code>
-                        <br />
-                        {shard}
-                      </code>
+                    {status.shard === "" ? (
+                      "-"
+                    ) : (
+                      <>
+                        <NodePill baseURL={null} nodeNumber={+status.shard} relative />
+                        {isAdmin && (
+                          <code>
+                            <br />
+                            {shard}
+                          </code>
+                        )}
+                      </>
                     )}
                   </td>
 
