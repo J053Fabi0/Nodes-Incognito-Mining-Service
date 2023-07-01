@@ -9,11 +9,14 @@ import { toFixedS } from "../../utils/numbersString.ts";
 import Typography from "../../components/Typography.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
 import { minutesOfPriceStability, setupFeeUSD } from "../../constants.ts";
+import Balance from "../../islands/Balance.tsx";
+import { WEBSITE_URL } from "../../env.ts";
 
 dayjs.extend(utc);
 
 interface NewNodeProps {
   expires: number;
+  /** Int format */
   balance: number;
   prvPrice: number;
   prvToPay: number;
@@ -57,8 +60,6 @@ export const handler: Handlers<NewNodeProps, State> = {
 export default function NewNode({ data }: PageProps<NewNodeProps>) {
   const { prvPrice, paymentAddressImage, expires, prvToPay, paymentAddress } = data;
 
-  const balanceString = toFixedS(data.balance / 1e9, 9);
-
   return (
     <>
       <Typography variant="h1" class="mt-3 mb-5">
@@ -86,7 +87,14 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
       <Typography variant="lead" class="mb-3">
         Balance:{" "}
         <b>
-          <code>{balanceString}</code>
+          <code>
+            <Balance
+              initialBalance={data.balance}
+              websiteUrl={WEBSITE_URL}
+              goal={prvToPay}
+              redirectTo="/nodes/new-confirm"
+            />
+          </code>
         </b>{" "}
         PRV.
       </Typography>

@@ -1,20 +1,20 @@
 import { ObjectId } from "mongo/mod.ts";
+import cryptr from "./cryptrInstance.ts";
 import { redis } from "../initDatabase.ts";
 import State from "../types/state.type.ts";
-import { aggregateClient } from "../controllers/client.controller.ts";
-import cryptr from "./cryptrInstance.ts";
-import IncognitoCli from "../incognito/IncognitoCli.ts";
 import handleError from "./handleError.ts";
+import IncognitoCli from "../incognito/IncognitoCli.ts";
 import { changeAccount } from "../controllers/account.controller.ts";
+import { aggregateClient } from "../controllers/client.controller.ts";
 
 type Account = Required<Pick<State, "prvPrice">> & {
   userId: string;
 };
 
-function isStateValid(state: any): state is Account {
-  if (!state) return false;
-  if (!state.userId) return false;
-  if (!state.prvPrice) return false;
+function isStateValid(state: unknown): state is Account {
+  if (!state || typeof state !== "object") return false;
+  if (!("userId" in state)) return false;
+  if (!("prvPrice" in state)) return false;
   return true;
 }
 
