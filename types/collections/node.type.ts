@@ -7,8 +7,9 @@ export default interface Node extends CommonCollection {
   number: number;
   client: ObjectId;
   inactive: boolean;
+  /** miningKey */
+  validator: string;
   dockerIndex: number;
-  paymentAddress: string;
   validatorPublic: string;
   /** To whom send notifications. This can or cannot include the owner */
   sendTo: ObjectId[];
