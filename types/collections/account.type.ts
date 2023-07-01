@@ -19,4 +19,5 @@ export default interface Account extends CommonCollection {
   miningPublicKey: string;
   validatorPublicKey: string;
   shardID: number;
+  balance: number;
 }

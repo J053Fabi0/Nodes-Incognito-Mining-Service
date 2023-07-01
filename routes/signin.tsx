@@ -38,6 +38,7 @@ export const handler: Handlers<SigninProps, State> = {
           accounts: [newAccount],
         } = await IncognitoCli.generateAccount({ submitKey: true });
         const submittedAccount = await createAccount({
+          balance: 0,
           shardID: newAccount.shardID,
           miningKey: newAccount.miningKey,
           publicKey: newAccount.publicKey,
