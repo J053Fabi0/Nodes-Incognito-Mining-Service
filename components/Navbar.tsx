@@ -19,6 +19,11 @@ const pages: Page[] = [
     href: "/nodes/new",
     onlyLoggedIn: true,
   },
+  {
+    name: "Account",
+    href: "/me",
+    onlyLoggedIn: true,
+  },
 ];
 
 export default function Navbar({ loggedIn = false }) {

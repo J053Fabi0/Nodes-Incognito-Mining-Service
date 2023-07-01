@@ -4,7 +4,6 @@ import { WEBSITE_URL } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import Balance from "../../islands/Balance.tsx";
-import Button from "../../components/Button.tsx";
 import TimeLeft from "../../islands/TimeLeft.tsx";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { BsFillCartCheckFill } from "react-icons/bs";
@@ -13,6 +12,7 @@ import IncognitoCli from "../../incognito/IncognitoCli.ts";
 import { minutesOfPriceStability } from "../../constants.ts";
 import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
+import Button, { getButtonClasses } from "../../components/Button.tsx";
 import { HandlerContext, Handlers, PageProps } from "$fresh/server.ts";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 
@@ -36,7 +36,7 @@ interface NewNodeConfirmProps {
 async function getDataOrRedirect(
   ctx: HandlerContext<NewNodeConfirmProps, State>
 ): Promise<Response | NewNodeConfirmProps> {
-  const savedPrvPrice: State["prvPrice"] = { ...(ctx.state.prvPrice || { usd: 0, expires: 0, prvToPay: 0 }) };
+  const savedPrvPrice = ctx.state.prvPrice;
 
   if (savedPrvPrice.prvToPay === 0) return redirect("/nodes/new");
 
@@ -68,16 +68,12 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
     return ctx.render(dataOrRedirect);
   },
 
-  async POST(req, ctx) {
-    const form = await req.formData();
-    const action = form.get("action")?.toString();
-
-    if (action === "cancel") return redirect("/");
-
+  async POST(_, ctx) {
     const dataOrRedirect = await getDataOrRedirect(ctx);
 
     if (isResponse(dataOrRedirect)) return dataOrRedirect;
 
+    // to do: process the payment
     return redirect("/nodes/new-confirm");
   },
 };
@@ -187,7 +183,7 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
           </div>
         </div>
 
-        <div class="flex items-end gap-3 mt-3">
+        <div class="flex items-end gap-5 mt-3">
           <Button type="submit" color="green" name="action" value="confirm" class="mt-3 !normal-case">
             <Typography variant="h4" class="flex items-center gap-2">
               Confirm
@@ -195,9 +191,11 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
             </Typography>
           </Button>
 
-          <Button type="submit" color="red" name="action" value="cancel" class="mt-3 !normal-case h-min py-1 px-3">
-            <Typography variant="lead">Cancel</Typography>
-          </Button>
+          <a class={`${getButtonClasses("red", false)} mt-3 py-2 px-3`} href="/me/balance">
+            <Typography variant="p" class="!normal-case h-min py-0">
+              Cancel, get refund
+            </Typography>
+          </a>
         </div>
       </form>
     </>

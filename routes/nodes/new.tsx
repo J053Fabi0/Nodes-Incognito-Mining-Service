@@ -28,7 +28,7 @@ interface NewNodeProps {
 
 export const handler: Handlers<NewNodeProps, State> = {
   async GET(_, ctx) {
-    const savedPrvPrice: State["prvPrice"] = { ...(ctx.state.prvPrice || { usd: 0, expires: 0, prvToPay: 0 }) };
+    const savedPrvPrice = ctx.state.prvPrice;
 
     const account = (await getAccount(
       { _id: ctx.state.user!.account },
@@ -118,7 +118,7 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
       </Typography>
 
       <Typography variant="lead" class="mb-3 before:content-['👉&nbsp;']">
-        This address is unique to your account and it'll never change. You can save it for future use.
+        This address is unique to your account and will never change. You can save it for future use.
       </Typography>
 
       {/* Why XX PRV? */}

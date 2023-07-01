@@ -3,6 +3,7 @@ export const loggedInURLs = [
   "/nodes",
   "/nodes/*",
   "/balance",
+  "/me",
 ].map((pathname) => new URLPattern({ pathname }));
 
 /**

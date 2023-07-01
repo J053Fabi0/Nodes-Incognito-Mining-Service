@@ -2,9 +2,17 @@ import joi from "joi";
 import { parse } from "std/jsonc/mod.ts";
 import Constants from "./types/constants.type.ts";
 import { getNodes } from "./controllers/node.controller.ts";
-import { allErrorTypes, AllErrorTypes } from "./utils/variables.ts";
 import { getClient } from "./controllers/client.controller.ts";
 import { getAccount } from "./controllers/account.controller.ts";
+import { allErrorTypes, AllErrorTypes } from "./utils/variables.ts";
+
+interface Json {
+  minEpochsToBeOnline: number;
+  minEpochsToLetSync: number;
+  maxDiskPercentageUsage: number;
+  waitingTimes: Record<AllErrorTypes, number>;
+  incognitoFee: number;
+}
 
 const schema = joi.object<Json>({
   minEpochsToBeOnline: joi.number().required(),
@@ -14,14 +22,8 @@ const schema = joi.object<Json>({
     .object()
     .pattern(joi.string().valid(...allErrorTypes), joi.number().positive().allow(0))
     .required(),
+  incognitoFee: joi.number().positive().allow(0).default(0.1),
 });
-
-interface Json {
-  minEpochsToBeOnline: number;
-  minEpochsToLetSync: number;
-  maxDiskPercentageUsage: number;
-  waitingTimes: Record<AllErrorTypes, number>;
-}
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
 const { error, value: json } = schema.validate(rawJson, { allowUnknown: true });
@@ -45,6 +47,8 @@ export const minEpochsToBeOnline = json.minEpochsToBeOnline;
 export const minEpochsToLetSync = json.minEpochsToLetSync;
 export const maxDiskPercentageUsage = json.maxDiskPercentageUsage;
 export const waitingTimes = json.waitingTimes;
+/** Decimal format */
+export const incognitoFee = json.incognitoFee;
 
 export const setupFeeUSD = 5;
 export const minutesOfPriceStability = 60;
