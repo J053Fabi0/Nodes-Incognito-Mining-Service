@@ -94,7 +94,12 @@ export default async function checkAccounts(checkAll: boolean) {
       { $project: { "account._id": 1, "account.privateKey": 1, "account.balance": 1 } },
     ])) as unknown as [{ account: { privateKey: string; balance: number; _id: ObjectId } }];
 
-    const privateKey = await cryptr.decrypt(account.privateKey);
+    const privateKey = await cryptr.decrypt(account.privateKey).catch((e) => {
+      console.log(`Error decrypting the private key of the user ${userId}`, account);
+      handleError(e);
+      return null;
+    });
+    if (!privateKey) continue;
 
     // get the balance
     const incognito = new IncognitoCli(privateKey);
