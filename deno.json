@@ -26,6 +26,7 @@
     "escapeHtml": "https://deno.land/x/escape_html@1.0.0/mod.ts",
     "fresh-charts/": "https://deno.land/x/fresh_charts@0.2.1/",
     "fresh-session/": "https://deno.land/x/fresh_session@0.2.1/",
+    "fresh-validation": "https://deno.land/x/fresh_validation@0.1.1/mod.ts",
     "grammy_validator": "https://raw.githubusercontent.com/J053Fabi0/validator/71d6c3f4b60a705e3718a3081e3f5c61cb1ca06f/src/mod.ts",
     "grammy/": "https://deno.land/x/grammy@v1.16.2/",
     "joi": "https://esm.sh/joi@17.9.2",

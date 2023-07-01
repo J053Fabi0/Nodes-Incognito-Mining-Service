@@ -6,17 +6,28 @@ import { toFixedS } from "../utils/numbersString.ts";
 import Typography, { getTypographyClass } from "../components/Typography.tsx";
 
 const styles = {
-  label: `whitespace-nowrap flex items-center gap-2 ${getTypographyClass("p")}`,
+  label: `whitespace-nowrap ${getTypographyClass("p")}`,
 };
 
 interface WidthdrawProps {
   balance: number;
+  amountError?: string;
   incognitoFee: number;
   paymentAddressPattern: string;
+  /** Decimal format */
+  defaultAmount?: string;
+  defautlPaymentAddress?: string;
 }
 
-export default function Withdraw({ balance, incognitoFee }: WidthdrawProps) {
-  const amountStr = useSignal<undefined | string>(undefined);
+export default function Withdraw({
+  balance,
+  amountError,
+  incognitoFee,
+  defaultAmount,
+  paymentAddressPattern,
+  defautlPaymentAddress,
+}: WidthdrawProps) {
+  const amountStr = useSignal<undefined | string>(defaultAmount);
   const max = (balance - incognitoFee * 1e9) / 1e9;
 
   function handleChange(e: JSX.TargetedEvent<HTMLInputElement, Event>) {
@@ -48,14 +59,16 @@ export default function Withdraw({ balance, incognitoFee }: WidthdrawProps) {
             id="paymentAddress"
             name="paymentAddress"
             placeholder="Payment address"
+            value={defautlPaymentAddress}
+            pattern={paymentAddressPattern}
             class="p-2 border border-gray-300 rounded w-full"
           />
         </div>
 
         <div>
-          <label for="validatorPublic" class={styles.label}>
+          <label for="amount" class={styles.label}>
             Amount (max:{" "}
-            <code class="hover:underline hover:cursor-pointer" onClick={() => (amountStr.value = `${max}`)}>
+            <code class="underline tabular-nums cursor-pointer" onClick={() => (amountStr.value = `${max}`)}>
               {toFixedS(max, 9)}
             </code>{" "}
             PRV)
@@ -63,15 +76,19 @@ export default function Withdraw({ balance, incognitoFee }: WidthdrawProps) {
 
           <input
             required
-            max={max}
-            min={1e-9}
+            id="amount"
             type="number"
-            id="validatorPublic"
+            name="amount"
+            step="0.000000001"
             onBlur={handleChange}
-            name="validatorPublic"
             value={amountStr.value}
             class="p-2 border border-gray-300 rounded w-full"
           />
+          {amountError && (
+            <Typography variant="p" class="mt-1 text-red-600">
+              {amountError}
+            </Typography>
+          )}
         </div>
       </div>
 
