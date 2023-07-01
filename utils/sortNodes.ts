@@ -6,12 +6,14 @@ import { Info, ShardsNames, normalizeShard } from "duplicatedFilesCleanerIncogni
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 
 export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
-  "NOT_STAKED",
   // SYNCING is important because it must be online to move to PENDING
   // But committe will get the priority if they have less epochs to the next event
   ["COMMITTEE", "SYNCING"],
   "PENDING",
   "WAITING",
+  // NOT_STAKED is the last because it's not important that it has files, only that
+  // it's online to be able to stake
+  "NOT_STAKED",
 ];
 
 export type NodeInfoByDockerIndex = [string, Info & { shard: ShardsNames | "" }];
