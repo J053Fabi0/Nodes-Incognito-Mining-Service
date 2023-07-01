@@ -4,7 +4,6 @@ import createTable from "./createTable.ts";
 import nameOfMonth from "../utils/nameOfMonth.ts";
 import updateTablesName from "./updateTablesName.ts";
 import getTableTotalEarnings from "./getTableTotalEarnings.ts";
-import { prvDecimalsDivisor } from "../constants.ts";
 
 /**
  * It creates the database if it doesn't exist. It also updates its title.
@@ -27,8 +26,7 @@ const uploadToNotion = async (
   const totalEarnings = await getTableTotalEarnings(database_id);
   updateTablesName(
     database_id,
-    `${nameOfMonth(date)} ${date.getFullYear()} - ` +
-      parseInt(totalEarnings * prvDecimalsDivisor + "") / prvDecimalsDivisor
+    `${nameOfMonth(date)} ${date.getFullYear()} - ` + parseInt(totalEarnings * 1e9 + "") / 1e9
   );
 };
 

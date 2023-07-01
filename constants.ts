@@ -41,7 +41,6 @@ const constants: Constants = nodes.map((node) => ({
 
 export default constants;
 
-export const prvDecimalsDivisor = 1_000_000_000;
 export const minEpochsToBeOnline = json.minEpochsToBeOnline;
 export const minEpochsToLetSync = json.minEpochsToLetSync;
 export const maxDiskPercentageUsage = json.maxDiskPercentageUsage;

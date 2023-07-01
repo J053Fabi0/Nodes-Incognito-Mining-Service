@@ -3,7 +3,6 @@ import handleError from "./handleError.ts";
 import getNodesStatus from "./getNodesStatus.ts";
 import getNodeEarnings from "./getNodeEarnings.ts";
 import sendMessage from "../telegram/sendMessage.ts";
-import { prvDecimalsDivisor } from "../constants.ts";
 import uploadToNotion from "../notion/uploadToNotion.ts";
 import Client from "../types/collections/client.type.ts";
 import { getNodes } from "../controllers/node.controller.ts";
@@ -45,18 +44,14 @@ export default async function checkEarnings() {
         time,
         epoch,
         node: _id,
-        earning: earning / prvDecimalsDivisor,
+        earning: earning / 1e9,
       }).catch(() => false as false);
       // If the earning was alredy registered, continue.
       if (created === false) continue;
 
       if (notionPage)
         try {
-          await repeatUntilNoError(
-            () => uploadToNotion(notionPage, epoch, time, earning / prvDecimalsDivisor, number),
-            20,
-            5
-          );
+          await repeatUntilNoError(() => uploadToNotion(notionPage, epoch, time, earning / 1e9, number), 20, 5);
         } catch (e) {
           handleError(e);
           await deleteNodeEarning({ _id: created._id });
@@ -68,7 +63,7 @@ export default async function checkEarnings() {
         const { telegram } = findClientById(clients, sendToId);
         if (telegram)
           sendMessage(
-            `#${name} - <code>${earning / prvDecimalsDivisor}</code>.\n` +
+            `#${name} - <code>${earning / 1e9}</code>.\n` +
               `Epoch: <code>${epoch}</code>.\n` +
               `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
             telegram,

@@ -5,8 +5,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "0": {
     _id: new ObjectId("648ea67e9d36345e94bff734"),
     name: "slabb_0",
-    paymentAddress:
-      "12sh9JD5qWDi7xeQt2cbJwvBGZm7oji1kjxBRvni82sKQcjzCAzfdK9c25fAzknrywwmpVLpwMbP1az39qwgkQqBQxFBarTRkyAwB8ZuiwyXakYr37mpvUE63k73odqCYhfb5k8V8ryXpoeY6WuU",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "18r4KwUYjwpZuNVQtpwf7s6qzFSvjMT1ucLVH1oksWMYvUcJt9xgDHtgsvdQ7FUrj5cuTthrS29RwTFQTW4bqMEgY2SmTsFmuPxsDGRJ2a9nKtaGQWKhBH2RpYDENVpmKi6EKXqHjGFnayg1ixEKSmsW57DPkCSoPmcTUrBBgmyXRoY8szZ1U",
     number: 1,
@@ -28,8 +27,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "1": {
     _id: new ObjectId("648ea67e9d36345e94bff735"),
     name: "slabb_1",
-    paymentAddress:
-      "12sfruiwZZBapS7g7ks6ks3i32mHNsLZXhhBtamYnYeftB8375MGKRN9inmwY1iEbmUT1U6FqZuksAFybMNtRKwrZpdGojMzv35x2K4CdEt6jvFctZU2A8oKbasu1iLab83zUjPXSPeySmA8LNiw",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "19hBFE5h4H298fC4DgRKgjRoq8KNBmpiTDchaBuwGkixd8n9iic4BxTCfL2QDK83fMgiA9xqB1bZG1BcA5PbUZYcUPkmpHVocGXh1cY5VQDjSRMT9ByzvSyoWVM9kCNZArTGibtGEtHJ4WGqK3mbYBfe1QseZpzvb5NQULrH2AhdzZpE5fzM9",
     number: 2,
@@ -51,8 +49,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "2": {
     _id: new ObjectId("648ea67e9d36345e94bff736"),
     name: "slabb_2",
-    paymentAddress:
-      "12sj31e23D4PehgHaLJbjtmL1rdXcR7Dzk3BTbtuRUcdm6jt2s915dxutgx9FfvGB4njp7mjUdCcZgQ2YmwdjwBaEDLBiRcxgCcXuGWLrXcBZLAFXD6jmTd9TEKZgfxSnc8fnzudKa9UJrKQD6KD",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "1KKNStgFPwd2L1SjREiB8QFVJonLqDqjzBYomKG8CXVBpnzQAY8BuUySwZAiPwseLR4E7xzkx3yFXJyEPoLo7msjWgr9Wqmy6JGQfBheb7gMdQUErbH5PoDp225VBgmQdhhkg5AyrcbFrURja1ZuxFdgZEb4NkWzxVGzrwJnBvoZBnmGNk41Z",
     number: 3,
@@ -74,8 +71,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "3": {
     _id: new ObjectId("648ea67e9d36345e94bff737"),
     name: "slabb_3",
-    paymentAddress:
-      "12sw5GFHmDx3kTpvrmqNZJofpXsD6WQuwwV5Ri5AyrBmJa1R5F462SE9VM6RFEXbJ1kMokCRkD98Uei2xd4fEeF6StNjGm2vYm5ePccd66FXVcafbXPubYhxtv3vMr6gZsJajXBMy55P8sYDgC2V",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "17FXjvRYWDpLmxKadtoxeERadjA6UkPaQACwidkjdjA84dQvgFn7WXpL8YSWEn4yWMmELC2tGYvGAWSYueC7MxqmNgyHKRnpUXYFurxHcLy3KDqz6XYGUTrmVM5HFgKMC6tKcsk3HN2cQtu2WzjyWXkUnbxmmpyGpaKk2GPsyDzg4DjSmHMnE",
     number: 4,
@@ -97,8 +93,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "4": {
     _id: new ObjectId("648ea67e9d36345e94bff738"),
     name: "slabb_4",
-    paymentAddress:
-      "12shbknn7ZkK9G9Tkda9ZCrgRRPfdFempijNiqg8pb9xwC5sGHFSaKWFDknFUHbQdS6P3JTE2qH4sRSzLWEGy234GKYHFoUdxqsZx6HiVhA4aERshPKZARqc3oakbnK8owvGZH16Nkf642qs3V28",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "1Xq6C4tZSf39eC1pZABhUdSeAXZzHYL8BRY88xicvxjFSuUD8ET25wB5U7M6tiQmWosR4JxxwxobHv2RjB9E23d6xDh4hy8ouNHwpV9DmhN1dNHrHhPLQubZDsKXpPJ2WEsjaaF8wX2HrDjfKtvLHbQCeogxRHLsKMUwEVHbcabsNcX12JE74",
     number: 5,
@@ -120,8 +115,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "5": {
     _id: new ObjectId("648ea67e9d36345e94bff739"),
     name: "slabb_5",
-    paymentAddress:
-      "12sh14Dupe2XX8RqSF2Vw7NG9FG763qDw4HMBNeyLGQTubEMUD9aUBD3HiDzLGqBQ6PdoyTNyGJfGVUhLofbxXY1dJkFJmq9PmRJvgoMQ7eN4fAeAviLnTpZhkKc95ZgE9nSHr5C19hGJut8okys",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "13Z1HgaUubdkqiStLseisscdiiVyvnf8XRZ6D6kArmEnGFSWDBKGoArUbvTXsaM1Hk691HCqp5GDTdLe64T5HqyraQWCfvdBJxNEgqm4TqGb4pVh6wBe2ykdhxy6JJ6SLapiy2RRGPNpAgCb5ka5SA35mz8qojShrsa13geaJN26vbfrYrsvM",
     number: 6,
@@ -143,8 +137,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "6": {
     _id: new ObjectId("648ea67f9d36345e94bff73a"),
     name: "slabb_6",
-    paymentAddress:
-      "12sxTRC8YS4PuPSDz69NvAzkfmHkbQvKeRjuizz9upcKnoxpb9F7suf2Y4nQM1QREW7ZqhLvd4Q93VdPmEqSCng8K1VncZV2LMqPgb1CVFA3M4hDg7ZRnurkexbYmYqLRQMoxZqoQAfZ2e9mUxRK",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "1SzPS8dGTbimsXfGQdF9JxgpfKzBmbt1Kacc6Qzvzav7CAAhg49j6cA5WFrwAmLhDjpvQAX8znyKHWgEsB9U5MwV6ju9tKgf8Lg1qgwYTZuQevLfH6HCwq9yskf2V2dgGhwPkY3c2DeMVmh9e9cv3rMF6qacEFJ9TgTng62MrTiQf9WuQZGcJ",
     number: 7,
@@ -166,8 +159,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "7": {
     _id: new ObjectId("648ea67f9d36345e94bff73b"),
     name: "slabb_7",
-    paymentAddress:
-      "12sjmNX2D4U2muxva6LcDXuCFzsSWJzNSiodLt6NZg63oPQmCPK4esv2aSNcvfBhPU2Lb4CVfvoAJ7PHvchU9DCEJKS7e7DCiptyXMRXPYsKSy8Qvdk3YweL2oedkLQiyy8VKYsyue9cRNgWA4mu",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "1ApBKZMc3gtLgmzU6cypHrkt9uZwTnrGi6hGRF36BENwfE8cLUxAFtZwrpNNPqHUBYBekxnqRMwc65oHFczdaNYDwkXRoSuD7xdYjVAWzrVazQeEdsC9EtxM9cVWPPFQiPbvMSXt19iAZJBUcKYz3WTakt3i5V69bcP7nQdRzcHbcSpJCRC62",
     number: 8,
@@ -189,8 +181,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "8": {
     _id: new ObjectId("648ea67f9d36345e94bff73c"),
     name: "slabb_8",
-    paymentAddress:
-      "12sdYoTeaDagbi2BkpV2d3gBJ7LBnoXu3eaVxm6Uuxxc6YqmTKbEitu5cy32wXPsTqvpY4pyh8sNcgJ8UNGXVUrFxeHvgUNRBJvZCw5ZtdcpNuij3ck3yua64VeqzBB3vHgDLv8NzhBLZf3NFDUe",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "1ZEat5zmX7fVuB95MHqgbRH2w62eqJByCwxC84GJg7z5f67zZvK3XDyF51FYsQYPmn86JWhMVYQEQs3eJ2npVmvnpHhPm5Q6T19EeGxMdFDrUpKxN3PYycPi96nBpnPL9WC5mLWzN66KaUfC2kGR9GfwhW4snaKxEC3gHSvfgnzG2NpAvbvvo",
     number: 9,
@@ -212,8 +203,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
   "9": {
     _id: new ObjectId("648ea67f9d36345e94bff73d"),
     name: "slabb_9",
-    paymentAddress:
-      "12sevfVoj76nD3GZLyKT6ArSub3fythanmtHooCbAgNGar7Ft3sXanwrGLWPZyEjnAsoCqqraygAnqvJMW5Gsx7mGD2peYQkLv6YnTaUMDMhB32rJ7qFGoC2qVLa7aUt29FeBymvQ3pveiaxbDoZ",
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
     validatorPublic:
       "1HCo8fBZKG5VbMfaCmHUvoWxdMCG5sL7vWHuV3SxH6QU9WxnFX8QoehQgeeuMRsRtwP3xRrBZMzooEaFZdk3eTcL1ydvHNZuzdwSd5HkhYrit2cTgMKQWrPkfGwBcbRbSUEsdFsD6Yxwr4H43G1qPuSFQEr9gwd4MAJW6ry3159NdGNyHDuhv",
     number: 10,

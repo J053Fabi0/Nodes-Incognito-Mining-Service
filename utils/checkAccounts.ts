@@ -11,15 +11,18 @@ type Account = Required<Pick<State, "prvPrice">> & {
   userId: string;
 };
 
-function isStateValid(state: unknown): state is Account {
+function isStateValid(state: unknown, checkPrvPrice: boolean): state is Account {
   if (!state || typeof state !== "object") return false;
   if (!("userId" in state)) return false;
-  if (!("prvPrice" in state)) return false;
+  if (checkPrvPrice && !("prvPrice" in state)) return false;
   return true;
 }
 
-async function getAccounts(): Promise<Account[]> {
-  const accounts: Account[] = [];
+async function getAccounts<
+  IgnorePrvprice extends boolean,
+  Return extends IgnorePrvprice extends false ? Account : Omit<Account, "prvPrice"> & { prvPrice: undefined }
+>(ignorePrvPrice: IgnorePrvprice): Promise<Return[]> {
+  const accounts: Return[] = [];
 
   // get all the keys
   const keys = await redis.keys("session_*");
@@ -43,12 +46,12 @@ async function getAccounts(): Promise<Account[]> {
       }
 
       // ignore those keys that are not valid
-      if (!isStateValid(possibleState.data)) continue;
+      if (!isStateValid(possibleState.data, ignorePrvPrice)) continue;
 
       accounts.push({
         userId: possibleState.data.userId,
-        prvPrice: possibleState.data.prvPrice,
-      });
+        prvPrice: ignorePrvPrice ? undefined : possibleState.data.prvPrice,
+      } as Return);
     } catch {
       // delete those keys that are not valid JSON
       await redis.del(key);
@@ -59,13 +62,16 @@ async function getAccounts(): Promise<Account[]> {
   return accounts;
 }
 
-export default async function checkAccounts() {
-  const accounts = await getAccounts();
+/**
+ * @param checkAll Check regardless of the expiry date
+ */
+export default async function checkAccounts(checkAll: boolean) {
+  const accounts = await getAccounts(checkAll);
   const accountsViewed: string[] = [];
 
   for (const { userId, prvPrice } of accounts) {
-    // check if the expiry date has passed
-    if (prvPrice.expires < Date.now()) continue;
+    // check if the expiry date has passed and we don't want to check all
+    if (!checkAll && prvPrice && prvPrice.expires < Date.now()) continue;
     // check if the account has already been viewed, just in case
     if (accountsViewed.includes(userId)) continue;
 

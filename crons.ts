@@ -8,4 +8,7 @@ new Cron("*/5 * * * *", { protect: true, catch: handleError }, checkEarnings);
 
 new Cron("*/1 * * * *", { protect: true, catch: handleError }, checkNodes);
 
-new Cron("*/1 * * * *", { protect: true, catch: handleError }, checkAccounts);
+// check all active accounts every minute
+new Cron("*/1 * * * *", { protect: true, catch: handleError }, checkAccounts.bind(null, true));
+// check all accounts regardless of the expiry date every hour
+new Cron("0 * * * *", { protect: true, catch: handleError }, checkAccounts.bind(null, false));
