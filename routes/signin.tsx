@@ -57,7 +57,7 @@ export const handler: Handlers<SigninProps, State> = {
           notionPage: null,
           telegram: params.id,
           account: submittedAccount._id,
-          name: params.username || `${params.first_name ?? ""} ${params.last_name ?? ""}`,
+          name: params.username || [params.first_name, params.last_name].filter(Boolean).join(" "),
         });
         ctx.state.session.set("userId", newUser._id.toString());
       }
