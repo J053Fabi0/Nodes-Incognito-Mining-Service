@@ -1,49 +1,22 @@
-import { ObjectId } from "mongo/mod.ts";
-import nameOfMonth from "./nameOfMonth.ts";
-import getTable from "../notion/getTable.ts";
-import getTableID from "../notion/getTableID.ts";
-import { getNodes } from "../controllers/node.controller.ts";
-import { createNodeEarning } from "../controllers/nodeEarning.controller.ts";
+import { createNode } from "../controllers/node.controller.ts";
+import { getClient } from "../controllers/client.controller.ts";
+import { adminId } from "../constants.ts";
 
-const nodes = (await getNodes()).reduce((obj, node) => {
-  obj[node.number] = node._id;
-  return obj;
-}, {} as Record<string, ObjectId>);
+const client = await getClient({ name: "Slabb" }, { projection: { _id: 1 } });
 
-// same as above but programmatically
-const dates = Array.from({ length: 20 }, (_, i) => new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * i));
-
-for (const date of dates) {
-  const database_id = await getTableID("f91d95c318d1492397fc4196da34dfe9", date);
-  console.log(database_id, date);
-
-  if (!database_id) continue;
-
-  const table = await getTable(database_id);
-
-  for (const { properties } of table) {
-    const dateString = properties["Date"]?.type === "date" && properties["Date"].date?.start;
-    const [year, month, day] = (dateString || `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}}`)
-      .split("-")
-      .map((a) => parseInt(a));
-    const time = new Date(year, month - 1, day);
-
-    const nodeSelect = properties["Node"]?.type === "select" && properties["Node"].select?.name;
-    const nodeNumber = properties["Node"]?.type === "number" && properties["Node"].number;
-    const node = nodes[nodeSelect || nodeNumber || 1];
-
-    const earning = properties["Total earnings"]?.type === "number" && properties["Total earnings"].number;
-    const epoch = properties["Epochs"]?.type === "title" && properties["Epochs"].title[0].plain_text;
-
-    if (!node || !epoch || typeof earning !== "number") {
-      console.log({ time, node, earning, epoch: parseInt(epoch || "0") });
-      continue;
-    }
-
-    try {
-      await createNodeEarning({ time, node, earning, epoch: parseInt(epoch) });
-    } catch {
-      console.log(nameOfMonth(time) + " - " + time.getFullYear(), nodeSelect || nodeNumber || 1, epoch);
-    }
-  }
+if (!client) {
+  console.log("Ho, ve");
+  Deno.exit(1);
 }
+
+await createNode({
+  name: "slabb_10",
+  client: client._id,
+  dockerIndex: 10,
+  inactive: false,
+  number: 11,
+  sendTo: [adminId],
+  validator: "1yUBmPWnY4DbgWAEQZVNuECFGLE6Bn1FdgTUnZzNS9ht9Y6MgR",
+  validatorPublic:
+    "1XfU9xQmZostUS9eXpnzbz9MYvC7oBkAdpQFtvdZwVW2CUzVmnemgi7hPrKBPYgvYpMczYBF7xVh3eF8SkRyGSXaeQeQY56Lex2KAWFWvQguskpLEpXZv7R1HRTweqgwdKPt3uweiwGwFzm8djSEZRu43cfdnmknzsERyw9VWp6PDYZEghvK6",
+});
