@@ -20,6 +20,7 @@ const styles = {
   th: "py-2 px-3 text-right",
   td: "py-2 px-3 text-left",
   label: `whitespace-nowrap flex items-center gap-2 ${getTypographyClass("p")}`,
+  ol: `list-decimal list-inside mt-2 ${getTypographyClass("lead")}`,
 };
 
 dayjs.extend(utc);
@@ -140,9 +141,14 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
         Node account data
       </Typography>
 
-      <Typography variant="lead" class="mt-3">
-        Create an account in the Incognito app and fill the following fields with the data you get from the app.
-      </Typography>
+      <ol class={styles.ol + " mt-3"}>
+        <li>
+          Create an account in the Incognito app: <b>More</b> &gt; <b>Keychain</b>.
+        </li>
+        <li>
+          Find its keys: <b>More</b> &gt; <b>Keychain</b> &gt; <b>Select the account</b>.
+        </li>
+      </ol>
 
       <form method="POST" class="mt-3">
         <div class="flex flex-col gap-3">
