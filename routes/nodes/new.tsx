@@ -14,6 +14,7 @@ dayjs.extend(utc);
 
 interface NewNodeProps {
   expires: number;
+  balance: number;
   prvPrice: number;
   prvToPay: number;
   paymentAddress: string;
@@ -43,6 +44,7 @@ export const handler: Handlers<NewNodeProps, State> = {
     const base64Image = await qrcode(account.paymentAddress, { size: 300, errorCorrectLevel: "L" });
 
     return ctx.render({
+      balance: account.balance,
       prvPrice: savedPrvPrice.usd,
       expires: savedPrvPrice.expires,
       paymentAddressImage: base64Image,
@@ -54,6 +56,8 @@ export const handler: Handlers<NewNodeProps, State> = {
 
 export default function NewNode({ data }: PageProps<NewNodeProps>) {
   const { prvPrice, paymentAddressImage, expires, prvToPay, paymentAddress } = data;
+
+  const balanceString = toFixedS(data.balance / 1e9, 9);
 
   return (
     <>
@@ -69,15 +73,25 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         PRV to the following address.
       </Typography>
 
-      <Typography variant="lead" class="mb-3 break-words">
-        <code>{paymentAddress}</code>
-      </Typography>
+      <div class="overflow-x-auto">
+        <Typography variant="lead" class="mb-3">
+          <code>{paymentAddress}</code>
+        </Typography>
+      </div>
 
       <div class="w-100 flex justify-center">
         <img src={paymentAddressImage} alt="Payment address" class="mb-3" />
       </div>
 
-      <Typography variant="lead" class="mb-10">
+      <Typography variant="lead" class="mb-3">
+        Balance:{" "}
+        <b>
+          <code>{balanceString}</code>
+        </b>{" "}
+        PRV.
+      </Typography>
+
+      <Typography variant="lead" class="mb-3">
         Time remaining:{" "}
         <b>
           <TimeLeft date={expires} />
@@ -85,14 +99,17 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         .
       </Typography>
 
-      <Typography variant="h3">
+      <Typography variant="lead" class="mb-3 before:content-['👉&nbsp;']">
+        This address is unique to your account and it'll never change. You can save it for future use.
+      </Typography>
+
+      <Typography variant="h3" class="mt-7">
         Why <code>{prvToPay}</code> PRV?
       </Typography>
 
       <Typography variant="lead" class="mb-3">
         The <code>{prvToPay}</code> PRV is a one-time fee to cover the cost of setting up a new node. It's
-        equivalent to {setupFeeUSD} USD at the current PRV price of <code>{prvPrice}</code> USD. The price was
-        fetched from{" "}
+        equivalent to {setupFeeUSD} USD at the current PRV price of <code>{prvPrice}</code> USD, fetched from{" "}
         <a class="underline" href="https://www.coingecko.com/en/coins/incognito">
           CoinGeko
         </a>
