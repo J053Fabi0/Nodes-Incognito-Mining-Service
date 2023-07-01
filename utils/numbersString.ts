@@ -8,7 +8,7 @@ export function toFixedS(string: string | number | bigint, decimals: number) {
   const intPart = string.substring(0, indexOfDot);
   if (decimals === 0) return intPart;
   const decimalPart = string.substring(indexOfDot + 1, indexOfDot + 1 + decimals);
-  return intPart + "." + decimalPart;
+  return leading0s(`${intPart}.${decimalPart}`);
 }
 
 /**
