@@ -15,6 +15,7 @@ export default class IncognitoCli {
   static incognitoCli = binaryWrapper("incognito-cli");
   static validatorKeyRegex = /[a-z0-9A-Z]{49,51}/;
   static validatorPublicKeyRegex = /[a-z0-9A-Z]{180,181}/;
+  static paymentAddressRegex = /[a-z0-9A-Z]{148}/;
 
   constructor(privateKey?: string) {
     this.privateKey = privateKey;
@@ -49,6 +50,10 @@ export default class IncognitoCli {
 
   static isValidatorPublicKey(key: string) {
     return IncognitoCli.validatorPublicKeyRegex.test(key);
+  }
+
+  static isPaymentAddress(key: string) {
+    return IncognitoCli.paymentAddressRegex.test(key);
   }
 }
 
