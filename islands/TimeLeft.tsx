@@ -11,12 +11,16 @@ interface TimeLeftProps {
 
 export default function TimeLeft({ date }: TimeLeftProps) {
   const time = useSignal<string>(rangeMsToTimeDescription(date));
+  const interval = useSignal<number | null>(null);
 
-  setTimeout(() => {
-    if (date <= Date.now()) {
-      time.value = "Expired. Reload to retry";
-    } else time.value = rangeMsToTimeDescription(new Date(date));
-  }, 1000);
+  if (interval.value === null)
+    interval.value = setInterval(() => {
+      if (date <= Date.now()) {
+        time.value = "Expired. Reload to retry";
+        // clear the interval without clearing the signal, so that it doesn't get reinitialized
+        clearInterval(interval.value!);
+      } else time.value = rangeMsToTimeDescription(new Date(date));
+    }, 1000);
 
   return <>{time.value}</>;
 }
