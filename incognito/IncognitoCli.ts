@@ -13,6 +13,8 @@ export default class IncognitoCli {
 
   static PRV_ID = PRV_ID;
   static incognitoCli = binaryWrapper("incognito-cli");
+  static validatorKeyRegex = /[a-z0-9A-Z]{49,51}/;
+  static validatorPublicKeyRegex = /[a-z0-9A-Z]{180,181}/;
 
   constructor(privateKey?: string) {
     this.privateKey = privateKey;
@@ -42,11 +44,11 @@ export default class IncognitoCli {
   declare keyInfo: OmitThisParameter<typeof keyInfo>;
 
   static isValidatorKey(key: string) {
-    return /[a-z0-9A-Z]{49,51}/.test(key);
+    return IncognitoCli.validatorKeyRegex.test(key);
   }
 
   static isValidatorPublicKey(key: string) {
-    return /[a-z0-9A-Z]{180,181}/.test(key);
+    return IncognitoCli.validatorPublicKeyRegex.test(key);
   }
 }
 
