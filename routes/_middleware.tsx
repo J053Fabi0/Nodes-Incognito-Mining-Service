@@ -29,6 +29,7 @@ export const { handler }: Middleware<State> = {
       ctx.state.userId = ctx.state.session.get("userId");
       ctx.state.commandResponse = ctx.state.session.get("commandResponse");
       ctx.state.supplanting = Boolean(ctx.state.session.get("supplanting"));
+      ctx.state.prvPrice = ctx.state.session.get("prvPrice");
       return ctx.next();
     },
 

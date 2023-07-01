@@ -18,6 +18,7 @@ import * as $12 from "./routes/signin.tsx";
 import * as $13 from "./routes/signout.tsx";
 import * as $$0 from "./islands/LocaleDate.tsx";
 import * as $$1 from "./islands/RelativeDate.tsx";
+import * as $$2 from "./islands/TimeLeft.tsx";
 
 const manifest = {
   routes: {
@@ -39,6 +40,7 @@ const manifest = {
   islands: {
     "./islands/LocaleDate.tsx": $$0,
     "./islands/RelativeDate.tsx": $$1,
+    "./islands/TimeLeft.tsx": $$2,
   },
   baseUrl: import.meta.url,
 };

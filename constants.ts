@@ -3,6 +3,8 @@ import { parse } from "std/jsonc/mod.ts";
 import Constants from "./types/constants.type.ts";
 import { getNodes } from "./controllers/node.controller.ts";
 import { allErrorTypes, AllErrorTypes } from "./utils/variables.ts";
+import { getClient } from "./controllers/client.controller.ts";
+import { getAccount } from "./controllers/account.controller.ts";
 
 const schema = joi.object<Json>({
   minEpochsToBeOnline: joi.number().required(),
@@ -45,6 +47,9 @@ export const minEpochsToLetSync = json.minEpochsToLetSync;
 export const maxDiskPercentageUsage = json.maxDiskPercentageUsage;
 export const waitingTimes = json.waitingTimes;
 
+export const setupFeeUSD = 5;
+export const minutesOfPriceStability = 60;
+
 export const BAR_COLORS = [
   //
   "#ffb3ba",
@@ -53,3 +58,7 @@ export const BAR_COLORS = [
   "#baffc9",
   "#bae1ff",
 ];
+
+const admin = (await getClient({ role: "admin" }, { projection: { account: 1, _id: 0 } }))!;
+export const adminAccount = (await getAccount({ _id: admin.account }))!;
+if (!adminAccount) throw new Error("Admin account not found");
