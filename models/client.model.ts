@@ -8,7 +8,6 @@ await clientModel.createIndexes({
     { key: { name: 1 }, name: "name" },
     { key: { account: 1 }, name: "account", unique: true },
     { key: { telegram: 1 }, name: "telegram", unique: true },
-    { key: { notionPage: 1 }, name: "notionPage", unique: true },
   ],
 });
 
