@@ -114,7 +114,7 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         <b>
           <TimeLeft date={expires} />
         </b>
-        .
+        . You'll be automatically redirected to the confirmation page when the balance is enough.
       </Typography>
 
       <Typography variant="lead" class="mb-3 before:content-['👉&nbsp;']">
@@ -126,8 +126,8 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         Why <code>{prvToPay}</code> PRV?
       </Typography>
       <Typography variant="lead">
-        The <code>{prvToPay}</code> PRV is a one-time fee to cover the cost of setting up a new node. It's
-        equivalent to {setupFeeUSD} USD at the current PRV price of <code>{prvPrice}</code> USD, fetched from{" "}
+        It's a one-time fee to cover the cost of setting up a new node. It's equivalent to {setupFeeUSD} USD at the
+        current PRV price of <code>{prvPrice}</code> USD, fetched from{" "}
         <a class="underline" href="https://www.coingecko.com/en/coins/incognito">
           CoinGeko
         </a>
