@@ -1,6 +1,10 @@
 import Typography, { TypographyProps, getTypographyClass } from "../Typography.tsx";
 
-export default function AfterYouPay(props: Omit<TypographyProps, "variant">) {
+interface AfterYouPayProps extends Omit<TypographyProps, "variant"> {
+  confirming?: boolean;
+}
+
+export default function AfterYouPay({ confirming, ...props }: AfterYouPayProps) {
   return (
     <>
       <Typography variant="h3" {...props}>
@@ -9,8 +13,8 @@ export default function AfterYouPay(props: Omit<TypographyProps, "variant">) {
 
       <ol class={`list-decimal list-inside mt-2 ${getTypographyClass("lead")} flex gap-2 flex-col`}>
         <li>
-          In a few minutes we'll give you a URL which you'll add to your Incognito app under More {">"} Power {">"}{" "}
-          Add Node Virtual.
+          {confirming ? "In a few minutes we'll" : "We'll"} give you a URL which you'll add to your Incognito app
+          under More {">"} Power {">"} Add Node Virtual.
         </li>
 
         <li>

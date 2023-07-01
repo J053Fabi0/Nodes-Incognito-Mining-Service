@@ -135,7 +135,7 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
       </table>
 
       {/* After you pay */}
-      <AfterYouPay class="mt-5" />
+      <AfterYouPay class="mt-5" confirming />
 
       <Typography variant="h3" class="mt-5">
         Node account data
