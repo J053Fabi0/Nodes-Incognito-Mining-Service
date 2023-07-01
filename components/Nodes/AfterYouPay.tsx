@@ -7,7 +7,7 @@ export default function AfterYouPay(props: Omit<TypographyProps, "variant">) {
         After you pay
       </Typography>
 
-      <ol class={`list-decimal list-inside mt-2 ${getTypographyClass("lead")}`}>
+      <ol class={`list-decimal list-inside mt-2 ${getTypographyClass("lead")} flex gap-2 flex-col`}>
         <li>
           In a few minutes we'll give you a URL which you'll add to your Incognito app under More {">"} Power {">"}{" "}
           Add Node Virtual.

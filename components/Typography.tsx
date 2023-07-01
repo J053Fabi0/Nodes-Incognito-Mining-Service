@@ -1,7 +1,7 @@
 import { JSX } from "preact";
 
 const commonStyles = "font-sans antialiased";
-const headersCommonStyles = "font-semibold tracking-normal leading-tight";
+const headersCommonStyles = "font-semibold tracking-normal";
 
 const textStyles = {
   h1: `${headersCommonStyles} text-5xl leading-tight`,

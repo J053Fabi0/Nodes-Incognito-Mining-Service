@@ -20,7 +20,7 @@ const styles = {
   th: "py-2 px-3 text-right",
   td: "py-2 px-3 text-left",
   label: `whitespace-nowrap flex items-center gap-2 ${getTypographyClass("p")}`,
-  ol: `list-decimal list-inside mt-2 ${getTypographyClass("lead")}`,
+  ol: `list-decimal list-inside mt-2 ${getTypographyClass("lead")} flex gap-2 flex-col`,
 };
 
 dayjs.extend(utc);
