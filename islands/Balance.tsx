@@ -20,7 +20,6 @@ export default function Balance({ initialBalance = 0, websiteUrl, goal, redirect
   const interval = useSignal<number | null>(null);
   // Balance in decimal format
   const balance = useSignal<number>(initialBalance / 1e9);
-  checkGoal(goal, initialBalance, redirectTo);
 
   if (interval.value === null)
     interval.value = setInterval(async () => {
