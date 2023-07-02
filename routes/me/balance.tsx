@@ -38,7 +38,6 @@ async function getProjectedAccount(id: ObjectId) {
     { _id: id },
     { projection: { balance: 1, paymentAddress: 1, privateKey: 1, _id: 0 } }
   ))!;
-
   return {
     ...account,
     privateKey: await cryptr.decrypt(account.privateKey),
@@ -48,19 +47,14 @@ async function getProjectedAccount(id: ObjectId) {
 export const handler: Handlers<BalanceProps, State> = {
   async GET(_, ctx) {
     const account = await getProjectedAccount(ctx.state.user!.account);
-
-    const base64Image = await qrcode(account.paymentAddress, { size: 300, errorCorrectLevel: "L" });
-
-    const errors = ctx.state.session.flash("errors") as ZodIssue[] | undefined;
-
     return ctx.render({
-      errors,
       ...account,
-      paymentAddressImage: base64Image,
+      errors: ctx.state.session.flash("errors"),
       txHash: ctx.state.session.flash("txHash"),
       sendingError: ctx.state.session.flash("sendingError"),
       withdrawAmount: ctx.state.session.flash("withdrawAmount"),
       withdrawPaymentAddress: ctx.state.session.flash("withdrawPaymentAddress"),
+      paymentAddressImage: await qrcode(account.paymentAddress, { size: 300, errorCorrectLevel: "L" }),
     });
   },
 
