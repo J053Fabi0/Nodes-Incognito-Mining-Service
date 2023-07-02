@@ -103,7 +103,11 @@ export const handler: Handlers<BalanceProps, State> = {
 
     if (txHash) {
       ctx.state.session.flash("txHash", txHash);
-      updateAccount(account.privateKey, ctx.state.user!.account, account.balance).catch(handleError);
+
+      updateAccount(account.privateKey, ctx.state.user!.account, account.balance)
+        .catch(handleError)
+        .finally(() => ctx.state.session.set("working", 0));
+
       await changeAccount(
         { _id: new ObjectId(ctx.state.user!.account) },
         { $set: { balance: account.balance - (amountInt + incognitoFee * 1e9) } }
