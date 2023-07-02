@@ -46,7 +46,10 @@ export default class IncognitoCli {
   /** Print all related-keys of a private key. */
   declare keyInfo: OmitThisParameter<typeof keyInfo>;
 
-  /** This command sends an amount of PRV or token from one wallet to another wallet. By default, it used 100 nano PRVs to pay the transaction fee. */
+  /**
+   * This command sends an amount of PRV or token from one wallet to another wallet. By default, it used 100 nano PRVs to pay the transaction fee.
+   * @returns The transaction hash.
+   */
   declare send: OmitThisParameter<typeof send>;
 
   static isValidatorKey(key: string) {

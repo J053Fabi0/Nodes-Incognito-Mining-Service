@@ -17,7 +17,10 @@ export default async function send(
     ...["--version", "2"],
   ];
 
-  const a = await this.incognitoCli(args);
+  const a: string = await this.incognitoCli(args);
 
-  return a;
+  // remove the first line of the string and parse to JSON
+  const lines = JSON.parse(a.split("\n").slice(1).join("\n")) as { TxHash: string };
+
+  return lines.TxHash;
 }
