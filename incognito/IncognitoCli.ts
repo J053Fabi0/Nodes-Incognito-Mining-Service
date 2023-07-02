@@ -1,3 +1,4 @@
+import send from "./account/send.ts";
 import keyInfo from "./account/keyInfo.ts";
 import balanceAccount from "./account/balance.ts";
 import generateAccount from "./account/generate.ts";
@@ -45,6 +46,9 @@ export default class IncognitoCli {
   /** Print all related-keys of a private key. */
   declare keyInfo: OmitThisParameter<typeof keyInfo>;
 
+  /** This command sends an amount of PRV or token from one wallet to another wallet. By default, it used 100 nano PRVs to pay the transaction fee. */
+  declare send: OmitThisParameter<typeof send>;
+
   static isValidatorKey(key: string) {
     return IncognitoCli.validatorKeyRegex.test(key);
   }
@@ -62,3 +66,4 @@ IncognitoCli.prototype.balanceAccount = balanceAccount;
 IncognitoCli.prototype.generateAccount = generateAccount;
 IncognitoCli.prototype.submitKeyAccount = submitKeyAccount;
 IncognitoCli.prototype.keyInfo = keyInfo;
+IncognitoCli.prototype.send = send;
