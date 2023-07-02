@@ -1,6 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 export type Methods = "push" | "pop" | "unshift" | "shift" | "splice" | "length";
 
+export type EventedArrayWithoutHandler<Type = any> = Omit<EventedArray<Type>, Methods>;
+
 /** Handler for EventedArray */
 export type Handler<Type = any> = ({}: {
   /** The items added, if aplicable */
@@ -8,7 +10,7 @@ export type Handler<Type = any> = ({}: {
   /** The items removed, if aplicable */
   removed: Type[] | null;
   /** The array itself */
-  array: Omit<EventedArray<Type>, Methods>;
+  array: EventedArrayWithoutHandler<Type>;
   method: Methods;
 }) => void;
 
