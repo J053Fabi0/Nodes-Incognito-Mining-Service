@@ -110,25 +110,27 @@ export default function Balance({ data }: PageProps<BalanceProps>) {
         This address is unique to your account and will never change. You can save it for future use.
       </Typography>
 
-      <hr class="my-5" />
-
-      <Typography variant="h4" class="mb-1">
-        Withdraw
-      </Typography>
-      <Typography variant="p">
-        You can withdraw your balance to any Incognito wallet. The transaction fee is <code>{incognitoFee}</code>{" "}
-        PRV.
-      </Typography>
-
       {balance <= incognitoFee * 1e9 ? null : (
-        <Withdraw
-          balance={balance}
-          defaultAmount={withdrawAmount}
-          defautlPaymentAddress={withdrawPaymentAddress}
-          incognitoFee={incognitoFee}
-          amountError={error(errors, "amount")?.message}
-          paymentAddressPattern={IncognitoCli.paymentAddressRegex.source}
-        />
+        <>
+          <hr class="my-5" />
+
+          <Typography variant="h4" class="mb-1">
+            Withdraw
+          </Typography>
+          <Typography variant="p">
+            You can withdraw your balance to any Incognito wallet. The transaction fee is{" "}
+            <code>{incognitoFee}</code> PRV.
+          </Typography>
+
+          <Withdraw
+            balance={balance}
+            defaultAmount={withdrawAmount}
+            defautlPaymentAddress={withdrawPaymentAddress}
+            incognitoFee={incognitoFee}
+            amountError={error(errors, "amount")?.message}
+            paymentAddressPattern={IncognitoCli.paymentAddressRegex.source}
+          />
+        </>
       )}
     </>
   );
