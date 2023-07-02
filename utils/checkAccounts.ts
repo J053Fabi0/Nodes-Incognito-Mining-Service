@@ -5,7 +5,7 @@ import State from "../types/state.type.ts";
 import handleError from "./handleError.ts";
 import IncognitoCli from "../incognito/IncognitoCli.ts";
 import { changeAccount } from "../controllers/account.controller.ts";
-import { aggregateClient } from "../controllers/client.controller.ts";
+import { aggregateClient, getClients } from "../controllers/client.controller.ts";
 
 type Account = Required<Pick<State, "prvPrice">> & {
   userId: string;
@@ -22,6 +22,11 @@ async function getAccounts<
   IgnorePrvprice extends boolean,
   Return extends IgnorePrvprice extends false ? Account : Omit<Account, "prvPrice"> & { prvPrice: undefined }
 >(ignorePrvPrice: IgnorePrvprice): Promise<Return[]> {
+  if (ignorePrvPrice) {
+    const accounts = await getClients({}, { projection: { _id: 1 } });
+    return accounts.map(({ _id }) => ({ userId: _id.toString() } as Return));
+  }
+
   const accounts: Return[] = [];
 
   // get all the keys
