@@ -27,4 +27,6 @@ export default interface AccountTransaction extends CommonCollection {
   status: AccountTransactionStatus;
   /** The first date will be the first retry, not the first try. To get the first try, read `createdAt` */
   retries: Date[];
+  errorDetails: string | null;
+  details: string | null;
 }

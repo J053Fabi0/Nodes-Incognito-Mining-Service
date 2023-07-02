@@ -11,7 +11,7 @@ import { aggregateClient } from "../../controllers/client.controller.ts";
 
 const styles = {
   td: "border border-slate-300 py-2 px-3 overflow-x-auto",
-};
+} as const;
 
 interface AccountsProps {
   privateKeys: {

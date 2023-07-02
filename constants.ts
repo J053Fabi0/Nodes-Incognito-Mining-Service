@@ -49,6 +49,7 @@ export const maxDiskPercentageUsage = json.maxDiskPercentageUsage;
 export const waitingTimes = json.waitingTimes;
 /** Decimal format */
 export const incognitoFee = json.incognitoFee;
+export const incognitoFeeInt = json.incognitoFee * 1e9;
 
 export const setupFeeUSD = 5;
 export const minutesOfPriceStability = 60;
