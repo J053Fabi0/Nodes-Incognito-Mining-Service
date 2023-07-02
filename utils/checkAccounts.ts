@@ -95,7 +95,7 @@ export default async function checkAccounts(checkAll: boolean) {
     ])) as unknown as [{ account: { privateKey: string; balance: number; _id: ObjectId } }];
 
     const privateKey = await cryptr.decrypt(account.privateKey).catch((e) => {
-      console.log(`Error decrypting the private key of the user ${userId}`, account);
+      console.error(`Error decrypting the private key of the user ${userId}`, account);
       handleError(e);
       return null;
     });
