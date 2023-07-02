@@ -3,6 +3,8 @@ import { IS_PRODUCTION } from "../env.ts";
 export const adminURLs = [
   //
   "/credentials",
+  "/admin",
+  "/admin/*",
 ].map((pathname) => new URLPattern({ pathname }));
 
 export const allowedForDevelopment = [

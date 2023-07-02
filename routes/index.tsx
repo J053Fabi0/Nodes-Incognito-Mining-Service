@@ -19,6 +19,7 @@ const styles = {
 interface HomeProps {
   data: number[];
   months: string[];
+  isAdmin: boolean;
   loggedIn: boolean;
   nodesCount: number;
   earningsCount: number;
@@ -35,6 +36,7 @@ export const handler: Handlers<HomeProps, State> = {
       nodesCount,
       earningsCount,
       months: monthsLabels,
+      isAdmin: ctx.state.isAdmin,
       loggedIn: Boolean(ctx.state.user),
       data: [...averageTotalEarningsByMonth.values()],
     });

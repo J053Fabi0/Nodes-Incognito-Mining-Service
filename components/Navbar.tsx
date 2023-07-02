@@ -6,6 +6,7 @@ interface Page {
   href: string;
   onlyLoggedIn?: true;
   onlyLoggedOut?: true;
+  onlyAdmin?: true;
 }
 
 const pages: Page[] = [
@@ -24,9 +25,14 @@ const pages: Page[] = [
     href: "/me",
     onlyLoggedIn: true,
   },
+  {
+    name: "Admin",
+    href: "/admin",
+    onlyAdmin: true,
+  },
 ];
 
-export default function Navbar({ loggedIn = false }) {
+export default function Navbar({ loggedIn = false, isAdmin = false }) {
   const signInOrOut = loggedIn ? (
     <a href="/signout">
       <Button color="red">
@@ -45,6 +51,7 @@ export default function Navbar({ loggedIn = false }) {
     <ul class="items-center gap-3 lg:gap-6 flex flex-col lg:flex-row">
       {pages
         .filter((p) => {
+          if (p.onlyAdmin) return isAdmin;
           if (p.onlyLoggedIn) return loggedIn;
           if (p.onlyLoggedOut) return !loggedIn;
           return true;

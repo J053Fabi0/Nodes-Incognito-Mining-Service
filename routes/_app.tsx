@@ -11,6 +11,7 @@ import { BsTelegram, BsFillCircleFill } from "react-icons/bs";
 
 export default function App({ Component, data, url }: AppProps) {
   const loggedIn = (data || {}).loggedIn ?? (isAdminPage(url.href) || isLoggedInPage(url.href));
+  const isAdmin = (data || {}).isAdmin ?? isAdminPage(url.href);
 
   return (
     <>
@@ -20,7 +21,7 @@ export default function App({ Component, data, url }: AppProps) {
       </Head>
 
       <body class="min-h-screen flex flex-col">
-        <Navbar loggedIn={loggedIn} />
+        <Navbar loggedIn={loggedIn} isAdmin={isAdmin} />
 
         <div class="px-4 pt-4 mx-auto w-full max-w-screen-lg flex-1">
           <Component />
