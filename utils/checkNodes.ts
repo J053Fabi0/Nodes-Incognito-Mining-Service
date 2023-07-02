@@ -84,6 +84,8 @@ export default async function checkNodes() {
       nodeStatus.syncState !== "LATEST" &&
         // should be online
         !shouldBeOffline &&
+        // its role is different than NOT_STAKED
+        nodeStatus.role !== "NOT_STAKED" &&
         // and it's online, so don't report it if it's offline
         nodeStatus.status === "ONLINE",
       lastErrorTime,
