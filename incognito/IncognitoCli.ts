@@ -1,6 +1,7 @@
 import keyInfo from "./account/keyInfo.ts";
 import balanceAccount from "./account/balance.ts";
 import generateAccount from "./account/generate.ts";
+import { join, fromFileUrl } from "std/path/mod.ts";
 import submitKeyAccount from "./account/submitKey.ts";
 import { binaryWrapper } from "duplicatedFilesCleanerIncognito";
 
@@ -9,10 +10,10 @@ const PRV_ID = "0000000000000000000000000000000000000000000000000000000000000004
 export default class IncognitoCli {
   PRV_ID = PRV_ID;
   privateKey?: string;
-  incognitoCli = binaryWrapper("incognito-cli");
+  incognitoCli = binaryWrapper(join(fromFileUrl(import.meta.url), "..", "incognito-cli"));
 
   static PRV_ID = PRV_ID;
-  static incognitoCli = binaryWrapper("incognito-cli");
+  static incognitoCli = binaryWrapper(join(fromFileUrl(import.meta.url), "..", "incognito-cli"));
   static validatorKeyRegex = /[a-z0-9A-Z]{49,51}/;
   static validatorPublicKeyRegex = /[a-z0-9A-Z]{180,181}/;
   static paymentAddressRegex = /[a-z0-9A-Z]{148}/;
