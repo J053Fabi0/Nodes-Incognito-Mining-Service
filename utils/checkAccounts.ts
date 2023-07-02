@@ -4,6 +4,7 @@ import { redis } from "../initDatabase.ts";
 import State from "../types/state.type.ts";
 import handleError from "./handleError.ts";
 import IncognitoCli from "../incognito/IncognitoCli.ts";
+import AccountDB from "../types/collections/account.type.ts";
 import { changeAccount } from "../controllers/account.controller.ts";
 import { aggregateClient, getClients } from "../controllers/client.controller.ts";
 
@@ -69,8 +70,9 @@ async function getAccounts<
 
 /**
  * @param checkAll Check regardless of the expiry date
+ * @param privateKey Check only the account with the given private key
  */
-export default async function checkAccounts(checkAll: boolean) {
+export default async function checkAccounts(checkAll: boolean, privateKey?: string) {
   const accounts = await getAccounts(checkAll);
   const accountsViewed: string[] = [];
 
@@ -106,16 +108,27 @@ export default async function checkAccounts(checkAll: boolean) {
     });
     if (!privateKey) continue;
 
-    // get the balance
-    const incognito = new IncognitoCli(privateKey);
-    const balance = await incognito.balanceAccount({ decimalFormat: false }).catch((e) => {
+    await updateAccount(privateKey, account._id, account.balance).catch((e) => {
       handleError(e);
       return 0;
     });
 
-    // update the balance if it's different
-    if (balance !== account.balance) await changeAccount({ _id: account._id }, { $set: { balance } });
-
     accountsViewed.push(userId);
   }
+}
+
+/**
+ *
+ * @param privateKey Decrypted private key
+ * @param accountId The id of the account to update, from the accounts collection
+ * @param currentBalance If given, the balance will be updated only if it's different
+ */
+export async function updateAccount(privateKey: string, accountId: string | ObjectId, currentBalance?: number) {
+  // get the balance
+  const incognito = new IncognitoCli(privateKey);
+  const balance = await incognito.balanceAccount({ decimalFormat: false });
+
+  // update the balance if it's different
+  if (balance === undefined || balance !== currentBalance)
+    await changeAccount({ _id: new ObjectId(accountId) }, { $set: { balance } });
 }
