@@ -1,14 +1,18 @@
 import {
   changeAccountTransaction,
   createAccountTransaction,
+  getAccountTransactions,
 } from "../controllers/accountTransaction.controller.ts";
 import { sleep } from "sleep";
 import { ObjectId } from "mongo/mod.ts";
+import { IS_PRODUCTION } from "../env.ts";
 import IncognitoCli from "./IncognitoCli.ts";
+import cryptr from "../utils/cryptrInstance.ts";
 import handleError from "../utils/handleError.ts";
 import { incognitoFeeInt } from "../constants.ts";
 import EventedArray from "../utils/EventedArray.ts";
 import { moveDecimalDot } from "../utils/numbersString.ts";
+import { getClient } from "../controllers/client.controller.ts";
 import { changeAccount, getAccount } from "../controllers/account.controller.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
@@ -150,9 +154,11 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
                   let i = 0;
                   do {
                     try {
-                      txHash = await cli.send(transaction.sendTo, transaction.amount);
-                      // temp testing
-                      // txHash = await new Promise((r) => setTimeout(() => r("txHash_" + Math.random()), 60_000));
+                      if (IS_PRODUCTION) {
+                        txHash = await cli.send(transaction.sendTo, transaction.amount);
+                      } else {
+                        txHash = await new Promise((r) => setTimeout(() => r("txHash_" + Math.random()), 30_000));
+                      }
                     } catch (e) {
                       handleError(e);
                       transaction.retries.push(Date.now());
@@ -205,3 +211,56 @@ export default function submitTransaction(
 }
 
 // to do: update redis an get redis when the server starts
+
+// Fetch all the pending transactions from the DB and add them to the array
+{
+  const pendingDBTransactions = await getAccountTransactions(
+    { status: AccountTransactionStatus.PENDING },
+    {
+      // sort by createdAt, the oldest first
+      sort: { createdAt: 1 },
+      projection: { type: 1, account: 1, fee: 1, amount: 1, sendTo: 1, createdAt: 1, details: 1 },
+    }
+  );
+
+  for (const pendingDBTransaction of pendingDBTransactions) {
+    if (pendingDBTransaction.type === AccountTransactionType.DEPOSIT) continue;
+
+    const account = await getAccount(
+      { _id: pendingDBTransaction.account },
+      { projection: { _id: 1, balance: 1, privateKey: 1 } }
+    );
+    if (!account) {
+      handleError(
+        new Error(
+          `Account ${pendingDBTransaction.account} not found for pending transaction ${pendingDBTransaction._id}`
+        )
+      );
+      continue;
+    }
+
+    const client = await getClient({ account: account._id }, { projection: { _id: 1 } });
+    if (!client) {
+      handleError(
+        new Error(
+          `Client for account ${pendingDBTransaction.account} not found for pending transaction ${pendingDBTransaction._id}`
+        )
+      );
+      continue;
+    }
+
+    submitTransaction({
+      userId: client._id,
+      balance: account.balance,
+      fee: pendingDBTransaction.fee,
+      type: pendingDBTransaction.type,
+      amount: pendingDBTransaction.amount,
+      sendTo: pendingDBTransaction.sendTo!,
+      account: pendingDBTransaction.account,
+      transactionId: pendingDBTransaction._id,
+      createdAt: +pendingDBTransaction.createdAt,
+      details: pendingDBTransaction.details ?? undefined,
+      privateKey: await cryptr.decrypt(account.privateKey),
+    });
+  }
+}
