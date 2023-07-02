@@ -76,7 +76,6 @@ export default function Accounts({ data }: PageProps<AccountsProps>) {
               <th class="border border-slate-400 px-4 py-2">Name</th>
               <th class="border border-slate-400 px-4 py-2">Balance</th>
               <th class="border border-slate-400 px-4 py-2">PrivateKey</th>
-              <th class="border border-slate-400 px-4 py-2">QR</th>
             </tr>
           </thead>
 
@@ -87,13 +86,17 @@ export default function Accounts({ data }: PageProps<AccountsProps>) {
                 <tr class="h-[200px]">
                   <td class={styles.td}>{name}</td>
                   <td class={styles.td}>
-                    <Typography variant="h3">
+                    <Typography variant="h3" class="text-center">
                       <code>{toFixedS(balance / 1e9, 9)}</code>
+                      <hr class="my-2" />
+                      <code>{balance}</code>
                     </Typography>
                   </td>
-                  <td class={styles.td + " overflow-x-auto max-w-[200px]"}>{address}</td>
-                  <td class={styles.td + " min-w-[200px]"}>
-                    <img src={image} alt="QR" />
+                  <td class={styles.td + " max-w-[200px]"}>
+                    <div class="overflow-x-auto pb-2">{address}</div>
+                    <div class="flex items-center flex-col">
+                      <img src={image} height={200} width={200} alt="QR" />
+                    </div>
                   </td>
                 </tr>
               ))}
