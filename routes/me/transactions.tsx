@@ -108,7 +108,7 @@ export default function Transactions({ data }: PageProps<TransactionsProps>) {
                     {capitalize(type)}
                   </div>
                 </td>
-                <td class={styles.td + " text-center"}>
+                <td class={styles.td + " text-center max-w-[180px]"}>
                   <TransactionStatusPill status={AccountTransactionStatus.PENDING} />
                   {details && (
                     <>
@@ -133,7 +133,7 @@ export default function Transactions({ data }: PageProps<TransactionsProps>) {
                     {capitalize(type)}
                   </div>
                 </td>
-                <td class={styles.td + " text-center"}>
+                <td class={styles.td + " text-center max-w-[180px]"}>
                   <TransactionStatusPill status={status} />
                   {(errorDetails || details) && (
                     <>
@@ -163,6 +163,6 @@ function getTypeIcon(type: AccountTransactionType, size = 20): JSX.Element {
     case AccountTransactionType.EXPENSE:
       return <GiMoneyStack color="green" size={size} />;
     default:
-      return undefined as never;
+      return null as never;
   }
 }
