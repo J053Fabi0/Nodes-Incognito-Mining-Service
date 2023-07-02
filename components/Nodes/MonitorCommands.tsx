@@ -18,7 +18,6 @@ export default function MonitorCommands({ route, commandResponse }: MonitorComma
         {commands.resolved
           .toReversed()
           .slice(0, 5)
-          .toReversed()
           .map((m) => (
             <div class="flex gap-3 mt-1 mb-5">
               <Typography variant="lead">
