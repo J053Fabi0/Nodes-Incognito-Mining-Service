@@ -48,7 +48,7 @@ export default class IncognitoCli {
 
   /**
    * This command sends an amount of PRV or token from one wallet to another wallet. By default, it used 100 nano PRVs to pay the transaction fee.
-   * @returns The transaction hash.
+   * @returns The transaction hash or null if there was an error parsing the response, but the transaction may have been sent.
    */
   declare send: OmitThisParameter<typeof send>;
 
