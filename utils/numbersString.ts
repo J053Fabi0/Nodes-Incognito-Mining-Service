@@ -1,7 +1,8 @@
 /**
  * Given an integer in string format, fix its decimals.
+ * It removes useless 0s.
  */
-export function toFixedS(string: string | number | bigint, decimals: number) {
+export function toFixedS(string: string | number | bigint, decimals: number): string {
   string = string.toString();
   const indexOfDot = string.indexOf(".");
   if (indexOfDot === -1) return string.toString();
@@ -13,8 +14,9 @@ export function toFixedS(string: string | number | bigint, decimals: number) {
 
 /**
  * Move the "." decimal point of a number in string format. The position could be negative or positive.
+ * It removes useless 0s.
  */
-export function moveDecimalDot(string: string | number | bigint, positions: number) {
+export function moveDecimalDot(string: string | number | bigint, positions: number): string {
   string = string.toString();
   if (positions === 0) return string.toString();
   const indexOfDot = string.indexOf(".");
@@ -22,25 +24,26 @@ export function moveDecimalDot(string: string | number | bigint, positions: numb
   const decimalPart = indexOfDot === -1 ? "" : string.substring(indexOfDot + 1, string.length);
 
   if (positions > 0) {
-    return (
+    return leading0s(
       intPart +
-      decimalPart.substring(0, positions) +
-      (positions >= decimalPart.length ? "" : ".") +
-      decimalPart.substring(positions, decimalPart.length) +
-      (positions >= decimalPart.length ? "0".repeat(positions - decimalPart.length) : "")
+        decimalPart.substring(0, positions) +
+        (positions >= decimalPart.length ? "" : ".") +
+        decimalPart.substring(positions, decimalPart.length) +
+        (positions >= decimalPart.length ? "0".repeat(positions - decimalPart.length) : "")
     );
   } else {
-    return (
+    return leading0s(
       intPart.substring(0, intPart.length + positions) +
-      (intPart.length <= Math.abs(positions) ? `0.${"0".repeat(Math.abs(positions) - intPart.length)}` : ".") +
-      intPart.substring(intPart.length + positions, intPart.length) +
-      decimalPart
+        (intPart.length <= Math.abs(positions) ? `0.${"0".repeat(Math.abs(positions) - intPart.length)}` : ".") +
+        intPart.substring(intPart.length + positions, intPart.length) +
+        decimalPart
     );
   }
 }
 
 /**
  * Given a string with usless 0 after the decimal point, it removes them.
+ * It doesn't remove the decimal point if it's the last character.
  */
 export function leading0s(n: string) {
   n = n.toString();

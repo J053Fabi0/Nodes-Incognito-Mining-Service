@@ -12,7 +12,7 @@ const styles = {
 interface WidthdrawProps {
   balance: number;
   amountError?: string;
-  incognitoFee: number;
+  incognitoFeeInt: number;
   paymentAddressPattern: string;
   /** Decimal format */
   defaultAmount?: string;
@@ -22,20 +22,20 @@ interface WidthdrawProps {
 export default function Withdraw({
   balance,
   amountError,
-  incognitoFee,
   defaultAmount,
+  incognitoFeeInt,
   paymentAddressPattern,
   defautlPaymentAddress,
 }: WidthdrawProps) {
   const amountStr = useSignal<undefined | string>(defaultAmount);
-  const max = (balance - incognitoFee * 1e9) / 1e9;
+  const max = (balance - incognitoFeeInt) / 1e9;
 
   function handleChange(e: JSX.TargetedEvent<HTMLInputElement, Event>) {
     const value = e.currentTarget.valueAsNumber;
     amountStr.value = undefined; // reset the value to trigger the re-render
 
-    if (value > (balance - incognitoFee * 1e9) / 1e9) {
-      amountStr.value = (balance - incognitoFee * 1e9) / 1e9 + "";
+    if (value > (balance - incognitoFeeInt) / 1e9) {
+      amountStr.value = (balance - incognitoFeeInt) / 1e9 + "";
     } else if (value < 1e-9) {
       amountStr.value = "0.000000001";
     } else {

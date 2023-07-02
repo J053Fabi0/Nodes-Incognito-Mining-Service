@@ -1,24 +1,20 @@
 import { qrcode } from "qrcode";
-import dayjs from "dayjs/mod.ts";
-import utc from "dayjs/plugin/utc.ts";
 import { ObjectId } from "mongo/mod.ts";
 import { WEBSITE_URL } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
-import { incognitoFee } from "../../constants.ts";
 import Withdraw from "../../islands/Withdraw.tsx";
 import cryptr from "../../utils/cryptrInstance.ts";
-import handleError from "../../utils/handleError.ts";
 import BalanceIsland from "../../islands/Balance.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { toFixedS } from "../../utils/numbersString.ts";
 import Typography from "../../components/Typography.tsx";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
-import { updateAccount } from "../../utils/checkAccounts.ts";
-import { changeAccount, getAccount } from "../../controllers/account.controller.ts";
+import { incognitoFee, incognitoFeeInt } from "../../constants.ts";
+import { getAccount } from "../../controllers/account.controller.ts";
+import submitTransaction from "../../incognito/submitTransaction.ts";
 import { error, validateFormData, z, ZodIssue } from "fresh-validation";
-
-dayjs.extend(utc);
+import { AccountTransactionType } from "../../types/collections/accountTransaction.type.ts";
 
 interface BalanceProps {
   balance: number;
@@ -31,17 +27,15 @@ interface BalanceProps {
   withdrawPaymentAddress?: string;
 }
 
-const URL = `${WEBSITE_URL}/me/balance`;
+const THIS_URL = `${WEBSITE_URL}/me/balance`;
+const TRANSACTIONS_URL = `${WEBSITE_URL}/me/transactions`;
 
 async function getProjectedAccount(id: ObjectId) {
   const account = (await getAccount(
     { _id: id },
     { projection: { balance: 1, paymentAddress: 1, privateKey: 1, _id: 0 } }
   ))!;
-  return {
-    ...account,
-    privateKey: await cryptr.decrypt(account.privateKey),
-  };
+  return { ...account, privateKey: await cryptr.decrypt(account.privateKey) };
 }
 
 export const handler: Handlers<BalanceProps, State> = {
@@ -53,26 +47,22 @@ export const handler: Handlers<BalanceProps, State> = {
       txHash: ctx.state.session.flash("txHash"),
       sendingError: ctx.state.session.flash("sendingError"),
       withdrawAmount: ctx.state.session.flash("withdrawAmount"),
-      withdrawPaymentAddress: ctx.state.session.flash("withdrawPaymentAddress"),
+      withdrawPaymentAddress: ctx.state.session.get("withdrawPaymentAddress"),
       paymentAddressImage: await qrcode(account.paymentAddress, { size: 300, errorCorrectLevel: "L" }),
     });
   },
 
   async POST(req, ctx) {
     const account = await getProjectedAccount(ctx.state.user!.account);
-    if (account.balance === 0) return redirect(URL);
-
-    const working = ctx.state.session.get("working");
-    if (working && dayjs().utc().diff(working, "minutes") <= 10) return redirect(URL);
-
-    ctx.state.session.set("working", Date.now());
+    if (account.balance === 0) return redirect(THIS_URL);
 
     const form = await req.formData();
 
     ctx.state.session.flash("withdrawAmount", form.get("amount")?.toString());
-    ctx.state.session.flash("withdrawPaymentAddress", form.get("paymentAddress")?.toString());
+    ctx.state.session.set("withdrawPaymentAddress", form.get("paymentAddress")?.toString());
 
-    const max = (account.balance - incognitoFee * 1e9) / 1e9;
+    /** Decimal format */
+    const max = (account.balance - incognitoFeeInt) / 1e9;
 
     const { validatedData, errors } = await validateFormData(form, {
       paymentAddress: z.string().regex(IncognitoCli.paymentAddressRegex, "Invalid payment address"),
@@ -84,31 +74,22 @@ export const handler: Handlers<BalanceProps, State> = {
 
     if (errors) {
       ctx.state.session.flash("errors", errors);
-      return redirect(URL);
+      return redirect(THIS_URL);
     }
 
-    const amountInt = validatedData.amount * 1e9;
-    const incognitoCli = new IncognitoCli(account.privateKey);
-    const txHash = await incognitoCli.send(validatedData.paymentAddress, amountInt).catch((e) => {
-      handleError(e);
-      ctx.state.session.flash("sendingError", true);
-      return undefined;
+    // submit the transaction asynchronously
+    submitTransaction({
+      createdAt: Date.now(),
+      balance: account.balance,
+      userId: ctx.state.user!._id,
+      privateKey: account.privateKey,
+      account: ctx.state.user!.account,
+      amount: validatedData.amount * 1e9,
+      sendTo: validatedData.paymentAddress,
+      type: AccountTransactionType.WITHDRAWAL,
     });
 
-    if (txHash) {
-      ctx.state.session.flash("txHash", txHash);
-
-      updateAccount(account.privateKey, ctx.state.user!.account, account.balance)
-        .catch(handleError)
-        .finally(() => ctx.state.session.set("working", 0));
-
-      await changeAccount(
-        { _id: new ObjectId(ctx.state.user!.account) },
-        { $set: { balance: account.balance - (amountInt + incognitoFee * 1e9) } }
-      );
-    }
-
-    return redirect(URL);
+    return redirect(TRANSACTIONS_URL);
   },
 };
 
@@ -173,7 +154,7 @@ export default function Balance({ data }: PageProps<BalanceProps>) {
         </>
       )}
 
-      {balance <= incognitoFee * 1e9 ? null : (
+      {balance <= incognitoFeeInt ? null : (
         <>
           <hr class="my-5" />
 
@@ -182,13 +163,13 @@ export default function Balance({ data }: PageProps<BalanceProps>) {
           </Typography>
           <Typography variant="p">
             You can withdraw your balance to any Incognito wallet. The transaction fee is{" "}
-            <code>{incognitoFee}</code> PRV.
+            <code>{toFixedS(incognitoFee, 9)}</code> PRV.
           </Typography>
 
           <Withdraw
             balance={balance}
-            incognitoFee={incognitoFee}
             defaultAmount={withdrawAmount}
+            incognitoFeeInt={incognitoFeeInt}
             defautlPaymentAddress={withdrawPaymentAddress}
             amountError={error(errors, "amount")?.message}
             paymentAddressPattern={IncognitoCli.paymentAddressRegex.source}

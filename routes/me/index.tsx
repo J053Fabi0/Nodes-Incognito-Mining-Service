@@ -17,6 +17,12 @@ export default function Nodes() {
             My balance
           </a>
         </li>
+
+        <li class={styles.li}>
+          <a href="me/transactions" class="underline">
+            Deposits, withdrawals, and payments
+          </a>
+        </li>
       </ul>
     </>
   );
