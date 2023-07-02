@@ -4,6 +4,7 @@ export const loggedInURLs = [
   "/nodes/*",
   "/balance",
   "/me",
+  "/me/*",
 ].map((pathname) => new URLPattern({ pathname }));
 
 /**
