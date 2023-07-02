@@ -1,10 +1,13 @@
 import { qrcode } from "qrcode";
 import State from "../../types/state.type.ts";
-import { Handlers, PageProps } from "$fresh/server.ts";
-import Typography from "../../components/Typography.tsx";
-import { aggregateClient } from "../../controllers/client.controller.ts";
-import { toFixedS } from "../../utils/numbersString.ts";
+import redirect from "../../utils/redirect.ts";
+import Button from "../../components/Button.tsx";
 import cryptr from "../../utils/cryptrInstance.ts";
+import { Handlers, PageProps } from "$fresh/server.ts";
+import { toFixedS } from "../../utils/numbersString.ts";
+import Typography from "../../components/Typography.tsx";
+import checkAccounts from "../../utils/checkAccounts.ts";
+import { aggregateClient } from "../../controllers/client.controller.ts";
 
 const styles = {
   td: "border border-slate-300 py-2 px-3 overflow-x-auto",
@@ -58,6 +61,11 @@ export const handler: Handlers<AccountsProps, State> = {
 
     return ctx.render({ privateKeys });
   },
+
+  async POST(req) {
+    await checkAccounts(true);
+    return redirect(req.url);
+  },
 };
 
 export default function Accounts({ data }: PageProps<AccountsProps>) {
@@ -68,6 +76,12 @@ export default function Accounts({ data }: PageProps<AccountsProps>) {
       <Typography variant="h1" class="mt-3 mb-5">
         Accounts - <code>{total}</code> PRV
       </Typography>
+
+      <form method="POST">
+        <Button color="green" class="mb-5" type="submit">
+          <Typography variant="lead">Reload</Typography>
+        </Button>
+      </form>
 
       <div class="overflow-x-auto">
         <table class="table-auto border-collapse border border-slate-400 w-full max-w-full">
