@@ -20,6 +20,7 @@ import { getAccountTransactions } from "../../controllers/accountTransaction.con
 import { PendingTransaction, pendingTransactionsByAccount } from "../../incognito/submitTransaction.ts";
 
 interface TransactionsProps {
+  isAdmin: boolean;
   pendingTransactions: PendingTransaction[];
   /** Relative dates */
   relative: boolean;
@@ -64,13 +65,14 @@ export const handler: Handlers<TransactionsProps, State> = {
     return ctx.render({
       transactions,
       pendingTransactions,
+      isAdmin: ctx.state.isAdmin,
       relative: "relative" in params,
     });
   },
 };
 
 export default function Transactions({ data }: PageProps<TransactionsProps>) {
-  const { pendingTransactions, transactions, relative } = data;
+  const { pendingTransactions, transactions, relative, isAdmin } = data;
 
   return (
     <>
@@ -97,7 +99,7 @@ export default function Transactions({ data }: PageProps<TransactionsProps>) {
             </tr>
           </thead>
           <tbody>
-            {pendingTransactions.map(({ amount, type, createdAt, details }) => (
+            {pendingTransactions.map(({ amount, type, createdAt, details, transactionId }) => (
               <tr>
                 <td class={styles.td}>
                   <code>{moveDecimalDot(amount, -9)}</code>
@@ -110,6 +112,7 @@ export default function Transactions({ data }: PageProps<TransactionsProps>) {
                 </td>
                 <td class={styles.td + " text-center max-w-[180px]"}>
                   <TransactionStatusPill status={AccountTransactionStatus.PENDING} />
+                  {isAdmin && !transactionId && " redis"}
                   {details && (
                     <>
                       <hr class="my-1" />
