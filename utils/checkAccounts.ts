@@ -4,7 +4,6 @@ import { redis } from "../initDatabase.ts";
 import State from "../types/state.type.ts";
 import handleError from "./handleError.ts";
 import IncognitoCli from "../incognito/IncognitoCli.ts";
-import AccountDB from "../types/collections/account.type.ts";
 import { changeAccount } from "../controllers/account.controller.ts";
 import { aggregateClient, getClients } from "../controllers/client.controller.ts";
 
@@ -72,7 +71,7 @@ async function getAccounts<
  * @param checkAll Check regardless of the expiry date
  * @param privateKey Check only the account with the given private key
  */
-export default async function checkAccounts(checkAll: boolean, privateKey?: string) {
+export default async function checkAccounts(checkAll: boolean) {
   const accounts = await getAccounts(checkAll);
   const accountsViewed: string[] = [];
 
