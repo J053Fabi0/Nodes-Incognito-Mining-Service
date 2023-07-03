@@ -5,7 +5,7 @@ import { docker } from "../../utils/commands.ts";
  * Stops and removes a docker container. Removes also the data directory.
  */
 export default async function deleteDocker(dockerIndex: number) {
-  await docker(["stop", `inc_mainnet_${dockerIndex}`]);
-  await docker(["rm", `inc_mainnet_${dockerIndex}`]);
-  await Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true });
+  await docker(["stop", `inc_mainnet_${dockerIndex}`]).catch(() => {});
+  await docker(["rm", `inc_mainnet_${dockerIndex}`]).catch(() => {});
+  await Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }).catch(() => {});
 }
