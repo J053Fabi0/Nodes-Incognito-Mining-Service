@@ -6,7 +6,7 @@ import cryptr from "../../utils/cryptrInstance.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { toFixedS } from "../../utils/numbersString.ts";
 import Typography from "../../components/Typography.tsx";
-import checkAccounts from "../../utils/checkAccounts.ts";
+import checkAccounts, { Unit } from "../../utils/checkAccounts.ts";
 import { aggregateClient } from "../../controllers/client.controller.ts";
 
 const styles = {
@@ -63,7 +63,7 @@ export const handler: Handlers<AccountsProps, State> = {
   },
 
   async POST(req) {
-    await checkAccounts(true);
+    await checkAccounts(30, Unit.day);
     return redirect(req.url);
   },
 };

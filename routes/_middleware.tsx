@@ -4,6 +4,7 @@ import { redis } from "../initDatabase.ts";
 import redirect from "../utils/redirect.ts";
 import isAdminPage from "../utils/isAdminPage.tsx";
 import { redisSession } from "fresh-session/mod.ts";
+import LastAccess from "../types/lastAccess.type.ts";
 import { Middleware } from "$fresh/src/server/types.ts";
 import isLoggedInPage from "../utils/isLoggedInPage.tsx";
 import { getClient } from "../controllers/client.controller.ts";
@@ -45,6 +46,12 @@ export const { handler }: Middleware<State> = {
       } else {
         ctx.state.user = user;
         ctx.state.isAdmin = user.role === "admin" || Boolean(ctx.state.supplanting);
+
+        // save the last time the user accessed the website
+        redis.set(
+          `last_access_${ctx.state.userId}`,
+          JSON.stringify({ user: { account: `${user.account}` }, date: Date.now() } satisfies LastAccess)
+        );
       }
 
       return ctx.next();

@@ -1,107 +1,75 @@
+import dayjs from "dayjs/mod.ts";
 import { ObjectId } from "mongo/mod.ts";
 import cryptr from "./cryptrInstance.ts";
 import { redis } from "../initDatabase.ts";
-import State from "../types/state.type.ts";
 import handleError from "./handleError.ts";
 import IncognitoCli from "../incognito/IncognitoCli.ts";
-import { changeAccount } from "../controllers/account.controller.ts";
-import { aggregateClient, getClients } from "../controllers/client.controller.ts";
+import { isLastAccess } from "../types/lastAccess.type.ts";
+import { changeAccount, getAccount } from "../controllers/account.controller.ts";
 
-type Account = Required<Pick<State, "prvPrice">> & {
-  userId: string;
-};
+/**
+ * Returns all the accounts that are not expired
+ * @param maxMinutes The maximum number of minutes that the account can be offline
+ */
+async function getAccounts(maxMinutes: number): Promise<string[]> {
+  const accounts: string[] = [];
 
-function isStateValid(state: unknown, checkPrvPrice: boolean): state is Account {
-  if (!state || typeof state !== "object") return false;
-  if (!("userId" in state)) return false;
-  if (checkPrvPrice && !("prvPrice" in state)) return false;
-  return true;
-}
-
-async function getAccounts<
-  IgnorePrvprice extends boolean,
-  Return extends IgnorePrvprice extends false ? Account : Omit<Account, "prvPrice"> & { prvPrice: undefined }
->(ignorePrvPrice: IgnorePrvprice): Promise<Return[]> {
-  if (ignorePrvPrice) {
-    const accounts = await getClients({}, { projection: { _id: 1 } });
-    return accounts.map(({ _id }) => ({ userId: _id.toString() } as Return));
-  }
-
-  const accounts: Return[] = [];
-
-  // get all the keys
-  const keys = await redis.keys("session_*");
-
+  const keys = await redis.keys("last_access_*");
   for (const key of keys) {
-    const sessionStr = await redis.get(key);
-
-    // delete those keys that are empty
-    if (!sessionStr || sessionStr === '{"data":{},"_flash":{}}') {
+    const rawData = await redis.get(key);
+    if (!rawData) {
       await redis.del(key);
       continue;
     }
 
     try {
-      const possibleState: { data?: State } = JSON.parse(sessionStr);
+      const data = JSON.parse(rawData);
+      if (!isLastAccess(data)) throw new Error("Invalid data");
 
-      if (typeof possibleState !== "object" || !possibleState.data) {
-        // delete those keys that are not objects or do not have a data property
-        await redis.del(key);
-        continue;
-      }
+      const { date, user } = data;
 
-      // ignore those keys that are not valid
-      if (!isStateValid(possibleState.data, ignorePrvPrice)) continue;
+      const minutesSince = dayjs().diff(date, "minute");
 
-      accounts.push({
-        userId: possibleState.data.userId,
-        prvPrice: ignorePrvPrice ? undefined : possibleState.data.prvPrice,
-      } as Return);
+      if (minutesSince <= maxMinutes) accounts.push(user.account);
     } catch {
-      // delete those keys that are not valid JSON
+      // delete the key if it's not a valid JSON
       await redis.del(key);
-      continue;
     }
   }
 
   return accounts;
 }
 
+export enum Unit {
+  minute = 1,
+  hour = 60,
+  day = 60 * 24,
+}
+
 /**
- * @param checkAll Check regardless of the expiry date
- * @param privateKey Check only the account with the given private key
+ * @param max The maximum number of minutes that the account can be offline
  */
-export default async function checkAccounts(checkAll: boolean) {
-  const accounts = await getAccounts(checkAll);
+export default async function checkAccounts(maxUnit: number, unit: Unit = Unit.minute) {
+  const minutes = maxUnit * unit;
+
+  const accounts = await getAccounts(minutes);
   const accountsViewed: string[] = [];
 
-  for (const { userId, prvPrice } of accounts) {
-    // check if the expiry date has passed and we don't want to check all
-    if (!checkAll && prvPrice && prvPrice.expires < Date.now()) continue;
+  for (const accountId of accounts) {
     // check if the account has already been viewed, just in case
-    if (accountsViewed.includes(userId)) continue;
+    if (accountsViewed.includes(accountId)) continue;
 
-    // get the user's private key
-    const accountId = new ObjectId(userId);
-    const [{ account }] = (await aggregateClient([
-      { $match: { _id: accountId } },
-      // populate the user's account
-      {
-        $lookup: {
-          from: "accounts",
-          localField: "account",
-          foreignField: "_id",
-          as: "account",
-        },
-      },
-      // flatten the account array
-      { $unwind: "$account" },
-      // project the private key and the balance
-      { $project: { "account._id": 1, "account.privateKey": 1, "account.balance": 1 } },
-    ])) as unknown as [{ account: { privateKey: string; balance: number; _id: ObjectId } }];
+    const account = await getAccount(
+      { _id: new ObjectId(accountId) },
+      { projection: { privateKey: 1, balance: 1, _id: 1 } }
+    );
+    if (!account) {
+      accountsViewed.push(accountId);
+      continue;
+    }
 
     const privateKey = await cryptr.decrypt(account.privateKey).catch((e) => {
-      console.error(`Error decrypting the private key of the user ${userId}`, account);
+      console.error(`Error decrypting the private key of account ${accountId}`, account);
       handleError(e);
       return null;
     });
@@ -112,7 +80,7 @@ export default async function checkAccounts(checkAll: boolean) {
       return 0;
     });
 
-    accountsViewed.push(userId);
+    accountsViewed.push(accountId);
   }
 }
 
