@@ -1,5 +1,6 @@
 import { ObjectId } from "mongo/mod.ts";
 import handleError from "./handleError.ts";
+import { adminTelegram } from "../constants.ts";
 import getNodesStatus from "./getNodesStatus.ts";
 import getNodeEarnings from "./getNodeEarnings.ts";
 import sendMessage from "../telegram/sendMessage.ts";
@@ -25,7 +26,7 @@ export default async function checkEarnings() {
   const nodesStatus = await getNodesStatus();
 
   for (const nodeStatus of nodesStatus) {
-    const { _id, name, sendTo, number, validatorPublic, client } = nodes.find(
+    const { _id, sendTo, number, validatorPublic, client } = nodes.find(
       (n) => n.validatorPublic === nodeStatus.validatorPublic
     )!;
 
@@ -61,15 +62,18 @@ export default async function checkEarnings() {
       // Send messages to the destination users
       for (const sendToId of sendTo) {
         const { telegram } = findClientById(clients, sendToId);
-        if (telegram)
+        if (telegram) {
+          const isAdmin = telegram === adminTelegram;
           sendMessage(
-            `#${name} - <code>${earning / 1e9}</code>.\n` +
+            `Node <code>#${number}${isAdmin ? ` ${client}` : ""}</code> - ` +
+              `<code>${earning / 1e9}</code>.\n` +
               `Epoch: <code>${epoch}</code>.\n` +
               `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
             telegram,
             { parse_mode: "HTML" },
             "notificationsBot"
           );
+        }
       }
     }
   }

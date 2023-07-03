@@ -67,8 +67,9 @@ export const BAR_COLORS = [
   "#bae1ff",
 ] as const;
 
-const admin = (await getClient({ role: "admin" }, { projection: { account: 1 } }))!;
+const admin = (await getClient({ role: "admin" }, { projection: { account: 1, telegram: 1 } }))!;
 export const adminId = admin._id;
+export const adminTelegram = admin.telegram!;
 /** The Incognito Account, not the client data */
 export const adminAccount = (await getAccount({ _id: admin.account }))!;
 if (!adminAccount) throw new Error("Admin account not found");
