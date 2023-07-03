@@ -16,7 +16,7 @@ function findClientById(clients: Pick<Client, "_id" | "notionPage" | "telegram">
 
 export default async function checkEarnings() {
   const nodes = await getNodes(
-    {},
+    { inactive: false },
     { projection: { name: 1, sendTo: 1, number: 1, client: 1, validatorPublic: 1, _id: 1 } }
   );
   const clients = await getClients({}, { projection: { telegram: 1, notionPage: 1, _id: 1 } });
