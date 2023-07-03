@@ -1,6 +1,6 @@
-import { infuraURL } from "../constants.ts";
-import getLatestTag from "./getLatestTag.ts";
-import { docker } from "../utils/commands.ts ";
+import getLatestTag from "../getLatestTag.ts";
+import { infuraURL } from "../../constants.ts";
+import { docker } from "../../utils/commands.ts ";
 
 const nodePortDiff = 1099; // nodePort is 1099 more than rpcPort
 const dataDir = "/home/incognito/node_data";
