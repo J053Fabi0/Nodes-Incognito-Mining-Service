@@ -3,8 +3,8 @@ import { WEBSITE_URL } from "../../env.ts";
 import { systemctl } from "../../utils/commands.ts";
 
 const { hostname } = new URL(WEBSITE_URL);
-const sitesEnabled = "/etc/nginx/sites-enabled/";
-const sitesAvailable = "/etc/nginx/sites-available/";
+export const sitesEnabled = "/etc/nginx/sites-enabled/";
+export const sitesAvailable = "/etc/nginx/sites-available/";
 
 export interface CreateNginxConfigResponse {
   /** Subdomain name */

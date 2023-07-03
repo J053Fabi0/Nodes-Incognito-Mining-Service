@@ -23,6 +23,12 @@ export default function Nodes() {
             Accounts
           </a>
         </li>
+
+        <li class={styles.li}>
+          <a href="/admin/nodes" class="underline">
+            Create or delete nodes
+          </a>
+        </li>
       </ul>
     </>
   );
