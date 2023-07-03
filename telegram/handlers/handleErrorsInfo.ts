@@ -15,9 +15,7 @@ import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
 import getMinutesSinceError from "../../utils/getMinutesSinceError.ts";
 
-const nodesByPublicKey = Object.fromEntries(
-  constants.map(({ validatorPublic, ...data }) => [validatorPublic, data])
-);
+type NodesByPublicKey = Record<string, { name: string; dockerIndex: number }>;
 
 export default async function handleErrorsInfo(rawErrorCodes: string[]): Promise<CommandResponse> {
   const errorCodesToShow: readonly AllErrorTypes[] | Error =
@@ -40,6 +38,10 @@ export default async function handleErrorsInfo(rawErrorCodes: string[]): Promise
     text += `<code>${error}</code><code>: </code><code>${getMinutesSinceError(date).toFixed(1)} min</code>\n`;
   }
   if (text) text += "\n";
+
+  const nodesByPublicKey: NodesByPublicKey = Object.fromEntries(
+    constants.map(({ validatorPublic, ...data }) => [validatorPublic, data])
+  );
 
   for (const publicKey of Object.keys(lastErrorTimes)) {
     const errors = (Object.entries(lastErrorTimes[publicKey]) as [ErrorTypes, number][]).filter(([error]) =>

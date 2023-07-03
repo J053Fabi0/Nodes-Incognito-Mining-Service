@@ -4,8 +4,6 @@ import Node from "../types/collections/node.type.ts";
 import { ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { getNodes } from "../controllers/node.controller.ts";
 
-const mpk = constants.map((c) => c.validatorPublic).join(",");
-
 export type NodeStatusKeys =
   | "role"
   | "name"
@@ -31,8 +29,9 @@ export interface NodeStatus extends Node {
 }
 
 export default async function getNodesStatus(): Promise<NodeStatus[]> {
-  const nodes = await getNodes({ validatorPublic: { $in: constants.map((c) => c.validatorPublic) } });
-  const rawData = await getRawData();
+  const validatorKeys = constants.map((c) => c.validatorPublic);
+  const nodes = await getNodes({ inactive: { $ne: true }, validatorPublic: { $in: validatorKeys } });
+  const rawData = await getRawData(validatorKeys);
 
   return rawData
     .map((d) => {
@@ -70,11 +69,14 @@ let lastRequestTime = 0;
 const minRequestInterval = 5_000; // 5 seconds
 let lastRequest: NodeStatusRawData[] | undefined = undefined;
 
-async function getRawData() {
+/**
+ * @param mpk The public validator keys separated by commas without spaces, or an array of public validator keys
+ */
+async function getRawData(mpk: string | string[]) {
   if (lastRequest && Date.now() - lastRequestTime < minRequestInterval) return lastRequest;
 
   const { data } = await axiod.post<NodeStatusRawData[]>("https://monitor.incognito.org/pubkeystat/stat", {
-    mpk,
+    mpk: Array.isArray(mpk) ? mpk.join(",") : mpk,
   });
   lastRequestTime = Date.now();
   lastRequest = data;
