@@ -35,5 +35,7 @@
   "minFilesToConsiderShard": 200,
 
   // In decimal format
-  "incognitoFee": 0.1
+  "incognitoFee": 0.1,
+
+  "infuraURL": ""
 }

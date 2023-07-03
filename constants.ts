@@ -12,6 +12,7 @@ interface Json {
   maxDiskPercentageUsage: number;
   waitingTimes: Record<AllErrorTypes, number>;
   incognitoFee: number;
+  infuraURL: string;
 }
 
 const schema = joi.object<Json>({
@@ -23,6 +24,7 @@ const schema = joi.object<Json>({
     .pattern(joi.string().valid(...allErrorTypes), joi.number().positive().allow(0))
     .required(),
   incognitoFee: joi.number().positive().allow(0).default(0.1),
+  infuraURL: joi.string().uri().required(),
 });
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
@@ -50,6 +52,7 @@ export const waitingTimes = json.waitingTimes;
 /** Decimal format */
 export const incognitoFee = json.incognitoFee;
 export const incognitoFeeInt = json.incognitoFee * 1e9;
+export const infuraURL = json.infuraURL;
 
 export const setupFeeUSD = 5;
 export const minutesOfPriceStability = 60;

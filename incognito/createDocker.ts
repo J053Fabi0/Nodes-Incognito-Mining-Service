@@ -1,0 +1,36 @@
+import { infuraURL } from "../constants.ts";
+import getLatestTag from "./getLatestTag.ts";
+import { docker } from "../utils/commands.ts ";
+
+const nodePortDiff = 1099; // nodePort is 1099 more than rpcPort
+const dataDir = "/home/incognito/node_data";
+const bootnode = "mainnet-bootnode.incognito.org:9330";
+const coinIndexAccessToken = "edeaaff3f1774ad2888673770c6d64097e391bc362d7d6fb34982ddf0efd18cb";
+
+export default async function createDocker(rpcPort: number, validatorKey: string, dockerIndex: number) {
+  // Run even if it fails, in case it already exists
+  await docker(["network", "create", "--driver", "bridge", "inc_net"]).catch(() => {});
+
+  const nodePort = rpcPort + nodePortDiff;
+  const latestTag = await getLatestTag();
+
+  return docker([
+    "run",
+    "--restart=always",
+    ...["--net", "inc_net"],
+    ...["-p", `${nodePort}:${nodePort}`],
+    ...["-p", `${rpcPort}:${rpcPort}`],
+    ...["-e", `NODE_PORT=${nodePort}`],
+    ...["-e", `RPC_PORT=${rpcPort}`],
+    ...["-e", `BOOTNODE_IP=${bootnode}`],
+    ...["-e", `GETH_NAME=${infuraURL}`],
+    ...["-e", `MININGKEY=${validatorKey}`],
+    ...["-e", "TESTNET=false"],
+    ...["-e", `INDEXER_ACCESS_TOKEN=${coinIndexAccessToken}`],
+    ...["-e", "NUM_INDEXER_WORKERS=0"],
+    ...["-v", `${dataDir}_${dockerIndex}:/data`],
+    "-d",
+    ...["--name", `inc_mainnet_${dockerIndex}`],
+    `incognitochain/incognito-mainnet:${latestTag}`,
+  ]);
+}
