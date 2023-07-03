@@ -31,7 +31,7 @@ export default function Account() {
         </li>
 
         <li class={styles.li}>
-          <a href="me/transactions" class="underline">
+          <a href="me/transactions?relative" class="underline">
             Deposits, withdrawals, and payments
           </a>
         </li>
