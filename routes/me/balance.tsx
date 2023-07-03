@@ -29,7 +29,7 @@ interface BalanceProps {
 }
 
 const THIS_URL = `${WEBSITE_URL}/me/balance`;
-const TRANSACTIONS_URL = `${WEBSITE_URL}/me/transactions`;
+const TRANSACTIONS_URL = `${WEBSITE_URL}/me/transactions?relative`;
 
 async function getProjectedAccount(id: ObjectId) {
   const account = (await getAccount(

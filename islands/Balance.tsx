@@ -1,7 +1,7 @@
 import axiod from "axiod";
 import { JSX } from "preact";
-import { moveDecimalDot, toFixedS } from "../utils/numbersString.ts";
 import { useSignal, useComputed } from "@preact/signals";
+import { moveDecimalDot, toFixedS } from "../utils/numbersString.ts";
 
 interface CommonProps {
   /** Int format */
