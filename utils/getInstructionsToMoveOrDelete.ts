@@ -9,7 +9,7 @@ type InstructionToMoveOrDelete =
 export default async function getInstructionsToMoveOrDelete() {
   const { nodesInfoByDockerIndex: nodesInfo } = await sortNodes();
 
-  const instructions = [] as InstructionToMoveOrDelete[];
+  const instructions: InstructionToMoveOrDelete[] = [];
 
   for (const shard of shardsNames) {
     const nodesWithShard = nodesInfo

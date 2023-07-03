@@ -10,19 +10,20 @@ import * as $4 from "./routes/admin/accounts.tsx";
 import * as $5 from "./routes/admin/index.tsx";
 import * as $6 from "./routes/balance.tsx";
 import * as $7 from "./routes/credentials.tsx";
-import * as $8 from "./routes/index.tsx";
-import * as $9 from "./routes/me/balance.tsx";
-import * as $10 from "./routes/me/index.tsx";
-import * as $11 from "./routes/me/transactions.tsx";
-import * as $12 from "./routes/nodes/earnings/[number].tsx";
-import * as $13 from "./routes/nodes/earnings/index.tsx";
-import * as $14 from "./routes/nodes/earnings/monthly.tsx";
-import * as $15 from "./routes/nodes/index.tsx";
-import * as $16 from "./routes/nodes/monitor.tsx";
-import * as $17 from "./routes/nodes/new-confirm.tsx";
-import * as $18 from "./routes/nodes/new.tsx";
-import * as $19 from "./routes/signin.tsx";
-import * as $20 from "./routes/signout.tsx";
+import * as $8 from "./routes/diffuse.tsx";
+import * as $9 from "./routes/index.tsx";
+import * as $10 from "./routes/me/balance.tsx";
+import * as $11 from "./routes/me/index.tsx";
+import * as $12 from "./routes/me/transactions.tsx";
+import * as $13 from "./routes/nodes/earnings/[number].tsx";
+import * as $14 from "./routes/nodes/earnings/index.tsx";
+import * as $15 from "./routes/nodes/earnings/monthly.tsx";
+import * as $16 from "./routes/nodes/index.tsx";
+import * as $17 from "./routes/nodes/monitor.tsx";
+import * as $18 from "./routes/nodes/new-confirm.tsx";
+import * as $19 from "./routes/nodes/new.tsx";
+import * as $20 from "./routes/signin.tsx";
+import * as $21 from "./routes/signout.tsx";
 import * as $$0 from "./islands/Balance.tsx";
 import * as $$1 from "./islands/LocaleDate.tsx";
 import * as $$2 from "./islands/RelativeDate.tsx";
@@ -39,19 +40,20 @@ const manifest = {
     "./routes/admin/index.tsx": $5,
     "./routes/balance.tsx": $6,
     "./routes/credentials.tsx": $7,
-    "./routes/index.tsx": $8,
-    "./routes/me/balance.tsx": $9,
-    "./routes/me/index.tsx": $10,
-    "./routes/me/transactions.tsx": $11,
-    "./routes/nodes/earnings/[number].tsx": $12,
-    "./routes/nodes/earnings/index.tsx": $13,
-    "./routes/nodes/earnings/monthly.tsx": $14,
-    "./routes/nodes/index.tsx": $15,
-    "./routes/nodes/monitor.tsx": $16,
-    "./routes/nodes/new-confirm.tsx": $17,
-    "./routes/nodes/new.tsx": $18,
-    "./routes/signin.tsx": $19,
-    "./routes/signout.tsx": $20,
+    "./routes/diffuse.tsx": $8,
+    "./routes/index.tsx": $9,
+    "./routes/me/balance.tsx": $10,
+    "./routes/me/index.tsx": $11,
+    "./routes/me/transactions.tsx": $12,
+    "./routes/nodes/earnings/[number].tsx": $13,
+    "./routes/nodes/earnings/index.tsx": $14,
+    "./routes/nodes/earnings/monthly.tsx": $15,
+    "./routes/nodes/index.tsx": $16,
+    "./routes/nodes/monitor.tsx": $17,
+    "./routes/nodes/new-confirm.tsx": $18,
+    "./routes/nodes/new.tsx": $19,
+    "./routes/signin.tsx": $20,
+    "./routes/signout.tsx": $21,
   },
   islands: {
     "./islands/Balance.tsx": $$0,

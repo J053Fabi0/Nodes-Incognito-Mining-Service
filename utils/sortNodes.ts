@@ -24,9 +24,9 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
   const nodesStr = IS_PRODUCTION ? nodes : nodes.map((node) => `${node}`);
 
   const nodesStatusByDockerIndex: NodesStatusByDockerIndex = IS_PRODUCTION
-    ? (await getNodesStatus()).reduce(
+    ? (await getNodesStatus()).reduce<Record<string, NodeStatus>>(
         (obj, node) => ((obj[node.dockerIndex] = node), obj),
-        {} as Record<string, NodeStatus>
+        {}
       )
     : nodes.length
     ? Object.fromEntries(

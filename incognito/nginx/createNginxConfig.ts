@@ -19,16 +19,16 @@ export default async function createNginxConfig(name: string, number: number, po
     server_name ${subdomain}.${hostname};
 
     location / {
-      proxy_set_header Host $host;
-      proxy_pass http://127.0.0.1:${port};
-      proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_pass http://127.0.0.1:${port};
+        proxy_redirect off;
     }
 
     server_tokens off;
     server_name_in_redirect off;
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
-  }`;
+}`;
 
   const filePath = join(sitesAvailable, subdomain);
 

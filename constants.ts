@@ -7,24 +7,24 @@ import { getAccount } from "./controllers/account.controller.ts";
 import { allErrorTypes, AllErrorTypes } from "./utils/variables.ts";
 
 interface Json {
-  minEpochsToBeOnline: number;
+  infuraURL: string;
+  incognitoFee: number;
   minEpochsToLetSync: number;
+  minEpochsToBeOnline: number;
   maxDiskPercentageUsage: number;
   waitingTimes: Record<AllErrorTypes, number>;
-  incognitoFee: number;
-  infuraURL: string;
 }
 
 const schema = joi.object<Json>({
-  minEpochsToBeOnline: joi.number().required(),
+  infuraURL: joi.string().uri().required(),
   minEpochsToLetSync: joi.number().required(),
+  minEpochsToBeOnline: joi.number().required(),
   maxDiskPercentageUsage: joi.number().required(),
+  incognitoFee: joi.number().positive().allow(0).default(0.1),
   waitingTimes: joi
     .object()
     .pattern(joi.string().valid(...allErrorTypes), joi.number().positive().allow(0))
     .required(),
-  incognitoFee: joi.number().positive().allow(0).default(0.1),
-  infuraURL: joi.string().uri().required(),
 });
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
@@ -64,9 +64,10 @@ export const BAR_COLORS = [
   "#fafa9e",
   "#baffc9",
   "#bae1ff",
-];
+] as const;
 
 const admin = (await getClient({ role: "admin" }, { projection: { account: 1 } }))!;
 export const adminId = admin._id;
+/** The Incognito Account, not the client data */
 export const adminAccount = (await getAccount({ _id: admin.account }))!;
 if (!adminAccount) throw new Error("Admin account not found");

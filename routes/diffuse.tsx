@@ -4,7 +4,8 @@ import handleError from "../utils/handleError.ts";
 
 export const handler: Handlers<null, State> = {
   GET() {
-    import("../utils/diffuse.ts").catch(handleError).finally(() => console.log("Diffuser fisihed."));
+    console.time("Diffuser.");
+    import("../utils/diffuse.ts").catch(handleError).finally(() => console.timeEnd("Diffuser."));
     return new Response();
   },
 };
