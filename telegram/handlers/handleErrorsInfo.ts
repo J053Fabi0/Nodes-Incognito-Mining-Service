@@ -20,7 +20,7 @@ const nodesByPublicKey = Object.fromEntries(
 );
 
 export default async function handleErrorsInfo(rawErrorCodes: string[]): Promise<CommandResponse> {
-  const errorCodesToShow: AllErrorTypes[] | Error =
+  const errorCodesToShow: readonly AllErrorTypes[] | Error =
     rawErrorCodes.length === 0
       ? allErrorTypes
       : ((await validateItems({
@@ -35,14 +35,14 @@ export default async function handleErrorsInfo(rawErrorCodes: string[]): Promise
 
   let text = "";
 
-  for (const [error, date] of Object.entries(lastGlobalErrorTimes) as [GlobalErrorTypes, Date][]) {
+  for (const [error, date] of Object.entries(lastGlobalErrorTimes) as [GlobalErrorTypes, number][]) {
     if (!errorCodesToShow.includes(error)) continue;
     text += `<code>${error}</code><code>: </code><code>${getMinutesSinceError(date).toFixed(1)} min</code>\n`;
   }
   if (text) text += "\n";
 
   for (const publicKey of Object.keys(lastErrorTimes)) {
-    const errors = (Object.entries(lastErrorTimes[publicKey]) as [ErrorTypes, Date][]).filter(([error]) =>
+    const errors = (Object.entries(lastErrorTimes[publicKey]) as [ErrorTypes, number][]).filter(([error]) =>
       errorCodesToShow.includes(error)
     );
     if (!errors.length) continue;

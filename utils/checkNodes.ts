@@ -16,8 +16,8 @@ import getInstructionsToMoveOrDelete from "./getInstructionsToMoveOrDelete.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
 import { errorTypes, AllErrorTypes, lastErrorTimes, globalErrorTypes, lastGlobalErrorTimes } from "./variables.ts";
 
-function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, Date | undefined>, errorKey: string) {
-  if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || new Date();
+function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, number | undefined>, errorKey: string) {
+  if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || Date.now();
   else delete lastErrorTime[errorKey];
 }
 
@@ -127,8 +127,8 @@ export default async function checkNodes() {
 
 async function handleErrors(
   fixes: string[],
-  date: Date | undefined,
-  lastDate: Date | undefined,
+  date: number | undefined,
+  lastDate: number | undefined,
   errorKey: AllErrorTypes,
   nodeName?: string
 ) {

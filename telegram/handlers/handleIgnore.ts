@@ -32,7 +32,7 @@ export default async function handleIgnore(args: string[]): Promise<CommandRespo
   }
 
   for (const t of type === "all" ? errorKeys : [type]) {
-    ignore[t].from = new Date();
+    ignore[t].from = Date.now();
     ignore[t].minutes = number;
   }
 

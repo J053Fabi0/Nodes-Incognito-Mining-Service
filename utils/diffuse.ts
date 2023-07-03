@@ -1,22 +1,18 @@
-import { createNode } from "../controllers/node.controller.ts";
-import { getClient } from "../controllers/client.controller.ts";
-import { adminId } from "../constants.ts";
+import { redis } from "../initDatabase.ts";
 
-const client = await getClient({ name: "Slabb" }, { projection: { _id: 1 } });
-
-if (!client) {
-  console.log("Ho, ve");
-  Deno.exit(1);
+// const keys = await redis.keys("session_*");
+// the opposite, all the keys that do not start with "session_"
+async function getKeys() {
+  return (await redis.keys("*")).filter((key) => !key.startsWith("session_"));
 }
 
-await createNode({
-  name: "slabb_10",
-  client: client._id,
-  dockerIndex: 10,
-  inactive: false,
-  number: 11,
-  sendTo: [adminId],
-  validator: "1yUBmPWnY4DbgWAEQZVNuECFGLE6Bn1FdgTUnZzNS9ht9Y6MgR",
-  validatorPublic:
-    "1XfU9xQmZostUS9eXpnzbz9MYvC7oBkAdpQFtvdZwVW2CUzVmnemgi7hPrKBPYgvYpMczYBF7xVh3eF8SkRyGSXaeQeQY56Lex2KAWFWvQguskpLEpXZv7R1HRTweqgwdKPt3uweiwGwFzm8djSEZRu43cfdnmknzsERyw9VWp6PDYZEghvK6",
-});
+console.log(await getKeys());
+
+await redis.set("test", "test");
+
+console.log(await getKeys());
+
+await redis.set("test", "test2");
+
+console.log(await getKeys());
+console.log(await redis.get("test"));
