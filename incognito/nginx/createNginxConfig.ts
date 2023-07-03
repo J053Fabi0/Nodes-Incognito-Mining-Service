@@ -6,17 +6,26 @@ const { hostname } = new URL(WEBSITE_URL);
 const sitesEnabled = "/etc/nginx/sites-enabled/";
 const sitesAvailable = "/etc/nginx/sites-available/";
 
+export interface CreateNginxConfigResponse {
+  /** Subdomain name */
+  name: string;
+  url: `http://${string}`;
+}
+
 /**
- *
- * @param name The name of the owner
  * @param number The node number of the owner, not docker index
  * @param port The port of the docker
  */
-export default async function createNginxConfig(name: string, number: number, port: number): Promise<void> {
-  const subdomain = `${name}-${number}`;
+export default async function createNginxConfig(
+  clientId: string,
+  number: number,
+  port: number
+): Promise<CreateNginxConfigResponse> {
+  const subdomain = `${number}-${clientId}`.toLowerCase();
+  const url = `${subdomain}.${hostname}`;
 
   const config = `server {
-    server_name ${subdomain}.${hostname};
+    server_name ${url};
 
     location / {
         proxy_set_header Host $host;
@@ -36,4 +45,6 @@ export default async function createNginxConfig(name: string, number: number, po
   await Deno.symlink(filePath, join(sitesEnabled, subdomain));
 
   await systemctl(["reload", "nginx"]);
+
+  return { name: subdomain, url: `http://${url}` };
 }
