@@ -22,6 +22,7 @@ interface NewNodeProps {
   balance: number;
   prvPrice: number;
   prvToPay: number;
+  isAdmin: boolean;
   paymentAddress: string;
   paymentAddressImage: string;
 }
@@ -58,6 +59,7 @@ export const handler: Handlers<NewNodeProps, State> = {
 
     return ctx.render({
       balance: account.balance,
+      isAdmin: ctx.state.isAdmin,
       prvPrice: savedPrvPrice.usd,
       expires: savedPrvPrice.expires,
       paymentAddressImage: base64Image,

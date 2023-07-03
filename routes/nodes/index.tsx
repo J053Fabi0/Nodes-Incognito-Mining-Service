@@ -1,7 +1,19 @@
+import { Handlers } from "$fresh/server.ts";
+import State from "../../types/state.type.ts";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 
 const styles = {
   li: `${getTypographyClass("lead")}`,
+};
+
+interface NodesProps {
+  isAdmin: boolean;
+}
+
+export const handler: Handlers<NodesProps, State> = {
+  GET(_, ctx) {
+    return ctx.render({ isAdmin: ctx.state.isAdmin });
+  },
 };
 
 export default function Nodes() {

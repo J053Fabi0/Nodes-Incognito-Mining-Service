@@ -19,6 +19,7 @@ import { AccountTransactionType } from "../../types/collections/accountTransacti
 interface BalanceProps {
   balance: number;
   txHash?: string;
+  isAdmin: boolean;
   sendingError?: boolean;
   paymentAddress: string;
   withdrawAmount?: string;
@@ -43,6 +44,7 @@ export const handler: Handlers<BalanceProps, State> = {
     const account = await getProjectedAccount(ctx.state.user!.account);
     return ctx.render({
       ...account,
+      isAdmin: ctx.state.isAdmin,
       errors: ctx.state.session.flash("errors"),
       txHash: ctx.state.session.flash("txHash"),
       sendingError: ctx.state.session.flash("sendingError"),
