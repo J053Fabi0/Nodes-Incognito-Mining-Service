@@ -110,7 +110,7 @@ export default function Transactions({ data }: PageProps<TransactionsProps>) {
                     {capitalize(type)}
                   </div>
                 </td>
-                <td class={styles.td + " text-center max-w-[180px]"}>
+                <td class={`${styles.td} text-center max-w-[180px]`}>
                   <TransactionStatusPill status={AccountTransactionStatus.PENDING} />
                   {isAdmin && !transactionId && " redis"}
                   {details && (
@@ -120,7 +120,7 @@ export default function Transactions({ data }: PageProps<TransactionsProps>) {
                     </>
                   )}
                 </td>
-                <td class={styles.td}>
+                <td class={`${styles.td} text-center`}>
                   {relative ? <RelativeDate capitalize date={createdAt} /> : <LocaleDate date={createdAt} />}
                 </td>
               </tr>
@@ -136,7 +136,7 @@ export default function Transactions({ data }: PageProps<TransactionsProps>) {
                     {capitalize(type)}
                   </div>
                 </td>
-                <td class={styles.td + " text-center max-w-[180px]"}>
+                <td class={`${styles.td} text-center max-w-[180px]`}>
                   <TransactionStatusPill status={status} />
                   {(errorDetails || details) && (
                     <>
@@ -145,7 +145,7 @@ export default function Transactions({ data }: PageProps<TransactionsProps>) {
                     </>
                   )}
                 </td>
-                <td class={styles.td}>
+                <td class={`${styles.td} text-center`}>
                   {relative ? <RelativeDate capitalize date={+createdAt} /> : <LocaleDate date={+createdAt} />}
                 </td>
               </tr>
