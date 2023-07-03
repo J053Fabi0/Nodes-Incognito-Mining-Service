@@ -28,6 +28,10 @@ function setProxy<T extends AcceptedRecord>(data: T, redisKey: string, rootData:
       if (isRecord(value)) value = setProxy(value, redisKey, rootData);
       return Reflect.set(target, key, value);
     },
+    deleteProperty: (target, key) => {
+      redis.set(redisPrefix + redisKey, JSON.stringify(rootData));
+      return Reflect.deleteProperty(target, key);
+    },
   });
 }
 
