@@ -12,7 +12,6 @@ nodeModel.createIndexes({
 
     { key: { inactive: 1 }, name: "nodes_inactive" },
     { key: { dockerIndex: 1 }, name: "nodes_dockerIndex", unique: true },
-    { key: { paymentAddress: 1 }, name: "nodes_paymentAddress", unique: true },
     { key: { validatorPublic: 1 }, name: "nodes_validatorPublic", unique: true },
   ],
 });
