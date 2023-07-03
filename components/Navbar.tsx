@@ -48,7 +48,7 @@ export default function Navbar({ loggedIn = false, isAdmin = false }) {
   );
 
   const pagesElement = pages.length > 0 && (
-    <ul class="items-center gap-3 lg:gap-6 flex flex-col lg:flex-row">
+    <ul class="lg:items-center gap-3 lg:gap-6 flex flex-col lg:flex-row">
       {pages
         .filter((p) => {
           if (p.onlyAdmin) return isAdmin;
