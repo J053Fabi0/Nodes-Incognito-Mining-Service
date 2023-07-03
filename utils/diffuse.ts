@@ -1,18 +1,21 @@
-import { redis } from "../initDatabase.ts";
+import createDocker from "../incognito/createDocker.ts";
+import { createNode } from "../controllers/node.controller.ts";
+import { getClient } from "../controllers/client.controller.ts";
 
-// const keys = await redis.keys("session_*");
-// the opposite, all the keys that do not start with "session_"
-async function getKeys() {
-  return (await redis.keys("*")).filter((key) => !key.startsWith("session_"));
-}
+const a = await createDocker(8345, "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ", 11);
+console.log(a);
 
-console.log(await getKeys());
+const admin = (await getClient({ role: "admin" }))!;
 
-await redis.set("test", "test");
-
-console.log(await getKeys());
-
-await redis.set("test", "test2");
-
-console.log(await getKeys());
-console.log(await redis.get("test"));
+await createNode({
+  number: 1,
+  name: "test",
+  rcpPort: 8345,
+  dockerIndex: 11,
+  inactive: false,
+  client: admin._id,
+  sendTo: [admin._id],
+  validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
+  validatorPublic:
+    "1AwETFmvEfRKHtwDa4KGUXQVhkQqDX8tRWi3cXnmpataSaALhXJAugCnuoRWrM1wwoUQvsHUEKwr7w8NqKriYjVaLozaLDeikbvwYVo4qDx9EEsRvLnTyhAMSNbwKTCgaAupPtSNmhYdjFVvGepk9gCgzwfuyXrR8E9w3vNFTm5Ed5xyGxKaS",
+});
