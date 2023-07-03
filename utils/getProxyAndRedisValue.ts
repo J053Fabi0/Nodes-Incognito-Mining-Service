@@ -1,8 +1,9 @@
 import { redis } from "../initDatabase.ts";
+import flags from "./flags.ts";
 
 const redisPrefix = "variable_";
 
-// await redis.del(redisPrefix + "*");
+if (flags.reloadRedisVariables) await redis.del(redisPrefix + "*");
 
 type AcceptedValues = number | string | boolean | null | undefined;
 type AcceptedRecord = Record<
@@ -10,7 +11,7 @@ type AcceptedRecord = Record<
   { [key: string]: AcceptedRecord | AcceptedValues } | AcceptedValues
 >;
 
-function isRecord<T extends AcceptedRecord>(data: unknown): data is T {
+function isRecord<T extends AcceptedRecord>(data: AcceptedRecord | AcceptedValues): data is T {
   return typeof data === "object" && data !== null;
 }
 
