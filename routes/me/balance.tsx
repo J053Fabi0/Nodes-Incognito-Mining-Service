@@ -82,7 +82,6 @@ export const handler: Handlers<BalanceProps, State> = {
     // submit the transaction asynchronously
     submitTransaction({
       createdAt: Date.now(),
-      balance: account.balance,
       userId: ctx.state.user!._id,
       privateKey: account.privateKey,
       account: ctx.state.user!.account,
