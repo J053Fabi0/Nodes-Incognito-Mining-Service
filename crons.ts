@@ -5,7 +5,7 @@ import checkEarnings from "./utils/checkEarnings.ts";
 import checkAccounts, { Unit } from "./utils/checkAccounts.ts";
 import deleteEmptySessions from "./utils/deleteEmptySessions.ts";
 
-new Cron("*/5 * * * *", { protect: true, catch: handleError }, checkEarnings);
+new Cron("*/5 * * * *", { protect: false, catch: handleError }, checkEarnings);
 
 new Cron("*/1 * * * *", { protect: true, catch: handleError }, checkNodes);
 
