@@ -23,7 +23,7 @@ export default function AfterYouPay({ confirming, ...props }: AfterYouPayProps) 
         </li>
         <li>
           And that's it! The node will begin to work. You'll be able to monitor it from{" "}
-          <a class="underline" href="/nodes">
+          <a class="underline" href="/nodes/monitor">
             here
           </a>
           .
