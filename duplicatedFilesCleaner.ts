@@ -22,7 +22,7 @@ if (error) {
   Deno.exit(1);
 }
 
-const nodes = await getNodes({}, { projection: { dockerIndex: 1, _id: 0 } });
+const nodes = await getNodes({ inactive: false }, { projection: { dockerIndex: 1, _id: 0 } });
 
 export const duplicatedConstants: Constants = {
   ...json,

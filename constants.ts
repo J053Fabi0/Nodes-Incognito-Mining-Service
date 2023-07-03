@@ -35,7 +35,10 @@ if (error) {
   Deno.exit(1);
 }
 
-const nodes = await getNodes({}, { projection: { name: 1, dockerIndex: 1, validatorPublic: 1, _id: 0 } });
+const nodes = await getNodes(
+  { inactive: false },
+  { projection: { name: 1, dockerIndex: 1, validatorPublic: 1, _id: 0 } }
+);
 const constants: Constants = nodes.map((node) => ({
   name: node.name,
   dockerIndex: node.dockerIndex,
