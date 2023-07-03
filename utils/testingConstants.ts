@@ -23,6 +23,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "-",
     epochsToNextEvent: 53,
     inactive: false,
+    rcpPort: 8334,
   },
   "1": {
     _id: new ObjectId("648ea67e9d36345e94bff735"),
@@ -45,6 +46,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "LATEST",
     epochsToNextEvent: 96,
     inactive: false,
+    rcpPort: 8335,
   },
   "2": {
     _id: new ObjectId("648ea67e9d36345e94bff736"),
@@ -67,6 +69,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "BEACON STALL",
     epochsToNextEvent: 0,
     inactive: false,
+    rcpPort: 8336,
   },
   "3": {
     _id: new ObjectId("648ea67e9d36345e94bff737"),
@@ -89,6 +92,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "SHARD SYNCING",
     epochsToNextEvent: 74,
     inactive: false,
+    rcpPort: 8337,
   },
   "4": {
     _id: new ObjectId("648ea67e9d36345e94bff738"),
@@ -111,6 +115,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "-",
     epochsToNextEvent: 11,
     inactive: false,
+    rcpPort: 8338,
   },
   "5": {
     _id: new ObjectId("648ea67e9d36345e94bff739"),
@@ -133,6 +138,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "-",
     epochsToNextEvent: 72,
     inactive: false,
+    rcpPort: 8339,
   },
   "6": {
     _id: new ObjectId("648ea67f9d36345e94bff73a"),
@@ -155,6 +161,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "-",
     epochsToNextEvent: 46,
     inactive: false,
+    rcpPort: 8340,
   },
   "7": {
     _id: new ObjectId("648ea67f9d36345e94bff73b"),
@@ -177,6 +184,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "LATEST",
     epochsToNextEvent: 5,
     inactive: false,
+    rcpPort: 8341,
   },
   "8": {
     _id: new ObjectId("648ea67f9d36345e94bff73c"),
@@ -199,6 +207,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "-",
     epochsToNextEvent: 52,
     inactive: false,
+    rcpPort: 8342,
   },
   "9": {
     _id: new ObjectId("648ea67f9d36345e94bff73d"),
@@ -221,6 +230,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     syncState: "-",
     epochsToNextEvent: 45,
     inactive: false,
+    rcpPort: 8343,
   },
 };
 

@@ -9,15 +9,15 @@ import { binaryWrapper } from "duplicatedFilesCleanerIncognito";
 const PRV_ID = "0000000000000000000000000000000000000000000000000000000000000004" as const;
 
 export default class IncognitoCli {
-  PRV_ID = PRV_ID;
-  privateKey?: string;
-  incognitoCli = binaryWrapper(join(fromFileUrl(import.meta.url), "..", "incognito-cli"));
-
   static PRV_ID = PRV_ID;
-  static incognitoCli = binaryWrapper(join(fromFileUrl(import.meta.url), "..", "incognito-cli"));
   static validatorKeyRegex = /[a-z0-9A-Z]{49,51}/;
-  static validatorPublicKeyRegex = /[a-z0-9A-Z]{180,181}/;
   static paymentAddressRegex = /[a-z0-9A-Z]{148}/;
+  static validatorPublicKeyRegex = /[a-z0-9A-Z]{180,181}/;
+  static incognitoCli = binaryWrapper(join(fromFileUrl(import.meta.url), "..", "incognito-cli"));
+
+  privateKey?: string;
+  PRV_ID = IncognitoCli.PRV_ID;
+  incognitoCli = IncognitoCli.incognitoCli;
 
   constructor(privateKey?: string) {
     this.privateKey = privateKey;

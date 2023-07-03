@@ -16,7 +16,7 @@ export default async function handleDocker([action, ...rawNodes]: string[]): Pro
 
   const nodes =
     rawNodes.length === 1 && rawNodes[0] === "all"
-      ? duplicatedFilesCleaner.usedNodes
+      ? duplicatedFilesCleaner.dockerIndexes
       : await validateItems({ rawItems: rawNodes }).catch((e) => {
           if (isError(e)) return e;
           else throw e;

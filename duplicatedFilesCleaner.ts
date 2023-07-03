@@ -26,17 +26,7 @@ const nodes = await getNodes({}, { projection: { dockerIndex: 1, _id: 0 } });
 
 export const duplicatedConstants: Constants = {
   ...json,
-  instructions: [
-    { shardName: "beacon", nodes: nodes.map((node) => node.dockerIndex) },
-    { shardName: "shard0", nodes: [] },
-    { shardName: "shard1", nodes: [] },
-    { shardName: "shard2", nodes: [] },
-    { shardName: "shard3", nodes: [] },
-    { shardName: "shard4", nodes: [] },
-    { shardName: "shard5", nodes: [] },
-    { shardName: "shard6", nodes: [] },
-    { shardName: "shard7", nodes: [] },
-  ],
+  dockerIndexes: nodes.map((node) => node.dockerIndex),
 };
 
 const duplicatedFilesCleaner = new DuplicatedFilesCleaner(duplicatedConstants);

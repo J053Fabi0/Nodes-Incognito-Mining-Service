@@ -7,7 +7,7 @@ import { CommandResponse } from "../submitCommand.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
-import { ShardsNames, dockerPs, docker } from "duplicatedFilesCleanerIncognito";
+import { ShardsNames, dockerPs, docker, shardsNames } from "duplicatedFilesCleanerIncognito";
 
 export default async function handleDelete(
   args: string[],
@@ -40,7 +40,7 @@ export default async function handleDelete(
       : // or validate the shards
         ((await validateItems({
           name: "shard",
-          validItems: duplicatedFilesCleaner.usedShards as string[],
+          validItems: [...shardsNames] as string[],
           // transform shard names to the format beacon or shard[0-7]
           rawItems: rawShards.map((shard) => (/^(shard[0-7]|beacon)$/i.test(shard) ? shard : `shard${shard}`)),
         }).catch((e) => {

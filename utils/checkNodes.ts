@@ -23,7 +23,7 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, number
 
 export default async function checkNodes() {
   const nodesStatus = await getNodesStatus();
-  const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.usedNodes);
+  const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.dockerIndexes);
   const fixes: string[] = [];
 
   // Check for global errors

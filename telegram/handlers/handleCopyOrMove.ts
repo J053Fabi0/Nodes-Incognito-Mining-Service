@@ -4,10 +4,10 @@ import isError from "../../types/guards/isError.ts";
 import { CommandResponse } from "../submitCommand.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
-import { ShardsNames } from "duplicatedFilesCleanerIncognito";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
+import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
 
 export default async function handleCopyOrMove(
   args: string[],
@@ -37,7 +37,7 @@ export default async function handleCopyOrMove(
           name: "shard",
           // transform shard names to the format beacon or shard[0-7]
           rawItems: rawShards.map((shard) => (/^(shard[0-7]|beacon)$/i.test(shard) ? shard : `shard${shard}`)),
-          validItems: duplicatedFilesCleaner.usedShards as string[],
+          validItems: [...shardsNames] as string[],
         }).catch((e) => {
           if (isError(e)) return e;
           throw e;
