@@ -7,6 +7,9 @@ const dataDir = "/home/incognito/node_data";
 const bootnode = "mainnet-bootnode.incognito.org:9330";
 const coinIndexAccessToken = "edeaaff3f1774ad2888673770c6d64097e391bc362d7d6fb34982ddf0efd18cb";
 
+/**
+ * @returns The container id
+ */
 export default async function createDocker(rpcPort: number, validatorKey: string, dockerIndex: number) {
   // Run even if it fails, in case it already exists
   await docker(["network", "create", "--driver", "bridge", "inc_net"]).catch(() => {});

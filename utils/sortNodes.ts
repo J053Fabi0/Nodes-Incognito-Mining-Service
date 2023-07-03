@@ -5,14 +5,15 @@ import getNodesStatus, { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 
-export const rolesOrder: (Exclude<NodeRoles, "SYNCING"> | Exclude<NodeRoles, "SYNCING">[])[] = [
+export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
   "COMMITTEE",
   "PENDING",
   "WAITING",
+  // SYNCING has a conditional priority
+  "SYNCING",
   // NOT_STAKED is the last because it's not important that it has files, only that
   // it's online to be able to stake
   "NOT_STAKED",
-  // SYNCING has a conditional priority
 ];
 
 export type NodeInfoByDockerIndex = [string, Info & { shard: ShardsNames | "" }];
@@ -59,9 +60,8 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
           const nodeStatus = nodesStatusByDockerIndex[dockerIndex];
           const role = nodeStatus.role;
 
-          // if the role is "SYNCING", make it the last one if it has less or 3 epochs to the next event
-          // and the first one if it has more than 3 epochs to the next event
-          if (role === "SYNCING") return nodeStatus.epochsToNextEvent >= 3 ? Infinity : 0;
+          // if the role is "SYNCING", make it the first one if it has less or 3 epochs to the next event
+          if (role === "SYNCING" && nodeStatus.epochsToNextEvent <= 3) return 0;
 
           const roleIndex = rolesOrder.findIndex((roles) =>
             Array.isArray(roles) ? roles.includes(role) : roles === nodeStatus.role
