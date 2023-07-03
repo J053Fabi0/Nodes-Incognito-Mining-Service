@@ -100,14 +100,18 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
                       if (IS_PRODUCTION) {
                         txHash = await cli.send(transaction.sendTo, transaction.amount);
                       } else {
-                        txHash = await new Promise((r) => setTimeout(() => r("txHash_" + Math.random()), 3_000));
+                        txHash = await new Promise<string>((r) =>
+                          setTimeout(() => r(`txHash_${Math.random()}`), 3_000)
+                        );
                       }
                     } catch (e) {
                       handleError(e);
                       transaction.retries.push(Date.now());
                       await sleep(transaction.retryDelay ?? RETRY_DELAY);
                     }
-                  } while (txHash === undefined || i++ < (transaction.maxRetries ?? MAX_RETRIES));
+                    // repeat while there's no txHash and the number of retries is less than the max
+                  } while (txHash === undefined && ++i <= (transaction.maxRetries ?? MAX_RETRIES));
+                  txHash = txHash ?? null;
                 }
 
                 // update the transaction
@@ -128,7 +132,7 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
                 saveToRedis();
 
                 // resolve the promise
-                transaction.resolve?.({ status, txHash: txHash, retries: transaction.retries });
+                transaction.resolve?.({ status, txHash, retries: transaction.retries });
               }
 
               working = false;
