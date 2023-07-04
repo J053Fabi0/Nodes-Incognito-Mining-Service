@@ -126,7 +126,11 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
       </Typography>
 
       <Typography variant="lead" class="mb-3">
-        You'll be able to withdraw any amout you deposit if you change your mind before confirming the node.
+        You'll be able to withdraw any deposited PRV form{" "}
+        <a class="underline" href="/me/balance">
+          the balance page
+        </a>
+        .
       </Typography>
 
       {/* Why XX PRV? */}
