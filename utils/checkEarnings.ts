@@ -65,8 +65,8 @@ export default async function checkEarnings() {
         if (telegram) {
           const isAdmin = telegram === adminTelegram;
           sendMessage(
-            `Node <code>#${number}${isAdmin ? ` ${client}` : ""}</code> - ` +
-              `<code>${earning / 1e9}</code>.\n` +
+            `Node: <code>#${number}${isAdmin ? ` ${client}` : ""}</code>.\n` +
+              `Earned: <code>${earning / 1e9}</code>.\n` +
               `Epoch: <code>${epoch}</code>.\n` +
               `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
             telegram,
