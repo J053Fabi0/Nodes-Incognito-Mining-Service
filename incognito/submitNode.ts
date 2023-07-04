@@ -1,3 +1,10 @@
+import {
+  saveToRedis,
+  resolveAndForget,
+  sendErrorToClient,
+  addSaveToRedisProxy,
+  getPendingNodesFromRedis,
+} from "./submitNodeUtils.ts";
 import { sleep } from "sleep";
 import createDockerAndConfigs, {
   addNodeToConfigs,
@@ -12,7 +19,6 @@ import deleteDockerAndConfigs from "./deleteDockerAndConfigs.ts";
 import { getClientById } from "../controllers/client.controller.ts";
 import { getAccountById } from "../controllers/account.controller.ts";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
-import { resolveAndForget, sendErrorToClient } from "./submitNodeUtils.ts";
 import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
@@ -30,6 +36,8 @@ export const pendingNodes = new EventedArray<NewNode>(
   (
     (working = false) =>
     async ({ array: pending }) => {
+      saveToRedis();
+
       if (working) return;
       working = true;
 
@@ -45,6 +53,8 @@ export const pendingNodes = new EventedArray<NewNode>(
     }
   )()
 );
+// Add the pending nodes from redis
+getPendingNodesFromRedis().then((pending) => pending && pendingNodes.push(...pending));
 
 async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode>): Promise<boolean> {
   const [newNode] = pending;
@@ -63,11 +73,14 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
     return resolveAndForget(newNode, pending, false);
   }
 
+  // Get the docker index and set it to the new node if it doesn't have one
   const dockerIndex =
-    Math.max(
-      ...(await getNodes({}, { projection: { _id: 0, dockerIndex: 1 } })).map((d) => d.dockerIndex),
-      -1 // will become 0
-    ) + 1;
+    newNode.dockerIndex ??
+    (newNode.dockerIndex =
+      Math.max(
+        ...(await getNodes({}, { projection: { _id: 0, dockerIndex: 1 } })).map((d) => d.dockerIndex),
+        -1 // will become 0
+      ) + 1);
 
   // Create the docker and configs, but inactive for the moment.
   const success: false | CreateDockerAndConfigsReturn = await (async () => {
@@ -121,5 +134,5 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
 }
 
 export default function submitNode(newNode: Omit<NewNode, "resolve">): Promise<boolean> {
-  return new Promise((resolve) => pendingNodes.push({ ...newNode, resolve }));
+  return new Promise((resolve) => pendingNodes.push(addSaveToRedisProxy({ ...newNode, resolve })));
 }
