@@ -35,9 +35,11 @@ export enum BotBlocked {
   NOT_HANDLED = "not handled",
 }
 
+const errors = ["Forbidden: bot was blocked by the user", "Bad Request: chat not found"];
+
 async function handleSendMessageError(e: unknown) {
   if (!isGrammyError(e)) throw e;
-  if (e.description !== "Forbidden: bot was blocked by the user") throw e;
+  if (!errors.includes(e.description)) throw e;
   if (!("chat_id" in e.payload)) throw e;
 
   const chat_id = e.payload.chat_id;
