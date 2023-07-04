@@ -125,6 +125,10 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         This address is unique to your account and will never change. You can save it for future use.
       </Typography>
 
+      <Typography variant="lead" class="mb-3">
+        You'll be able to withdraw any amout you deposit if you change your mind before confirming the node.
+      </Typography>
+
       {/* Why XX PRV? */}
       <Typography variant="h3" class="mt-7 mb-2">
         Why <code>{prvToPay}</code> PRV?
