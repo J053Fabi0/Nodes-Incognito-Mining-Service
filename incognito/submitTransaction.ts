@@ -85,56 +85,60 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
             working = true;
 
             // Resolve all the pending transactions.
-            while (pending.lengthNoEvent > 0) {
-              // get the first transaction
-              const [transaction] = pending;
-              if (!transaction) continue;
+            try {
+              while (pending.lengthNoEvent > 0) {
+                // get the first transaction
+                const [transaction] = pending;
+                if (!transaction) continue;
 
-              // execute the transaction
-              const txHash: string | null | undefined = await (async (
-                cli = new IncognitoCli(transaction.privateKey),
-                maxRetries = transaction.maxRetries ?? MAX_RETRIES,
-                retryDelay = transaction.retryDelay ?? RETRY_DELAY
-              ) => {
-                for (let i = 0; i < maxRetries; i++)
-                  try {
-                    if (IS_PRODUCTION) return await cli.send(transaction.sendTo, transaction.amount);
-                    // fake transactions for testing
-                    else
-                      return await new Promise<string>((r) =>
-                        setTimeout(() => r(`txHash_${Math.random()}`), 3_000)
-                      );
-                  } catch (e) {
-                    handleError(e);
-                    transaction.retries.push(Date.now());
-                    if (i !== maxRetries - 1) await sleep(retryDelay);
+                // execute the transaction
+                const txHash: string | null | undefined = await (async (
+                  cli = new IncognitoCli(transaction.privateKey),
+                  maxRetries = transaction.maxRetries ?? MAX_RETRIES,
+                  retryDelay = transaction.retryDelay ?? RETRY_DELAY
+                ) => {
+                  for (let i = 0; i < maxRetries; i++)
+                    try {
+                      if (IS_PRODUCTION) return await cli.send(transaction.sendTo, transaction.amount);
+                      // fake transactions for testing
+                      else
+                        return await new Promise<string>((r) =>
+                          setTimeout(() => r(`txHash_${Math.random()}`), 3_000)
+                        );
+                    } catch (e) {
+                      handleError(e);
+                      transaction.retries.push(Date.now());
+                      if (i !== maxRetries - 1) await sleep(retryDelay);
+                    }
+
+                  // undefined means that the transaction couldn't be done
+                  return undefined;
+                })();
+
+                // update the transaction
+                const status =
+                  txHash === undefined ? AccountTransactionStatus.FAILED : AccountTransactionStatus.COMPLETED;
+
+                await changeAccountTransaction(
+                  { _id: new ObjectId(transaction.transactionId!) },
+                  {
+                    $set: {
+                      status,
+                      txHash: txHash ?? null,
+                      retries: transaction.retries.map((r) => new Date(r)),
+                    },
                   }
+                );
 
-                // undefined means that the transaction couldn't be done
-                return undefined;
-              })();
+                // remove it from the array
+                pending.shiftNoEvent();
+                saveToRedis();
 
-              // update the transaction
-              const status =
-                txHash === undefined ? AccountTransactionStatus.FAILED : AccountTransactionStatus.COMPLETED;
-
-              await changeAccountTransaction(
-                { _id: new ObjectId(transaction.transactionId!) },
-                {
-                  $set: {
-                    status,
-                    txHash: txHash ?? null,
-                    retries: transaction.retries.map((r) => new Date(r)),
-                  },
-                }
-              );
-
-              // remove it from the array
-              pending.shiftNoEvent();
-              saveToRedis();
-
-              // resolve the promise
-              transaction.resolve?.({ status, txHash: txHash ?? null, retries: transaction.retries });
+                // resolve the promise
+                transaction.resolve?.({ status, txHash: txHash ?? null, retries: transaction.retries });
+              }
+            } catch (e) {
+              handleError(e);
             }
 
             working = false;

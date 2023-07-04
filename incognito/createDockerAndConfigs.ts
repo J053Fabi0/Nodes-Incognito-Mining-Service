@@ -5,7 +5,7 @@ import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { createNode, getNodes } from "../controllers/node.controller.ts";
 import createNginxConfig, { CreateNginxConfigResponse } from "./nginx/createNginxConfig.ts";
 
-interface CreateDockerAndConfigsOptions {
+export interface CreateDockerAndConfigsOptions {
   clientId: string | ObjectId;
   number: number;
   rcpPort?: number;
@@ -16,6 +16,7 @@ interface CreateDockerAndConfigsOptions {
 
 interface CreateDockerAndConfigsReturn {
   nodeId: ObjectId;
+  dockerIndex: number;
   url: CreateNginxConfigResponse["url"];
   name: CreateNginxConfigResponse["name"];
 }
@@ -24,8 +25,8 @@ interface CreateDockerAndConfigsReturn {
  * It completely creates a new node, including docker, nginx config, node in the database and update configurations
  */
 export default async function createDockerAndConfigs({
-  clientId,
   number,
+  clientId,
   validator,
   validatorPublic,
   ...optionals
@@ -36,8 +37,8 @@ export default async function createDockerAndConfigs({
 
     const nodes = await getNodes({}, { projection: { _id: 0, rcpPort: 1, dockerIndex: 1 } });
 
-    const rcpPort = optionals.rcpPort ?? nodes.map((n) => n.rcpPort).sort((a, b) => b - a)[0] + 1;
-    const dockerIndex = optionals.dockerIndex ?? nodes.map((n) => n.dockerIndex).sort((a, b) => b - a)[0] + 1;
+    const rcpPort = optionals.rcpPort ?? Math.max(...nodes.map((n) => n.rcpPort)) + 1;
+    const dockerIndex = optionals.dockerIndex ?? Math.max(...nodes.map((n) => n.dockerIndex)) + 1;
 
     return { rcpPort, dockerIndex };
   })();
@@ -64,5 +65,5 @@ export default async function createDockerAndConfigs({
   duplicatedFilesCleaner.dockerIndexes.push(dockerIndex);
   constants.push({ name, dockerIndex, validatorPublic });
 
-  return { name, url, nodeId: newNode._id };
+  return { name, url, nodeId: newNode._id, dockerIndex };
 }

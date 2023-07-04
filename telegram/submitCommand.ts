@@ -33,16 +33,20 @@ export const commands: {
       if (!working) {
         working = true;
         // Resolve the pending commands.
-        while (pending.lengthNoEvent > 0) {
-          // get the first command
-          const command = pending[0];
-          if (!command) continue;
-          // execute the command
-          const successful = await handleCommands(command.command);
-          // remove it
-          pending.shiftNoEvent();
-          // resolve the promise
-          command.resolve(successful);
+        try {
+          while (pending.lengthNoEvent > 0) {
+            // get the first command
+            const command = pending[0];
+            if (!command) continue;
+            // execute the command
+            const successful = await handleCommands(command.command);
+            // remove it
+            pending.shiftNoEvent();
+            // resolve the promise
+            command.resolve(successful);
+          }
+        } catch (e) {
+          handleError(e);
         }
         working = false;
       }
