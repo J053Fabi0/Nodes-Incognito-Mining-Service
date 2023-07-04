@@ -233,15 +233,15 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
           )}
         </div>
 
-        <div class="flex items-end gap-5 mt-3">
-          <Button type="submit" color="green" name="action" value="confirm" class="mt-3 !normal-case">
+        <div class="flex items-end justify-center gap-5 mt-3">
+          <Button type="submit" color="green" class="mt-3 !normal-case">
             <Typography variant="h4" class="flex items-center gap-2">
               Confirm
               <BsFillCartCheckFill size={20} />
             </Typography>
           </Button>
 
-          <a class={`${getButtonClasses("red", false)} mt-3 py-2 px-3`} href="/me/balance">
+          <a class={`${getButtonClasses("red", false)} mt-3 py-1 px-2`} href="/me/balance">
             <Typography variant="p" class="!normal-case h-min py-0">
               Cancel, get refund
             </Typography>
