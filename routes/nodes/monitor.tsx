@@ -3,6 +3,7 @@ import { Head } from "$fresh/runtime.ts";
 import Pill from "../../components/Pill.tsx";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
+import getNodeUrl from "../../utils/getNodeUrl.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import NodePill from "../../components/Nodes/NodePill.tsx";
@@ -23,10 +24,12 @@ const styles = {
 
 interface MonitorProps {
   isAdmin: boolean;
+  /** number, URL */
+  nodesUrl: string[];
+  pendingNodes: NewNode[];
   nodesInfo: NodeInfoByDockerIndex[];
   nodesStatus: NodesStatusByDockerIndex;
   commandResponse?: CommandResponse | null;
-  pendingNodes: NewNode[];
 }
 
 // Only change the last boolean value if you want to test
@@ -44,7 +47,7 @@ export const handler: Handlers<MonitorProps, State> = {
     const nodesQuery: Parameters<typeof getNodes>[0] = shouldGetAll
       ? { inactive: false }
       : { client: new ObjectId(userId!), inactive: false };
-    const nodes = await getNodes(nodesQuery, { projection: { _id: 0, dockerIndex: 1 } });
+    const nodes = await getNodes(nodesQuery, { projection: { _id: 0, dockerIndex: 1, name: 1 } });
 
     const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = nodes.length
       ? await sortNodes(nodes.map((n) => n.dockerIndex))
@@ -53,7 +56,10 @@ export const handler: Handlers<MonitorProps, State> = {
     // admin can see all pending nodes, client can only see their own
     const userPendingNodes = isAdmin ? pendingNodes : pendingNodes.filter((n) => `${n.clientId}` === userId!);
 
+    const nodesUrl: MonitorProps["nodesUrl"] = nodes.map((n) => getNodeUrl(n.name));
+
     return ctx.render({
+      nodesUrl,
       nodesInfo,
       nodesStatus,
       commandResponse,
@@ -84,7 +90,7 @@ export const handler: Handlers<MonitorProps, State> = {
 };
 
 export default function Monitor({ data, route }: PageProps<MonitorProps>) {
-  const { nodesInfo, nodesStatus, isAdmin, commandResponse, pendingNodes } = data;
+  const { nodesInfo, nodesStatus, isAdmin, commandResponse, pendingNodes, nodesUrl } = data;
 
   const head = (
     <Head>
@@ -245,6 +251,16 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
           </tbody>
         </table>
       </div>
+
+      <Typography variant="h5">Node URLs</Typography>
+
+      <ul class={`list-disc list-inside mt-2 ${getTypographyClass("p")}`}>
+        {nodesUrl.map((url) => (
+          <li>
+            <a href={url}>{url}</a>
+          </li>
+        ))}
+      </ul>
 
       {!isAdmin && (
         <Typography variant="smallP">
