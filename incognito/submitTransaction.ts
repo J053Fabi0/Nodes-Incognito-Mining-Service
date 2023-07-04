@@ -115,7 +115,7 @@ async function handlePendingTransactions(
   // execute the transaction
   const txHash: string | null | undefined = await (async (
     cli = new IncognitoCli(transaction.privateKey),
-    maxRetries = transaction.maxRetries ?? MAX_RETRIES,
+    maxRetries = (transaction.maxRetries ?? MAX_RETRIES) - transaction.retries.length,
     retryDelay = transaction.retryDelay ?? RETRY_DELAY
   ) => {
     for (let i = 0; i < maxRetries; i++)
