@@ -11,6 +11,7 @@ import createDockerAndConfigs, {
   CreateDockerAndConfigsReturn,
   CreateDockerAndConfigsOptions,
 } from "./createDockerAndConfigs.ts";
+import { ObjectId } from "mongo/mod.ts";
 import cryptr from "../utils/cryptrInstance.ts";
 import { adminAccount } from "../constants.ts";
 import handleError from "../utils/handleError.ts";
@@ -22,8 +23,9 @@ import { changeNode, getNodes } from "../controllers/node.controller.ts";
 import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
-export interface NewNode extends CreateDockerAndConfigsOptions {
-  /** In PRV. Int format. */
+export interface NewNode extends Omit<CreateDockerAndConfigsOptions, "number" | "inactive"> {
+  number?: number;
+  /** In PRV. Int format. It MUST NOT have the incognitoFee included. */
   cost: number;
   resolve?: (success: boolean) => void;
 }
@@ -81,12 +83,22 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
         ...(await getNodes({}, { projection: { _id: 0, dockerIndex: 1 } })).map((d) => d.dockerIndex),
         -1 // will become 0
       ) + 1);
+  // same with the node number
+  const number =
+    newNode.number ??
+    (newNode.number =
+      Math.max(
+        ...(await getNodes({ client: new ObjectId(newNode.clientId) }, { projection: { _id: 0, number: 1 } })).map(
+          (d) => d.number
+        ),
+        0 // will become 1
+      ) + 1);
 
   // Create the docker and configs, but inactive for the moment.
   const success: false | CreateDockerAndConfigsReturn = await (async () => {
     for (let i = 0; i < MAX_RETRIES; i++)
       try {
-        return await createDockerAndConfigs({ ...newNode, dockerIndex, inactive: true });
+        return await createDockerAndConfigs({ ...newNode, number, dockerIndex, inactive: true });
       } catch (e) {
         handleError(e);
         if (i !== MAX_RETRIES - 1) await sleep(RETRY_DELAY);

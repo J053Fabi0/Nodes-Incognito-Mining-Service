@@ -7,14 +7,17 @@ import Balance from "../../islands/Balance.tsx";
 import TimeLeft from "../../islands/TimeLeft.tsx";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { BsFillCartCheckFill } from "react-icons/bs";
+import submitNode from "../../incognito/submitNode.ts";
 import isResponse from "../../types/guards/isResponse.ts";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
-import { minutesOfPriceStability } from "../../constants.ts";
 import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
 import Button, { getButtonClasses } from "../../components/Button.tsx";
 import { HandlerContext, Handlers, PageProps } from "$fresh/server.ts";
+import { error, validateFormData, z, ZodIssue } from "fresh-validation";
+import { incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
+import { toFixedS } from "../../utils/numbersString.ts";
 
 const styles = {
   th: "py-2 px-3 text-right",
@@ -25,12 +28,16 @@ const styles = {
 
 dayjs.extend(utc);
 
+const THIS_URL = `${WEBSITE_URL}/nodes/new-confirm`;
+const MONITOR_URL = `${WEBSITE_URL}/nodes/monitor`;
+
 interface NewNodeConfirmProps {
   /** Int format */
   balance: number;
   prvPrice: number;
   prvToPay: number;
   confirmationExpires: number;
+  errors: ZodIssue[] | undefined;
 }
 
 async function getDataOrRedirect(
@@ -56,6 +63,7 @@ async function getDataOrRedirect(
     balance: account.balance,
     prvPrice: savedPrvPrice.usd,
     prvToPay: savedPrvPrice.prvToPay,
+    errors: ctx.state.session.flash("errors"),
   };
 }
 
@@ -68,18 +76,42 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
     return ctx.render(dataOrRedirect);
   },
 
-  async POST(_, ctx) {
+  async POST(req, ctx) {
     const dataOrRedirect = await getDataOrRedirect(ctx);
 
     if (isResponse(dataOrRedirect)) return dataOrRedirect;
 
-    // to do: process the payment
-    return redirect("/nodes/new-confirm");
+    const form = await req.formData();
+
+    const { validatedData, errors } = await validateFormData(form, {
+      validator: z.string().trim().regex(IncognitoCli.validatorKeyRegex, "Invalid validator key."),
+      validatorPublic: z
+        .string()
+        .trim()
+        .regex(IncognitoCli.validatorPublicKeyRegex, "Invalid validator public key."),
+    });
+
+    if (errors) {
+      ctx.state.session.flash("errors", errors);
+      return redirect(THIS_URL);
+    }
+
+    submitNode({
+      clientId: ctx.state.user!._id,
+      validator: validatedData.validator,
+      validatorPublic: validatedData.validatorPublic,
+      cost: dataOrRedirect.prvToPay - incognitoFeeInt,
+    });
+
+    return redirect(MONITOR_URL);
   },
 };
 
 export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
-  const { confirmationExpires, balance, prvPrice, prvToPay } = data;
+  const { confirmationExpires, balance, prvToPay, errors } = data;
+
+  const validatorError = error(errors, "validator");
+  const validatorPublicError = error(errors, "validatorPublic");
 
   return (
     <>
@@ -115,7 +147,13 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
           <tr>
             <th class={styles.th}>To pay</th>
             <td class={styles.td}>
-              <code>{prvToPay}</code> PRV
+              <code>{toFixedS(prvToPay - incognitoFee, 2)}</code> PRV
+            </td>
+          </tr>
+          <tr>
+            <th class={styles.th}>Incognito fee</th>
+            <td class={styles.td}>
+              <code>{incognitoFee}</code> PRV
             </td>
           </tr>
           <tr>
@@ -163,6 +201,12 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
               pattern={IncognitoCli.validatorKeyRegex.source}
               class="p-2 border border-gray-300 rounded w-full"
             />
+
+            {validatorError && (
+              <Typography variant="p" class="mt-1 text-red-600">
+                {validatorError.message}
+              </Typography>
+            )}
           </div>
 
           <div>
@@ -181,6 +225,12 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
               pattern={IncognitoCli.validatorPublicKeyRegex.source}
             />
           </div>
+
+          {validatorPublicError && (
+            <Typography variant="p" class="mt-1 text-red-600">
+              {validatorPublicError.message}
+            </Typography>
+          )}
         </div>
 
         <div class="flex items-end gap-5 mt-3">

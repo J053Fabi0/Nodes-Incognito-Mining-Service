@@ -12,7 +12,7 @@ import { toFixedS } from "../../utils/numbersString.ts";
 import Typography from "../../components/Typography.tsx";
 import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
-import { minutesOfPriceStability, setupFeeUSD } from "../../constants.ts";
+import { incognitoFee, minutesOfPriceStability, setupFeeUSD } from "../../constants.ts";
 
 dayjs.extend(utc);
 
@@ -47,9 +47,11 @@ export const handler: Handlers<NewNodeProps, State> = {
     if (account.balance >= savedPrvPrice.prvToPay * 1e9 && confirmationExpires > Date.now())
       return redirect("/nodes/new-confirm");
 
+    // Set the new price if the previous one has expired
     if (savedPrvPrice.expires <= Date.now()) {
       savedPrvPrice.usd = await getPRVPrice();
-      savedPrvPrice.prvToPay = +toFixedS(setupFeeUSD / savedPrvPrice.usd, 2);
+      // add the fee to transfer the PRV to the admin account later
+      savedPrvPrice.prvToPay = +toFixedS(setupFeeUSD / savedPrvPrice.usd, 2) + incognitoFee;
       savedPrvPrice.expires = dayjs().utc().add(minutesOfPriceStability, "minute").valueOf();
 
       ctx.state.session.set("prvPrice", savedPrvPrice);

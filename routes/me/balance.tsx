@@ -67,7 +67,7 @@ export const handler: Handlers<BalanceProps, State> = {
     const max = (account.balance - incognitoFeeInt) / 1e9;
 
     const { validatedData, errors } = await validateFormData(form, {
-      paymentAddress: z.string().regex(IncognitoCli.paymentAddressRegex, "Invalid payment address"),
+      paymentAddress: z.string().trim().regex(IncognitoCli.paymentAddressRegex, "Invalid payment address"),
       amount: z
         .number()
         .min(1e-9, "The minimum amount is 0.000000001 PRV")
