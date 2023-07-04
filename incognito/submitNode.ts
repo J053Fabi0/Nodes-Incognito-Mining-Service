@@ -1,5 +1,6 @@
 import {
   saveToRedis,
+  getNodeNumber,
   resolveAndForget,
   sendErrorToClient,
   addSaveToRedisProxy,
@@ -11,7 +12,6 @@ import createDockerAndConfigs, {
   CreateDockerAndConfigsReturn,
   CreateDockerAndConfigsOptions,
 } from "./createDockerAndConfigs.ts";
-import { ObjectId } from "mongo/mod.ts";
 import cryptr from "../utils/cryptrInstance.ts";
 import { adminAccount } from "../constants.ts";
 import handleError from "../utils/handleError.ts";
@@ -37,7 +37,12 @@ const RETRY_DELAY = 1 * 60;
 export const pendingNodes = new EventedArray<NewNode>(
   (
     (working = false) =>
-    async ({ array: pending }) => {
+    async ({ array: pending, added }) => {
+      if (added)
+        for (const newNode of added) {
+          await getNodeNumber(newNode);
+        }
+
       saveToRedis();
 
       if (working) return;
@@ -84,15 +89,7 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
         -1 // will become 0
       ) + 1);
   // same with the node number
-  const number =
-    newNode.number ??
-    (newNode.number =
-      Math.max(
-        ...(await getNodes({ client: new ObjectId(newNode.clientId) }, { projection: { _id: 0, number: 1 } })).map(
-          (d) => d.number
-        ),
-        0 // will become 1
-      ) + 1);
+  const number = await getNodeNumber(newNode);
 
   // Create the docker and configs, but inactive for the moment.
   const success: false | CreateDockerAndConfigsReturn = await (async () => {
@@ -111,7 +108,7 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
   if (!success) {
     sendErrorToClient(client.telegram);
     handleError(new Error(`Couldn't create node #${dockerIndex} for client ${newNode.clientId}`));
-    await deleteDockerAndConfigs({ dockerIndex, number: newNode.number, clientId: newNode.clientId });
+    await deleteDockerAndConfigs({ dockerIndex, number, clientId: newNode.clientId });
     return resolveAndForget(newNode, pending, false);
   }
 
@@ -134,7 +131,7 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
   if (status === AccountTransactionStatus.FAILED) {
     sendErrorToClient(client.telegram, `There was a problem charging you for node #${newNode.number}.`);
     handleError(new Error(`Couldn't charge client ${newNode.clientId} for node #${dockerIndex}`));
-    await deleteDockerAndConfigs({ dockerIndex, number: newNode.number, clientId: newNode.clientId });
+    await deleteDockerAndConfigs({ dockerIndex, number, clientId: newNode.clientId });
     return resolveAndForget(newNode, pending, false);
   }
 

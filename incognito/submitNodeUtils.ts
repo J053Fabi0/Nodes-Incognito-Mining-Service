@@ -1,8 +1,10 @@
+import { ObjectId } from "mongo/mod.ts";
 import { redis } from "../initDatabase.ts";
 import handleError from "../utils/handleError.ts";
 import sendMessage from "../telegram/sendMessage.ts";
 import { NewNode, pendingNodes } from "./submitNode.ts";
 import { adminTelegramUsername } from "../constants.ts";
+import { getNodes } from "../controllers/node.controller.ts";
 import { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 
 const redisKey = "newNodes";
@@ -65,4 +67,18 @@ export function addSaveToRedisProxy<T extends NewNode>(obj: T): T {
       return Reflect.set(target, name, value);
     },
   });
+}
+
+/** It returns the saved data or fetches and sets the data */
+export async function getNodeNumber(newNode: NewNode) {
+  return (
+    newNode.number ??
+    (newNode.number =
+      Math.max(
+        ...(await getNodes({ client: new ObjectId(newNode.clientId) }, { projection: { _id: 0, number: 1 } })).map(
+          (d) => d.number
+        ),
+        0 // will become 1
+      ) + 1)
+  );
 }
