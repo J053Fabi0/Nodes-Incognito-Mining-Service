@@ -10,7 +10,7 @@ import { IS_PRODUCTION } from "../env.ts";
 import IncognitoCli from "./IncognitoCli.ts";
 import handleError from "../utils/handleError.ts";
 import { incognitoFeeInt } from "../constants.ts";
-import EventedArray from "../utils/EventedArray.ts";
+import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { changeAccountTransaction } from "../controllers/accountTransaction.controller.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
@@ -84,62 +84,14 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
             if (working) return;
             working = true;
 
-            // Resolve all the pending transactions.
-            try {
-              while (pending.lengthNoEvent > 0) {
-                // get the first transaction
-                const [transaction] = pending;
-                if (!transaction) continue;
-
-                // execute the transaction
-                const txHash: string | null | undefined = await (async (
-                  cli = new IncognitoCli(transaction.privateKey),
-                  maxRetries = transaction.maxRetries ?? MAX_RETRIES,
-                  retryDelay = transaction.retryDelay ?? RETRY_DELAY
-                ) => {
-                  for (let i = 0; i < maxRetries; i++)
-                    try {
-                      if (IS_PRODUCTION) return await cli.send(transaction.sendTo, transaction.amount);
-                      // fake transactions for testing
-                      else
-                        return await new Promise<string>((r) =>
-                          setTimeout(() => r(`txHash_${Math.random()}`), 3_000)
-                        );
-                    } catch (e) {
-                      handleError(e);
-                      transaction.retries.push(Date.now());
-                      if (i !== maxRetries - 1) await sleep(retryDelay);
-                    }
-
-                  // undefined means that the transaction couldn't be done
-                  return undefined;
-                })();
-
-                // update the transaction
-                const status =
-                  txHash === undefined ? AccountTransactionStatus.FAILED : AccountTransactionStatus.COMPLETED;
-
-                await changeAccountTransaction(
-                  { _id: new ObjectId(transaction.transactionId!) },
-                  {
-                    $set: {
-                      status,
-                      txHash: txHash ?? null,
-                      retries: transaction.retries.map((r) => new Date(r)),
-                    },
-                  }
-                );
-
-                // remove it from the array
-                pending.shiftNoEvent();
-                saveToRedis();
-
-                // resolve the promise
-                transaction.resolve?.({ status, txHash: txHash ?? null, retries: transaction.retries });
+            // handle the transactions
+            while (pending.lengthNoEvent > 0)
+              try {
+                await handlePendingTransactions(pending);
+              } catch (e) {
+                handleError(e);
+                if (pending.lengthNoEvent > 0) await sleep(RETRY_DELAY);
               }
-            } catch (e) {
-              handleError(e);
-            }
 
             working = false;
           }
@@ -148,6 +100,57 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
     },
   }
 );
+
+async function handlePendingTransactions(
+  pending: EventedArrayWithoutHandler<PendingTransaction>
+): Promise<boolean> {
+  // get the first transaction
+  const [transaction] = pending;
+  if (!transaction) return false;
+
+  // execute the transaction
+  const txHash: string | null | undefined = await (async (
+    cli = new IncognitoCli(transaction.privateKey),
+    maxRetries = transaction.maxRetries ?? MAX_RETRIES,
+    retryDelay = transaction.retryDelay ?? RETRY_DELAY
+  ) => {
+    for (let i = 0; i < maxRetries; i++)
+      try {
+        if (IS_PRODUCTION) return await cli.send(transaction.sendTo, transaction.amount);
+        // fake transactions for testing
+        else return await new Promise<string>((r) => setTimeout(() => r(`txHash_${Math.random()}`), 3_000));
+      } catch (e) {
+        handleError(e);
+        transaction.retries.push(Date.now());
+        if (i !== maxRetries - 1) await sleep(retryDelay);
+      }
+
+    // undefined means that the transaction couldn't be done
+    return undefined;
+  })();
+
+  const status = txHash === undefined ? AccountTransactionStatus.FAILED : AccountTransactionStatus.COMPLETED;
+
+  // update the transaction in the DB
+  await changeAccountTransaction(
+    { _id: new ObjectId(transaction.transactionId!) },
+    {
+      $set: {
+        status,
+        txHash: txHash ?? null,
+        retries: transaction.retries.map((r) => new Date(r)),
+      },
+    }
+  );
+
+  // remove it from the array
+  pending.shiftNoEvent();
+  saveToRedis();
+
+  // resolve the promise
+  transaction.resolve?.({ status, txHash: txHash ?? null, retries: transaction.retries });
+  return true;
+}
 
 /**
  * @param urgent If true, the transaction will be placed at the beginning of the queue
