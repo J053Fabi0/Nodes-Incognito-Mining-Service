@@ -100,7 +100,7 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
       clientId: ctx.state.user!._id,
       validator: validatedData.validator,
       validatorPublic: validatedData.validatorPublic,
-      cost: dataOrRedirect.prvToPay - incognitoFeeInt,
+      cost: dataOrRedirect.prvToPay * 1e9 - incognitoFeeInt,
     });
 
     return redirect(MONITOR_URL);
