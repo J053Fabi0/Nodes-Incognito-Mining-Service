@@ -26,7 +26,11 @@ export default async function deleteDockerAndConfigs({
   // Delete from db
   await changeNode({ dockerIndex }, { $set: { inactive: true } });
 
-  // Update configurations
+  // Remove from constants
+  removeNodeFromConfigs(dockerIndex);
+}
+
+export function removeNodeFromConfigs(dockerIndex: number) {
   {
     const index = duplicatedFilesCleaner.dockerIndexes.findIndex((i) => i === dockerIndex);
     if (index !== -1) duplicatedFilesCleaner.dockerIndexes.splice(index, 1);
