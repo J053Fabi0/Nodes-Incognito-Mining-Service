@@ -155,13 +155,18 @@ export default function Balance({ data }: PageProps<BalanceProps>) {
         </>
       )}
 
-      {balance <= incognitoFeeInt ? null : (
-        <>
-          <hr class="my-5" />
+      <hr class="my-5" />
 
-          <Typography variant="h4" class="mb-1">
-            Withdraw
-          </Typography>
+      <Typography variant="h4" class="mb-1">
+        Withdraw
+      </Typography>
+
+      {balance <= incognitoFeeInt ? (
+        <Typography variant="lead">
+          {balance === 0 ? "You don't have any balance to withdraw." : "Your balance is too low to withdraw."}
+        </Typography>
+      ) : (
+        <>
           <Typography variant="p">
             You can withdraw your balance to any Incognito wallet. The transaction fee is{" "}
             <code>{toFixedS(incognitoFee, 9)}</code> PRV.
