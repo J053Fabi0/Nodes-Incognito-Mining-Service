@@ -11,6 +11,7 @@ interface Json {
   incognitoFee: number;
   minEpochsToLetSync: number;
   minEpochsToBeOnline: number;
+  adminTelegramUsername: string;
   maxDiskPercentageUsage: number;
   waitingTimes: Record<AllErrorTypes, number>;
 }
@@ -21,6 +22,7 @@ const schema = joi.object<Json>({
   minEpochsToBeOnline: joi.number().required(),
   maxDiskPercentageUsage: joi.number().required(),
   incognitoFee: joi.number().positive().allow(0).default(0.1),
+  adminTelegramUsername: joi.string().default("@incognitoNodes"),
   waitingTimes: joi
     .object()
     .pattern(joi.string().valid(...allErrorTypes), joi.number().positive().allow(0))
@@ -35,6 +37,14 @@ if (error) {
   Deno.exit(1);
 }
 
+/////////////////////
+///// Incognito /////
+/////////////////////
+export const { infuraURL } = json;
+/** Decimal format */
+export const { incognitoFee } = json;
+export const incognitoFeeInt = json.incognitoFee * 1e9;
+
 const nodes = await getNodes(
   { inactive: false },
   { projection: { name: 1, dockerIndex: 1, validatorPublic: 1, _id: 0 } }
@@ -46,18 +56,23 @@ const constants: Constants = nodes.map((node) => ({
 }));
 export default constants;
 
-export const minEpochsToBeOnline = json.minEpochsToBeOnline;
-export const minEpochsToLetSync = json.minEpochsToLetSync;
-export const maxDiskPercentageUsage = json.maxDiskPercentageUsage;
-export const waitingTimes = json.waitingTimes;
-/** Decimal format */
-export const incognitoFee = json.incognitoFee;
-export const incognitoFeeInt = json.incognitoFee * 1e9;
-export const infuraURL = json.infuraURL;
-
 export const setupFeeUSD = 5;
 export const minutesOfPriceStability = 60;
 
+///////////////
+//// Admin ////
+///////////////
+const admin = (await getClient({ role: "admin" }, { projection: { account: 1, telegram: 1 } }))!;
+export const adminId = admin._id;
+export const adminTelegram = admin.telegram!;
+/** The Incognito Account, not the client data */
+export const adminAccount = (await getAccount({ _id: admin.account }))!;
+if (!adminAccount) throw new Error("Admin account not found");
+export const { adminTelegramUsername } = json;
+
+///////////////
+//// Other ////
+///////////////
 export const BAR_COLORS = [
   //
   "#ffb3ba",
@@ -66,11 +81,7 @@ export const BAR_COLORS = [
   "#baffc9",
   "#bae1ff",
 ] as const;
-
-const admin = (await getClient({ role: "admin" }, { projection: { account: 1, telegram: 1 } }))!;
-export const adminId = admin._id;
-export const adminTelegram = admin.telegram!;
-/** The Incognito Account, not the client data */
-export const adminAccount = (await getAccount({ _id: admin.account }))!;
-if (!adminAccount) throw new Error("Admin account not found");
-export const adminTelegramUsername = "@incognitoNodes";
+export const { waitingTimes } = json;
+export const { minEpochsToLetSync } = json;
+export const { minEpochsToBeOnline } = json;
+export const { maxDiskPercentageUsage } = json;
