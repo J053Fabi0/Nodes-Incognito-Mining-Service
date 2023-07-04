@@ -131,12 +131,14 @@ export async function checkBalance(
     { projection: { balance: 1, _id: 0 } }
   ))!.balance;
 
-  // if the balance is not enough
-  if (balance < total) {
+  // if the balance is not enough or the amount is less or equal to 0
+  if (balance < total || transaction.amount <= 0) {
     // if so, update the transaction to failed
     const errorDetails =
-      `Balance not enough. You have ${moveDecimalDot(balance, -9)} PRV ` +
-      `but you need ${moveDecimalDot(total, -9)} PRV`;
+      transaction.amount <= 0
+        ? `Amount must be greater than 0`
+        : `Balance not enough. You have ${moveDecimalDot(balance, -9)} PRV ` +
+          `but you need ${moveDecimalDot(total, -9)} PRV`;
 
     await changeAccountTransaction(
       { _id: new ObjectId(transaction.transactionId) },
