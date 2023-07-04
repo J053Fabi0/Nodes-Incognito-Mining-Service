@@ -12,6 +12,13 @@ export default function AfterYouPay({ confirming, ...props }: AfterYouPayProps) 
       </Typography>
 
       <ol class={`list-decimal list-inside mt-2 ${getTypographyClass("lead")} flex gap-2 flex-col`}>
+        {!confirming && (
+          <li>
+            We'll ask you to create a new account in the Incognito app and give us the validator and validator
+            public keys. The private key stays with you.
+          </li>
+        )}
+
         <li>
           {confirming ? "In a few minutes we'll" : "We'll"} give you a URL which you'll add to your Incognito app
           under More {">"} Power {">"} Add Node Virtual.
