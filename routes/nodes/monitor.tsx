@@ -1,15 +1,18 @@
 import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
+import Pill from "../../components/Pill.tsx";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
-import Typography from "../../components/Typography.tsx";
 import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
+import { pendingNodesTest } from "../../utils/testingConstants.ts";
+import { NewNode, pendingNodes } from "../../incognito/submitNode.ts";
 import MonitorCommands from "../../components/Nodes/MonitorCommands.tsx";
 import { roleToEmoji } from "../../telegram/handlers/handleTextMessage.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
+import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import submitCommand, { CommandResponse } from "../../telegram/submitCommand.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
 
@@ -23,10 +26,12 @@ interface MonitorProps {
   nodesInfo: NodeInfoByDockerIndex[];
   nodesStatus: NodesStatusByDockerIndex;
   commandResponse?: CommandResponse | null;
+  pendingNodes: NewNode[];
 }
 
 // Only change the last boolean value if you want to test
 const testingClient = !IS_PRODUCTION && false;
+const testingPendingNodes = !IS_PRODUCTION && false;
 const URL = `${WEBSITE_URL}/nodes/monitor`;
 
 export const handler: Handlers<MonitorProps, State> = {
@@ -45,7 +50,16 @@ export const handler: Handlers<MonitorProps, State> = {
       ? await sortNodes(nodes.map((n) => n.dockerIndex))
       : { nodesInfoByDockerIndex: [], nodesStatusByDockerIndex: {} };
 
-    return ctx.render({ nodesInfo, nodesStatus, isAdmin: shouldGetAll, commandResponse });
+    // admin can see all pending nodes, client can only see their own
+    const userPendingNodes = isAdmin ? pendingNodes : pendingNodes.filter((n) => `${n.clientId}` === userId!);
+
+    return ctx.render({
+      nodesInfo,
+      nodesStatus,
+      commandResponse,
+      isAdmin: shouldGetAll,
+      pendingNodes: testingPendingNodes ? pendingNodesTest : userPendingNodes,
+    });
   },
 
   async POST(req, ctx) {
@@ -70,7 +84,7 @@ export const handler: Handlers<MonitorProps, State> = {
 };
 
 export default function Monitor({ data, route }: PageProps<MonitorProps>) {
-  const { nodesInfo, nodesStatus, isAdmin, commandResponse } = data;
+  const { nodesInfo, nodesStatus, isAdmin, commandResponse, pendingNodes } = data;
 
   const head = (
     <Head>
@@ -100,6 +114,27 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
       )}
 
       {isAdmin && <MonitorCommands route={route} commandResponse={commandResponse} />}
+
+      {pendingNodes.length > 0 && (
+        <>
+          <Typography variant="h4" class="mt-5">
+            Pending nodes
+          </Typography>
+          <Typography variant="p" class="mb-2">
+            These nodes will soon be initialized. Reload the page periodically to see when they are ready.
+          </Typography>
+
+          <div class="flex flex-wrap items-center gap-3 mb-5">
+            {pendingNodes.map(({ number }) =>
+              typeof number === "number" ? (
+                <NodePill nodeNumber={number} baseURL={null} relative />
+              ) : (
+                <Pill color="gray">Number yet to be determined</Pill>
+              )
+            )}
+          </div>
+        </>
+      )}
 
       <div class="overflow-x-auto">
         <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">

@@ -1,4 +1,5 @@
 import { ObjectId } from "mongo/mod.ts";
+import { NewNode } from "../incognito/submitNode.ts";
 import { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "./sortNodes.ts";
 
 export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
@@ -398,4 +399,24 @@ export const nodesInfoByDockerIndexTest: NodeInfoByDockerIndex[] = [
       shard: "shard7",
     },
   ],
+];
+
+export const pendingNodesTest: NewNode[] = [
+  {
+    dockerIndex: 0,
+    clientId: new ObjectId("648ea521877f51b62ea4a023"),
+    cost: 36 * 1e9,
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
+    validatorPublic:
+      "1HCo8fBZKG5VbMfaCmHUvoWxdMCG5sL7vWHuV3SxH6QU9WxnFX8QoehQgeeuMRsRtwP3xRrBZMzooEaFZdk3eTcL1ydvHNZuzdwSd5HkhYrit2cTgMKQWrPkfGwBcbRbSUEsdFsD6Yxwr4H43G1qPuSFQEr9gwd4MAJW6ry3159NdGNyHDuhv",
+    number: 1,
+  },
+  {
+    dockerIndex: 1,
+    clientId: new ObjectId("648ea521877f51b62ea4a023"),
+    cost: 36 * 1e9,
+    validator: "1QTKG4k1mZD195iwAD2FY5ADGzTCSFNkBhNUZ7QV2Y9TFYfvNQ",
+    validatorPublic:
+      "1HCo8fBZKG5VbMfaCmHUvoWxdMCG5sL7vWHuV3SxH6QU9WxnFX8QoehQgeeuMRsRtwP3xRrBZMzooEaFZdk3eTcL1ydvHNZuzdwSd5HkhYrit2cTgMKQWrPkfGwBcbRbSUEsdFsD6Yxwr4H43G1qPuSFQEr9gwd4MAJW6ry3159NdGNyHDuhv",
+  },
 ];
