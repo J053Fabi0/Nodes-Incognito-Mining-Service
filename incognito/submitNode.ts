@@ -78,7 +78,7 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
   // check if there's already a node with the same validator key that is active
   const existingNode = await getNode(
     { validator: newNode.validator },
-    { projection: { _id: 0, inactive: 1, dockerIndex: 1, number: 1 } }
+    { projection: { _id: 1, inactive: 1, dockerIndex: 1, number: 1 } }
   );
   if (existingNode && existingNode.inactive === false) {
     sendErrorToClient(client.telegram, `Node with validator key ${newNode.validator} already exists`);
@@ -102,7 +102,13 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
   const success: false | CreateDockerAndConfigsReturn = await (async () => {
     for (let i = 0; i < MAX_RETRIES; i++)
       try {
-        return await createDockerAndConfigs({ ...newNode, number, dockerIndex, inactive: true });
+        return await createDockerAndConfigs({
+          ...newNode,
+          number,
+          dockerIndex,
+          inactive: true,
+          nodeId: existingNode ? existingNode._id : undefined,
+        });
       } catch (e) {
         handleError(e);
         if (i !== MAX_RETRIES - 1) await sleep(RETRY_DELAY);

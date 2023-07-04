@@ -2,13 +2,15 @@ import { ObjectId } from "mongo/mod.ts";
 import createDocker from "./docker/createDocker.ts";
 import constants, { adminId } from "../constants.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { createNode, getNodes } from "../controllers/node.controller.ts";
+import { changeNode, createNode, getNodes } from "../controllers/node.controller.ts";
 import createNginxConfig, { CreateNginxConfigResponse } from "./nginx/createNginxConfig.ts";
 
 export interface CreateDockerAndConfigsOptions {
   clientId: string | ObjectId;
   number: number;
   rcpPort?: number;
+  /** If there's already a node in DB, change it instead of creating a new one */
+  nodeId?: ObjectId;
   validator: string;
   inactive?: boolean;
   dockerIndex?: number;
@@ -27,6 +29,7 @@ export interface CreateDockerAndConfigsReturn {
  */
 export default async function createDockerAndConfigs({
   number,
+  nodeId,
   clientId,
   validator,
   validatorPublic,
@@ -50,23 +53,43 @@ export default async function createDockerAndConfigs({
   const { name, url } = await createNginxConfig(clientIdStr, number, rcpPort);
   await createDocker(rcpPort, validator, dockerIndex);
 
+  if (nodeId)
+    // Update node in the database
+    await changeNode(
+      { _id: nodeId },
+      {
+        $set: {
+          // the only fields that don't change are validator and validatorPublic
+          name,
+          number,
+          rcpPort,
+          inactive,
+          dockerIndex,
+          client: new ObjectId(clientId),
+          sendTo: [adminId, new ObjectId(clientId)],
+        },
+      }
+    );
   // Create node in the database
-  const newNode = await createNode({
-    name,
-    number,
-    rcpPort,
-    inactive,
-    validator,
-    dockerIndex,
-    validatorPublic,
-    client: new ObjectId(clientId),
-    sendTo: [adminId, new ObjectId(clientId)],
-  });
+  else
+    nodeId = (
+      await createNode({
+        name,
+        number,
+        rcpPort,
+        inactive,
+        validator,
+        dockerIndex,
+        validatorPublic,
+        client: new ObjectId(clientId),
+        sendTo: [adminId, new ObjectId(clientId)],
+      })
+    )._id;
 
   // Update configurations only if the node is active
   if (inactive === false) addNodeToConfigs(dockerIndex, name, validatorPublic);
 
-  return { name, url, nodeId: newNode._id, dockerIndex };
+  return { name, url, nodeId, dockerIndex };
 }
 
 export function addNodeToConfigs(dockerIndex: number, name: string, validatorPublic: string) {
