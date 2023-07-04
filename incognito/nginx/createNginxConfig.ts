@@ -1,6 +1,8 @@
+import { ObjectId } from "mongo/mod.ts";
 import { join } from "std/path/mod.ts";
 import { WEBSITE_URL } from "../../env.ts";
 import { systemctl } from "../../utils/commands.ts";
+import getNodeName from "../../utils/getNodeName.ts";
 
 const { hostname } = new URL(WEBSITE_URL);
 export const sitesEnabled = "/etc/nginx/sites-enabled/";
@@ -17,11 +19,11 @@ export interface CreateNginxConfigResponse {
  * @param port The port of the docker
  */
 export default async function createNginxConfig(
-  clientId: string,
+  clientId: string | ObjectId,
   number: number,
   port: number
 ): Promise<CreateNginxConfigResponse> {
-  const subdomain = `${number}-${clientId}`.toLowerCase();
+  const subdomain = getNodeName(clientId, number);
   const url = `${subdomain}.${hostname}`;
 
   const config = `server {
