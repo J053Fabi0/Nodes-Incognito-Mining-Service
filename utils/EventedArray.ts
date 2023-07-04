@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-export type Methods = "push" | "pop" | "unshift" | "shift" | "splice" | "length";
+export type Methods = "push" | "pop" | "unshift" | "shift" | "splice" | "length" | "lengths";
 
 export type EventedArrayWithoutHandler<Type = any> = Omit<EventedArray<Type>, Methods>;
 

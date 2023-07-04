@@ -27,13 +27,13 @@ export const commands: {
   let working = false;
   return {
     resolved: new EventedArray<string>(({ array }) => {
-      if (array.lengths > 100) array.spliceNoEvent(0, array.lengths - 100);
+      if (array.lengthNoEvent > 100) array.spliceNoEvent(0, array.lengthNoEvent - 100);
     }),
     pending: new EventedArray<Command>(async ({ array: pending }) => {
       if (!working) {
         working = true;
         // Resolve the pending commands.
-        while (pending.lengths > 0) {
+        while (pending.lengthNoEvent > 0) {
           // get the first command
           const command = pending[0];
           if (!command) continue;
