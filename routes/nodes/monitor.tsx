@@ -245,6 +245,12 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
           </tbody>
         </table>
       </div>
+
+      {!isAdmin && (
+        <Typography variant="smallP">
+          * Nodes become online only when needed. They are offline most of the time.
+        </Typography>
+      )}
     </>
   );
 }
