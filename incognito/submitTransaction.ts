@@ -98,6 +98,10 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
         )()
       ));
     },
+    set(target, name, value) {
+      saveToRedis();
+      return Reflect.set(target, name, value);
+    },
   }
 );
 

@@ -14,9 +14,11 @@ import { changeAccount, getAccount } from "../controllers/account.controller.ts"
 import submitTransaction, { PendingTransaction, pendingTransactionsByAccount } from "./submitTransaction.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
+const redisKey = "transactions";
+
 export async function saveToRedis() {
   const allPendingTransactions = Object.values(pendingTransactionsByAccount).flatMap((a) => a);
-  await redis.set("transactions", JSON.stringify(allPendingTransactions));
+  await redis.set(redisKey, JSON.stringify(allPendingTransactions));
 }
 
 export function addSaveToRedisProxy<T extends PendingTransaction>(obj: T): T {
@@ -30,7 +32,7 @@ export function addSaveToRedisProxy<T extends PendingTransaction>(obj: T): T {
 
 export async function fetchPendingTransactionsFromRedisAndDB() {
   // Get them from redis
-  const redisTransactions = await redis.get("transactions");
+  const redisTransactions = await redis.get(redisKey);
   if (redisTransactions)
     // without the balance, so it can be checked again
     for (const transaction of JSON.parse(redisTransactions) as PendingTransaction[])
