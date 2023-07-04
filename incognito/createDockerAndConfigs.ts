@@ -10,11 +10,12 @@ export interface CreateDockerAndConfigsOptions {
   number: number;
   rcpPort?: number;
   validator: string;
+  inactive?: boolean;
   dockerIndex?: number;
   validatorPublic: string;
 }
 
-interface CreateDockerAndConfigsReturn {
+export interface CreateDockerAndConfigsReturn {
   nodeId: ObjectId;
   dockerIndex: number;
   url: CreateNginxConfigResponse["url"];
@@ -29,6 +30,7 @@ export default async function createDockerAndConfigs({
   clientId,
   validator,
   validatorPublic,
+  inactive = false,
   ...optionals
 }: CreateDockerAndConfigsOptions): Promise<CreateDockerAndConfigsReturn> {
   const { rcpPort, dockerIndex } = await (async function (): Promise<Required<typeof optionals>> {
@@ -53,17 +55,21 @@ export default async function createDockerAndConfigs({
     name,
     number,
     rcpPort,
+    inactive,
     validator,
     dockerIndex,
     validatorPublic,
-    inactive: false,
     client: new ObjectId(clientId),
     sendTo: [adminId, new ObjectId(clientId)],
   });
 
-  // Update configurations
-  duplicatedFilesCleaner.dockerIndexes.push(dockerIndex);
-  constants.push({ name, dockerIndex, validatorPublic });
+  // Update configurations only if the node is active
+  if (inactive === false) addNodeToConfigs(dockerIndex, name, validatorPublic);
 
   return { name, url, nodeId: newNode._id, dockerIndex };
+}
+
+export function addNodeToConfigs(dockerIndex: number, name: string, validatorPublic: string) {
+  duplicatedFilesCleaner.dockerIndexes.push(dockerIndex);
+  constants.push({ name, dockerIndex, validatorPublic });
 }
