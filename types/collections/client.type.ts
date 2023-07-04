@@ -7,4 +7,5 @@ export default interface Client extends CommonCollection {
   telegram: string | null;
   role: "admin" | "client";
   notionPage: string | null;
+  isBotBlocked?: boolean;
 }
