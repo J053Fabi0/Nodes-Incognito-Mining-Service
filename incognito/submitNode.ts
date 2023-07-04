@@ -1,6 +1,7 @@
 import {
   saveToRedis,
   getNodeNumber,
+  getDockerIndex,
   resolveAndForget,
   sendErrorToClient,
   addSaveToRedisProxy,
@@ -12,14 +13,14 @@ import createDockerAndConfigs, {
   CreateDockerAndConfigsReturn,
   CreateDockerAndConfigsOptions,
 } from "./createDockerAndConfigs.ts";
-import cryptr from "../utils/cryptrInstance.ts";
 import { adminAccount } from "../constants.ts";
+import cryptr from "../utils/cryptrInstance.ts";
 import handleError from "../utils/handleError.ts";
 import submitTransaction from "./submitTransaction.ts";
+import { changeNode } from "../controllers/node.controller.ts";
 import deleteDockerAndConfigs from "./deleteDockerAndConfigs.ts";
 import { getClientById } from "../controllers/client.controller.ts";
 import { getAccountById } from "../controllers/account.controller.ts";
-import { changeNode, getNodes } from "../controllers/node.controller.ts";
 import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
@@ -81,13 +82,7 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
   }
 
   // Get the docker index and set it to the new node if it doesn't have one
-  const dockerIndex =
-    newNode.dockerIndex ??
-    (newNode.dockerIndex =
-      Math.max(
-        ...(await getNodes({}, { projection: { _id: 0, dockerIndex: 1 } })).map((d) => d.dockerIndex),
-        -1 // will become 0
-      ) + 1);
+  const dockerIndex = await getDockerIndex(newNode);
   // same with the node number
   const number = await getNodeNumber(newNode);
 

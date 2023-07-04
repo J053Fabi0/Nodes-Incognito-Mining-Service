@@ -4,7 +4,7 @@ import handleError from "../utils/handleError.ts";
 import sendMessage from "../telegram/sendMessage.ts";
 import { NewNode, pendingNodes } from "./submitNode.ts";
 import { adminTelegramUsername } from "../constants.ts";
-import { getNodes } from "../controllers/node.controller.ts";
+import { getNode, getNodes } from "../controllers/node.controller.ts";
 import { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 
 const redisKey = "newNodes";
@@ -70,15 +70,32 @@ export function addSaveToRedisProxy<T extends NewNode>(obj: T): T {
 }
 
 /** It returns the saved data or fetches and sets the data */
-export async function getNodeNumber(newNode: NewNode) {
-  return (
-    newNode.number ??
-    (newNode.number =
-      Math.max(
-        ...(await getNodes({ client: new ObjectId(newNode.clientId) }, { projection: { _id: 0, number: 1 } })).map(
-          (d) => d.number
-        ),
-        0 // will become 1
-      ) + 1)
-  );
+export async function getNodeNumber(newNode: NewNode): Promise<number> {
+  if (typeof newNode.number === "number") return newNode.number;
+
+  const node = await getNode({ validator: newNode.validator });
+  if (node) return (newNode.number = node.number);
+
+  return (newNode.number =
+    Math.max(
+      ...(await getNodes({ client: new ObjectId(newNode.clientId) }, { projection: { _id: 0, number: 1 } })).map(
+        (d) => d.number
+      ),
+      0 // will become 1
+    ) + 1);
+}
+
+export async function getDockerIndex(newNode: NewNode): Promise<number> {
+  if (typeof newNode.dockerIndex === "number") return newNode.dockerIndex;
+
+  const node = await getNode({ validator: newNode.validator });
+  if (node) return (newNode.dockerIndex = node.dockerIndex);
+
+  return (newNode.dockerIndex =
+    Math.max(
+      ...(
+        await getNodes({ client: new ObjectId(newNode.clientId) }, { projection: { _id: 0, dockerIndex: 1 } })
+      ).map((d) => d.dockerIndex),
+      -1 // will become 0
+    ) + 1);
 }

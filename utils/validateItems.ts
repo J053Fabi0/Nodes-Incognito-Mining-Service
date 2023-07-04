@@ -16,7 +16,7 @@ interface GenericOptions {
  * @param rawItems Array of raw items to validate. Example: ["1", "2", "3"].
  * @returns Array of valid items parsed to the type of the original valid items.
  */
-export default async function validateItems<T extends string | number = number>({
+export default async function validateItems<T extends string | number>({
   rawItems,
   validItems,
   name = "node",
