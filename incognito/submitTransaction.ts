@@ -87,41 +87,43 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
             // Resolve all the pending transactions.
             while (pending.lengthNoEvent > 0) {
               // get the first transaction
-              const transaction = pending[0];
+              const [transaction] = pending;
               if (!transaction) continue;
 
               // execute the transaction
-              let txHash: string | undefined | null;
-              {
-                const cli = new IncognitoCli(transaction.privateKey);
-                let i = 0;
-                do {
+              const txHash: string | null | undefined = await (async (
+                cli = new IncognitoCli(transaction.privateKey),
+                maxRetries = transaction.maxRetries ?? MAX_RETRIES,
+                retryDelay = transaction.retryDelay ?? RETRY_DELAY
+              ) => {
+                for (let i = 0; i < maxRetries; i++)
                   try {
-                    if (IS_PRODUCTION) {
-                      txHash = await cli.send(transaction.sendTo, transaction.amount);
-                    } else {
-                      txHash = await new Promise<string>((r) =>
+                    if (IS_PRODUCTION) return await cli.send(transaction.sendTo, transaction.amount);
+                    // fake transactions for testing
+                    else
+                      return await new Promise<string>((r) =>
                         setTimeout(() => r(`txHash_${Math.random()}`), 3_000)
                       );
-                    }
                   } catch (e) {
                     handleError(e);
                     transaction.retries.push(Date.now());
-                    await sleep(transaction.retryDelay ?? RETRY_DELAY);
+                    if (i !== maxRetries - 1) await sleep(retryDelay);
                   }
-                  // repeat while there's no txHash and the number of retries is less than the max
-                } while (txHash === undefined && ++i <= (transaction.maxRetries ?? MAX_RETRIES));
-                txHash = txHash ?? null;
-              }
+
+                // undefined means that the transaction couldn't be done
+                return undefined;
+              })();
 
               // update the transaction
-              const status = txHash ? AccountTransactionStatus.COMPLETED : AccountTransactionStatus.FAILED;
+              const status =
+                txHash === undefined ? AccountTransactionStatus.FAILED : AccountTransactionStatus.COMPLETED;
+
               await changeAccountTransaction(
                 { _id: new ObjectId(transaction.transactionId!) },
                 {
                   $set: {
-                    txHash,
                     status,
+                    txHash: txHash ?? null,
                     retries: transaction.retries.map((r) => new Date(r)),
                   },
                 }
@@ -132,7 +134,7 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
               saveToRedis();
 
               // resolve the promise
-              transaction.resolve?.({ status, txHash, retries: transaction.retries });
+              transaction.resolve?.({ status, txHash: txHash ?? null, retries: transaction.retries });
             }
 
             working = false;
