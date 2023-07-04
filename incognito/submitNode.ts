@@ -69,12 +69,12 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
   if (!newNode) return false;
 
   // Get the client and account
-  const client = await getClientById(newNode.clientId);
+  const client = await getClientById(newNode.clientId, { projection: { account: 1, telegram: 1, _id: 0 } });
   if (!client) {
     handleError(new Error(`Client ${newNode.clientId} not found`));
     return resolveAndForget(newNode, pending, false);
   }
-  const account = await getAccountById(client.account);
+  const account = await getAccountById(client.account, { projection: { _id: 0, privateKey: 1 } });
   if (!account) {
     sendErrorToClient(client.telegram);
     handleError(new Error(`Account ${client.account} not found`));
