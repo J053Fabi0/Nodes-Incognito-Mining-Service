@@ -81,62 +81,61 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
 
             saveToRedis();
 
-            if (!working) {
-              working = true;
+            if (working) return;
+            working = true;
 
-              // Resolve all the pending transactions.
-              while (pending.lengths > 0) {
-                // get the first transaction
-                const transaction = pending[0];
-                if (!transaction) continue;
+            // Resolve all the pending transactions.
+            while (pending.lengthNoEvent > 0) {
+              // get the first transaction
+              const transaction = pending[0];
+              if (!transaction) continue;
 
-                // execute the transaction
-                let txHash: string | undefined | null;
-                {
-                  const cli = new IncognitoCli(transaction.privateKey);
-                  let i = 0;
-                  do {
-                    try {
-                      if (IS_PRODUCTION) {
-                        txHash = await cli.send(transaction.sendTo, transaction.amount);
-                      } else {
-                        txHash = await new Promise<string>((r) =>
-                          setTimeout(() => r(`txHash_${Math.random()}`), 3_000)
-                        );
-                      }
-                    } catch (e) {
-                      handleError(e);
-                      transaction.retries.push(Date.now());
-                      await sleep(transaction.retryDelay ?? RETRY_DELAY);
+              // execute the transaction
+              let txHash: string | undefined | null;
+              {
+                const cli = new IncognitoCli(transaction.privateKey);
+                let i = 0;
+                do {
+                  try {
+                    if (IS_PRODUCTION) {
+                      txHash = await cli.send(transaction.sendTo, transaction.amount);
+                    } else {
+                      txHash = await new Promise<string>((r) =>
+                        setTimeout(() => r(`txHash_${Math.random()}`), 3_000)
+                      );
                     }
-                    // repeat while there's no txHash and the number of retries is less than the max
-                  } while (txHash === undefined && ++i <= (transaction.maxRetries ?? MAX_RETRIES));
-                  txHash = txHash ?? null;
-                }
-
-                // update the transaction
-                const status = txHash ? AccountTransactionStatus.COMPLETED : AccountTransactionStatus.FAILED;
-                await changeAccountTransaction(
-                  { _id: new ObjectId(transaction.transactionId!) },
-                  {
-                    $set: {
-                      txHash,
-                      status,
-                      retries: transaction.retries.map((r) => new Date(r)),
-                    },
+                  } catch (e) {
+                    handleError(e);
+                    transaction.retries.push(Date.now());
+                    await sleep(transaction.retryDelay ?? RETRY_DELAY);
                   }
-                );
-
-                // remove it from the array
-                pending.shiftNoEvent();
-                saveToRedis();
-
-                // resolve the promise
-                transaction.resolve?.({ status, txHash, retries: transaction.retries });
+                  // repeat while there's no txHash and the number of retries is less than the max
+                } while (txHash === undefined && ++i <= (transaction.maxRetries ?? MAX_RETRIES));
+                txHash = txHash ?? null;
               }
 
-              working = false;
+              // update the transaction
+              const status = txHash ? AccountTransactionStatus.COMPLETED : AccountTransactionStatus.FAILED;
+              await changeAccountTransaction(
+                { _id: new ObjectId(transaction.transactionId!) },
+                {
+                  $set: {
+                    txHash,
+                    status,
+                    retries: transaction.retries.map((r) => new Date(r)),
+                  },
+                }
+              );
+
+              // remove it from the array
+              pending.shiftNoEvent();
+              saveToRedis();
+
+              // resolve the promise
+              transaction.resolve?.({ status, txHash, retries: transaction.retries });
             }
+
+            working = false;
           }
         )()
       ));
@@ -144,12 +143,16 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
   }
 );
 
+/**
+ * @param urgent If true, the transaction will be placed at the beginning of the queue
+ */
 export default function submitTransaction(
   params: Omit<PendingTransaction, "resolve" | "retries" | "createdAt"> &
-    Partial<Pick<PendingTransaction, "createdAt">>
+    Partial<Pick<PendingTransaction, "createdAt">>,
+  urgent = false
 ): Promise<Result> {
   return new Promise((resolve) => {
-    pendingTransactionsByAccount[`${params.account}`].push(
+    pendingTransactionsByAccount[`${params.account}`][urgent ? "unshift" : "push"](
       addSaveToRedisProxy({ resolve, ...params, retries: [], createdAt: params.createdAt ?? Date.now() })
     );
   });
