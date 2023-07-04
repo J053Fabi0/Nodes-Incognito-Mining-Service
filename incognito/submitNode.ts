@@ -17,10 +17,10 @@ import { adminAccount } from "../constants.ts";
 import cryptr from "../utils/cryptrInstance.ts";
 import handleError from "../utils/handleError.ts";
 import submitTransaction from "./submitTransaction.ts";
-import { changeNode } from "../controllers/node.controller.ts";
 import deleteDockerAndConfigs from "./deleteDockerAndConfigs.ts";
 import { getClientById } from "../controllers/client.controller.ts";
 import { getAccountById } from "../controllers/account.controller.ts";
+import { changeNode, getNode } from "../controllers/node.controller.ts";
 import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
@@ -74,6 +74,18 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
     handleError(new Error(`Client ${newNode.clientId} not found`));
     return resolveAndForget(newNode, pending, false);
   }
+
+  // check if there's already a node with the same validator key that is active
+  const existingNode = await getNode(
+    { validator: newNode.validator },
+    { projection: { _id: 0, inactive: 1, dockerIndex: 1, number: 1 } }
+  );
+  if (existingNode && existingNode.inactive === false) {
+    sendErrorToClient(client.telegram, `Node with validator key ${newNode.validator} already exists`);
+    handleError(new Error(`Node with validator ${newNode.validator} already exists`));
+    return resolveAndForget(newNode, pending, false);
+  }
+
   const account = await getAccountById(client.account, { projection: { _id: 0, privateKey: 1 } });
   if (!account) {
     sendErrorToClient(client.telegram);
@@ -82,9 +94,9 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
   }
 
   // Get the docker index and set it to the new node if it doesn't have one
-  const dockerIndex = await getDockerIndex(newNode);
+  const dockerIndex = await getDockerIndex(newNode, existingNode);
   // same with the node number
-  const number = await getNodeNumber(newNode);
+  const number = await getNodeNumber(newNode, existingNode);
 
   // Create the docker and configs, but inactive for the moment.
   const success: false | CreateDockerAndConfigsReturn = await (async () => {

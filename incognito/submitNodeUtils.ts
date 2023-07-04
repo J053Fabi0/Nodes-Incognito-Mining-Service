@@ -2,6 +2,7 @@ import { ObjectId } from "mongo/mod.ts";
 import { redis } from "../initDatabase.ts";
 import handleError from "../utils/handleError.ts";
 import sendMessage from "../telegram/sendMessage.ts";
+import Node from "../types/collections/node.type.ts";
 import { NewNode, pendingNodes } from "./submitNode.ts";
 import { adminTelegramUsername } from "../constants.ts";
 import { getNode, getNodes } from "../controllers/node.controller.ts";
@@ -70,11 +71,15 @@ export function addSaveToRedisProxy<T extends NewNode>(obj: T): T {
 }
 
 /** It returns the saved data or fetches and sets the data */
-export async function getNodeNumber(newNode: NewNode): Promise<number> {
-  if (typeof newNode.number === "number") return newNode.number;
+export async function getNodeNumber(
+  newNode: NewNode,
+  existingNode?: Pick<Node, "number"> | null
+): Promise<number> {
+  existingNode =
+    existingNode ?? (await getNode({ validator: newNode.validator }, { projection: { _id: 0, number: 1 } }));
+  if (existingNode) return (newNode.number = existingNode.number);
 
-  const node = await getNode({ validator: newNode.validator });
-  if (node) return (newNode.number = node.number);
+  if (typeof newNode.number === "number") return newNode.number;
 
   return (newNode.number =
     Math.max(
@@ -85,11 +90,15 @@ export async function getNodeNumber(newNode: NewNode): Promise<number> {
     ) + 1);
 }
 
-export async function getDockerIndex(newNode: NewNode): Promise<number> {
-  if (typeof newNode.dockerIndex === "number") return newNode.dockerIndex;
+export async function getDockerIndex(
+  newNode: NewNode,
+  existingNode?: Pick<Node, "dockerIndex"> | null
+): Promise<number> {
+  existingNode =
+    existingNode ?? (await getNode({ validator: newNode.validator }, { projection: { _id: 0, dockerIndex: 1 } }));
+  if (existingNode) return (newNode.dockerIndex = existingNode.dockerIndex);
 
-  const node = await getNode({ validator: newNode.validator });
-  if (node) return (newNode.dockerIndex = node.dockerIndex);
+  if (typeof newNode.dockerIndex === "number") return newNode.dockerIndex;
 
   return (newNode.dockerIndex =
     Math.max(
