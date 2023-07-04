@@ -119,27 +119,29 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
     return resolveAndForget(newNode, pending, false);
   }
 
-  // Charge the client
-  const { status } = await submitTransaction(
-    {
-      maxRetries: 20,
-      amount: newNode.cost,
-      account: client.account,
-      userId: newNode.clientId,
-      sendTo: adminAccount.paymentAddress,
-      type: AccountTransactionType.EXPENSE,
-      details: `Setup fee for node #${newNode.number}`,
-      privateKey: await cryptr.decrypt(account.privateKey),
-    },
-    true // urgent transaction
-  );
+  // Charge the client if the cost is greater than 0
+  if (newNode.cost > 0) {
+    const { status } = await submitTransaction(
+      {
+        maxRetries: 20,
+        amount: newNode.cost,
+        account: client.account,
+        userId: newNode.clientId,
+        sendTo: adminAccount.paymentAddress,
+        type: AccountTransactionType.EXPENSE,
+        details: `Setup fee for node #${newNode.number}`,
+        privateKey: await cryptr.decrypt(account.privateKey),
+      },
+      true // urgent transaction
+    );
 
-  // If the transaction failed, delete the docker and configs, and alert the admin and client
-  if (status === AccountTransactionStatus.FAILED) {
-    sendErrorToClient(client.telegram, `There was a problem charging you for node #${newNode.number}.`);
-    handleError(new Error(`Couldn't charge client ${newNode.clientId} for node #${dockerIndex}`));
-    await deleteDockerAndConfigs({ dockerIndex, number, clientId: newNode.clientId });
-    return resolveAndForget(newNode, pending, false);
+    // If the transaction failed, delete the docker and configs, and alert the admin and client
+    if (status === AccountTransactionStatus.FAILED) {
+      sendErrorToClient(client.telegram, `There was a problem charging you for node #${newNode.number}.`);
+      handleError(new Error(`Couldn't charge client ${newNode.clientId} for node #${dockerIndex}`));
+      await deleteDockerAndConfigs({ dockerIndex, number, clientId: newNode.clientId });
+      return resolveAndForget(newNode, pending, false);
+    }
   }
 
   // Activate the node and configs
