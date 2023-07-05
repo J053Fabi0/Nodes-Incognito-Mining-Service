@@ -1,3 +1,4 @@
+import { Big } from "math";
 import { qrcode } from "qrcode";
 import dayjs from "dayjs/mod.ts";
 import utc from "dayjs/plugin/utc.ts";
@@ -51,7 +52,10 @@ export const handler: Handlers<NewNodeProps, State> = {
     if (savedPrvPrice.expires <= Date.now()) {
       savedPrvPrice.usd = await getPRVPrice();
       // add the fee to transfer the PRV to the admin account later
-      savedPrvPrice.prvToPay = +toFixedS(setupFeeUSD / savedPrvPrice.usd, 2) + incognitoFee;
+      savedPrvPrice.prvToPay = +toFixedS(
+        new Big(setupFeeUSD).div(savedPrvPrice.usd).add(incognitoFee).valueOf(),
+        2
+      );
       savedPrvPrice.expires = dayjs().utc().add(minutesOfPriceStability, "minute").valueOf();
 
       ctx.state.session.set("prvPrice", savedPrvPrice);
