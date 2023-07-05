@@ -27,7 +27,7 @@ interface HomeProps {
 
 export const handler: Handlers<HomeProps, State> = {
   async GET(_, ctx) {
-    const nodesCount = await countNodes();
+    const nodesCount = await countNodes({ inactive: { $ne: true } });
     const earningsCount = await countNodeEarnings();
 
     const { averageTotalEarningsByMonth, monthsLabels } = await getNodesStatistics();
