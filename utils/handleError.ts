@@ -3,6 +3,8 @@ import isError from "../types/guards/isError.ts";
 import sendMessage from "../telegram/sendMessage.ts";
 import isMongoServerError from "../types/guards/isMongoServerError.ts";
 
+const maxLength = 4096 - "<code></code>".length - 10;
+
 // deno-lint-ignore no-explicit-any
 export default async function handleError(e: any) {
   console.error("#".repeat(40));
@@ -16,14 +18,14 @@ export default async function handleError(e: any) {
   }
   if (isMongoServerError(e) && e.codeName === "NotPrimaryNoSecondaryOk") Deno.exit(1); // exit with error so that PM2 restarts the process
 
-  const sMessage = (message: string) =>
-    sendMessage(`<code>${escapeHtml(message)}</code>`, undefined, { parse_mode: "HTML" });
+  const sendError = (message: string) =>
+    sendMessage(`<code>${escapeHtml(message).slice(0, maxLength)}</code>`, undefined, { parse_mode: "HTML" });
 
   try {
     if ("message" in e) {
-      await sMessage(typeof e.message === "object" ? JSON.stringify(e.message) : e.message);
+      await sendError(typeof e.message === "object" ? JSON.stringify(e.message) : e.message);
     } else {
-      await sMessage(JSON.stringify(e));
+      await sendError(JSON.stringify(e));
     }
   } catch (e) {
     console.error(e);
