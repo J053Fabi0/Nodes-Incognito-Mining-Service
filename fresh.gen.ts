@@ -24,8 +24,9 @@ import * as $18 from "./routes/nodes/index.tsx";
 import * as $19 from "./routes/nodes/monitor.tsx";
 import * as $20 from "./routes/nodes/new-confirm.tsx";
 import * as $21 from "./routes/nodes/new.tsx";
-import * as $22 from "./routes/signin.tsx";
-import * as $23 from "./routes/signout.tsx";
+import * as $22 from "./routes/nodes/notifications.tsx";
+import * as $23 from "./routes/signin.tsx";
+import * as $24 from "./routes/signout.tsx";
 import * as $$0 from "./islands/Balance.tsx";
 import * as $$1 from "./islands/LocaleDate.tsx";
 import * as $$2 from "./islands/RelativeDate.tsx";
@@ -56,8 +57,9 @@ const manifest = {
     "./routes/nodes/monitor.tsx": $19,
     "./routes/nodes/new-confirm.tsx": $20,
     "./routes/nodes/new.tsx": $21,
-    "./routes/signin.tsx": $22,
-    "./routes/signout.tsx": $23,
+    "./routes/nodes/notifications.tsx": $22,
+    "./routes/signin.tsx": $23,
+    "./routes/signout.tsx": $24,
   },
   islands: {
     "./islands/Balance.tsx": $$0,

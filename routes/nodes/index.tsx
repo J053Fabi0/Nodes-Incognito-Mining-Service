@@ -41,6 +41,12 @@ export default function Nodes() {
             All earnings records
           </a>
         </li>
+
+        <li class={styles.li}>
+          <a href="nodes/notifications" class="underline">
+            Notifications
+          </a>
+        </li>
       </ul>
     </>
   );
