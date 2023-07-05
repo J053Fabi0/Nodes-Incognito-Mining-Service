@@ -4,10 +4,12 @@ import isGrammyError from "../types/guards/isGrammyError.ts";
 import isStringOrNumber from "../types/guards/isStringOrNumber.ts";
 import { changeClient, getClient } from "../controllers/client.controller.ts";
 
+type Options = Parameters<typeof bot.api.sendMessage>[2];
+
 const sendMessage = (
   message: string,
   chatID: string | number = ADMIN_ID,
-  options: Parameters<typeof bot.api.sendMessage>[2] = {},
+  options: Options = {},
   botInstance: "bot" | "notificationsBot" = "bot"
 ) =>
   (botInstance === "bot" ? bot : notificationsBot).api
@@ -18,7 +20,7 @@ export default sendMessage;
 export const sendHTMLMessage = (
   message: string,
   chatID: string | number = ADMIN_ID,
-  options: Omit<Parameters<typeof bot.api.sendMessage>[2], "parse_mode"> = {},
+  options: Omit<Exclude<Options, undefined>, "parse_mode"> = {},
   botInstance: "bot" | "notificationsBot" = "bot"
 ) =>
   (botInstance === "bot" ? bot : notificationsBot).api

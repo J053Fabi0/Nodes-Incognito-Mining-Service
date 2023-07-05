@@ -5,6 +5,7 @@ export const loggedInURLs = [
   "/balance",
   "/me",
   "/me/*",
+  "/bot-is-blocked",
 ].map((pathname) => new URLPattern({ pathname }));
 
 /**
