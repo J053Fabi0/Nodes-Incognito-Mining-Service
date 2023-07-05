@@ -7,6 +7,7 @@ import { redisSession } from "fresh-session/mod.ts";
 import LastAccess from "../types/lastAccess.type.ts";
 import { Middleware } from "$fresh/src/server/types.ts";
 import isLoggedInPage from "../utils/isLoggedInPage.tsx";
+import isFreshOrStaticPage from "../utils/isFreshOrStatic.ts";
 import { getClient } from "../controllers/client.controller.ts";
 
 export const { handler }: Middleware<State> = {
@@ -20,7 +21,8 @@ export const { handler }: Middleware<State> = {
     }),
 
     // parse the session data
-    (_, ctx) => {
+    (req, ctx) => {
+      if (isFreshOrStaticPage(req.url)) return ctx.next();
       ctx.state.userId = ctx.state.session.get("userId");
       ctx.state.commandResponse = ctx.state.session.get("commandResponse");
       ctx.state.supplanting = Boolean(ctx.state.session.get("supplanting"));
@@ -34,7 +36,8 @@ export const { handler }: Middleware<State> = {
     },
 
     // fetch de user data
-    async (_, ctx) => {
+    async (req, ctx) => {
+      if (isFreshOrStaticPage(req.url)) return ctx.next();
       ctx.state.user = null;
 
       if (!ctx.state.userId) return ctx.next();
@@ -52,6 +55,9 @@ export const { handler }: Middleware<State> = {
           `last_access_${ctx.state.userId}`,
           JSON.stringify({ user: { account: `${user.account}` }, date: Date.now() } satisfies LastAccess)
         );
+
+        const url = new URL(req.url);
+        if (user.isBotBlocked && url.pathname !== "/bot-is-blocked") return redirect("/bot-is-blocked");
       }
 
       return ctx.next();
@@ -59,6 +65,7 @@ export const { handler }: Middleware<State> = {
 
     // check if the user is trying to access a page he's not supposed to
     async (req, ctx) => {
+      if (isFreshOrStaticPage(req.url)) return ctx.next();
       const url = new URL(req.url);
       if (url.pathname === "") return await ctx.next();
 
@@ -77,7 +84,8 @@ export const { handler }: Middleware<State> = {
     },
 
     // add the Link: rel="modulepreload" header
-    async (_, ctx) => {
+    async (req, ctx) => {
+      if (isFreshOrStaticPage(req.url)) return ctx.next();
       const response = await ctx.next();
       response.headers.append("Link", 'rel="modulepreload"');
       return response;
