@@ -1,5 +1,5 @@
 import { JSX } from "preact";
-import { ShadedColors } from "../twind.config.ts";
+import { ShadedColors } from "../utils/twindColors.ts";
 
 interface SwitchProps {
   checked: boolean;
@@ -32,12 +32,12 @@ export default function Switch({
 
   return (
     <div class={classes}>
-      <div class="flex items-center">
+      <div class="flex items-center gap-2">
         <div {...props} class={buttonClass}>
           <div class={circleClass} />
         </div>
 
-        {label && <p class="ml-2 leading-none">{label}</p>}
+        {label && <p class="leading-none">{label}</p>}
       </div>
     </div>
   );
