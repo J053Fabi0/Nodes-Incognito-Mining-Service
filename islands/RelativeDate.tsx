@@ -12,13 +12,18 @@ interface RelativeDateProps {
 }
 
 export default function RelativeDate({ date, capitalize }: RelativeDateProps) {
-  const interval = useSignal<number | null>(null);
+  const interval = useSignal<number | undefined>(undefined);
   const t = useSignal<string>(dayjs(date).fromNow());
 
-  if (interval.value === null)
+  // Don't run this on the server
+  if (!globalThis.Deno)
     interval.value = setInterval(() => {
-      interval.value = null;
-      t.value = dayjs(date).fromNow();
+      const newT = dayjs(date).fromNow();
+
+      if (newT !== t.peek()) {
+        clearInterval(interval.value);
+        t.value = newT;
+      }
     }, 1_000);
 
   return <>{capitalize ? capitalizeFn(t.value) : t.value}.</>;

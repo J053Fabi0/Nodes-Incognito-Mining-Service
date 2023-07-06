@@ -42,16 +42,22 @@ function checkGoal(goal: number, balance: number, redirectTo: string, whenLowerT
 }
 
 export default function Balance(options: BalanceRedirectProps | BalanceProps): JSX.Element {
-  const interval = useSignal<number | null>(null);
+  const interval = useSignal<number | undefined>(undefined);
   /** Balance Int format */
   const balance = useSignal<number>(typeof options.initialBalance === "number" ? options.initialBalance : 0);
 
-  if (interval.value === null && "goal" in options && typeof options.goal === "number")
-    interval.value = setInterval(async () => {
-      const { data } = await axiod.get<{ balance: number }>(`${options.websiteUrl}/balance`);
-      balance.value = data.balance;
-      checkGoal(options.goal * 1e9, balance.value, options.redirectsTo, options.whenLowerThanGoal ?? false);
-    }, 6_000);
+  // Don't run this on the server
+  if (!globalThis.Deno)
+    if ("goal" in options && typeof options.goal === "number")
+      interval.value = setInterval(async () => {
+        const { data } = await axiod.get<{ balance: number }>(`${options.websiteUrl}/balance`);
+
+        if (balance.peek() !== data.balance) {
+          clearInterval(interval.value);
+          balance.value = data.balance;
+          checkGoal(options.goal * 1e9, balance.value, options.redirectsTo, options.whenLowerThanGoal ?? false);
+        }
+      }, 6_000);
 
   const finalBalance = useComputed(() => {
     if (typeof options.substract === "number") return balance.value - options.substract;
