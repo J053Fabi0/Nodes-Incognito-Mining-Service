@@ -8,6 +8,7 @@
 
     "run": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts",
     "dev": "deno run --watch=static/,routes/  --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts -i",
+    "devNoAlive": "DENO_DEPLOYMENT_ID=\"$(git rev-parse HEAD)\" deno run --watch=static/,routes/  --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts -i",
     "check": "deno check main.ts crons.ts",
     "diffuse": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write utils/diffuse.ts"
   },
