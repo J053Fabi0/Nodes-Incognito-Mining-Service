@@ -1,3 +1,4 @@
+import { asset } from "https://deno.land/x/fresh@1.2.0/runtime.ts";
 import Button from "./Button.tsx";
 import Typography from "./Typography.tsx";
 
@@ -110,7 +111,7 @@ export default function Navbar({ loggedIn = false, isAdmin = false }) {
         </div>
       </div>
 
-      <script src="https://unpkg.com/@material-tailwind/html@latest/scripts/collapse.js"></script>
+      <script src={asset("/scripts/collapse.js")}></script>
     </nav>
   );
 }
