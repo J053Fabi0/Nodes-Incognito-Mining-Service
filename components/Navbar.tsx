@@ -1,5 +1,5 @@
-import { asset } from "https://deno.land/x/fresh@1.2.0/runtime.ts";
 import Button from "./Button.tsx";
+import { asset } from "$fresh/runtime.ts";
 import Typography from "./Typography.tsx";
 
 interface Page {

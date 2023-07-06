@@ -15,6 +15,7 @@ export default async function handleError(e: any) {
   if (isError(e)) {
     if (e.message.startsWith("error sending request for url")) return;
     if (e.message.includes("Resource temporarily unavailable")) Deno.exit(1); // exit with error so that PM2 restarts the process
+    if (e.message.includes("Error when retrieving balance: cannot check spent coins")) return;
   }
   if (isMongoServerError(e) && e.codeName === "NotPrimaryNoSecondaryOk") Deno.exit(1); // exit with error so that PM2 restarts the process
 
@@ -29,6 +30,6 @@ export default async function handleError(e: any) {
     }
   } catch (e) {
     console.error(e);
-    await sendMessage("Error al enviar mensaje de Telegram.");
+    await sendMessage("Error al enviar mensaje de Telegram.").catch(console.error);
   }
 }
