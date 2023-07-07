@@ -28,10 +28,12 @@ import * as $22 from "./routes/nodes/notifications.tsx";
 import * as $23 from "./routes/signin.tsx";
 import * as $24 from "./routes/signout.tsx";
 import * as $$0 from "./islands/Balance.tsx";
-import * as $$1 from "./islands/LocaleDate.tsx";
-import * as $$2 from "./islands/RelativeDate.tsx";
-import * as $$3 from "./islands/TimeLeft.tsx";
-import * as $$4 from "./islands/Withdraw.tsx";
+import * as $$1 from "./islands/EarningsTable.tsx";
+import * as $$2 from "./islands/EarningsTableAndOptions.tsx";
+import * as $$3 from "./islands/LocaleDate.tsx";
+import * as $$4 from "./islands/RelativeDate.tsx";
+import * as $$5 from "./islands/TimeLeft.tsx";
+import * as $$6 from "./islands/Withdraw.tsx";
 
 const manifest = {
   routes: {
@@ -63,10 +65,12 @@ const manifest = {
   },
   islands: {
     "./islands/Balance.tsx": $$0,
-    "./islands/LocaleDate.tsx": $$1,
-    "./islands/RelativeDate.tsx": $$2,
-    "./islands/TimeLeft.tsx": $$3,
-    "./islands/Withdraw.tsx": $$4,
+    "./islands/EarningsTable.tsx": $$1,
+    "./islands/EarningsTableAndOptions.tsx": $$2,
+    "./islands/LocaleDate.tsx": $$3,
+    "./islands/RelativeDate.tsx": $$4,
+    "./islands/TimeLeft.tsx": $$5,
+    "./islands/Withdraw.tsx": $$6,
   },
   baseUrl: import.meta.url,
 };

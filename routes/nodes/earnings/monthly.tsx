@@ -12,18 +12,17 @@ import { toFixedS } from "../../../utils/numbersString.ts";
 import Typography from "../../../components/Typography.tsx";
 import getQueryParams from "../../../utils/getQueryParams.ts";
 import { getNodes } from "../../../controllers/node.controller.ts";
-import EarningsTable from "../../../components/Nodes/EarningsTable.tsx";
-import NodeEarning from "../../../types/collections/nodeEarning.type.ts";
 import MonthlyEarningsTable from "../../../components/Nodes/MonthlyEarningsTable.tsx";
+import EarningsTable, { EarningForEarningsTable } from "../../../islands/EarningsTable.tsx";
 import { getNodeEarnings, getTotalEarnings } from "../../../controllers/nodeEarning.controller.ts";
 
 dayjs.extend(utc);
 
 interface MonthlyNodesEarningsProps {
   monthsLeft: number;
-  earnings: NodeEarning[];
   monthEarnings: string[];
   nodes: Record<string, number>;
+  earnings: EarningForEarningsTable[];
 }
 
 const MAX_MONTHS = 5;
@@ -42,7 +41,16 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
     const nodesByNumber: MonthlyNodesEarningsProps["nodes"] = {};
     for (const node of nodes) nodesByNumber[`${node._id}`] = node.number;
 
-    const earnings = await getNodeEarnings({ node: { $in: nodesIds } }, { limit: LIMIT, sort: { epoch: -1 } });
+    const earnings = (
+      await getNodeEarnings(
+        { node: { $in: nodesIds } },
+        {
+          limit: LIMIT,
+          sort: { epoch: -1 },
+          projection: { _id: 0, epoch: 1, time: 1, node: 1, earning: 1 },
+        }
+      )
+    ).map((e) => ({ ...e, time: +e.time }));
 
     const oldestEarning = dayjs(Math.min(...nodes.map((n) => +n.createdAt)));
     const months = dayjs().utc().diff(oldestEarning, "month");

@@ -2,17 +2,15 @@ import { ObjectId } from "mongo/mod.ts";
 import { Head } from "$fresh/runtime.ts";
 import State from "../../../types/state.type.ts";
 import redirect from "../../../utils/redirect.ts";
-import Switch from "../../../components/Switch.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { toFixedS } from "../../../utils/numbersString.ts";
 import Pagination from "../../../components/Pagination.tsx";
 import Typography from "../../../components/Typography.tsx";
 import getQueryParams from "../../../utils/getQueryParams.ts";
-import NodePill from "../../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../../controllers/node.controller.ts";
-import EarningsTable from "../../../components/Nodes/EarningsTable.tsx";
-import NodeEarning from "../../../types/collections/nodeEarning.type.ts";
+import { EarningForEarningsTable } from "../../../islands/EarningsTable.tsx";
 import { getTotalEarnings } from "../../../controllers/nodeEarning.controller.ts";
+import EarningsTableAndOptions from "../../../islands/EarningsTableAndOptions.tsx";
 import MonthlyEarningsTable from "../../../components/Nodes/MonthlyEarningsTable.tsx";
 import { getNodeEarnings, countNodeEarnings } from "../../../controllers/nodeEarning.controller.ts";
 
@@ -20,9 +18,9 @@ interface NodesEarningsProps {
   page: number;
   pages: number[];
   relative: boolean;
-  earnings: NodeEarning[];
   monthEarnings: string[];
   nodes: Record<string, number>;
+  earnings: EarningForEarningsTable[];
 }
 
 const LIMIT = 30;
@@ -51,14 +49,17 @@ export const handler: Handlers<NodesEarningsProps, State> = {
     if (page > pages.length && pages.length)
       return redirect(`/nodes/earnings?${relative ? "relative&" : ""}page=${pages.length}`);
 
-    const earnings = await getNodeEarnings(
-      { node: { $in: nodesIds } },
-      {
-        limit: LIMIT,
-        sort: { epoch: -1 },
-        skip: (page - 1) * LIMIT,
-      }
-    );
+    const earnings = (
+      await getNodeEarnings(
+        { node: { $in: nodesIds } },
+        {
+          limit: LIMIT,
+          sort: { epoch: -1 },
+          skip: (page - 1) * LIMIT,
+          projection: { _id: 0, epoch: 1, time: 1, node: 1, earning: 1 },
+        }
+      )
+    ).map((e) => ({ ...e, time: +e.time }));
 
     const monthEarnings: string[] = [];
     for (let i = 0; i < 2; i++) {
@@ -102,7 +103,7 @@ export default function NodesEarnings({ data }: PageProps<NodesEarningsProps>) {
       {head}
 
       <MonthlyEarningsTable monthEarnings={data.monthEarnings} horizontal />
-      <a href="earnings/monthly">
+      <a href="earnings/monthly" class="w-min block whitespace-nowrap">
         <Typography variant="p" class="my-2 hover:underline after:content-['_↗'] text-blue-600">
           View more
         </Typography>
@@ -110,24 +111,12 @@ export default function NodesEarnings({ data }: PageProps<NodesEarningsProps>) {
 
       <hr class="mb-5" />
 
-      <div class="flex flex-wrap items-center gap-3 mt-1">
-        {nodeNumbers.map((n, i) => (
-          <NodePill
-            nodeNumber={n}
-            baseURL="earnings"
-            relative={relative}
-            class={i === nodesCount - 1 ? "mr-3" : ""}
-          />
-        ))}
-
-        <a href={`earnings/?${relative ? "" : "relative&"}page=${page}`}>
-          <Switch checked={relative} size={20} color="sky" label="Relative dates" />
-        </a>
-      </div>
-
-      <hr class="my-5" />
-
-      <EarningsTable baseURL="earnings" earnings={earnings} nodes={nodes} relative={relative} />
+      <EarningsTableAndOptions
+        nodes={nodes}
+        earnings={earnings}
+        nodeNumbers={nodeNumbers}
+        defaultRelative={relative}
+      />
 
       {pages.length > 1 && (
         <Pagination

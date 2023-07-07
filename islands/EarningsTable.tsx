@@ -1,17 +1,21 @@
-import LocaleDate from "../../islands/LocaleDate.tsx";
-import NodePill, { NodePillProps } from "./NodePill.tsx";
-import RelativeDate from "../../islands/RelativeDate.tsx";
-import NodeEarning from "../../types/collections/nodeEarning.type.ts";
+import LocaleDate from "./LocaleDate.tsx";
+import RelativeDate from "./RelativeDate.tsx";
+import NodeEarning from "../types/collections/nodeEarning.type.ts";
+import NodePill, { NodePillProps } from "../components/Nodes/NodePill.tsx";
 
 const styles = {
   th: "border border-slate-300 py-2 px-3",
   td: "border border-slate-300 py-2 px-3 text-center",
 };
 
+export interface EarningForEarningsTable extends Pick<NodeEarning, "epoch" | "earning" | "node"> {
+  time: number;
+}
+
 interface EarninsTableProps {
   /** Wether or not to use relative time */
   relative: boolean;
-  earnings: NodeEarning[];
+  earnings: EarningForEarningsTable[];
 
   /** Id as key and node number as value */
   nodes: Record<string, number>;
