@@ -1,6 +1,6 @@
 function addSingularPlural(value: number, ignore = false) {
   if (ignore) return "";
-  return value > 1 ? "s" : "";
+  return value === 1 ? "" : "s";
 }
 
 interface Options {
@@ -48,11 +48,11 @@ export default function msToTimeDescription(ms: number | Date, { short }: Option
   const timeDescription = [];
   if (leftTimes.days > 0)
     timeDescription.push(`${leftTimes.days}${words.days}${addSingularPlural(leftTimes.days, short)}`);
-  if (leftTimes.hours > 0)
+  if (leftTimes.hours > 0 || timeDescription.length > 0)
     timeDescription.push(`${leftTimes.hours}${words.hours}${addSingularPlural(leftTimes.hours, short)}`);
-  if (leftTimes.minutes > 0)
+  if (leftTimes.minutes > 0 || timeDescription.length > 0)
     timeDescription.push(`${leftTimes.minutes}${words.minutes}${addSingularPlural(leftTimes.minutes, short)}`);
-  if (leftTimes.seconds > 0)
+  if (leftTimes.seconds > 0 || timeDescription.length > 0)
     timeDescription.push(`${leftTimes.seconds}${words.seconds}${addSingularPlural(leftTimes.seconds, short)}`);
 
   if (timeDescription.length === 0) return `0${words.seconds}${addSingularPlural(0, short)}`;
