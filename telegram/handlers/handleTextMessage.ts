@@ -253,7 +253,7 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; 
         <head>
           <meta charset="utf-8">
           <style>
-            ${Deno.readTextFileSync("./html/markdown_css.css")}
+            ${Deno.readTextFileSync("./static/styles/markdown_css.css")}
           </style>
         </head>
         <body>
