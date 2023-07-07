@@ -11,6 +11,7 @@ import getPRVPrice from "../../utils/getPRVPrice.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { toFixedS } from "../../utils/numbersString.ts";
 import Typography from "../../components/Typography.tsx";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
 import { incognitoFee, minutesOfPriceStability, setupFeeUSD } from "../../constants.ts";
@@ -102,7 +103,7 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         <img src={paymentAddressImage} alt="Payment address" class="mb-3" />
       </div>
 
-      <Typography variant="lead" class="mb-3">
+      <Typography variant="lead" class="mb-3 flex gap-2 items-center">
         Balance:{" "}
         <b>
           <code>
@@ -115,6 +116,7 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
           </code>
         </b>{" "}
         PRV.
+        <AiOutlineLoading3Quarters size={16} class="animate-spin duration-75" title="Updated every 6 seconds" />
       </Typography>
 
       <Typography variant="lead" class="mb-3">
