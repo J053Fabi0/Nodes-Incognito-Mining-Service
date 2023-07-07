@@ -1,9 +1,9 @@
 import Cron from "croner";
-import checkNodes from "./utils/checkNodes.ts";
-import handleError from "./utils/handleError.ts";
-import checkEarnings from "./utils/checkEarnings.ts";
-import checkAccounts, { Unit } from "./utils/checkAccounts.ts";
-import deleteEmptySessions from "./utils/deleteEmptySessions.ts";
+import checkNodes from "./checkNodes.ts";
+import checkEarnings from "./checkEarnings.ts";
+import handleError from "../utils/handleError.ts";
+import checkAccounts, { Unit } from "./checkAccounts.ts";
+import deleteEmptySessions from "./deleteEmptySessions.ts";
 
 new Cron("*/5 * * * *", { protect: true, catch: handleError }, checkEarnings);
 

@@ -1,20 +1,26 @@
-import flags from "./flags.ts";
+import {
+  errorTypes,
+  AllErrorTypes,
+  lastErrorTimes,
+  globalErrorTypes,
+  lastGlobalErrorTimes,
+} from "../utils/variables.ts";
+import flags from "../utils/flags.ts";
 import { escapeHtml } from "escapeHtml";
-import isBeingIgnored from "./isBeingIgnored.ts";
-import getNodesStatus from "./getNodesStatus.ts";
-import handleNodeError from "./handleNodeError.ts";
-import getShouldBeOffline from "./getShouldBeOffline.ts";
+import getNodesStatus from "../utils/getNodesStatus.ts";
+import isBeingIgnored from "../utils/isBeingIgnored.ts";
+import handleNodeError from "../utils/handleNodeError.ts";
 import handleInfo from "../telegram/handlers/handleInfo.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
-import getMinutesSinceError from "./getMinutesSinceError.ts";
 import handleDelete from "../telegram/handlers/handleDelete.ts";
+import getShouldBeOffline from "../utils/getShouldBeOffline.ts";
+import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
 import { waitingTimes, maxDiskPercentageUsage } from "../constants.ts";
 import { df, docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import handleCopyOrMove from "../telegram/handlers/handleCopyOrMove.ts";
 import handleTextMessage from "../telegram/handlers/handleTextMessage.ts";
-import getInstructionsToMoveOrDelete from "./getInstructionsToMoveOrDelete.ts";
+import getInstructionsToMoveOrDelete from "../utils/getInstructionsToMoveOrDelete.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
-import { errorTypes, AllErrorTypes, lastErrorTimes, globalErrorTypes, lastGlobalErrorTimes } from "./variables.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, number | undefined>, errorKey: string) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || Date.now();

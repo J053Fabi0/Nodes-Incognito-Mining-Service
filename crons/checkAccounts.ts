@@ -1,8 +1,8 @@
 import dayjs from "dayjs/mod.ts";
 import { ObjectId } from "mongo/mod.ts";
-import cryptr from "./cryptrInstance.ts";
 import { redis } from "../initDatabase.ts";
-import handleError from "./handleError.ts";
+import cryptr from "../utils/cryptrInstance.ts";
+import handleError from "../utils/handleError.ts";
 import IncognitoCli from "../incognito/IncognitoCli.ts";
 import { isLastAccess } from "../types/lastAccess.type.ts";
 import { changeAccount, getAccount } from "../controllers/account.controller.ts";
