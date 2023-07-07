@@ -31,9 +31,8 @@ function setProxy<T extends AcceptedRecord>(data: T, redisKey: string, rootData:
       return a;
     },
     deleteProperty: (target, key) => {
-      const a = Reflect.deleteProperty(target, key);
       setTimeout(() => redis.set(redisPrefix + redisKey, JSON.stringify(rootData)), 0);
-      return a;
+      return Reflect.deleteProperty(target, key);
     },
   });
 }

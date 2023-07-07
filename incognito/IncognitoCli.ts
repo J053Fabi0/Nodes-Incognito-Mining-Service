@@ -10,9 +10,9 @@ const PRV_ID = "0000000000000000000000000000000000000000000000000000000000000004
 
 export default class IncognitoCli {
   static PRV_ID = PRV_ID;
-  static validatorKeyRegex = /[a-z0-9A-Z]{49,51}/;
-  static paymentAddressRegex = /[a-z0-9A-Z]{148}/;
-  static validatorPublicKeyRegex = /[a-z0-9A-Z]{180,181}/;
+  static validatorKeyRegex = /^[a-z0-9A-Z]{49,51}$/;
+  static paymentAddressRegex = /^[a-z0-9A-Z]{148}$/;
+  static validatorPublicKeyRegex = /^[a-z0-9A-Z]{180,181}$/;
   static incognitoCli = binaryWrapper(join(fromFileUrl(import.meta.url), "..", "incognito-cli"));
 
   privateKey?: string;
