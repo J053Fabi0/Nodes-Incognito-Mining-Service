@@ -1,6 +1,6 @@
-import State from "../types/state.type.ts";
 import { Handlers } from "$fresh/server.ts";
-import { getAccount } from "../controllers/account.controller.ts";
+import State from "../../types/state.type.ts";
+import { getAccount } from "../../controllers/account.controller.ts";
 
 export const handler: Handlers<null, State> = {
   async GET(_, ctx) {

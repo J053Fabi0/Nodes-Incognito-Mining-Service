@@ -9,7 +9,7 @@ import * as $3 from "./routes/_middleware.tsx";
 import * as $4 from "./routes/admin/accounts.tsx";
 import * as $5 from "./routes/admin/index.tsx";
 import * as $6 from "./routes/admin/nodes.tsx";
-import * as $7 from "./routes/balance.tsx";
+import * as $7 from "./routes/api/balance.tsx";
 import * as $8 from "./routes/bot-is-blocked.tsx";
 import * as $9 from "./routes/credentials.tsx";
 import * as $10 from "./routes/diffuse.tsx";
@@ -44,7 +44,7 @@ const manifest = {
     "./routes/admin/accounts.tsx": $4,
     "./routes/admin/index.tsx": $5,
     "./routes/admin/nodes.tsx": $6,
-    "./routes/balance.tsx": $7,
+    "./routes/api/balance.tsx": $7,
     "./routes/bot-is-blocked.tsx": $8,
     "./routes/credentials.tsx": $9,
     "./routes/diffuse.tsx": $10,

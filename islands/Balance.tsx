@@ -50,7 +50,7 @@ export default function Balance(options: BalanceRedirectProps | BalanceProps): J
   if (!globalThis.Deno)
     if ("goal" in options && typeof options.goal === "number")
       interval.value = setInterval(async () => {
-        const { data } = await axiod.get<{ balance: number }>(`${options.websiteUrl}/balance`);
+        const { data } = await axiod.get<{ balance: number }>(`${options.websiteUrl}/api/balance`);
 
         if (balance.peek() !== data.balance) {
           clearInterval(interval.value);

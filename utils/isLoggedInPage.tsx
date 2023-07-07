@@ -2,7 +2,7 @@ export const loggedInURLs = [
   //
   "/nodes",
   "/nodes/*",
-  "/balance",
+  "/api/*",
   "/me",
   "/me/*",
   "/bot-is-blocked",
