@@ -1,5 +1,5 @@
-import { redis } from "../initDatabase.ts";
 import flags from "./flags.ts";
+import { redis } from "../initDatabase.ts";
 
 const redisPrefix = "variable_";
 
@@ -8,7 +8,7 @@ if (flags.reloadRedisVariables) await redis.del(redisPrefix + "*");
 type AcceptedValues = number | string | boolean | null | undefined;
 type AcceptedRecord = Record<
   string | number | symbol,
-  { [key: string]: AcceptedRecord | AcceptedValues } | AcceptedValues
+  { [key: string | number | symbol]: AcceptedRecord | AcceptedValues } | AcceptedValues
 >;
 
 function isRecord<T extends AcceptedRecord>(data: AcceptedRecord | AcceptedValues): data is T {
@@ -24,13 +24,16 @@ function setProxy<T extends AcceptedRecord>(data: T, redisKey: string, rootData:
 
   return new Proxy<T>(data, {
     set: (target, key, value) => {
-      redis.set(redisPrefix + redisKey, JSON.stringify(rootData));
-      if (isRecord(value)) value = setProxy(value, redisKey, rootData);
-      return Reflect.set(target, key, value);
+      const a = Reflect.set(target, key, value);
+      if (typeof key === "string" && isRecord(value))
+        Object.defineProperty(target, key, { value: setProxy(value, redisKey, rootData) });
+      setTimeout(() => redis.set(redisPrefix + redisKey, JSON.stringify(rootData)), 0);
+      return a;
     },
     deleteProperty: (target, key) => {
-      redis.set(redisPrefix + redisKey, JSON.stringify(rootData));
-      return Reflect.deleteProperty(target, key);
+      const a = Reflect.deleteProperty(target, key);
+      setTimeout(() => redis.set(redisPrefix + redisKey, JSON.stringify(rootData)), 0);
+      return a;
     },
   });
 }
