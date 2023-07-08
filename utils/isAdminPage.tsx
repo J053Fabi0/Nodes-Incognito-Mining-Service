@@ -6,6 +6,7 @@ export const adminURLs = [
   "/admin",
   "/admin/*",
   "/diffuse",
+  "/api/variables/*",
 ].map((pathname) => new URLPattern({ pathname }));
 
 export const allowedForDevelopment = [

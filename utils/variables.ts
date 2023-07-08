@@ -1,5 +1,7 @@
 import { NodeRoles } from "./getNodesStatus.ts";
+import createTrueRecord from "./createTrueRecord.ts";
 import getProxyAndRedisValue from "./getProxyAndRedisValue.ts";
+import getPRVPrice from "./getPRVPrice.ts";
 
 export type ErrorTypes = "alert" | "isSlashed" | "isOldVersion" | "offline" | "stalling" | "unsynced";
 export const errorTypes = [
@@ -53,17 +55,14 @@ type LastRole = {
   lastWarningDay?: number;
 };
 function isLastRole(a: unknown): a is LastRole {
-  return typeof a === "object" && a !== null && "date" in a && "role" in a;
+  const keys: (keyof LastRole)[] = ["date", "client", "role", "createdAt", "nodeNumber"];
+  return typeof a === "object" && a !== null && keys.map((k) => k in a).every((k) => k);
 }
 /** Docker index as key */
-export const lastRoles = new Proxy(await getProxyAndRedisValue<Record<string, LastRole>>("lastRoles", {}), {
-  get: (target, key) => {
-    if (typeof key !== "string") return Reflect.get(target, key);
-    const a = Reflect.get(target, key);
-    if (!a) return (target[key] = {} as LastRole);
-    return a;
-  },
-  set: (target, key, value) => {
+export const lastRoles = createTrueRecord(
+  await getProxyAndRedisValue<Record<string, LastRole>>("lastRoles", {}),
+  () => ({ date: 1, client: "", createdAt: 1, nodeNumber: 1, lastWarningDay: 1, role: "NOT_STAKED" as const }),
+  (target, key, value) => {
     // only allow to set LastRole
     if (!isLastRole(value)) return false;
     // let symbol pass
@@ -73,5 +72,18 @@ export const lastRoles = new Proxy(await getProxyAndRedisValue<Record<string, La
     // update if the new role is different from the old one or the old one is is a dummy one
     if (value.role !== lastRoles[key].role) return Reflect.set(target, key, value);
     return true;
-  },
-});
+  }
+);
+
+type PrvToPay = {
+  usd: number;
+  expires: number; // timestamp
+  /** The prv it needs to give to host a new node. Decimal format */
+  prvToPay: number;
+  confirmed: boolean;
+};
+/** Client Id as key */
+export const prvToPay = createTrueRecord(
+  await getProxyAndRedisValue<Record<string, PrvToPay>>("prvToPay", {}),
+  () => ({ usd: 0, expires: 0, prvToPay: 0, confirmed: false })
+);
