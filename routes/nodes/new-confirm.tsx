@@ -1,24 +1,25 @@
 import dayjs from "dayjs/mod.ts";
 import utc from "dayjs/plugin/utc.ts";
-import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import Balance from "../../islands/Balance.tsx";
 import TimeLeft from "../../islands/TimeLeft.tsx";
+import newZodError from "../../utils/newZodError.ts";
 import submitNode from "../../incognito/submitNode.ts";
 import { toFixedS } from "../../utils/numbersString.ts";
 import Node from "../../types/collections/node.type.ts";
+import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import isResponse from "../../types/guards/isResponse.ts";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
-import { getNode, getNodes } from "../../controllers/node.controller.ts";
 import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
 import { HandlerContext, Handlers, PageProps } from "$fresh/server.ts";
 import { error, validateFormData, z, ZodIssue } from "fresh-validation";
+import { getNode, getNodes } from "../../controllers/node.controller.ts";
 import NewConfirmNodeSelector from "../../islands/NewConfirmNodeSelector.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import { incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
-import newZodError from "../../utils/newZodError.ts";
+import { prvToPay } from "../../utils/variables.ts";
 
 export const styles = {
   th: "py-2 px-3 text-right",
@@ -28,8 +29,9 @@ export const styles = {
 
 dayjs.extend(utc);
 
-const THIS_URL = `${WEBSITE_URL}/nodes/new-confirm`;
+const NEW_URL = `${WEBSITE_URL}/nodes/new`;
 const MONITOR_URL = `${WEBSITE_URL}/nodes/monitor`;
+const THIS_URL = `${WEBSITE_URL}/nodes/new-confirm`;
 
 interface NewNodeConfirmProps {
   /** Int format */
@@ -37,25 +39,26 @@ interface NewNodeConfirmProps {
   prvPrice: number;
   prvToPay: number;
   isAdmin: boolean;
+  defaultValidator: string;
   confirmationExpires: number;
   errors: ZodIssue[] | undefined;
-  inactiveNodes: Pick<Node, "number" | "validatorPublic" | "validator">[];
-  defaultValidator: string;
   defaultValidatorPublic: string;
+  inactiveNodes: Pick<Node, "number" | "validatorPublic" | "validator">[];
 }
 
 async function getDataOrRedirect(
   ctx: HandlerContext<NewNodeConfirmProps, State>
 ): Promise<Response | NewNodeConfirmProps> {
-  const savedPrvPrice = ctx.state.prvPrice;
+  const savedPrvPrice = prvToPay[ctx.state.userId!];
+  const isAdmin = ctx.state.isAdmin;
 
-  if (savedPrvPrice.prvToPay === 0) return redirect("/nodes/new");
+  if (savedPrvPrice.prvToPay !== 0 && isAdmin) savedPrvPrice.prvToPay = 0;
 
   // the confirmation expires in the previous time plus an exatra minutesOfPriceStability
   const confirmationExpires = dayjs(savedPrvPrice.expires).utc().add(minutesOfPriceStability, "minute").valueOf();
 
   // if the confirmation expires, redirect to the new node page
-  if (confirmationExpires <= Date.now()) return redirect("/nodes/new");
+  if (confirmationExpires <= Date.now()) return redirect(NEW_URL);
 
   const account = (await getAccount({ _id: ctx.state.user!.account }, { projection: { balance: 1, _id: 0 } }))!;
 
@@ -65,13 +68,13 @@ async function getDataOrRedirect(
   );
 
   // if it is not enough balance to pay for the node, redirect to the new node page
-  if (account.balance < savedPrvPrice.prvToPay * 1e9) return redirect("/nodes/new");
+  if (account.balance < savedPrvPrice.prvToPay * 1e9) return redirect(NEW_URL);
 
   return {
+    isAdmin,
     inactiveNodes,
     confirmationExpires,
     balance: account.balance,
-    isAdmin: ctx.state.isAdmin,
     prvPrice: savedPrvPrice.usd,
     prvToPay: savedPrvPrice.prvToPay,
     errors: ctx.state.session.flash("errors"),
@@ -197,15 +200,23 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
           <tr>
             <th class={styles.th}>To pay</th>
             <td class={styles.td}>
-              <code>{toFixedS(prvToPay - incognitoFee, 2)}</code> PRV
+              {prvToPay > 0 ? (
+                <>
+                  <code>{toFixedS(prvToPay - incognitoFee, 2)}</code> PRV
+                </>
+              ) : (
+                "Free"
+              )}
             </td>
           </tr>
-          <tr>
-            <th class={styles.th}>Incognito fee</th>
-            <td class={styles.td}>
-              <code>{incognitoFee}</code> PRV
-            </td>
-          </tr>
+          {prvToPay > 0 && (
+            <tr>
+              <th class={styles.th}>Incognito fee</th>
+              <td class={styles.td}>
+                <code>{incognitoFee}</code> PRV
+              </td>
+            </tr>
+          )}
           <tr>
             <th class={styles.th}>Balance afterwards</th>
             <td class={styles.td}>

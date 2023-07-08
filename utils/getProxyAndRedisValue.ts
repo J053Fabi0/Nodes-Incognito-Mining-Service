@@ -6,7 +6,7 @@ const redisPrefix = "variable_";
 if (flags.reloadRedisVariables) await redis.del(redisPrefix + "*");
 
 type AcceptedValues = number | string | boolean | null | undefined;
-type AcceptedRecord = Record<
+export type AcceptedRecord = Record<
   string | number | symbol,
   { [key: string | number | symbol]: AcceptedRecord | AcceptedValues } | AcceptedValues
 >;

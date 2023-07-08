@@ -7,6 +7,7 @@ import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import Balance from "../../islands/Balance.tsx";
 import TimeLeft from "../../islands/TimeLeft.tsx";
+import { prvToPay } from "../../utils/variables.ts";
 import getPRVPrice from "../../utils/getPRVPrice.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { toFixedS } from "../../utils/numbersString.ts";
@@ -17,6 +18,8 @@ import { getAccount } from "../../controllers/account.controller.ts";
 import { incognitoFee, minutesOfPriceStability, setupFeeUSD } from "../../constants.ts";
 
 dayjs.extend(utc);
+
+const CONFIRM_URL = `${WEBSITE_URL}/nodes/new-confirm`;
 
 interface NewNodeProps {
   expires: number;
@@ -31,7 +34,8 @@ interface NewNodeProps {
 
 export const handler: Handlers<NewNodeProps, State> = {
   async GET(_, ctx) {
-    const savedPrvPrice = ctx.state.prvPrice;
+    const savedPrvPrice = prvToPay[ctx.state.userId!];
+    const isAdmin = ctx.state.isAdmin;
 
     const account = (await getAccount(
       { _id: ctx.state.user!.account },
@@ -53,20 +57,19 @@ export const handler: Handlers<NewNodeProps, State> = {
     if (savedPrvPrice.expires <= Date.now()) {
       savedPrvPrice.usd = await getPRVPrice();
       // add the fee to transfer the PRV to the admin account later
-      savedPrvPrice.prvToPay = +toFixedS(
-        new Big(setupFeeUSD).div(savedPrvPrice.usd).add(incognitoFee).valueOf(),
-        2
-      );
+      savedPrvPrice.prvToPay = isAdmin
+        ? 0
+        : +toFixedS(new Big(setupFeeUSD).div(savedPrvPrice.usd).add(incognitoFee).valueOf(), 2);
       savedPrvPrice.expires = dayjs().utc().add(minutesOfPriceStability, "minute").valueOf();
-
-      ctx.state.session.set("prvPrice", savedPrvPrice);
     }
 
     const base64Image = await qrcode(account.paymentAddress, { size: 300, errorCorrectLevel: "L" });
 
+    if (account.balance >= savedPrvPrice.prvToPay * 1e9) return redirect(CONFIRM_URL);
+
     return ctx.render({
+      isAdmin,
       balance: account.balance,
-      isAdmin: ctx.state.isAdmin,
       prvPrice: savedPrvPrice.usd,
       expires: savedPrvPrice.expires,
       paymentAddressImage: base64Image,

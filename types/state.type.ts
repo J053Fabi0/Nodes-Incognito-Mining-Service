@@ -13,11 +13,4 @@ export default interface State extends WithSession {
   userId?: string | null;
   supplanting: boolean; // if true, an admin is supplanting a user
   commandResponse?: CommandResponse | null;
-  prvPrice: {
-    usd: number;
-    expires: number; // timestamp
-    /** The prv it needs to give to host a new node. Decimal format */
-    prvToPay: number;
-    confirmed: boolean;
-  };
 }
