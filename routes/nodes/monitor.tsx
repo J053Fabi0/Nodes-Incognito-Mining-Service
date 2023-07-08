@@ -4,6 +4,7 @@ import Pill from "../../components/Pill.tsx";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import getNodeUrl from "../../utils/getNodeUrl.ts";
+import { lastRoles } from "../../utils/variables.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import NodePill from "../../components/Nodes/NodePill.tsx";
@@ -160,6 +161,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
               const status = nodesStatus[node];
               const shard = shards[`shard${status.shard}`] ?? 0;
               const sync = status.syncState[0] + status.syncState.slice(1).toLowerCase();
+              const roleSince = rangeMsToTimeDescription(lastRoles[+node].date, undefined, { short: true });
               return (
                 <tr>
                   <td class={styles.td}>
@@ -206,14 +208,22 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
                     </code>
                   </td>
 
-                  <td class={styles.td}>
+                  <td class={styles.td} title={roleSince}>
                     <code>
                       {roleToEmoji(status.role)}
                       &nbsp;
                       {status.role[0] + status.role.slice(1).toLowerCase().replace(/_/g, " ")}
                     </code>
                     <br />
-                    For <code class="font-semibold">{status.epochsToNextEvent}</code> epochs
+                    {isAdmin ? (
+                      <>
+                        <code>{roleSince}</code> | <code class="font-semibold">{status.epochsToNextEvent}</code>
+                      </>
+                    ) : (
+                      <>
+                        For <code class="font-semibold">{status.epochsToNextEvent}</code> epochs
+                      </>
+                    )}
                   </td>
 
                   <td class={styles.td}>
