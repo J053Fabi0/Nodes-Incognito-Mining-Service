@@ -1,7 +1,6 @@
 import { NodeRoles } from "./getNodesStatus.ts";
 import createTrueRecord from "./createTrueRecord.ts";
 import getProxyAndRedisValue from "./getProxyAndRedisValue.ts";
-import getPRVPrice from "./getPRVPrice.ts";
 
 export type ErrorTypes = "alert" | "isSlashed" | "isOldVersion" | "offline" | "stalling" | "unsynced";
 export const errorTypes = [
