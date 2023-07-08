@@ -1,5 +1,6 @@
 import dayjs from "dayjs/mod.ts";
 import { useSignal } from "@preact/signals";
+import { IS_BROWSER } from "$fresh/runtime.ts";
 import capitalizeFn from "../utils/capitalize.ts";
 import relativeTime from "dayjs/plugin/relativeTime.ts";
 
@@ -16,7 +17,7 @@ export default function RelativeDate({ date, capitalize }: RelativeDateProps) {
   const t = useSignal<string>(dayjs(date).fromNow());
 
   // Don't run this on the server
-  if (!globalThis.Deno)
+  if (IS_BROWSER)
     interval.value = setInterval(() => {
       const newT = dayjs(date).fromNow();
 

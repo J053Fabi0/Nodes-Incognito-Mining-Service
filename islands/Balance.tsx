@@ -1,5 +1,6 @@
 import axiod from "axiod";
 import { JSX } from "preact";
+import { IS_BROWSER } from "$fresh/runtime.ts";
 import { useSignal, useComputed } from "@preact/signals";
 import { moveDecimalDot, toFixedS } from "../utils/numbersString.ts";
 
@@ -47,7 +48,7 @@ export default function Balance(options: BalanceRedirectProps | BalanceProps): J
   const balance = useSignal<number>(typeof options.initialBalance === "number" ? options.initialBalance : 0);
 
   // Don't run this on the server
-  if (!globalThis.Deno)
+  if (IS_BROWSER)
     if ("goal" in options && typeof options.goal === "number")
       interval.value = setInterval(async () => {
         const { data } = await axiod.get<{ balance: number }>(`${options.websiteUrl}/api/balance`);

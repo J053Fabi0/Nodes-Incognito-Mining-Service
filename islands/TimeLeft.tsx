@@ -1,5 +1,6 @@
 import dayjs from "dayjs/mod.ts";
 import { useSignal } from "@preact/signals";
+import { IS_BROWSER } from "$fresh/runtime.ts";
 import relativeTime from "dayjs/plugin/relativeTime.ts";
 import { rangeMsToTimeDescription } from "../utils/msToTimeDescription.ts";
 
@@ -14,7 +15,7 @@ export default function TimeLeft({ date }: TimeLeftProps) {
   const interval = useSignal<number | undefined>(undefined);
 
   // Don't run this on the server
-  if (!globalThis.Deno)
+  if (IS_BROWSER)
     interval.value = setInterval(() => {
       const newValue = date <= Date.now() ? "Expired. Reload to retry" : rangeMsToTimeDescription(new Date(date));
 
