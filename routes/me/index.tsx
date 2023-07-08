@@ -1,4 +1,7 @@
 import { qrcode } from "qrcode";
+import dayjs from "dayjs/mod.ts";
+import "humanizer/toQuantity.ts";
+import utc from "dayjs/plugin/utc.ts";
 import { ObjectId } from "mongo/mod.ts";
 import { WEBSITE_URL } from "../../env.ts";
 import State from "../../types/state.type.ts";
@@ -6,20 +9,22 @@ import redirect from "../../utils/redirect.ts";
 import Balance from "../../islands/Balance.tsx";
 import Withdraw from "../../islands/Withdraw.tsx";
 import cryptr from "../../utils/cryptrInstance.ts";
+import LocaleDate from "../../islands/LocaleDate.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { toFixedS } from "../../utils/numbersString.ts";
+import RelativeDate from "../../islands/RelativeDate.tsx";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
-import { incognitoFee, incognitoFeeInt } from "../../constants.ts";
 import { getAccount } from "../../controllers/account.controller.ts";
 import submitTransaction from "../../incognito/submitTransaction.ts";
 import { error, validateFormData, z, ZodIssue } from "fresh-validation";
 import PaymentAddress from "../../components/Account/PaymentAddress.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
+import { incognitoFee, incognitoFeeInt, maxNotPayedDays } from "../../constants.ts";
 import { AccountTransactionType } from "../../types/collections/accountTransaction.type.ts";
 
-const styles = {
-  li: `${getTypographyClass("lead")}`,
-};
+dayjs.extend(utc);
+
+const styles = { li: `${getTypographyClass("lead")}` };
 
 const THIS_URL = `${WEBSITE_URL}/me`;
 const TRANSACTIONS_URL = `${WEBSITE_URL}/me/transactions?relative`;
@@ -98,6 +103,7 @@ export const handler: Handlers<AccountProps, State> = {
 export default function Account({ data }: PageProps<AccountProps>) {
   const { withdrawPaymentAddress, balance, errors } = data;
   const { paymentAddressImage, paymentAddress, withdrawAmount } = data;
+  const nextPayment = dayjs().utc().add(1, "month").startOf("month").valueOf();
 
   return (
     <>
@@ -114,7 +120,15 @@ export default function Account({ data }: PageProps<AccountProps>) {
         </b>{" "}
         PRV.
       </Typography>
-      <Typography variant="p">The balance will be used to pay your monthly fee automatically.</Typography>
+      <Typography variant="p">
+        The balance will be used to pay your monthly fee automatically if it is enough, else a message will be
+        delivered via Telegram asking you to deposit more. If no payment is recieved in less than{" "}
+        {"day".toQuantity(maxNotPayedDays)}, the node will be suspended and the initial setup will be charged again
+        to reactivate it.
+      </Typography>
+      <Typography variant="p">
+        The next payment will be on <LocaleDate date={nextPayment} />, <RelativeDate date={nextPayment} />
+      </Typography>
 
       <hr class="my-5" />
 

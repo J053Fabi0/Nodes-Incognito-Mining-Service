@@ -17,6 +17,7 @@ interface Json {
   waitingTimes: Record<AllErrorTypes, number>;
   maxNotStakedDays: number; // for nodes with more than 1 month working
   maxNotStakedDaysForNew: number; // for nodes with less than 1 month working
+  maxNotPayedDays: number; // monthly fee
 }
 
 const schema = joi.object<Json>({
@@ -24,6 +25,7 @@ const schema = joi.object<Json>({
   minEpochsToLetSync: joi.number().required(),
   minEpochsToBeOnline: joi.number().required(),
   maxDiskPercentageUsage: joi.number().required(),
+  maxNotPayedDays: joi.number().integer().default(3),
   incognitoFee: joi.number().positive().allow(0).default(0.1),
   adminTelegramUsername: joi.string().default("@incognitoNodes"),
   waitingTimes: joi
@@ -49,7 +51,7 @@ export const { infuraURL } = json;
 /** Decimal format */
 export const { incognitoFee } = json;
 export const incognitoFeeInt = json.incognitoFee * 1e9;
-export const { maxNotStakedDays, maxNotStakedDaysForNew } = json;
+export const { maxNotStakedDays, maxNotStakedDaysForNew, maxNotPayedDays } = json;
 
 const nodes = await getNodes(
   { inactive: false },
