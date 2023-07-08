@@ -1,3 +1,4 @@
+import { NodeRoles } from "./getNodesStatus.ts";
 import getProxyAndRedisValue from "./getProxyAndRedisValue.ts";
 
 export type ErrorTypes = "alert" | "isSlashed" | "isOldVersion" | "offline" | "stalling" | "unsynced";
@@ -37,4 +38,40 @@ export const ignore = await getProxyAndRedisValue<Ignore>("ignore", {
 });
 
 /** Node's public validator key as key */
-export const syncedNodes = await getProxyAndRedisValue<Record<string | number, boolean>>("syncedNodes", {});
+export const syncedNodes = await getProxyAndRedisValue<Record<string | number, boolean | undefined>>(
+  "syncedNodes",
+  {}
+);
+
+type LastRole = {
+  date: number;
+  client: string;
+  role: NodeRoles;
+  createdAt: number;
+  nodeNumber: number;
+  // the last day since that a warning has been send
+  lastWarningDay?: number;
+};
+function isLastRole(a: unknown): a is LastRole {
+  return typeof a === "object" && a !== null && "date" in a && "role" in a;
+}
+/** Docker index as key */
+export const lastRoles = new Proxy(await getProxyAndRedisValue<Record<string, LastRole>>("lastRoles", {}), {
+  get: (target, key) => {
+    if (typeof key !== "string") return Reflect.get(target, key);
+    const a = Reflect.get(target, key);
+    if (!a) return (target[key] = {} as LastRole);
+    return a;
+  },
+  set: (target, key, value) => {
+    // only allow to set LastRole
+    if (!isLastRole(value)) return false;
+    // let symbol pass
+    if (typeof key !== "string") return Reflect.set(target, key, value);
+    // only let strings that represent a valid number
+    if (isNaN(+key)) return false;
+    // update if the new role is different from the old one or the old one is is a dummy one
+    if (value.role !== lastRoles[key].role) return Reflect.set(target, key, value);
+    return true;
+  },
+});

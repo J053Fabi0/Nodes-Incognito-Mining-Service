@@ -30,6 +30,7 @@
     "fresh-validation": "https://deno.land/x/fresh_validation@0.1.1/mod.ts",
     "grammy_validator": "https://raw.githubusercontent.com/J053Fabi0/validator/71d6c3f4b60a705e3718a3081e3f5c61cb1ca06f/src/mod.ts",
     "grammy/": "https://deno.land/x/grammy@v1.16.2/",
+    "humanizer/": "https://deno.land/x/humanizer@1.1/",
     "joi": "https://esm.sh/joi@17.9.2",
     "math": "https://deno.land/x/math@v1.1.0/mod.ts",
     "mongo/": "https://deno.land/x/mongo@v0.31.2/",

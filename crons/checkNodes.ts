@@ -1,4 +1,5 @@
 import {
+  lastRoles,
   errorTypes,
   AllErrorTypes,
   lastErrorTimes,
@@ -51,6 +52,15 @@ export default async function checkNodes() {
   for (const nodeStatus of nodesStatus) {
     if (!(nodeStatus.validatorPublic in lastErrorTimes)) lastErrorTimes[nodeStatus.validatorPublic] = {};
     const { [nodeStatus.validatorPublic]: lastErrorTime } = lastErrorTimes;
+
+    // update the last role of the node
+    lastRoles[nodeStatus.dockerIndex] = {
+      date: Date.now(),
+      role: nodeStatus.role,
+      nodeNumber: nodeStatus.number,
+      createdAt: +nodeStatus.createdAt,
+      client: nodeStatus.client.toString(),
+    };
 
     const shouldBeOffline = getShouldBeOffline(nodeStatus);
 
