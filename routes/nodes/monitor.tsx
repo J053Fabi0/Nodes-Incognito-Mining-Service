@@ -4,24 +4,17 @@ import Pill from "../../components/Pill.tsx";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import getNodeUrl from "../../utils/getNodeUrl.ts";
-import { lastRoles } from "../../utils/variables.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import { getNodes } from "../../controllers/node.controller.ts";
 import { pendingNodesTest } from "../../utils/testingConstants.ts";
+import MonitorTable from "../../components/Nodes/MonitorTable.tsx";
 import { NewNode, pendingNodes } from "../../incognito/submitNode.ts";
 import MonitorCommands from "../../components/Nodes/MonitorCommands.tsx";
-import { roleToEmoji } from "../../telegram/handlers/handleTextMessage.ts";
-import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import submitCommand, { CommandResponse } from "../../telegram/submitCommand.ts";
 import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
-
-const styles = {
-  th: "border border-slate-300 py-2 px-3",
-  td: "border border-slate-300 py-2 px-3 text-center",
-};
 
 interface MonitorProps {
   isAdmin: boolean;
@@ -99,7 +92,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
     </Head>
   );
 
-  if (nodesInfo.length === 0)
+  if (nodesInfo.length === 0 && pendingNodes.length === 0)
     return (
       <>
         {head}
@@ -128,7 +121,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
             Pending nodes
           </Typography>
           <Typography variant="p" class="mb-2">
-            These nodes will soon be initialized. Reload the page periodically to see when they are ready.
+            These nodes will be initialized soon. Reload the page periodically to see when they are ready.
           </Typography>
 
           <div class="flex flex-wrap items-center gap-3 mb-5">
@@ -143,124 +136,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
         </>
       )}
 
-      <div class="overflow-x-auto">
-        <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
-          <thead>
-            <tr>
-              <th class={styles.th}>Node</th>
-              <th class={styles.th}>Docker</th>
-              <th class={styles.th}>Online</th>
-              <th class={styles.th}>Sync</th>
-              <th class={styles.th}>Role</th>
-              <th class={styles.th}>Shard</th>
-              {isAdmin && <th class={styles.th}>Beacon</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {nodesInfo.map(([node, { docker, beacon, ...shards }]) => {
-              const status = nodesStatus[node];
-              const shard = shards[`shard${status.shard}`] ?? 0;
-              const sync = status.syncState[0] + status.syncState.slice(1).toLowerCase();
-              const roleSince = rangeMsToTimeDescription(lastRoles[+node].date, undefined, { short: true });
-              return (
-                <tr>
-                  <td class={styles.td}>
-                    <NodePill baseURL={null} nodeNumber={isAdmin ? +node : status.number} relative />
-                    {isAdmin && (
-                      <>
-                        <br />
-                        <code>
-                          Number: <b>{status.number}</b>
-                        </code>
-                      </>
-                    )}
-                  </td>
-
-                  <td class={styles.td}>
-                    {docker.restarting && isAdmin && (
-                      <code class="text-red-600 font-bold">
-                        ⚠️ Restarting ⚠️
-                        <br />
-                      </code>
-                    )}
-                    <code>{docker.running ? "🟢 Running" : "🔴 Stopped"}</code>
-                    <br />
-                    <code>
-                      {docker.running
-                        ? rangeMsToTimeDescription(docker.startedAt, undefined, { short: true })
-                        : rangeMsToTimeDescription(docker.finishedAt, undefined, { short: true })}
-                    </code>
-                  </td>
-
-                  <td class={styles.td}>{status.status === "ONLINE" ? "🟢" : "🔴"}</td>
-
-                  <td class={styles.td}>
-                    <code>
-                      {sync === "-" || sync === "Latest" ? (
-                        sync
-                      ) : (
-                        <>
-                          {sync.split(" ")[0]}
-                          <br />
-                          {sync.split(" ")[1]}
-                        </>
-                      )}
-                    </code>
-                  </td>
-
-                  <td class={styles.td} title={roleSince}>
-                    <code>
-                      {roleToEmoji(status.role)}
-                      &nbsp;
-                      {status.role[0] + status.role.slice(1).toLowerCase().replace(/_/g, " ")}
-                    </code>
-                    <br />
-                    {isAdmin ? (
-                      <>
-                        <code>{roleSince}</code> | <code class="font-semibold">{status.epochsToNextEvent}</code>
-                      </>
-                    ) : (
-                      <>
-                        For <code class="font-semibold">{status.epochsToNextEvent}</code> epochs
-                      </>
-                    )}
-                  </td>
-
-                  <td class={styles.td}>
-                    {status.shard === "" ? (
-                      "-"
-                    ) : (
-                      <>
-                        <NodePill baseURL={null} nodeNumber={+status.shard} relative />
-                        {isAdmin && (
-                          <code>
-                            <br />
-                            {shard}
-                          </code>
-                        )}
-                      </>
-                    )}
-                  </td>
-
-                  {isAdmin && (
-                    <td class={styles.td}>
-                      {beacon && beacon > 0 ? (
-                        <>
-                          🟢
-                          <br />
-                          <code>{beacon}</code>
-                        </>
-                      ) : (
-                        "🔴"
-                      )}
-                    </td>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      {nodesInfo.length > 0 && <MonitorTable isAdmin={isAdmin} nodesInfo={nodesInfo} nodesStatus={nodesStatus} />}
 
       <Typography variant="h5">Node URLs</Typography>
 

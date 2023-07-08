@@ -38,7 +38,7 @@ export default function AfterYouPay({ confirming, ...props }: AfterYouPayProps) 
       </ol>
 
       <Typography variant="p" class="mt-3">
-        All its earnings will be in your control, we don't have access to them.
+        All the earnings will be in your control, we don't have access to them.
       </Typography>
     </>
   );
