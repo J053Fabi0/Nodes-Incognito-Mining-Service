@@ -112,19 +112,28 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
 
     const existingNode = await getNode(
       { $or: [{ validator: validatedData.validator }, { validatorPublic: validatedData.validatorPublic }] },
-      { projection: { client: 1, validator: 1, validatorPublic: 1 } }
+      { projection: { client: 1, validator: 1, validatorPublic: 1, inactive: 1 } }
     );
 
     if (existingNode) {
+      // if he's not the owner of the node
       if (`${existingNode.client}` !== ctx.state.userId) {
         ctx.state.session.flash("errors", [
           await newZodError("validator", "This node was already registered with us, but it wasn't you who did."),
+        ]);
+        return redirect(THIS_URL);
+      }
+      // if it's not inactive
+      else if (existingNode.inactive === false) {
+        ctx.state.session.flash("errors", [
+          await newZodError("validator", "This node is currently active. Please create a new account."),
         ]);
         return redirect(THIS_URL);
       } else {
         const vDiferent = existingNode.validator !== validatedData.validator;
         const vpDifferent = existingNode.validatorPublic !== validatedData.validatorPublic;
 
+        // if the keys are different
         if (vDiferent || vpDifferent) {
           const e =
             `The validator${vDiferent ? " public" : ""} key exists in one of your inactive nodes, ` +
