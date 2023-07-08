@@ -30,9 +30,10 @@ import * as $$0 from "./islands/Balance.tsx";
 import * as $$1 from "./islands/EarningsTable.tsx";
 import * as $$2 from "./islands/EarningsTableAndOptions.tsx";
 import * as $$3 from "./islands/LocaleDate.tsx";
-import * as $$4 from "./islands/RelativeDate.tsx";
-import * as $$5 from "./islands/TimeLeft.tsx";
-import * as $$6 from "./islands/Withdraw.tsx";
+import * as $$4 from "./islands/NewConfirmNodeSelector.tsx";
+import * as $$5 from "./islands/RelativeDate.tsx";
+import * as $$6 from "./islands/TimeLeft.tsx";
+import * as $$7 from "./islands/Withdraw.tsx";
 
 const manifest = {
   routes: {
@@ -66,9 +67,10 @@ const manifest = {
     "./islands/EarningsTable.tsx": $$1,
     "./islands/EarningsTableAndOptions.tsx": $$2,
     "./islands/LocaleDate.tsx": $$3,
-    "./islands/RelativeDate.tsx": $$4,
-    "./islands/TimeLeft.tsx": $$5,
-    "./islands/Withdraw.tsx": $$6,
+    "./islands/NewConfirmNodeSelector.tsx": $$4,
+    "./islands/RelativeDate.tsx": $$5,
+    "./islands/TimeLeft.tsx": $$6,
+    "./islands/Withdraw.tsx": $$7,
   },
   baseUrl: import.meta.url,
 };

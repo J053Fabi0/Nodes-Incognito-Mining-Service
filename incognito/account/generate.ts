@@ -21,6 +21,7 @@ export interface CapAccount {
   PaymentAddress: string;
   ReadOnlyKey: string;
   OTAPrivateKey: string;
+  /** Or validator key */
   MiningKey: string;
   MiningPublicKey: string;
   ValidatorPublicKey: string;

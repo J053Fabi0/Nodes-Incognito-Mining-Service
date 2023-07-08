@@ -1,28 +1,28 @@
 import dayjs from "dayjs/mod.ts";
 import utc from "dayjs/plugin/utc.ts";
-import { WEBSITE_URL } from "../../env.ts";
+import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import Balance from "../../islands/Balance.tsx";
 import TimeLeft from "../../islands/TimeLeft.tsx";
-import { AiOutlineInfoCircle } from "react-icons/ai";
-import { BsFillCartCheckFill } from "react-icons/bs";
 import submitNode from "../../incognito/submitNode.ts";
+import { toFixedS } from "../../utils/numbersString.ts";
+import Node from "../../types/collections/node.type.ts";
 import isResponse from "../../types/guards/isResponse.ts";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
+import { getNode, getNodes } from "../../controllers/node.controller.ts";
 import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
-import Button, { getButtonClasses } from "../../components/Button.tsx";
 import { HandlerContext, Handlers, PageProps } from "$fresh/server.ts";
 import { error, validateFormData, z, ZodIssue } from "fresh-validation";
-import { incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
+import NewConfirmNodeSelector from "../../islands/NewConfirmNodeSelector.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
-import { toFixedS } from "../../utils/numbersString.ts";
+import { incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
+import newZodError from "../../utils/newZodError.ts";
 
-const styles = {
+export const styles = {
   th: "py-2 px-3 text-right",
   td: "py-2 px-3 text-left",
-  label: `whitespace-nowrap flex items-center gap-2 ${getTypographyClass("p")}`,
   ol: `list-decimal list-inside mt-2 ${getTypographyClass("lead")} flex gap-2 flex-col`,
 };
 
@@ -36,8 +36,12 @@ interface NewNodeConfirmProps {
   balance: number;
   prvPrice: number;
   prvToPay: number;
+  isAdmin: boolean;
   confirmationExpires: number;
   errors: ZodIssue[] | undefined;
+  inactiveNodes: Pick<Node, "number" | "validatorPublic" | "validator">[];
+  defaultValidator: string;
+  defaultValidatorPublic: string;
 }
 
 async function getDataOrRedirect(
@@ -55,15 +59,24 @@ async function getDataOrRedirect(
 
   const account = (await getAccount({ _id: ctx.state.user!.account }, { projection: { balance: 1, _id: 0 } }))!;
 
+  const inactiveNodes = await getNodes(
+    { inactive: true, client: ctx.state.user!._id },
+    { projection: { validator: 1, validatorPublic: 1, number: 1 } }
+  );
+
   // if it is not enough balance to pay for the node, redirect to the new node page
   if (account.balance < savedPrvPrice.prvToPay * 1e9) return redirect("/nodes/new");
 
   return {
+    inactiveNodes,
     confirmationExpires,
     balance: account.balance,
+    isAdmin: ctx.state.isAdmin,
     prvPrice: savedPrvPrice.usd,
     prvToPay: savedPrvPrice.prvToPay,
     errors: ctx.state.session.flash("errors"),
+    defaultValidator: ctx.state.session.flash("defaultValidator"),
+    defaultValidatorPublic: ctx.state.session.flash("defaultValidatorPublic"),
   };
 }
 
@@ -78,37 +91,65 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
 
   async POST(req, ctx) {
     const dataOrRedirect = await getDataOrRedirect(ctx);
-
     if (isResponse(dataOrRedirect)) return dataOrRedirect;
 
     const form = await req.formData();
-
-    const { validatedData, errors } = await validateFormData(form, {
+    ctx.state.session.flash("defaultValidator", form.get("validator") ?? "");
+    ctx.state.session.flash("defaultValidatorPublic", form.get("validatorPublic") ?? "");
+    const { errors, ...data } = await validateFormData(form, {
       validator: z.string().trim().regex(IncognitoCli.validatorKeyRegex, "Invalid validator key."),
       validatorPublic: z
         .string()
         .trim()
         .regex(IncognitoCli.validatorPublicKeyRegex, "Invalid validator public key."),
     });
+    const validatedData = data.validatedData as { validator: string; validatorPublic: string };
 
     if (errors) {
       ctx.state.session.flash("errors", errors);
       return redirect(THIS_URL);
     }
 
-    submitNode({
-      clientId: ctx.state.user!._id,
-      validator: validatedData.validator,
-      validatorPublic: validatedData.validatorPublic,
-      cost: dataOrRedirect.prvToPay * 1e9 - incognitoFeeInt,
-    });
+    const existingNode = await getNode(
+      { $or: [{ validator: validatedData.validator }, { validatorPublic: validatedData.validatorPublic }] },
+      { projection: { client: 1, validator: 1, validatorPublic: 1 } }
+    );
+
+    if (existingNode) {
+      if (`${existingNode.client}` !== ctx.state.userId) {
+        ctx.state.session.flash("errors", [
+          await newZodError("validator", "This node was already registered with us, but it wasn't you who did."),
+        ]);
+        return redirect(THIS_URL);
+      } else {
+        const vDiferent = existingNode.validator !== validatedData.validator;
+        const vpDifferent = existingNode.validatorPublic !== validatedData.validatorPublic;
+
+        if (vDiferent || vpDifferent) {
+          const e =
+            `The validator${vDiferent ? " public" : ""} key exists in one of your inactive nodes, ` +
+            `but the validator${vDiferent ? "" : " public"} key provided is different. ` +
+            `Its value is: ${vDiferent ? existingNode.validator : existingNode.validatorPublic}`;
+          ctx.state.session.flash("errors", [await newZodError(vDiferent ? "validator" : "validatorPublic", e)]);
+          return redirect(THIS_URL);
+        }
+      }
+    }
+
+    if (IS_PRODUCTION)
+      submitNode({
+        clientId: ctx.state.user!._id,
+        validator: validatedData.validator,
+        validatorPublic: validatedData.validatorPublic,
+        cost: dataOrRedirect.prvToPay * 1e9 - incognitoFeeInt,
+      });
 
     return redirect(MONITOR_URL);
   },
 };
 
 export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
-  const { confirmationExpires, balance, prvToPay, errors } = data;
+  const { confirmationExpires, balance, prvToPay, errors, inactiveNodes } = data;
 
   const validatorError = error(errors, "validator");
   const validatorPublicError = error(errors, "validatorPublic");
@@ -184,70 +225,15 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
         </li>
       </ol>
 
-      <form method="POST" class="mt-3">
-        <div class="flex flex-col gap-3">
-          <div>
-            <label for="validator" class={styles.label}>
-              Validator key
-              <AiOutlineInfoCircle class="hidden sm:block" title="Used to initialize the node" size={18} />
-              <span class="block sm:hidden">(used to initialize the node)</span>
-            </label>
-
-            <input
-              required
-              type="text"
-              id="validator"
-              name="validator"
-              pattern={IncognitoCli.validatorKeyRegex.source}
-              class="p-2 border border-gray-300 rounded w-full"
-            />
-
-            {validatorError && (
-              <Typography variant="p" class="mt-1 text-red-600">
-                {validatorError.message}
-              </Typography>
-            )}
-          </div>
-
-          <div>
-            <label for="validatorPublic" class={styles.label}>
-              Validator public key
-              <AiOutlineInfoCircle class="hidden sm:block" title="Used to check the node status" size={18} />
-              <span class="block sm:hidden">(used to check the node status)</span>
-            </label>
-
-            <input
-              required
-              type="text"
-              id="validatorPublic"
-              name="validatorPublic"
-              class="p-2 border border-gray-300 rounded w-full"
-              pattern={IncognitoCli.validatorPublicKeyRegex.source}
-            />
-          </div>
-
-          {validatorPublicError && (
-            <Typography variant="p" class="mt-1 text-red-600">
-              {validatorPublicError.message}
-            </Typography>
-          )}
-        </div>
-
-        <div class="flex items-end justify-center gap-5 mt-3">
-          <Button type="submit" color="green" class="mt-3 !normal-case">
-            <Typography variant="h4" class="flex items-center gap-2">
-              Confirm
-              <BsFillCartCheckFill size={20} />
-            </Typography>
-          </Button>
-
-          <a class={`${getButtonClasses("red", false)} mt-3 py-1 px-2`} href="/me/balance">
-            <Typography variant="p" class="!normal-case h-min py-0">
-              Cancel, get refund
-            </Typography>
-          </a>
-        </div>
-      </form>
+      <NewConfirmNodeSelector
+        inactiveNodes={inactiveNodes}
+        validatorError={validatorError?.message}
+        validatorPublicError={validatorPublicError?.message}
+        validatorRegex={IncognitoCli.validatorKeyRegex.source}
+        validatorPublicRegex={IncognitoCli.validatorPublicKeyRegex.source}
+        defaultValidator={data.defaultValidator}
+        defaultValidatorPublic={data.defaultValidatorPublic}
+      />
     </>
   );
 }
