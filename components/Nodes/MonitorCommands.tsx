@@ -29,7 +29,7 @@ export default function MonitorCommands({ route, commandResponse }: MonitorComma
               </Button>
             </div>
           ))}
-        {commands.pending.map((c) => (
+        {commands.pending.toReversed().map((c) => (
           <div class="mt-1 mb-5">
             <Typography variant="lead" class="flex gap-3 items-center">
               <code>{c.command}</code>
