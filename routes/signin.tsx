@@ -1,4 +1,4 @@
-import dayjs from "dayjs/index.d.ts";
+import dayjs from "dayjs/mod.ts";
 import utc from "dayjs/plugin/utc.ts";
 import State from "../types/state.type.ts";
 import redirect from "../utils/redirect.ts";
