@@ -73,10 +73,10 @@ export const handler: Handlers<MonitorProps, State> = {
     if (!command) return redirect(URL);
 
     if (submit === "noWait") {
-      submitCommand(command, { silent: true });
+      submitCommand(command);
       ctx.state.session.set("commandResponse", null);
     } else {
-      const [commandResponse] = await submitCommand(command, { silent: true });
+      const [commandResponse] = await submitCommand(command);
       ctx.state.session.set("commandResponse", commandResponse);
     }
 

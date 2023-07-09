@@ -135,11 +135,8 @@ export default async function checkNodes() {
 
         if (instruction.action === "move") {
           if (!isToRunning && !isFromRunning)
-            submitCommand(`move ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`, {
-              silent: true,
-            });
-        } else if (!isToRunning)
-          submitCommand(`delete ${instruction.from} ${instruction.shards.join(" ")}`, { silent: true });
+            submitCommand(`move ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`);
+        } else if (!isToRunning) submitCommand(`delete ${instruction.from} ${instruction.shards.join(" ")}`);
       }
     }
   }
