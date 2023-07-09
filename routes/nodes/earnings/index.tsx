@@ -98,6 +98,14 @@ export default function NodesEarnings({ data }: PageProps<NodesEarningsProps>) {
       </>
     );
 
+  if (earnings.length === 0)
+    return (
+      <>
+        {head}
+        <Typography variant="h3">You don't have any earnings yet.</Typography>
+      </>
+    );
+
   return (
     <>
       {head}
