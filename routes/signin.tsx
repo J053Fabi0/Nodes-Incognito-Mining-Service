@@ -1,3 +1,5 @@
+import dayjs from "dayjs/index.d.ts";
+import utc from "dayjs/plugin/utc.ts";
 import State from "../types/state.type.ts";
 import redirect from "../utils/redirect.ts";
 import cryptr from "../utils/cryptrInstance.ts";
@@ -10,6 +12,8 @@ import { isTelegramPayload } from "../types/telegramPayload.type.ts";
 import { createAccount } from "../controllers/account.controller.ts";
 import { createClient, getClient } from "../controllers/client.controller.ts";
 import { NOTIFICATIONS_BOT_TOKEN, NOTIFICATIONS_BOT_USERNAME } from "../env.ts";
+
+dayjs.extend(utc);
 
 interface SigninProps {
   create: boolean;
@@ -57,6 +61,7 @@ export const handler: Handlers<SigninProps, State> = {
           notionPage: null,
           telegram: params.id,
           account: submittedAccount._id,
+          lastPayment: dayjs().utc().startOf("month").toDate(),
           name: params.username || [params.first_name, params.last_name].filter(Boolean).join(" "),
         });
         ctx.state.session.set("userId", newUser._id.toString());

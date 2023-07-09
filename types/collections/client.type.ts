@@ -8,4 +8,5 @@ export default interface Client extends CommonCollection {
   role: "admin" | "client";
   notionPage: string | null;
   isBotBlocked?: boolean;
+  lastPayment: Date;
 }
