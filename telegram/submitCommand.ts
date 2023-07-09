@@ -155,7 +155,7 @@ export default async function submitCommand(command: string): Promise<CommandRes
         }).then((response) => {
           if (response.successful)
             // add the command to the list of resolved commands
-            commands.resolved.push(finalFullCommand);
+            commands.resolved.unshift(finalFullCommand);
 
           return response;
         })

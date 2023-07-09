@@ -17,7 +17,6 @@ export default function MonitorCommands({ route, commandResponse }: MonitorComma
     <>
       <form method="post">
         {commands.resolved
-          .toReversed()
           .slice(0, 5)
           .toReversed()
           .map((m) => (
