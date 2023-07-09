@@ -1,9 +1,11 @@
 import { FiTrash2 } from "react-icons/fi";
+import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import { BsFillPlayFill } from "react-icons/bs";
 import Button from "../../components/Button.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
+import submitNode from "../../incognito/submitNode.ts";
 import Node from "../../types/collections/node.type.ts";
 import Typography from "../../components/Typography.tsx";
 import { getNodeById, getNodes } from "../../controllers/node.controller.ts";
@@ -31,17 +33,34 @@ export const handler: Handlers<AdminNodesProps, State> = {
   async POST(req) {
     const form = await req.formData();
 
-    const nodeId = form.get(Action.DELETE);
+    const [action] = [...form.keys()] as [Action | undefined];
+    if (!action || !Object.values(Action).includes(action)) return new Response("No action", { status: 400 });
+
+    const nodeId = form.get(action);
     if (!nodeId || typeof nodeId !== "string") return new Response("No node id", { status: 400 });
 
     const node = await getNodeById(nodeId);
     if (!node) return new Response("Node not found", { status: 404 });
 
-    await deleteDockerAndConfigs({
-      number: node.number,
-      clientId: node.client,
-      dockerIndex: node.dockerIndex,
-    });
+    if (IS_PRODUCTION) {
+      if (action === Action.DELETE)
+        await deleteDockerAndConfigs({
+          number: node.number,
+          clientId: node.client,
+          dockerIndex: node.dockerIndex,
+        });
+      else if (action === Action.ACTIVATE)
+        await submitNode({
+          cost: 0,
+          nodeId: node._id,
+          number: node.number,
+          clientId: node.client,
+          rcpPort: node.rcpPort,
+          validator: node.validator,
+          dockerIndex: node.dockerIndex,
+          validatorPublic: node.validatorPublic,
+        });
+    }
 
     return redirect(req.url);
   },
@@ -61,7 +80,7 @@ export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
           <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
             <thead>
               <tr>
-                <th class={styles.th}>Name</th>
+                <th class={styles.th}>Client</th>
                 <th class={styles.th}>Number</th>
                 <th class={styles.th}>Docker index</th>
                 <th class={styles.th}>Action</th>
@@ -71,7 +90,7 @@ export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
               {nodes.map((node) => (
                 <tr>
                   <td class={styles.td}>
-                    <code>{node.name}</code>
+                    <code>{`${node.client}`}</code>
                   </td>
 
                   <td class={styles.td}>
