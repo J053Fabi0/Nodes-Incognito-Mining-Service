@@ -1,13 +1,10 @@
 import State from "../../types/state.type.ts";
-import { join, fromFileUrl } from "std/path/mod.ts";
+import { variablesToParse } from "../api/variables.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Client from "../../types/collections/client.type.ts";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 
 const styles = { li: `${getTypographyClass("lead")}` };
-const variables = [...Deno.readDirSync(join(fromFileUrl(import.meta.url), "../../api/variables"))].map(
-  (a) => a.name.split(".")[0]
-);
 
 interface AdminProps {
   user: Client;
@@ -57,7 +54,7 @@ export default function Admin({ data }: PageProps<AdminProps>) {
       <Typography variant="h3">Variables</Typography>
 
       <ul class="list-disc list-inside mb-5">
-        {variables.map((v) => (
+        {variablesToParse.map((v) => (
           <li class={styles.li}>
             <a href={`/api/variables/${v}`} target="blank" class="underline">
               {v}
