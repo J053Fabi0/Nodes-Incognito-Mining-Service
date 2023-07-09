@@ -4,7 +4,8 @@ import Typography from "../Typography.tsx";
 import { BsFillPlayFill } from "react-icons/bs";
 import { MdScheduleSend } from "react-icons/md";
 import Button, { getButtonClasses } from "../Button.tsx";
-import { CommandResponse, commands } from "../../telegram/submitCommand.ts";
+import { commands } from "../../telegram/submitCommand.ts";
+import { CommandResponse } from "../../telegram/submitCommandUtils.ts";
 
 interface MonitorCommandsProps {
   route: string;

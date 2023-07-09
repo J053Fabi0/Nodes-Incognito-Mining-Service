@@ -1,5 +1,5 @@
 import Client from "./collections/client.type.ts";
-import { CommandResponse } from "../telegram/submitCommand.ts";
+import { CommandResponse } from "../telegram/submitCommandUtils.ts";
 import { WithSession } from "fresh-session/src/stores/interface.ts";
 
 /**

@@ -1,5 +1,5 @@
 import { ignore } from "../../utils/variables.ts";
-import { CommandResponse } from "../submitCommand.ts";
+import { CommandResponse } from "../submitCommandUtils.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 
 type Type = (typeof errorKeys)[number] | "all";

@@ -3,9 +3,9 @@ import { join } from "std/path/mod.ts";
 import sendMessage from "../sendMessage.ts";
 import { ignore } from "../../utils/variables.ts";
 import isError from "../../types/guards/isError.ts";
-import { CommandResponse } from "../submitCommand.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
+import { CommandResponse } from "../submitCommandUtils.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { ShardsNames, dockerPs, docker, shardsNames } from "duplicatedFilesCleanerIncognito";
 

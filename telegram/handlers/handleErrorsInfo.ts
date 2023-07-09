@@ -10,9 +10,9 @@ import { escapeHtml } from "escapeHtml";
 import constants from "../../constants.ts";
 import { sendHTMLMessage } from "../sendMessage.ts";
 import isError from "../../types/guards/isError.ts";
-import { CommandResponse } from "../submitCommand.ts";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
+import { CommandResponse } from "../submitCommandUtils.ts";
 import getMinutesSinceError from "../../utils/getMinutesSinceError.ts";
 
 type NodesByPublicKey = Record<string, { name: string; dockerIndex: number }>;

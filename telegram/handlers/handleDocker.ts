@@ -1,7 +1,7 @@
 import isError from "../../types/guards/isError.ts";
-import { CommandResponse } from "../submitCommand.ts";
-import validateItems from "../../utils/validateItems.ts";
 import { docker } from "duplicatedFilesCleanerIncognito";
+import validateItems from "../../utils/validateItems.ts";
+import { CommandResponse } from "../submitCommandUtils.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 

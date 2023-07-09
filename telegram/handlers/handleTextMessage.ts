@@ -2,7 +2,7 @@ import bot from "../initBots.ts";
 import { ADMIN_ID } from "../../env.ts";
 import { InputFile } from "grammy/mod.ts";
 import sendMessage from "../sendMessage.ts";
-import { CommandResponse } from "../submitCommand.ts";
+import { CommandResponse } from "../submitCommandUtils.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
 import emojisCodes, { splitEmoji } from "../../utils/emojisCodes.ts";

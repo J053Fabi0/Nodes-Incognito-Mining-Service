@@ -1,9 +1,9 @@
 import bot from "../initBots.ts";
 import { ignore } from "../../utils/variables.ts";
 import isError from "../../types/guards/isError.ts";
-import { CommandResponse } from "../submitCommand.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
+import { CommandResponse } from "../submitCommandUtils.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";

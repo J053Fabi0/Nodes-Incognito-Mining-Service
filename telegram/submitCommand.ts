@@ -1,3 +1,11 @@
+import {
+  Command,
+  Commands,
+  saveToRedis,
+  CommandResponse,
+  addSaveToRedisProxy,
+  getCommandsFromReds,
+} from "./submitCommandUtils.ts";
 import isError from "../types/guards/isError.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
@@ -14,22 +22,16 @@ import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
 import getCommandOrPossibilities, { AllowedCommands } from "../utils/getCommandOrPossibilities.ts";
 
-interface Command {
-  command: string;
-  resolve: (response: CommandResponse) => void;
-}
-export const commands: {
-  /** The first one is the oldest */
-  resolved: EventedArray<string>;
-  /** The first one is the oldest */
-  pending: EventedArray<Command>;
-} = (() => {
+export const commands: Commands = (() => {
   let working = false;
+  setTimeout(getCommandsFromReds, 100);
   return {
     resolved: new EventedArray<string>(({ array }) => {
+      saveToRedis();
       if (array.lengthNoEvent > 100) array.spliceNoEvent(0, array.lengthNoEvent - 100);
     }),
     pending: new EventedArray<Command>(async ({ array: pending }) => {
+      saveToRedis();
       if (!working) {
         working = true;
         // Resolve the pending commands.
@@ -42,6 +44,7 @@ export const commands: {
             const successful = await handleCommands(command.command);
             // remove it
             pending.shiftNoEvent();
+            saveToRedis();
             // resolve the promise
             command.resolve(successful);
           }
@@ -54,7 +57,6 @@ export const commands: {
   };
 })();
 
-export type CommandResponse = { response: string; successful: true } | { successful: false; error: string };
 /**
  * @returns true if the command was handled successfully
  */
@@ -148,8 +150,8 @@ export default async function submitCommand(command: string): Promise<CommandRes
       const finalFullCommand = [commandOrPossibilities.command, ...args].join(" ");
 
       promises.push(
-        new Promise<CommandResponse>((resolve) => {
-          commands.pending.push({ resolve, command: finalFullCommand });
+        new Promise<CommandResponse>((r) => {
+          commands.pending.push(addSaveToRedisProxy({ resolve: r, command: finalFullCommand }));
         }).then((response) => {
           if (response.successful)
             // add the command to the list of resolved commands
