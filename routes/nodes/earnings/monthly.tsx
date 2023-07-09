@@ -23,6 +23,7 @@ interface MonthlyNodesEarningsProps {
   monthEarnings: string[];
   nodes: Record<string, number>;
   earnings: EarningForEarningsTable[];
+  isAdmin: boolean;
 }
 
 const MAX_MONTHS = 5;
@@ -41,34 +42,38 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
     const nodesByNumber: MonthlyNodesEarningsProps["nodes"] = {};
     for (const node of nodes) nodesByNumber[`${node._id}`] = node.number;
 
-    const earnings = (
-      await getNodeEarnings(
-        { node: { $in: nodesIds } },
-        {
-          limit: LIMIT,
-          sort: { epoch: -1 },
-          projection: { _id: 0, epoch: 1, time: 1, node: 1, earning: 1 },
-        }
-      )
-    ).map((e) => ({ ...e, time: +e.time }));
+    const earnings =
+      nodesIds.length > 0
+        ? (
+            await getNodeEarnings(
+              { node: { $in: nodesIds } },
+              {
+                limit: LIMIT,
+                sort: { epoch: -1 },
+                projection: { _id: 0, epoch: 1, time: 1, node: 1, earning: 1 },
+              }
+            )
+          ).map((e) => ({ ...e, time: +e.time }))
+        : [];
 
-    const oldestEarning = dayjs(Math.min(...nodes.map((n) => +n.createdAt)));
+    const oldestEarning = earnings.length > 0 ? dayjs(Math.min(...nodes.map((n) => +n.createdAt))) : dayjs();
     const months = dayjs().utc().diff(oldestEarning, "month");
 
     const monthEarnings: MonthlyNodesEarningsProps["monthEarnings"] = [];
-    for (let i = 0; i <= (all ? months : MAX_MONTHS); i++) {
-      const total = toFixedS(await getTotalEarnings(nodesIds, i), 9);
+    if (earnings.length > 0)
+      for (let i = 0; i <= (all ? months : MAX_MONTHS); i++) {
+        const total = toFixedS(await getTotalEarnings(nodesIds, i), 9);
 
-      if (all) {
-        // add all months, even if the earnings are 0
-        monthEarnings.push(total);
-      } else {
-        // add only months with earnings
-        if (total !== "0" || i === 0) monthEarnings.push(total);
-        // and break when any month has 0 earnings
-        else break;
+        if (all) {
+          // add all months, even if the earnings are 0
+          monthEarnings.push(total);
+        } else {
+          // add only months with earnings
+          if (total !== "0" || i === 0) monthEarnings.push(total);
+          // and break when any month has 0 earnings
+          else break;
+        }
       }
-    }
 
     const monthsLeft = Math.max(0, dayjs().utc().diff(oldestEarning, "month") - monthEarnings.length);
 
@@ -77,12 +82,13 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
       monthsLeft,
       monthEarnings,
       nodes: nodesByNumber,
+      isAdmin: ctx.state.isAdmin,
     });
   },
 };
 
 export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarningsProps>) {
-  const { nodes, earnings, monthEarnings, monthsLeft } = data;
+  const { nodes, earnings, monthEarnings, monthsLeft, isAdmin } = data;
   const nodeNumbers = Object.values(nodes);
   const nodesCount = nodeNumbers.length;
 
@@ -92,11 +98,19 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
     </Head>
   );
 
-  if (nodesCount === 0)
+  if (nodesCount === 0 && !isAdmin)
     return (
       <>
         {head}
         <Typography variant="h3">You don't have any nodes yet.</Typography>
+      </>
+    );
+
+  if (earnings.length === 0)
+    return (
+      <>
+        {head}
+        <Typography variant="h3">You don't have any earnings yet.</Typography>
       </>
     );
 
