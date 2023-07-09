@@ -8,7 +8,7 @@ const redisKey = "commands";
 export type CommandResponse = { response: string; successful: true } | { successful: false; error: string };
 export interface Command {
   command: string;
-  resolve: (response: CommandResponse) => void;
+  resolve?: (response: CommandResponse) => void;
 }
 export type Commands = {
   /** The first one is the oldest */

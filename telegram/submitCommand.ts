@@ -46,7 +46,7 @@ export const commands: Commands = (() => {
             pending.shiftNoEvent();
             saveToRedis();
             // resolve the promise
-            command.resolve(successful);
+            command.resolve?.(successful);
           }
         } catch (e) {
           handleError(e);
