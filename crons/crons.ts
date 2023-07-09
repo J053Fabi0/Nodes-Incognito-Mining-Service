@@ -5,6 +5,7 @@ import handleError from "../utils/handleError.ts";
 import checkAccounts, { Unit } from "./checkAccounts.ts";
 import deleteEmptySessions from "./deleteEmptySessions.ts";
 import checkNotStakedNodes from "./checkNotStakedNodes.ts";
+import cacheNodesStatistics from "./cacheNodesStatistics.ts";
 
 new Cron("*/5 * * * *", { protect: true, catch: handleError }, checkEarnings);
 
@@ -20,3 +21,6 @@ new Cron("0 * * * *", { protect: true, catch: handleError }, deleteEmptySessions
 
 // check not staked nodes every 30 minutes
 new Cron("*/30 * * * *", { protect: true, catch: handleError }, checkNotStakedNodes);
+
+// cache nodes statistics every 5 minutes
+new Cron("*/5 * * * *", { catch: handleError }, cacheNodesStatistics);

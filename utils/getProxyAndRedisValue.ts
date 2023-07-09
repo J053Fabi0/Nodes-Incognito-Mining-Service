@@ -5,13 +5,10 @@ const redisPrefix = "variable_";
 
 if (flags.reloadRedisVariables) await redis.del(redisPrefix + "*");
 
-type AcceptedValues = number | string | boolean | null | undefined;
-export type AcceptedRecord = Record<
-  string | number | symbol,
-  { [key: string | number | symbol]: AcceptedRecord | AcceptedValues } | AcceptedValues
->;
+// deno-lint-ignore no-explicit-any
+export type AcceptedRecord = Record<string, any>;
 
-function isRecord<T extends AcceptedRecord>(data: AcceptedRecord | AcceptedValues): data is T {
+function isRecord<T extends AcceptedRecord>(data: AcceptedRecord): data is T {
   return typeof data === "object" && data !== null;
 }
 

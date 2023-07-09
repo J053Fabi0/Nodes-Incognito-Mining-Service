@@ -5,9 +5,9 @@ import { Chart } from "fresh-charts/mod.ts";
 import { BAR_COLORS } from "../constants.ts";
 import { toFixedS } from "../utils/numbersString.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
+import { nodesStatistics } from "../utils/variables.ts";
 import { getButtonClasses } from "../components/Button.tsx";
 import { countNodes } from "../controllers/node.controller.ts";
-import getNodesStatistics from "../utils/getNodesStatistics.ts";
 import { countNodeEarnings } from "../controllers/nodeEarning.controller.ts";
 import Typography, { getTypographyClass } from "../components/Typography.tsx";
 
@@ -26,11 +26,8 @@ interface HomeProps {
 }
 
 export const handler: Handlers<HomeProps, State> = {
-  async GET(_, ctx) {
-    const nodesCount = await countNodes({ inactive: { $ne: true } });
-    const earningsCount = await countNodeEarnings();
-
-    const { averageTotalEarningsByMonth, monthsLabels } = await getNodesStatistics();
+  GET(_, ctx) {
+    const { averageTotalEarningsByMonth, monthsLabels, nodesCount, earningsCount } = nodesStatistics;
 
     return ctx.render({
       nodesCount,
@@ -38,7 +35,7 @@ export const handler: Handlers<HomeProps, State> = {
       months: monthsLabels,
       isAdmin: ctx.state.isAdmin,
       loggedIn: Boolean(ctx.state.user),
-      data: [...averageTotalEarningsByMonth.values()],
+      data: Object.values(averageTotalEarningsByMonth),
     });
   },
 };

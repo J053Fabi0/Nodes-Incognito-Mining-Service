@@ -1,5 +1,6 @@
 import { NodeRoles } from "./getNodesStatus.ts";
 import createTrueRecord from "./createTrueRecord.ts";
+import { NodesStatistics } from "./getNodesStatistics.ts";
 import getProxyAndRedisValue from "./getProxyAndRedisValue.ts";
 
 export type ErrorTypes = "alert" | "isSlashed" | "isOldVersion" | "offline" | "stalling" | "unsynced";
@@ -85,4 +86,9 @@ type PrvToPay = {
 export const prvToPay = createTrueRecord(
   await getProxyAndRedisValue<Record<string, PrvToPay>>("prvToPay", {}),
   () => ({ usd: 0, expires: 0, prvToPay: 0, confirmed: false })
+);
+
+export const nodesStatistics = await getProxyAndRedisValue<NodesStatistics>(
+  "nodesStatistics",
+  {} as NodesStatistics
 );

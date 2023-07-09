@@ -8,6 +8,7 @@ export const variablesToParse: (keyof typeof variablesObj)[] = [
   "lastRoles",
   "syncedNodes",
   "lastErrorTimes",
+  "nodesStatistics",
   "lastGlobalErrorTimes",
 ];
 

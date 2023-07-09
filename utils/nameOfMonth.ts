@@ -1,32 +1,42 @@
-const nameOfMonth = (date = new Date()) => {
+export enum Month {
+  January = "January",
+  February = "February",
+  March = "March",
+  April = "April",
+  May = "May",
+  June = "June",
+  July = "July",
+  August = "August",
+  September = "September",
+  November = "November",
+  December = "December",
+}
+
+export default function nameOfMonth(date = new Date()): Month {
   switch (date.getUTCMonth()) {
     case 0:
-      return "January";
+      return Month.January;
     case 1:
-      return "February";
+      return Month.February;
     case 2:
-      return "March";
+      return Month.March;
     case 3:
-      return "April";
+      return Month.April;
     case 4:
-      return "May";
+      return Month.May;
     case 5:
-      return "June";
+      return Month.June;
     case 6:
-      return "July";
+      return Month.July;
     case 7:
-      return "August";
+      return Month.August;
     case 8:
-      return "September";
+      return Month.September;
     case 9:
-      return "October";
+      return Month.November;
     case 10:
-      return "November";
-    case 11:
-      return "December";
+      return Month.December;
     default:
-      return "";
+      return "" as never;
   }
-};
-
-export default nameOfMonth;
+}
