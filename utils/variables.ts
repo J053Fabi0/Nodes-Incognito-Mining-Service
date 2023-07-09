@@ -46,6 +46,7 @@ export const syncedNodes = await getProxyAndRedisValue<Record<string | number, b
 );
 
 type LastRole = {
+  /** The date in which the role changed */
   date: number;
   client: string;
   role: NodeRoles;
@@ -61,7 +62,14 @@ function isLastRole(a: unknown): a is LastRole {
 /** Docker index as key */
 export const lastRoles = createTrueRecord(
   await getProxyAndRedisValue<Record<string, LastRole>>("lastRoles", {}),
-  () => ({ date: 1, client: "", createdAt: 1, nodeNumber: 1, lastWarningDay: 1, role: "NOT_STAKED" as const }),
+  () => ({
+    client: "",
+    createdAt: 1,
+    nodeNumber: 1,
+    date: Date.now(),
+    lastWarningDay: 1,
+    role: "NOT_STAKED" as const,
+  }),
   (target, key, value) => {
     // only allow to set LastRole
     if (!isLastRole(value)) return false;
