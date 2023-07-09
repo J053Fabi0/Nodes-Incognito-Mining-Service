@@ -1,5 +1,6 @@
 import { ObjectId } from "mongo/mod.ts";
 import constants from "../constants.ts";
+import { lastRoles } from "../utils/variables.ts";
 import deleteDocker from "./docker/deleteDocker.ts";
 import deleteNginxConfig from "./nginx/deleteNginxConfig.ts";
 import { changeNode } from "../controllers/node.controller.ts";
@@ -39,4 +40,5 @@ export function removeNodeFromConfigs(dockerIndex: number) {
     const index = constants.findIndex((i) => i.dockerIndex === dockerIndex);
     if (index !== -1) constants.splice(index, 1);
   }
+  delete lastRoles[dockerIndex];
 }
