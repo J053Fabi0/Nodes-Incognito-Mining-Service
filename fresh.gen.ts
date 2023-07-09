@@ -10,24 +10,28 @@ import * as $4 from "./routes/admin/accounts.tsx";
 import * as $5 from "./routes/admin/index.tsx";
 import * as $6 from "./routes/admin/nodes.tsx";
 import * as $7 from "./routes/api/balance.tsx";
-import * as $8 from "./routes/api/variables/lastRoles.tsx";
-import * as $9 from "./routes/api/variables/prvToPay.tsx";
-import * as $10 from "./routes/bot-is-blocked.tsx";
-import * as $11 from "./routes/credentials.tsx";
-import * as $12 from "./routes/diffuse.tsx";
-import * as $13 from "./routes/index.tsx";
-import * as $14 from "./routes/me/index.tsx";
-import * as $15 from "./routes/me/transactions.tsx";
-import * as $16 from "./routes/nodes/earnings/[number].tsx";
-import * as $17 from "./routes/nodes/earnings/index.tsx";
-import * as $18 from "./routes/nodes/earnings/monthly.tsx";
-import * as $19 from "./routes/nodes/index.tsx";
-import * as $20 from "./routes/nodes/monitor.tsx";
-import * as $21 from "./routes/nodes/new-confirm.tsx";
-import * as $22 from "./routes/nodes/new.tsx";
-import * as $23 from "./routes/nodes/notifications.tsx";
-import * as $24 from "./routes/signin.tsx";
-import * as $25 from "./routes/signout.tsx";
+import * as $8 from "./routes/api/variables/ignore.ts";
+import * as $9 from "./routes/api/variables/lastErrorTimes.ts";
+import * as $10 from "./routes/api/variables/lastGlobalErrorTimes.ts";
+import * as $11 from "./routes/api/variables/lastRoles.ts";
+import * as $12 from "./routes/api/variables/prvToPay.ts";
+import * as $13 from "./routes/api/variables/syncedNodes.ts";
+import * as $14 from "./routes/bot-is-blocked.tsx";
+import * as $15 from "./routes/credentials.tsx";
+import * as $16 from "./routes/diffuse.tsx";
+import * as $17 from "./routes/index.tsx";
+import * as $18 from "./routes/me/index.tsx";
+import * as $19 from "./routes/me/transactions.tsx";
+import * as $20 from "./routes/nodes/earnings/[number].tsx";
+import * as $21 from "./routes/nodes/earnings/index.tsx";
+import * as $22 from "./routes/nodes/earnings/monthly.tsx";
+import * as $23 from "./routes/nodes/index.tsx";
+import * as $24 from "./routes/nodes/monitor.tsx";
+import * as $25 from "./routes/nodes/new-confirm.tsx";
+import * as $26 from "./routes/nodes/new.tsx";
+import * as $27 from "./routes/nodes/notifications.tsx";
+import * as $28 from "./routes/signin.tsx";
+import * as $29 from "./routes/signout.tsx";
 import * as $$0 from "./islands/Balance.tsx";
 import * as $$1 from "./islands/EarningsTable.tsx";
 import * as $$2 from "./islands/EarningsTableAndOptions.tsx";
@@ -47,24 +51,28 @@ const manifest = {
     "./routes/admin/index.tsx": $5,
     "./routes/admin/nodes.tsx": $6,
     "./routes/api/balance.tsx": $7,
-    "./routes/api/variables/lastRoles.tsx": $8,
-    "./routes/api/variables/prvToPay.tsx": $9,
-    "./routes/bot-is-blocked.tsx": $10,
-    "./routes/credentials.tsx": $11,
-    "./routes/diffuse.tsx": $12,
-    "./routes/index.tsx": $13,
-    "./routes/me/index.tsx": $14,
-    "./routes/me/transactions.tsx": $15,
-    "./routes/nodes/earnings/[number].tsx": $16,
-    "./routes/nodes/earnings/index.tsx": $17,
-    "./routes/nodes/earnings/monthly.tsx": $18,
-    "./routes/nodes/index.tsx": $19,
-    "./routes/nodes/monitor.tsx": $20,
-    "./routes/nodes/new-confirm.tsx": $21,
-    "./routes/nodes/new.tsx": $22,
-    "./routes/nodes/notifications.tsx": $23,
-    "./routes/signin.tsx": $24,
-    "./routes/signout.tsx": $25,
+    "./routes/api/variables/ignore.ts": $8,
+    "./routes/api/variables/lastErrorTimes.ts": $9,
+    "./routes/api/variables/lastGlobalErrorTimes.ts": $10,
+    "./routes/api/variables/lastRoles.ts": $11,
+    "./routes/api/variables/prvToPay.ts": $12,
+    "./routes/api/variables/syncedNodes.ts": $13,
+    "./routes/bot-is-blocked.tsx": $14,
+    "./routes/credentials.tsx": $15,
+    "./routes/diffuse.tsx": $16,
+    "./routes/index.tsx": $17,
+    "./routes/me/index.tsx": $18,
+    "./routes/me/transactions.tsx": $19,
+    "./routes/nodes/earnings/[number].tsx": $20,
+    "./routes/nodes/earnings/index.tsx": $21,
+    "./routes/nodes/earnings/monthly.tsx": $22,
+    "./routes/nodes/index.tsx": $23,
+    "./routes/nodes/monitor.tsx": $24,
+    "./routes/nodes/new-confirm.tsx": $25,
+    "./routes/nodes/new.tsx": $26,
+    "./routes/nodes/notifications.tsx": $27,
+    "./routes/signin.tsx": $28,
+    "./routes/signout.tsx": $29,
   },
   islands: {
     "./islands/Balance.tsx": $$0,
