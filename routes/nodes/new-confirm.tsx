@@ -156,6 +156,9 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
         cost: dataOrRedirect.prvToPay * 1e9 - incognitoFeeInt,
       });
 
+    // delete default values if the values are valid
+    ctx.state.session.flash("defaultValidator");
+    ctx.state.session.flash("defaultValidatorPublic");
     return redirect(MONITOR_URL);
   },
 };
