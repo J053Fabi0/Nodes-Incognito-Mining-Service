@@ -1,12 +1,19 @@
 import State from "../../types/state.type.ts";
 import * as variablesObj from "../../utils/variables.ts";
 import { Handlers, RouteConfig } from "$fresh/server.ts";
+import { commands } from "../../telegram/submitCommand.ts";
+import { pendingNodes } from "../../incognito/submitNode.ts";
+import { pendingTransactionsByAccount } from "../../incognito/submitTransaction.ts";
 
-export const variablesToParse: (keyof typeof variablesObj)[] = [
+type SeparateVariables = "commands" | "pendingNodes" | "transactions";
+export const variablesToParse: (keyof typeof variablesObj | SeparateVariables)[] = [
   "ignore",
+  "commands",
   "prvToPay",
   "lastRoles",
   "syncedNodes",
+  "transactions",
+  "pendingNodes",
   "lastErrorTimes",
   "nodesStatistics",
   "lastGlobalErrorTimes",
@@ -19,7 +26,26 @@ export const config: RouteConfig = {
 export const handler: Handlers<null, State> = {
   GET(req) {
     const variable = variablesToParse.find((v) => req.url.includes(v));
-    return new Response(variable ? JSON.stringify(variablesObj[variable]) : "{}", {
+
+    let parsed: string;
+    switch (variable) {
+      case undefined:
+        parsed = "{}";
+        break;
+      case "commands":
+        parsed = JSON.stringify(commands);
+        break;
+      case "pendingNodes":
+        parsed = JSON.stringify(pendingNodes);
+        break;
+      case "transactions":
+        parsed = JSON.stringify(pendingTransactionsByAccount);
+        break;
+      default:
+        parsed = JSON.stringify(variablesObj[variable]);
+    }
+
+    return new Response(parsed, {
       headers: { "content-type": "application/json" },
     });
   },

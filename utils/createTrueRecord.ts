@@ -1,6 +1,6 @@
 import { AcceptedRecord } from "./getProxyAndRedisValue.ts";
 
-const notAssignableKeys = ["toJSON"];
+export const notAssignableKeys = ["toJSON"];
 
 export default function createTrueRecord<R extends AcceptedRecord>(
   record: R,

@@ -10,6 +10,7 @@ import { IS_PRODUCTION } from "../env.ts";
 import IncognitoCli from "./IncognitoCli.ts";
 import handleError from "../utils/handleError.ts";
 import { incognitoFeeInt } from "../constants.ts";
+import { notAssignableKeys } from "../utils/createTrueRecord.ts";
 import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { changeAccountTransaction } from "../controllers/accountTransaction.controller.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
@@ -61,11 +62,12 @@ export interface PendingTransaction {
 export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArray<PendingTransaction>>>(
   {},
   {
-    get(target, name: string) {
-      if (name in target) return target[name];
+    get(target, key: string) {
+      if (typeof key === "symbol" || notAssignableKeys.includes(key)) return Reflect.get(target, key);
+      if (key in target) return target[key];
 
       // If the array for this account doesn't exist, create it
-      return (target[name] = new EventedArray<PendingTransaction>(
+      return (target[key] = new EventedArray<PendingTransaction>(
         // create a closure for the variable working
         (
           (working = false) =>

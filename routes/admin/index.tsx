@@ -57,7 +57,7 @@ export default function Admin({ data }: PageProps<AdminProps>) {
         {variablesToParse.map((v) => (
           <li class={styles.li}>
             <a href={`/api/variables/${v}`} target="blank" class="underline">
-              {v}
+              <code>{v}</code>
             </a>
           </li>
         ))}

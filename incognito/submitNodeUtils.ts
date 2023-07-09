@@ -8,7 +8,7 @@ import { adminTelegramUsername } from "../constants.ts";
 import { getNode, getNodes } from "../controllers/node.controller.ts";
 import { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 
-const redisKey = "newNodes";
+const redisKey = "pendingNodes";
 
 /** Resolves the promise and removes the pending node from the array */
 export function resolveAndForget<S extends boolean>(
