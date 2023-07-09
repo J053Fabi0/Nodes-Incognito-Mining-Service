@@ -1,13 +1,12 @@
-import bot from "../initBots.ts";
 import { escapeHtml } from "escapeHtml";
 import sortNodes from "../../utils/sortNodes.ts";
-import { sendHTMLMessage } from "../sendMessage.ts";
 import isError from "../../types/guards/isError.ts";
 import { df } from "duplicatedFilesCleanerIncognito";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
-import { CommandResponse } from "../submitCommandUtils.ts";
+import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import { duplicatedConstants } from "../../duplicatedFilesCleaner.ts";
+import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
 
@@ -16,16 +15,16 @@ import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDe
  */
 export default async function handleInfo(
   rawNodes: string[] = [],
-  options: Parameters<typeof bot.api.sendMessage>[2] = {}
+  options?: CommandOptions
 ): Promise<CommandResponse> {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {
     if (!duplicatedConstants.fileSystem) {
-      await sendHTMLMessage("File system not configured", undefined, options);
+      await sendMessage("File system not configured", undefined, { disable_notification: options?.silent });
       return { successful: false, error: "File system not configured" };
     }
     const response = await getFileSistemInfo(duplicatedConstants.fileSystem);
-    await sendHTMLMessage(response, undefined, options);
+    await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
     return { successful: true, response };
   }
 
@@ -73,7 +72,7 @@ export default async function handleInfo(
       .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
       .join("\n")}</code>`;
 
-  await sendHTMLMessage(text.trim(), undefined, options);
+  await sendHTMLMessage(text.trim(), undefined, { disable_notification: options?.silent });
   return { successful: true, response: text.trim() };
 }
 

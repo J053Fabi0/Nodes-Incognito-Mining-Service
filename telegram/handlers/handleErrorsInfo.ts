@@ -12,12 +12,15 @@ import { sendHTMLMessage } from "../sendMessage.ts";
 import isError from "../../types/guards/isError.ts";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
-import { CommandResponse } from "../submitCommandUtils.ts";
 import getMinutesSinceError from "../../utils/getMinutesSinceError.ts";
+import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 
 type NodesByPublicKey = Record<string, { name: string; dockerIndex: number }>;
 
-export default async function handleErrorsInfo(rawErrorCodes: string[]): Promise<CommandResponse> {
+export default async function handleErrorsInfo(
+  rawErrorCodes: string[],
+  options?: CommandOptions
+): Promise<CommandResponse> {
   const errorCodesToShow: readonly AllErrorTypes[] | Error =
     rawErrorCodes.length === 0
       ? allErrorTypes
@@ -73,6 +76,6 @@ export default async function handleErrorsInfo(rawErrorCodes: string[]): Promise
   }
 
   const response = text.trim() || "No errors found. Send /full or /fulltext to get all the information.";
-  await sendHTMLMessage(response);
+  await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
   return { successful: true, response };
 }

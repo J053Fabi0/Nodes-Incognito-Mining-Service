@@ -1,16 +1,19 @@
 import isError from "../../types/guards/isError.ts";
 import { docker } from "duplicatedFilesCleanerIncognito";
 import validateItems from "../../utils/validateItems.ts";
-import { CommandResponse } from "../submitCommandUtils.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
+import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 
-export default async function handleDocker([action, ...rawNodes]: string[]): Promise<CommandResponse> {
+export default async function handleDocker(
+  [action, ...rawNodes]: string[],
+  options?: CommandOptions
+): Promise<CommandResponse> {
   // check if the command is valid
   if ((action !== "start" && action !== "stop") || rawNodes.length === 0) {
     const error =
       "Invalid command. Use <code>start</code> or <code>stop</code> followed by the indexes of the nodes or <code>all</code>.";
-    await sendHTMLMessage(error);
+    await sendHTMLMessage(error, undefined, { disable_notification: options?.silent });
     return { successful: false, error };
   }
 
@@ -30,11 +33,11 @@ export default async function handleDocker([action, ...rawNodes]: string[]): Pro
     await docker(`inc_mainnet_${node}`, action);
 
     const response = `Docker <code>${node}</code> ${action === "stop" ? "stopp" : "start"}ed.`;
-    await sendHTMLMessage(response);
+    await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
     responses.push(response);
   }
 
-  await sendMessage("Done.");
+  await sendMessage("Done.", undefined, { disable_notification: options?.silent });
 
   return { successful: true, response: responses.join("\n") };
 }

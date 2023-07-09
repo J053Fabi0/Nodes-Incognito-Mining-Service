@@ -1,13 +1,13 @@
 import bot from "../initBots.ts";
 import { ADMIN_ID } from "../../env.ts";
 import { InputFile } from "grammy/mod.ts";
-import sendMessage from "../sendMessage.ts";
-import { CommandResponse } from "../submitCommandUtils.ts";
+import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
 import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
 import emojisCodes, { splitEmoji } from "../../utils/emojisCodes.ts";
-import getNodesStatus, { NodeRoles, NodeStatus } from "../../utils/getNodesStatus.ts";
+import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
+import getNodesStatus, { NodeRoles, NodeStatus } from "../../utils/getNodesStatus.ts";
 
 const allKeys = ["name", "role", "shard", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
 const booleanKeys = ["isSlashed", "isOldVersion", "alert"] as const;
@@ -18,7 +18,10 @@ let lastPhotoIdTime: number | undefined;
 let lastText = "";
 let lastTextTime: number | undefined;
 
-export default async function handleTextMessage(text: "text" | "full" | "fulltext"): Promise<CommandResponse> {
+export default async function handleTextMessage(
+  text: "text" | "full" | "fulltext",
+  options?: CommandOptions
+): Promise<CommandResponse> {
   const keys: Keys[] = [];
   let nodes = await getNodesStatus();
 
@@ -41,14 +44,14 @@ export default async function handleTextMessage(text: "text" | "full" | "fulltex
 
   if (!nodes.length) {
     const response = "Everything is alright. Send /full or /fulltext to get all the information.";
-    await sendMessage(response);
+    await sendMessage(response, undefined, { disable_notification: options?.silent });
     return { successful: true, response };
   }
 
   // for text-only
   if (text === "text") {
     const response = getMessageText(keys, nodes);
-    await sendMessage(response, undefined, { parse_mode: "HTML" });
+    await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
     return { successful: true, response };
   }
 

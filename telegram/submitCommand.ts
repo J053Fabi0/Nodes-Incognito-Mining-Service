@@ -2,6 +2,7 @@ import {
   Command,
   Commands,
   saveToRedis,
+  CommandOptions,
   CommandResponse,
   addSaveToRedisProxy,
   getCommandsFromReds,
@@ -41,7 +42,7 @@ export const commands: Commands = (() => {
             const command = pending[0];
             if (!command) continue;
             // execute the command
-            const successful = await handleCommands(command.command);
+            const successful = await handleCommands(command.command, command.options);
             // remove it
             pending.shiftNoEvent();
             saveToRedis();
@@ -60,11 +61,11 @@ export const commands: Commands = (() => {
 /**
  * @returns true if the command was handled successfully
  */
-async function handleCommands(fullCommand: string): Promise<CommandResponse> {
+async function handleCommands(fullCommand: string, options?: CommandOptions): Promise<CommandResponse> {
   try {
     const repeating = fullCommand.startsWith("repeat");
     if (repeating && commands.resolved.lengths === 0) {
-      await sendMessage("No previous messages to repeat.");
+      await sendMessage("No previous messages to repeat.", undefined, { disable_notification: options?.silent });
       return { successful: false, error: "No previous messages to repeat." };
     }
 
@@ -72,46 +73,46 @@ async function handleCommands(fullCommand: string): Promise<CommandResponse> {
 
     switch (command) {
       case "help":
-        await sendHTMLMessage(helpMessage);
+        await sendHTMLMessage(helpMessage, undefined, { disable_notification: options?.silent });
         return { successful: true, response: helpMessage };
 
       case "docker":
-        return handleDocker(args);
+        return handleDocker(args, options);
 
       case "ignore":
-        return handleIgnore(args);
+        return handleIgnore(args, options);
 
       case "info":
-        return handleInfo(args);
+        return handleInfo(args, options);
 
       case "copy":
-        return handleCopyOrMove(args, "copy");
+        return handleCopyOrMove(args, "copy", options);
 
       case "move":
-        return handleCopyOrMove(args, "move");
+        return handleCopyOrMove(args, "move", options);
 
       case "delete":
-        return handleDelete(args);
+        return handleDelete(args, options);
 
       case "errors":
-        return handleErrorsInfo(args);
+        return handleErrorsInfo(args, options);
 
       case "instructions": {
         const response = await getTextInstructionsToMoveOrDelete();
-        await sendHTMLMessage(response);
+        await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
         return { successful: true, response };
       }
 
       case "reset":
         for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
-        await sendMessage("Reset successful.");
+        await sendMessage("Reset successful.", undefined, { disable_notification: options?.silent });
         return { successful: true, response: "Reset successful." };
 
       case "full":
       case "text":
       case "fulltext":
       default:
-        return handleTextMessage(command);
+        return handleTextMessage(command, options);
     }
   } catch (e) {
     handleError(e);
@@ -121,7 +122,10 @@ async function handleCommands(fullCommand: string): Promise<CommandResponse> {
 }
 
 /** Pushes a command to the queue and waits for it to be executed. */
-export default async function submitCommand(command: string): Promise<CommandResponse[]> {
+export default async function submitCommand(
+  command: string,
+  options?: CommandOptions
+): Promise<CommandResponse[]> {
   const fullCommands = command
     .toLowerCase()
     .split("\n")
@@ -143,7 +147,12 @@ export default async function submitCommand(command: string): Promise<CommandRes
               .join("</code>\n- <code>")}</code>`
           : `Command <code>${fullCommand}</code> not found. Type /help to see the available commands.`;
 
-      promises.push(sendHTMLMessage(response).then(() => ({ successful: false, error: response })));
+      promises.push(
+        sendHTMLMessage(response, undefined, { disable_notification: options?.silent }).then(() => ({
+          successful: false,
+          error: response,
+        }))
+      );
     }
     // push the command to the queue
     else {
@@ -151,7 +160,7 @@ export default async function submitCommand(command: string): Promise<CommandRes
 
       promises.push(
         new Promise<CommandResponse>((r) => {
-          commands.pending.push(addSaveToRedisProxy({ resolve: r, command: finalFullCommand }));
+          commands.pending.push(addSaveToRedisProxy({ resolve: r, command: finalFullCommand, options }));
         }).then((response) => {
           if (response.successful)
             // add the command to the list of resolved commands

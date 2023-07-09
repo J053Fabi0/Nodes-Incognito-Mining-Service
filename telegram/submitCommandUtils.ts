@@ -6,8 +6,13 @@ import EventedArray from "../utils/EventedArray.ts";
 const redisKey = "commands";
 
 export type CommandResponse = { response: string; successful: true } | { successful: false; error: string };
+export interface CommandOptions {
+  /** Send telegram messages silently */
+  silent?: boolean;
+}
 export interface Command {
   command: string;
+  options?: CommandOptions;
   resolve?: (response: CommandResponse) => void;
 }
 export type Commands = {

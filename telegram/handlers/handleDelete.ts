@@ -1,26 +1,22 @@
-import bot from "../initBots.ts";
 import { join } from "std/path/mod.ts";
 import sendMessage from "../sendMessage.ts";
 import { ignore } from "../../utils/variables.ts";
 import isError from "../../types/guards/isError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
-import { CommandResponse } from "../submitCommandUtils.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
+import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { ShardsNames, dockerPs, docker, shardsNames } from "duplicatedFilesCleanerIncognito";
 
-export default async function handleDelete(
-  args: string[],
-  options: Parameters<typeof bot.api.sendMessage>[2] = {}
-): Promise<CommandResponse> {
+export default async function handleDelete(args: string[], options?: CommandOptions): Promise<CommandResponse> {
   const [nodeRaw, rawShards] = [args.slice(0, 1), args.slice(1)];
 
   if (nodeRaw.length === 0) {
-    await sendMessage("Please specify a node.", undefined, options);
+    await sendMessage("Please specify a node.", undefined, { disable_notification: options?.silent });
     return { successful: false, error: "Missing 1st argument: node index." };
   }
   if (rawShards.length === 0) {
-    await sendMessage("Please specify a shard.", undefined, options);
+    await sendMessage("Please specify a shard.", undefined, { disable_notification: options?.silent });
     return { successful: false, error: "Missing 2nd argument: shard." };
   }
 
@@ -59,7 +55,7 @@ export default async function handleDelete(
   const dockerStatus = await dockerPs([fromNodeIndex]);
   if (dockerStatus[fromNodeIndex].running) {
     await Promise.all([
-      sendMessage("Stopping node...", undefined, options),
+      sendMessage("Stopping node...", undefined, { disable_notification: options?.silent }),
       docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
     responses.push("Stopping node...");
@@ -67,7 +63,9 @@ export default async function handleDelete(
 
   for (const shard of shards) {
     await Promise.all([
-      sendMessage(`Deleting ${shard} from node ${fromNodeIndex}...`, undefined, options),
+      sendMessage(`Deleting ${shard} from node ${fromNodeIndex}...`, undefined, {
+        disable_notification: options?.silent,
+      }),
       Deno.remove(join(duplicatedFilesCleaner.homePath, `/node_data_${fromNodeIndex}/mainnet/block/${shard}`), {
         recursive: true,
       }).catch(() => {}),
@@ -81,7 +79,7 @@ export default async function handleDelete(
   // start the docker if they were not being ignored
   if (isBeingIgnored("docker") && dockerStatus[fromNodeIndex].running) {
     await Promise.all([
-      sendMessage("Starting node...", undefined, options),
+      sendMessage("Starting node...", undefined, { disable_notification: options?.silent }),
       docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
     responses.push("Starting node...");

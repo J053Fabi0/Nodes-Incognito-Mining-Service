@@ -1,18 +1,17 @@
-import bot from "../initBots.ts";
+import sendMessage from "../sendMessage.ts";
 import { ignore } from "../../utils/variables.ts";
 import isError from "../../types/guards/isError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
-import { CommandResponse } from "../submitCommandUtils.ts";
-import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
+import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
 
 export default async function handleCopyOrMove(
   args: string[],
   action: "copy" | "move",
-  options: Parameters<typeof bot.api.sendMessage>[2] = {}
+  options?: CommandOptions
 ): Promise<CommandResponse> {
   const [nodesRaw, rawShards] = [args.slice(0, 2), args.slice(2)];
 
@@ -54,7 +53,7 @@ export default async function handleCopyOrMove(
   const dockerStatus = await dockerPs([fromNodeIndex, toNodeIndex]);
   if (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running) {
     await Promise.all([
-      sendMessage("Stopping nodes...", undefined, options),
+      sendMessage("Stopping nodes...", undefined, { disable_notification: options?.silent }),
       dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
       dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
@@ -67,7 +66,7 @@ export default async function handleCopyOrMove(
       `from node ${fromNodeIndex} to node ${toNodeIndex}...`;
 
     await Promise.all([
-      sendHTMLMessage(response, undefined, options),
+      sendMessage(response, undefined, { disable_notification: options?.silent }),
       action === "copy"
         ? duplicatedFilesCleaner.copyData({
             from: fromNodeIndex as unknown as string,
@@ -86,7 +85,7 @@ export default async function handleCopyOrMove(
   // start the dockers if they were not being ignored
   if (isBeingIgnored("docker") && (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running)) {
     await Promise.all([
-      sendMessage("Starting nodes...", undefined, options),
+      sendMessage("Starting nodes...", undefined, { disable_notification: options?.silent }),
       dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "start"),
       dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
