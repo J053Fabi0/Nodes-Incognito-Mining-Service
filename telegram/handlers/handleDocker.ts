@@ -13,7 +13,8 @@ export default async function handleDocker(
   if ((action !== "start" && action !== "stop") || rawNodes.length === 0) {
     const error =
       "Invalid command. Use <code>start</code> or <code>stop</code> followed by the indexes of the nodes or <code>all</code>.";
-    await sendHTMLMessage(error, undefined, { disable_notification: options?.silent });
+    if (options?.telegramMessages)
+      await sendHTMLMessage(error, undefined, { disable_notification: options?.silent });
     return { successful: false, error };
   }
 
@@ -33,11 +34,12 @@ export default async function handleDocker(
     await docker(`inc_mainnet_${node}`, action);
 
     const response = `Docker <code>${node}</code> ${action === "stop" ? "stopp" : "start"}ed.`;
-    await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
+    if (options?.telegramMessages)
+      await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
     responses.push(response);
   }
 
-  await sendMessage("Done.", undefined, { disable_notification: options?.silent });
+  if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });
 
   return { successful: true, response: responses.join("\n") };
 }

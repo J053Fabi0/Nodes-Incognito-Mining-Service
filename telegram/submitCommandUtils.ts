@@ -9,6 +9,7 @@ export type CommandResponse = { response: string; successful: true } | { success
 export interface CommandOptions {
   /** Send telegram messages silently */
   silent?: boolean;
+  telegramMessages?: boolean;
 }
 export interface Command {
   command: string;

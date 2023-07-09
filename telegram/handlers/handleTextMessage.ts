@@ -44,14 +44,16 @@ export default async function handleTextMessage(
 
   if (!nodes.length) {
     const response = "Everything is alright. Send /full or /fulltext to get all the information.";
-    await sendMessage(response, undefined, { disable_notification: options?.silent });
+    if (options?.telegramMessages)
+      await sendMessage(response, undefined, { disable_notification: options?.silent });
     return { successful: true, response };
   }
 
   // for text-only
   if (text === "text") {
     const response = getMessageText(keys, nodes);
-    await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
+    if (options?.telegramMessages)
+      await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
     return { successful: true, response };
   }
 

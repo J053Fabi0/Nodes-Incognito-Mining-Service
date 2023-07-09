@@ -53,7 +53,9 @@ export default async function handleCopyOrMove(
   const dockerStatus = await dockerPs([fromNodeIndex, toNodeIndex]);
   if (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running) {
     await Promise.all([
-      sendMessage("Stopping nodes...", undefined, { disable_notification: options?.silent }),
+      options?.telegramMessages
+        ? sendMessage("Stopping nodes...", undefined, { disable_notification: options?.silent })
+        : null,
       dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
       dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
@@ -66,7 +68,9 @@ export default async function handleCopyOrMove(
       `from node ${fromNodeIndex} to node ${toNodeIndex}...`;
 
     await Promise.all([
-      sendMessage(response, undefined, { disable_notification: options?.silent }),
+      options?.telegramMessages
+        ? sendMessage(response, undefined, { disable_notification: options?.silent })
+        : null,
       action === "copy"
         ? duplicatedFilesCleaner.copyData({
             from: fromNodeIndex as unknown as string,
@@ -85,7 +89,9 @@ export default async function handleCopyOrMove(
   // start the dockers if they were not being ignored
   if (isBeingIgnored("docker") && (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running)) {
     await Promise.all([
-      sendMessage("Starting nodes...", undefined, { disable_notification: options?.silent }),
+      options?.telegramMessages
+        ? sendMessage("Starting nodes...", undefined, { disable_notification: options?.silent })
+        : null,
       dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "start"),
       dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);

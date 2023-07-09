@@ -8,7 +8,7 @@ const bot = new Bot(BOT_TOKEN);
 export default bot;
 
 bot.on("message", (ctx) => {
-  if (ctx.message.text && ctx?.chat?.id === ADMIN_ID) submitCommand(ctx.message.text);
+  if (ctx.message.text && ctx?.chat?.id === ADMIN_ID) submitCommand(ctx.message.text, { telegramMessages: true });
 });
 
 bot.catch(console.error);

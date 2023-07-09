@@ -21,13 +21,14 @@ export default async function handleIgnore(args: string[], options?: CommandOpti
 
   if (number < 0) {
     const error = "The number of minutes must be positive.";
-    await sendMessage(error, undefined, { disable_notification: options?.silent });
+    if (options?.telegramMessages) await sendMessage(error, undefined, { disable_notification: options?.silent });
     return { successful: false, error };
   }
 
   if ((type !== "all" && !errorKeys.includes(type)) || type.toLowerCase() === "codes") {
     const error = `Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`;
-    await sendHTMLMessage(error, undefined, { disable_notification: options?.silent });
+    if (options?.telegramMessages)
+      await sendHTMLMessage(error, undefined, { disable_notification: options?.silent });
     return { successful: false, error };
   }
 
@@ -37,6 +38,6 @@ export default async function handleIgnore(args: string[], options?: CommandOpti
   }
 
   const response = `Ignoring ${type} for ${number} minutes.`;
-  await sendMessage(response, undefined, { disable_notification: options?.silent });
+  if (options?.telegramMessages) await sendMessage(response, undefined, { disable_notification: options?.silent });
   return { successful: true, response };
 }

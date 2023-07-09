@@ -20,11 +20,13 @@ export default async function handleInfo(
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {
     if (!duplicatedConstants.fileSystem) {
-      await sendMessage("File system not configured", undefined, { disable_notification: options?.silent });
+      if (options?.telegramMessages)
+        await sendMessage("File system not configured", undefined, { disable_notification: options?.silent });
       return { successful: false, error: "File system not configured" };
     }
     const response = await getFileSistemInfo(duplicatedConstants.fileSystem);
-    await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
+    if (options?.telegramMessages)
+      await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
     return { successful: true, response };
   }
 
@@ -72,7 +74,8 @@ export default async function handleInfo(
       .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
       .join("\n")}</code>`;
 
-  await sendHTMLMessage(text.trim(), undefined, { disable_notification: options?.silent });
+  if (options?.telegramMessages)
+    await sendHTMLMessage(text.trim(), undefined, { disable_notification: options?.silent });
   return { successful: true, response: text.trim() };
 }
 

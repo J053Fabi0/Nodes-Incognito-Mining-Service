@@ -12,11 +12,13 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   const [nodeRaw, rawShards] = [args.slice(0, 1), args.slice(1)];
 
   if (nodeRaw.length === 0) {
-    await sendMessage("Please specify a node.", undefined, { disable_notification: options?.silent });
+    if (options?.telegramMessages)
+      await sendMessage("Please specify a node.", undefined, { disable_notification: options?.silent });
     return { successful: false, error: "Missing 1st argument: node index." };
   }
   if (rawShards.length === 0) {
-    await sendMessage("Please specify a shard.", undefined, { disable_notification: options?.silent });
+    if (options?.telegramMessages)
+      await sendMessage("Please specify a shard.", undefined, { disable_notification: options?.silent });
     return { successful: false, error: "Missing 2nd argument: shard." };
   }
 
@@ -55,7 +57,9 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   const dockerStatus = await dockerPs([fromNodeIndex]);
   if (dockerStatus[fromNodeIndex].running) {
     await Promise.all([
-      sendMessage("Stopping node...", undefined, { disable_notification: options?.silent }),
+      options?.telegramMessages
+        ? sendMessage("Stopping node...", undefined, { disable_notification: options?.silent })
+        : null,
       docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
     responses.push("Stopping node...");
@@ -63,9 +67,11 @@ export default async function handleDelete(args: string[], options?: CommandOpti
 
   for (const shard of shards) {
     await Promise.all([
-      sendMessage(`Deleting ${shard} from node ${fromNodeIndex}...`, undefined, {
-        disable_notification: options?.silent,
-      }),
+      options?.telegramMessages
+        ? sendMessage(`Deleting ${shard} from node ${fromNodeIndex}...`, undefined, {
+            disable_notification: options?.silent,
+          })
+        : null,
       Deno.remove(join(duplicatedFilesCleaner.homePath, `/node_data_${fromNodeIndex}/mainnet/block/${shard}`), {
         recursive: true,
       }).catch(() => {}),
@@ -79,7 +85,9 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   // start the docker if they were not being ignored
   if (isBeingIgnored("docker") && dockerStatus[fromNodeIndex].running) {
     await Promise.all([
-      sendMessage("Starting node...", undefined, { disable_notification: options?.silent }),
+      options?.telegramMessages
+        ? sendMessage("Starting node...", undefined, { disable_notification: options?.silent })
+        : null,
       docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
     responses.push("Starting node...");

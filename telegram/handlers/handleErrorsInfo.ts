@@ -76,6 +76,7 @@ export default async function handleErrorsInfo(
   }
 
   const response = text.trim() || "No errors found. Send /full or /fulltext to get all the information.";
-  await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
+  if (options?.telegramMessages)
+    await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
   return { successful: true, response };
 }

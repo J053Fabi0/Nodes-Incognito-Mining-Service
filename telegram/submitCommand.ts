@@ -65,7 +65,8 @@ async function handleCommands(fullCommand: string, options?: CommandOptions): Pr
   try {
     const repeating = fullCommand.startsWith("repeat");
     if (repeating && commands.resolved.lengths === 0) {
-      await sendMessage("No previous messages to repeat.", undefined, { disable_notification: options?.silent });
+      if (options?.telegramMessages)
+        await sendMessage("No previous messages to repeat.", undefined, { disable_notification: options?.silent });
       return { successful: false, error: "No previous messages to repeat." };
     }
 
@@ -73,7 +74,8 @@ async function handleCommands(fullCommand: string, options?: CommandOptions): Pr
 
     switch (command) {
       case "help":
-        await sendHTMLMessage(helpMessage, undefined, { disable_notification: options?.silent });
+        if (options?.telegramMessages)
+          await sendHTMLMessage(helpMessage, undefined, { disable_notification: options?.silent });
         return { successful: true, response: helpMessage };
 
       case "docker":
@@ -99,13 +101,15 @@ async function handleCommands(fullCommand: string, options?: CommandOptions): Pr
 
       case "instructions": {
         const response = await getTextInstructionsToMoveOrDelete();
-        await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
+        if (options?.telegramMessages)
+          await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
         return { successful: true, response };
       }
 
       case "reset":
         for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
-        await sendMessage("Reset successful.", undefined, { disable_notification: options?.silent });
+        if (options?.telegramMessages)
+          await sendMessage("Reset successful.", undefined, { disable_notification: options?.silent });
         return { successful: true, response: "Reset successful." };
 
       case "full":
@@ -146,12 +150,14 @@ export default async function submitCommand(
               .map((c) => `${c} ${args.join(" ")}`)
               .join("</code>\n- <code>")}</code>`
           : `Command <code>${fullCommand}</code> not found. Type /help to see the available commands.`;
+      const commandResponse: CommandResponse = { successful: false, error: response };
 
       promises.push(
-        sendHTMLMessage(response, undefined, { disable_notification: options?.silent }).then(() => ({
-          successful: false,
-          error: response,
-        }))
+        options?.telegramMessages
+          ? sendHTMLMessage(response, undefined, { disable_notification: options?.silent }).then(
+              () => commandResponse
+            )
+          : Promise.resolve(commandResponse)
       );
     }
     // push the command to the queue
