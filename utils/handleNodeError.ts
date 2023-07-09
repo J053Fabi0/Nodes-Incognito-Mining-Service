@@ -4,14 +4,14 @@ import sendMessage from "../telegram/sendMessage.ts";
 
 export default async function handleNodeError(
   errorKey: AllErrorTypes,
-  node: string | undefined,
+  dockerIndex: number | undefined,
   minutesSinceError: number
 ) {
   console.error("#".repeat(40));
-  console.error(node, errorKey, `${Math.round(minutesSinceError)} minutes`);
+  console.error(dockerIndex, errorKey, `${Math.round(minutesSinceError)} minutes`);
 
   await sendMessage(
-    (node ? `<b>${node}</b> - ` : "") +
+    (typeof dockerIndex === "number" ? `<code>${dockerIndex}</code> - ` : "") +
       `<code>${escapeHtml(errorKey)}</code><code>: ` +
       `${Math.round(minutesSinceError)} minutes</code>`,
     undefined,

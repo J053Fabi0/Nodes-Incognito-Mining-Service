@@ -21,7 +21,7 @@ export default async function getInstructionsToMoveOrDelete() {
       shard === "beacon" ? nodesInfo : nodesInfo.filter(([, { shard: s }]) => s === shard)
     )
       .slice(0, nodesWithShard.length)
-      .map(([name]) => name);
+      .map(([dockerIndex]) => dockerIndex);
 
     for (const dockerIndex of nodesWithShard) {
       // if this node should have the shard, ignore it

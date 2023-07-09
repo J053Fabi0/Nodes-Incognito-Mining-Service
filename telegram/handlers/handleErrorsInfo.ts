@@ -48,9 +48,9 @@ export default async function handleErrorsInfo(rawErrorCodes: string[]): Promise
       errorCodesToShow.includes(error)
     );
     if (!errors.length) continue;
-    const { dockerIndex, name } = nodesByPublicKey[publicKey];
+    const { dockerIndex } = nodesByPublicKey[publicKey];
     text +=
-      `<code>${name} - #${dockerIndex}</code>\n` +
+      `<code>${dockerIndex}</code>\n` +
       `<code>${escapeHtml(
         objectToTableText(
           Object.fromEntries(

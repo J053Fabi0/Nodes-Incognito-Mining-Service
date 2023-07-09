@@ -72,7 +72,8 @@ export default async function checkNodes() {
         (!dockerStatuses[nodeStatus.dockerIndex].running && !shouldBeOffline))
     ) {
       console.log(
-        `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} for node ${nodeStatus.name}.`
+        `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} ` +
+          `for node ${nodeStatus.dockerIndex}.`
       );
       await docker(`inc_mainnet_${nodeStatus.dockerIndex}`, shouldBeOffline ? "stop" : "start");
     }
@@ -110,7 +111,13 @@ export default async function checkNodes() {
 
     // report errors if they have been present for longer than established
     for (const errorKey of errorTypes)
-      await handleErrors(fixes, lastErrorTime[errorKey], prevLastErrorTime[errorKey], errorKey, nodeStatus.name);
+      await handleErrors(
+        fixes,
+        lastErrorTime[errorKey],
+        prevLastErrorTime[errorKey],
+        errorKey,
+        nodeStatus.dockerIndex
+      );
   }
 
   if (fixes.length) {
@@ -123,8 +130,8 @@ export default async function checkNodes() {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
     if (instructionsToMoveOrDelete.length > 0) {
       for (const instruction of instructionsToMoveOrDelete) {
-        const nodeTo = nodesStatus.find((node) => node.name === instruction.to);
-        const nodeFrom = nodesStatus.find((node) => node.name === instruction.from);
+        const nodeTo = nodesStatus.find((node) => `${node.dockerIndex}` === instruction.to);
+        const nodeFrom = nodesStatus.find((node) => `${node.dockerIndex}` === instruction.from);
         const dockerStatusTo = nodeTo ? dockerStatuses[nodeTo.dockerIndex].status : "OFFLINE";
         const dockerStatusFrom = nodeFrom ? dockerStatuses[nodeFrom.dockerIndex].status : "OFFLINE";
 
@@ -146,7 +153,7 @@ async function handleErrors(
   date: number | undefined,
   lastDate: number | undefined,
   errorKey: AllErrorTypes,
-  nodeName?: string
+  dockerIndex?: number
 ) {
   if (date) {
     const minutes = getMinutesSinceError(date);
@@ -156,11 +163,12 @@ async function handleErrors(
       // and it's not being ignored
       !isBeingIgnored(errorKey)
     )
-      await handleNodeError(errorKey, nodeName, minutes);
+      await handleNodeError(errorKey, dockerIndex, minutes);
   }
   // if it had a problem before but it's now fixed, report it even if it's being ignored
   else if (lastDate && getMinutesSinceError(lastDate) >= waitingTimes[errorKey])
     fixes.push(
-      (nodeName ? `<b>${nodeName}</b> - ` : "") + `<code>${escapeHtml(errorKey)}</code><code>: Fixed ✅</code>`
+      (dockerIndex ? `<b>${dockerIndex}</b> - ` : "") +
+        `<code>${escapeHtml(errorKey)}</code><code>: Fixed ✅</code>`
     );
 }
