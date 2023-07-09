@@ -17,32 +17,32 @@ dayjs.extend(relativeTime);
 const clientsTelegram: Record<string, string | null> = {};
 
 export default async function checkNotStakedNodes() {
+  const notStakedNodes = Object.entries(lastRoles)
+    .filter(([, { role }]) => role === "NOT_STAKED")
+    .map(([dockerIndex]) => dockerIndex);
+
   // First delete the files of all not staked nodes
-  if (IS_PRODUCTION) await deleteFiles();
+  if (IS_PRODUCTION) await deleteFiles(notStakedNodes);
 
   // then check if they should be deleted
   await checkAndAlert();
 }
 
-async function deleteFiles() {
+async function deleteFiles(notStakedNodes: string[]) {
   // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
   const lastIgnoreMinutes = ignore.docker.minutes;
   ignore.docker.minutes = Infinity;
 
   // Stop all the nodes
-  await Promise.allSettled(
-    Object.keys(lastRoles).map((dockerindex) => docker(`inc_mainnet_${dockerindex}`, "stop"))
-  );
+  await Promise.allSettled(notStakedNodes.map((dockerindex) => docker(`inc_mainnet_${dockerindex}`, "stop")));
 
   // Delete their files
   await Promise.allSettled(
-    Object.keys(lastRoles).map((dockerIndex) => Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }))
+    notStakedNodes.map((dockerIndex) => Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }))
   );
 
   // Start them
-  await Promise.allSettled(
-    Object.keys(lastRoles).map((dockerIndex) => docker(`inc_mainnet_${dockerIndex}`, "start"))
-  );
+  await Promise.allSettled(notStakedNodes.map((dockerIndex) => docker(`inc_mainnet_${dockerIndex}`, "start")));
 
   ignore.docker.minutes = lastIgnoreMinutes;
 }
