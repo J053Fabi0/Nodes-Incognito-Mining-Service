@@ -1,10 +1,10 @@
 import { ObjectId } from "mongo/mod.ts";
 import constants from "../constants.ts";
-import { lastRoles } from "../utils/variables.ts";
 import deleteDocker from "./docker/deleteDocker.ts";
 import deleteNginxConfig from "./nginx/deleteNginxConfig.ts";
 import { changeNode } from "../controllers/node.controller.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
+import { lastErrorTimes, lastRoles, syncedNodes } from "../utils/variables.ts";
 
 interface DeleteDockerAndConfigsOptions {
   number: number;
@@ -36,9 +36,15 @@ export function removeNodeFromConfigs(dockerIndex: number) {
     const index = duplicatedFilesCleaner.dockerIndexes.findIndex((i) => i === dockerIndex);
     if (index !== -1) duplicatedFilesCleaner.dockerIndexes.splice(index, 1);
   }
+
   {
     const index = constants.findIndex((i) => i.dockerIndex === dockerIndex);
-    if (index !== -1) constants.splice(index, 1);
+    if (index !== -1) {
+      constants.splice(index, 1);
+      delete lastErrorTimes[constants[index].validatorPublic];
+      delete syncedNodes[constants[index].validatorPublic];
+    }
   }
+
   delete lastRoles[dockerIndex];
 }
