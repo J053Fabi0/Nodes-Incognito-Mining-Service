@@ -9,7 +9,7 @@ import cacheNodesStatistics from "./cacheNodesStatistics.ts";
 
 const options: CronOptions = { catch: handleError, utcOffset: 0 };
 
-new Cron("*/5 * * * *", { protect: true, ...options }, checkEarnings);
+new Cron("*/5 * * * *", options, checkEarnings);
 
 new Cron("*/1 * * * *", { protect: true, ...options }, checkNodes);
 
