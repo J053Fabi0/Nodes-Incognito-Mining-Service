@@ -49,6 +49,12 @@ export default function Admin({ data }: PageProps<AdminProps>) {
             Create or delete nodes
           </a>
         </li>
+
+        <li class={styles.li}>
+          <a href="/diffuse" class="underline">
+            Diffuse
+          </a>
+        </li>
       </ul>
 
       <Typography variant="h3">Variables</Typography>
