@@ -50,6 +50,7 @@ type LastRole = {
   date: number;
   client: string;
   role: NodeRoles | "-";
+  /** The creation date of the node */
   createdAt: number;
   nodeNumber: number;
   // the last day since that a warning has been send
