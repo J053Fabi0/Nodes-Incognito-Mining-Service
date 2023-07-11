@@ -71,7 +71,7 @@ async function checkAndAlert() {
       const telegramId =
         clientsTelegram[client] ??
         (clientsTelegram[client] = (await getClient(
-          { _id: new ObjectId() },
+          { _id: new ObjectId(client) },
           { projection: { _id: 0, telegram: 1 } }
         ))!.telegram);
 

@@ -49,7 +49,7 @@ type LastRole = {
   /** The date in which the role changed */
   date: number;
   client: string;
-  role: NodeRoles;
+  role: NodeRoles | "-";
   createdAt: number;
   nodeNumber: number;
   // the last day since that a warning has been send
@@ -68,7 +68,7 @@ export const lastRoles = createTrueRecord(
     nodeNumber: 1,
     date: Date.now(),
     lastWarningDay: 1,
-    role: "NOT_STAKED" as const,
+    role: "-" as const,
   }),
   (target, key, value) => {
     // only allow to set LastRole
