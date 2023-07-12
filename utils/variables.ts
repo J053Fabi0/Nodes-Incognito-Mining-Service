@@ -101,3 +101,19 @@ export const nodesStatistics = await getProxyAndRedisValue<NodesStatistics>(
   "nodesStatistics",
   {} as NodesStatistics
 );
+
+export type MonthlyPayments = {
+  /** If an error happened with us */
+  errorInTransaction: boolean;
+  /** The day in which a warning was last sent in the month */
+  lastWarningDay: number | null;
+  /** The fee for the month, without the incognito fee. Int format. If it's null, update it. */
+  fee: number | null;
+  /** Month of the year. 0-11 */
+  forMonth: number;
+};
+/** Client id as key */
+export const monthlyPayments = createTrueRecord(
+  await getProxyAndRedisValue<Record<string, MonthlyPayments>>("monthlyPayments", {}),
+  () => ({ errorInTransaction: false, fee: null, forMonth: new Date().getUTCMonth(), lastWarningDay: null })
+);

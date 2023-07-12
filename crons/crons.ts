@@ -2,6 +2,8 @@ import checkNodes from "./checkNodes.ts";
 import Cron, { CronOptions } from "croner";
 import checkEarnings from "./checkEarnings.ts";
 import handleError from "../utils/handleError.ts";
+import { maxNotPayedDays } from "../constants.ts";
+import checkMonthlyFee from "./checkMonthlyFee.ts";
 import checkAccounts, { Unit } from "./checkAccounts.ts";
 import deleteEmptySessions from "./deleteEmptySessions.ts";
 import checkNotStakedNodes from "./checkNotStakedNodes.ts";
@@ -26,3 +28,6 @@ new Cron("*/30 * * * *", { protect: true, ...options }, checkNotStakedNodes);
 
 // cache nodes statistics every 5 minutes
 new Cron("*/5 * * * *", options, cacheNodesStatistics);
+
+// check the monthly fee every 1st day of the month until the maxNotPayedDays
+new Cron(`0 0 1-${maxNotPayedDays + 1} * *`, options, checkMonthlyFee);

@@ -72,6 +72,7 @@ export const minutesOfPriceStability = 60;
 ///////////////
 const admin = (await getClient({ role: "admin" }, { projection: { account: 1, telegram: 1 } }))!;
 export const adminId = admin._id;
+/** Telegram ID */
 export const adminTelegram = admin.telegram!;
 /** The Incognito Account, not the client data */
 export const adminAccount = (await getAccount({ _id: admin.account }))!;

@@ -27,6 +27,7 @@ export const aggregateNodeEarning = a.aggregate(Model);
  * Returns the total earnings of a node or nodes in the last `monthsToSubtract` months
  * @param nodeOrNodes If given an empty array or null, it will return the total earnings of all nodes
  * @param monthsToSubtract
+ * @returns The total earnings. Decimal format.
  */
 export async function getTotalEarnings(nodeOrNodes: ObjectId | ObjectId[] | null, monthsToSubtract: number) {
   const time: { $gte: Date; $lte?: Date } = {

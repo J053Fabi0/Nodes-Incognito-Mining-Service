@@ -1,14 +1,26 @@
+import capitalize from "../utils/capitalize.ts";
+
 /** Converts an object into a readable text format */
-export default function objectToTableText(obj: Record<string, string | number | boolean>) {
+export default function objectToTableText(obj: Record<string, string | number | boolean>): string;
+export default function objectToTableText(
+  obj: Record<string, string | number | boolean>,
+  pre: string,
+  post: string
+): string;
+export default function objectToTableText(
+  obj: Record<string, string | number | boolean>,
+  pre = "",
+  post = ""
+): string {
   const keys = Object.keys(obj);
   // maxLength in the keys
   const maxLength = Math.max(...keys.map((key) => key.length));
 
   return keys.reduce(
-    (text, key) =>
+    (text, key, i) =>
       (text +=
-        `${key.charAt(0).toUpperCase()}${key.slice(1).toLowerCase()}:` +
-        `${" ".repeat(maxLength - key.length + 1)}${obj[key]}\n`),
+        `${pre}${capitalize(key)}${post}${pre}:${" ".repeat(maxLength - key.length + 1)}` +
+        `${post}${pre}${obj[key]}${post}${i === keys.length - 1 ? "" : "\n"}`),
     ""
   );
 }

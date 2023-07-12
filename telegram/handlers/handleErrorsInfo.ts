@@ -72,7 +72,7 @@ export default async function handleErrorsInfo(
           )
         )
         .join("</code>\n<code>")}</code>` +
-      "\n";
+      "\n\n";
   }
 
   const response = text.trim() || "No errors found. Send /full or /fulltext to get all the information.";
