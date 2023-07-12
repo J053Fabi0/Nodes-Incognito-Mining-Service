@@ -15,6 +15,7 @@ export const variablesToParse: (keyof typeof variablesObj | SeparateVariables)[]
   "transactions",
   "pendingNodes",
   "lastErrorTimes",
+  "monthlyPayments",
   "nodesStatistics",
   "lastGlobalErrorTimes",
 ];

@@ -98,7 +98,7 @@ async function getMonthlyFee(client: ObjectId): Promise<number> {
   return +toFixedS(Big(earningsLastMonth).div(10).mul(1e9).valueOf(), 0);
 }
 
-export async function sendAkcnowledgment(
+async function sendAkcnowledgment(
   successfull: boolean,
   account: Pick<Account, "_id" | "privateKey" | "paymentAddress" | "balance">,
   feeWithIncognitoFee: number,
@@ -152,7 +152,7 @@ export async function sendAkcnowledgment(
     );
 }
 
-export async function sendWarning(
+async function sendWarning(
   account: Pick<Account, "_id" | "privateKey" | "paymentAddress" | "balance">,
   feeWithIncognitoFee: number,
   paymentData: MonthlyPayments,
