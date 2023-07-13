@@ -40,9 +40,9 @@ export function removeNodeFromConfigs(dockerIndex: number) {
   {
     const index = constants.findIndex((i) => i.dockerIndex === dockerIndex);
     if (index !== -1) {
-      constants.splice(index, 1);
-      delete lastErrorTimes[constants[index].validatorPublic];
-      delete syncedNodes[constants[index].validatorPublic];
+      const [{ validatorPublic }] = constants.splice(index, 1);
+      delete lastErrorTimes[validatorPublic];
+      delete syncedNodes[validatorPublic];
     }
   }
 
