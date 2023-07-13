@@ -20,6 +20,10 @@ import { df, docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import handleTextMessage from "../telegram/handlers/handleTextMessage.ts";
 import getInstructionsToMoveOrDelete from "../utils/getInstructionsToMoveOrDelete.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
+import dayjs from "dayjs/mod.ts";
+import utc from "dayjs/plugin/utc.ts";
+
+dayjs.extend(utc);
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, number | undefined>, errorKey: string) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || Date.now();
@@ -124,8 +128,12 @@ export default async function checkNodes() {
   }
 
   // Check if there are shards that need to be moved or deleted
+  console.log("About to check for shards to move or delete.");
   if (!isBeingIgnored("autoMove") && !flags.ignoreDocker) {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
+
+    console.log(dayjs().utcOffset(-360).format("YYYY-MM-DD HH:mm:ss"), instructionsToMoveOrDelete);
+
     if (instructionsToMoveOrDelete.length > 0) {
       for (const instruction of instructionsToMoveOrDelete) {
         const nodeTo = nodesStatus.find((node) => `${node.dockerIndex}` === instruction.to);
