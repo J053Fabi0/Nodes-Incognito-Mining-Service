@@ -21,6 +21,15 @@ export default async function checkNotStakedNodes() {
     .filter(([, { role }]) => role === "NOT_STAKED")
     .map(([dockerIndex]) => dockerIndex);
 
+  // delete lastWarningDay and removeOnDate from other nodes
+  const otherNodes = Object.entries(lastRoles)
+    .filter(([, { role }]) => role !== "NOT_STAKED")
+    .map(([, data]) => data);
+  for (const data of otherNodes) {
+    delete data.lastWarningDay;
+    delete data.removeOnDate;
+  }
+
   // First delete the files of all not-staked nodes
   if (IS_PRODUCTION) await deleteFiles(notStakedNodes);
 
@@ -57,7 +66,14 @@ async function checkAndAlert() {
 
     const daysSince = dayjs().diff(date, "days");
     const isNew = dayjs().diff(createdAt, "days") <= 30;
-    const maxDaysAllowed = isNew ? maxNotStakedDaysForNew : maxNotStakedDays;
+
+    const removeOnDate =
+      data.removeOnDate ??
+      (data.removeOnDate = dayjs()
+        .add(isNew ? maxNotStakedDaysForNew : maxNotStakedDays, "day")
+        .valueOf());
+
+    const maxDaysAllowed = dayjs(removeOnDate).diff(date, "days");
 
     thisIf: if (daysSince > maxDaysAllowed) {
       if (IS_PRODUCTION)
@@ -66,6 +82,7 @@ async function checkAndAlert() {
           number: nodeNumber,
           dockerIndex: +dockerIndex,
         });
+      else console.log("Would delete", dockerIndex);
     } else if ((lastWarningDay ?? -Infinity) < daysSince) {
       // if it's new, give 3 days before giving alerts
       if (isNew && daysSince <= 3) break thisIf;
