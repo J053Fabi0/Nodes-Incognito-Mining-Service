@@ -21,7 +21,7 @@ export default async function checkNotStakedNodes() {
     .filter(([, { role }]) => role === "NOT_STAKED")
     .map(([dockerIndex]) => dockerIndex);
 
-  // First delete the files of all not staked nodes
+  // First delete the files of all not-staked nodes
   if (IS_PRODUCTION) await deleteFiles(notStakedNodes);
 
   // then check if they should be deleted
