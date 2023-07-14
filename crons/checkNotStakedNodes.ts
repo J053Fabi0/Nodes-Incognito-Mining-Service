@@ -77,23 +77,28 @@ async function checkAndAlert() {
           { projection: { _id: 0, telegram: 1 } }
         ))!.telegram);
 
-      data.lastWarningDay = daysSince;
-
       if (telegramId) {
+        data.lastWarningDay = daysSince;
+
         // send it both to the user and the admin
         await sendHTMLMessage(
           `⚠️ Warning ⚠️\n\nYour node <code>${nodeNumber}</code> has been unstaked for ` +
             `${dayjs(date).fromNow(true)}. ` +
             `It'll be deleted in the ${(maxDaysAllowed + 1).ordinalize()} day if it remains unstaked. ` +
             `\nYou'll still be able to host it with us, but the setup fee will be charged again.`,
-          telegramId
+          telegramId,
+          undefined,
+          "notificationsBot"
         ).catch(handleError);
+
         await sendHTMLMessage(
           `⚠️ Warning ⚠️\n\nDocker <code>${dockerIndex}</code> has been unstaked for ` +
             `${dayjs(date).fromNow(true)}. ` +
             `It'll be deleted in the ${(maxDaysAllowed + 1).ordinalize()} day if it remains unstaked. ` +
             `\nYou'll still be able to host it with us, but the setup fee will be charged again.`,
-          telegramId
+          telegramId,
+          undefined,
+          "notificationsBot"
         ).catch(handleError);
       }
     }
