@@ -49,7 +49,9 @@ async function deleteFiles(notStakedNodes: string[]) {
 
 async function checkAndAlert() {
   const entries = Object.entries(lastRoles);
-  for (const [dockerIndex, { date, role, createdAt, lastWarningDay, client, nodeNumber }] of entries) {
+  for (const [dockerIndex, data] of entries) {
+    const { date, role, createdAt, lastWarningDay, client, nodeNumber } = data;
+
     // only check not staked
     if (role !== "NOT_STAKED") continue;
 
@@ -64,7 +66,7 @@ async function checkAndAlert() {
           number: nodeNumber,
           dockerIndex: +dockerIndex,
         });
-    } else if ((lastWarningDay ?? -1) < daysSince) {
+    } else if ((lastWarningDay ?? -Infinity) < daysSince) {
       // if it's new, give 3 days before giving alerts
       if (isNew && daysSince <= 3) break thisIf;
 
@@ -74,6 +76,8 @@ async function checkAndAlert() {
           { _id: new ObjectId(client) },
           { projection: { _id: 0, telegram: 1 } }
         ))!.telegram);
+
+      data.lastWarningDay = daysSince;
 
       if (telegramId) {
         // send it both to the user and the admin
