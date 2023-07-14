@@ -1,5 +1,6 @@
 import "humanizer/ordinalize.ts";
 import dayjs from "dayjs/mod.ts";
+import utc from "dayjs/plugin/utc.ts";
 import { ObjectId } from "mongo/mod.ts";
 import { IS_PRODUCTION } from "../env.ts";
 import handleError from "../utils/handleError.ts";
@@ -13,6 +14,7 @@ import { maxNotStakedDays, maxNotStakedDaysForNew } from "../constants.ts";
 import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
 
 dayjs.extend(relativeTime);
+dayjs.extend(utc);
 
 const clientsTelegram: Record<string, string | null> = {};
 
@@ -69,13 +71,15 @@ async function checkAndAlert() {
 
     const removeOnDate =
       data.removeOnDate ??
-      (data.removeOnDate = dayjs()
+      (data.removeOnDate = dayjs(date)
+        .utc()
         .add(isNew ? maxNotStakedDaysForNew : maxNotStakedDays, "day")
+        .add(1, "day")
+        .startOf("day")
         .valueOf());
+    const dayToDelete = dayjs(removeOnDate).diff(date, "days");
 
-    const maxDaysAllowed = dayjs(removeOnDate).diff(date, "days");
-
-    thisIf: if (daysSince > maxDaysAllowed) {
+    thisIf: if (removeOnDate < Date.now()) {
       if (IS_PRODUCTION)
         await deleteDockerAndConfigs({
           clientId: client,
@@ -101,7 +105,7 @@ async function checkAndAlert() {
         await sendHTMLMessage(
           `⚠️ Warning ⚠️\n\nYour node <code>${nodeNumber}</code> has been unstaked for ` +
             `${dayjs(date).fromNow(true)}. ` +
-            `It'll be deleted in the ${(maxDaysAllowed + 1).ordinalize()} day if it remains unstaked. ` +
+            `It'll be deleted in the ${dayToDelete.ordinalize()} day if it remains unstaked. ` +
             `\nYou'll still be able to host it with us, but the setup fee will be charged again.`,
           telegramId,
           undefined,
@@ -111,7 +115,7 @@ async function checkAndAlert() {
         await sendHTMLMessage(
           `⚠️ Warning ⚠️\n\nDocker <code>${dockerIndex}</code> has been unstaked for ` +
             `${dayjs(date).fromNow(true)}. ` +
-            `It'll be deleted in the ${(maxDaysAllowed + 1).ordinalize()} day if it remains unstaked. ` +
+            `It'll be deleted in the ${dayToDelete.ordinalize()} day if it remains unstaked. ` +
             `\nYou'll still be able to host it with us, but the setup fee will be charged again.`,
           telegramId,
           undefined,
