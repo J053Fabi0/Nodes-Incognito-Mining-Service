@@ -1,6 +1,6 @@
 import { JSX } from "preact";
 import { Head } from "$fresh/runtime.ts";
-import twindColors, { ShadedColors } from "../utils/twindColors.ts";
+import twindColors, { ALL_COLORS, ShadedColors } from "../utils/twindColors.ts";
 
 interface SwitchProps extends JSX.HTMLAttributes<HTMLInputElement> {
   checked: boolean;
@@ -12,7 +12,7 @@ interface SwitchProps extends JSX.HTMLAttributes<HTMLInputElement> {
   class?: JSX.HTMLAttributes<HTMLInputElement>["class"];
 }
 
-const bgColors = (Object.keys(twindColors) as ShadedColors[]).reduce((obj, color) => {
+const bgColors = ALL_COLORS.reduce((obj, color) => {
   obj[color] = (size) => `
       input:checked + .bg-custom-${color}-${size} {
         background-color: ${twindColors[color][200]};

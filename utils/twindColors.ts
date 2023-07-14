@@ -289,3 +289,9 @@ const twindColors = {
 
 export default twindColors;
 export type ShadedColors = keyof typeof twindColors;
+export const ALL_COLORS = Object.keys(twindColors) as ShadedColors[];
+
+export type Colors = Exclude<ShadedColors, "slate" | "gray" | "zinc" | "neutral" | "stone">;
+export const COLORS = ALL_COLORS.filter(
+  (c) => !["slace", "gray", "zinc", "neutral", "stone"].includes(c)
+) as Colors[];
