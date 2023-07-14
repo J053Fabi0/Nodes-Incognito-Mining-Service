@@ -53,8 +53,10 @@ type LastRole = {
   /** The creation date of the node */
   createdAt: number;
   nodeNumber: number;
-  // the last day since that a warning has been send
+  /** the last day since that a warning has been send */
   lastWarningDay?: number;
+  /** Remove on date */
+  removeOnDate?: number;
 };
 function isLastRole(a: unknown): a is LastRole {
   const keys: (keyof LastRole)[] = ["date", "client", "role", "createdAt", "nodeNumber"];
@@ -68,18 +70,18 @@ export const lastRoles = createTrueRecord(
     createdAt: 1,
     nodeNumber: 1,
     date: Date.now(),
-    lastWarningDay: 1,
     role: "-" as const,
   }),
-  (target, key, value) => {
+  (target, dockerIndex, obj) => {
     // only allow to set LastRole
-    if (!isLastRole(value)) return false;
+    if (!isLastRole(obj)) return false;
     // let symbol pass
-    if (typeof key !== "string") return Reflect.set(target, key, value);
+    if (typeof dockerIndex !== "string") return Reflect.set(target, dockerIndex, obj);
     // only let strings that represent a valid number
-    if (isNaN(+key)) return false;
+    if (isNaN(+dockerIndex)) return false;
+
     // update if the new role is different from the old one or the old one is is a dummy one
-    if (value.role !== lastRoles[key].role) return Reflect.set(target, key, value);
+    if (obj.role !== lastRoles[dockerIndex].role) return Reflect.set(target, dockerIndex, obj);
     return true;
   }
 );

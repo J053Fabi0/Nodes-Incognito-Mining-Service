@@ -1,5 +1,6 @@
 import "humanizer/ordinalize.ts";
 import dayjs from "dayjs/mod.ts";
+import utc from "dayjs/plugin/utc.ts";
 import { ObjectId } from "mongo/mod.ts";
 import { IS_PRODUCTION } from "../env.ts";
 import handleError from "../utils/handleError.ts";
@@ -13,6 +14,7 @@ import { maxNotStakedDays, maxNotStakedDaysForNew } from "../constants.ts";
 import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
 
 dayjs.extend(relativeTime);
+dayjs.extend(utc);
 
 const clientsTelegram: Record<string, string | null> = {};
 
@@ -21,7 +23,16 @@ export default async function checkNotStakedNodes() {
     .filter(([, { role }]) => role === "NOT_STAKED")
     .map(([dockerIndex]) => dockerIndex);
 
-  // First delete the files of all not staked nodes
+  // delete lastWarningDay and removeOnDate from other nodes
+  const otherNodes = Object.entries(lastRoles)
+    .filter(([, { role }]) => role !== "NOT_STAKED")
+    .map(([, data]) => data);
+  for (const data of otherNodes) {
+    delete data.lastWarningDay;
+    delete data.removeOnDate;
+  }
+
+  // First delete the files of all not-staked nodes
   if (IS_PRODUCTION) await deleteFiles(notStakedNodes);
 
   // then check if they should be deleted
@@ -49,22 +60,34 @@ async function deleteFiles(notStakedNodes: string[]) {
 
 async function checkAndAlert() {
   const entries = Object.entries(lastRoles);
-  for (const [dockerIndex, { date, role, createdAt, lastWarningDay, client, nodeNumber }] of entries) {
+  for (const [dockerIndex, data] of entries) {
+    const { date, role, createdAt, lastWarningDay, client, nodeNumber } = data;
+
     // only check not staked
     if (role !== "NOT_STAKED") continue;
 
     const daysSince = dayjs().diff(date, "days");
     const isNew = dayjs().diff(createdAt, "days") <= 30;
-    const maxDaysAllowed = isNew ? maxNotStakedDays : maxNotStakedDaysForNew;
 
-    thisIf: if (daysSince > maxDaysAllowed) {
+    const removeOnDate =
+      data.removeOnDate ??
+      (data.removeOnDate = dayjs(date)
+        .utc()
+        .add(isNew ? maxNotStakedDaysForNew : maxNotStakedDays, "day")
+        .add(1, "day")
+        .startOf("day")
+        .valueOf());
+    const dayToDelete = dayjs(removeOnDate).diff(date, "days");
+
+    thisIf: if (removeOnDate < Date.now()) {
       if (IS_PRODUCTION)
         await deleteDockerAndConfigs({
           clientId: client,
           number: nodeNumber,
           dockerIndex: +dockerIndex,
         });
-    } else if ((lastWarningDay ?? -1) < daysSince) {
+      else console.log("Would delete", dockerIndex);
+    } else if ((lastWarningDay ?? -Infinity) < daysSince) {
       // if it's new, give 3 days before giving alerts
       if (isNew && daysSince <= 3) break thisIf;
 
@@ -76,20 +99,27 @@ async function checkAndAlert() {
         ))!.telegram);
 
       if (telegramId) {
+        data.lastWarningDay = daysSince;
+
         // send it both to the user and the admin
         await sendHTMLMessage(
           `⚠️ Warning ⚠️\n\nYour node <code>${nodeNumber}</code> has been unstaked for ` +
             `${dayjs(date).fromNow(true)}. ` +
-            `It'll be deleted in the ${(maxDaysAllowed + 1).ordinalize()} day if it remains unstaked. ` +
+            `It'll be deleted in the ${dayToDelete.ordinalize()} day if it remains unstaked. ` +
             `\nYou'll still be able to host it with us, but the setup fee will be charged again.`,
-          telegramId
+          telegramId,
+          undefined,
+          "notificationsBot"
         ).catch(handleError);
+
         await sendHTMLMessage(
           `⚠️ Warning ⚠️\n\nDocker <code>${dockerIndex}</code> has been unstaked for ` +
             `${dayjs(date).fromNow(true)}. ` +
-            `It'll be deleted in the ${(maxDaysAllowed + 1).ordinalize()} day if it remains unstaked. ` +
+            `It'll be deleted in the ${dayToDelete.ordinalize()} day if it remains unstaked. ` +
             `\nYou'll still be able to host it with us, but the setup fee will be charged again.`,
-          telegramId
+          telegramId,
+          undefined,
+          "notificationsBot"
         ).catch(handleError);
       }
     }
