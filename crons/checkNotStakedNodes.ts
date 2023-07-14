@@ -55,7 +55,7 @@ async function checkAndAlert() {
 
     const daysSince = dayjs().diff(date, "days");
     const isNew = dayjs().diff(createdAt, "days") <= 30;
-    const maxDaysAllowed = isNew ? maxNotStakedDays : maxNotStakedDaysForNew;
+    const maxDaysAllowed = isNew ? maxNotStakedDaysForNew : maxNotStakedDays;
 
     thisIf: if (daysSince > maxDaysAllowed) {
       if (IS_PRODUCTION)
