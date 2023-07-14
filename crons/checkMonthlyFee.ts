@@ -129,7 +129,8 @@ async function sendAkcnowledgment(
         `\n\n${details}\n\n` +
         `Have a nice month!`,
       telegramID,
-      { disable_web_page_preview: true }
+      { disable_web_page_preview: true },
+      "notificationsBot"
     );
   // error in transaction
   else if (!successfull)
@@ -139,7 +140,8 @@ async function sendAkcnowledgment(
         "\n\nPlease don't worry, we'll handle the payment manually. Your nodes won't be suspended, " +
         "unless you withdraw your balance.",
       telegramID,
-      { disable_web_page_preview: true }
+      { disable_web_page_preview: true },
+      "notificationsBot"
     );
   // past error in transaction, but it was solved
   else
@@ -148,7 +150,8 @@ async function sendAkcnowledgment(
         `${details}\n\n` +
         `Have a nice month!`,
       telegramID,
-      { disable_web_page_preview: true }
+      { disable_web_page_preview: true },
+      "notificationsBot"
     );
 }
 
@@ -183,7 +186,8 @@ async function sendWarning(
           `in which case you'll need to pay the initial setup again for each one if you wish to continue using our services.` +
           `\n\n${details}`,
     telegramID,
-    { disable_web_page_preview: true }
+    { disable_web_page_preview: true },
+    "notificationsBot"
   );
 
   // only if the user didn't blocked the bot and there's more than an hour left to the end of the day

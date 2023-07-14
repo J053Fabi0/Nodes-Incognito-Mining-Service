@@ -20,7 +20,8 @@ export const handler: Handlers<undefined, State> = {
         "Great, I'm not.\n\nThank you for understanding.\n\nRemember that you can manage your notifications " +
           `<a href="${WEBSITE_URL}/nodes/notifications">here</a>.`,
         ctx.state.user.telegram!,
-        { disable_web_page_preview: true }
+        { disable_web_page_preview: true },
+        "notificationsBot"
       );
       await changeClient({ _id: ctx.state.user._id }, { $set: { isBotBlocked: false } });
       return redirect(WEBSITE_URL);
