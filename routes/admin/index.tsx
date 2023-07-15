@@ -1,4 +1,5 @@
 import State from "../../types/state.type.ts";
+import { BsFillEyeFill } from "react-icons/bs";
 import { variablesToParse } from "../api/variables.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import Client from "../../types/collections/client.type.ts";
@@ -57,7 +58,7 @@ export default function Admin({ data }: PageProps<AdminProps>) {
         </li>
       </ul>
 
-      <Typography variant="h3">Variables edit</Typography>
+      <Typography variant="h3">Variables</Typography>
 
       <ul class="list-disc list-inside mb-5">
         {variablesToParse.map((v) => (
@@ -65,17 +66,9 @@ export default function Admin({ data }: PageProps<AdminProps>) {
             <a href={`/admin/edit/${v}`} class="underline">
               <code>{v}</code>
             </a>
-          </li>
-        ))}
-      </ul>
-
-      <Typography variant="h3">Variables view</Typography>
-
-      <ul class="list-disc list-inside mb-5">
-        {variablesToParse.map((v) => (
-          <li class={styles.li}>
-            <a href={`/api/variables/${v}`} target="blank" class="underline">
-              <code>{v}</code>
+            &nbsp;&nbsp;
+            <a href={`/api/variables/${v}`} target="blank">
+              <BsFillEyeFill class="inline" />
             </a>
           </li>
         ))}
