@@ -57,7 +57,19 @@ export default function Admin({ data }: PageProps<AdminProps>) {
         </li>
       </ul>
 
-      <Typography variant="h3">Variables</Typography>
+      <Typography variant="h3">Variables edit</Typography>
+
+      <ul class="list-disc list-inside mb-5">
+        {variablesToParse.map((v) => (
+          <li class={styles.li}>
+            <a href={`/admin/edit/${v}`} class="underline">
+              <code>{v}</code>
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <Typography variant="h3">Variables view</Typography>
 
       <ul class="list-disc list-inside mb-5">
         {variablesToParse.map((v) => (
