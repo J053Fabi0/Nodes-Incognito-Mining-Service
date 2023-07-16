@@ -102,7 +102,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
     );
 
   return (
-    <>
+    <div class="relative">
       {head}
 
       {!isAdmin && (
@@ -154,6 +154,6 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
           * Nodes become online only when needed. They are offline most of the time.
         </Typography>
       )}
-    </>
+    </div>
   );
 }

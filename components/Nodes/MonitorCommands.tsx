@@ -15,12 +15,13 @@ interface MonitorCommandsProps {
 export default function MonitorCommands({ route, commandResponse }: MonitorCommandsProps) {
   return (
     <>
+      {/* The command history */}
       <form method="post">
         {commands.resolved
           .slice(0, 5)
           .toReversed()
           .map((m) => (
-            <div class="flex gap-3 mt-1 mb-5">
+            <div class="flex gap-3 mt-1 mb-3">
               <Typography variant="lead">
                 <code>{m}</code>
               </Typography>
@@ -31,7 +32,7 @@ export default function MonitorCommands({ route, commandResponse }: MonitorComma
             </div>
           ))}
         {commands.pending.toReversed().map((c) => (
-          <div class="mt-1 mb-5">
+          <div class="mt-1 mb-3">
             <Typography variant="lead" class="flex gap-3 items-center">
               <code>{c.command}</code>
               <FiClock size={20} />
@@ -39,8 +40,10 @@ export default function MonitorCommands({ route, commandResponse }: MonitorComma
           </div>
         ))}
       </form>
-      <form method="post">
-        <div class="flex w-full mb-2 items-center gap-2">
+
+      {/* The command input */}
+      <form method="post" class="sticky top-0 left-0 right-0 bg-white mb-2 pt-2">
+        <div class="flex w-full items-center gap-2 drop-shadow-md bg-white rounded-lg">
           <input
             required
             type="text"
@@ -61,6 +64,8 @@ export default function MonitorCommands({ route, commandResponse }: MonitorComma
           </a>
         </div>
       </form>
+
+      {/* The command response */}
       {commandResponse && (
         <>
           <Typography variant="lead">
