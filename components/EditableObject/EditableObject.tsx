@@ -24,7 +24,7 @@ export default function EditableObject({ object, level, path = "" }: EditableObj
         if (typeof value === "object" && value !== null) {
           return (
             <details>
-              <summary>
+              <summary class="truncate text-ellipsis ">
                 <Typography variant="lead" class="font-semibold inline">
                   {capitalize(key)}
                 </Typography>

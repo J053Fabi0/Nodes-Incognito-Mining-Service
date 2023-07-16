@@ -99,7 +99,7 @@ export const handler: Handlers<EditProps, State> = {
             break;
         }
 
-        path = p;
+        if (!path) path = p;
       }
 
       setProperty(path.split("."), `${date.toDate().valueOf()}`, obj as RecursiveObject);
