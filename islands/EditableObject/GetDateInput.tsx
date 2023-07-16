@@ -54,13 +54,13 @@ export default function GetDateInput({ value, id }: EditableObjectDateInputProps
       <input type="hidden" name="offset" id="offset&" value={timezoneOffset} />
 
       {/* Submit button */}
-      <Button type="submit" color="green" class="pl-3 pr-[0.6rem]">
+      <Button type="submit" color="green" class="pl-3 pr-[0.6rem] h-[26px]">
         <MdSend size={13} />
       </Button>
 
       {/* Today button */}
       <div
-        class={getButtonClasses("blue", false) + " px-2 flex items-center cursor-pointer"}
+        class={getButtonClasses("blue", false) + " px-2 flex items-center cursor-pointer h-[26px]"}
         onClick={handleDateToday}
       >
         <MdToday size={13} />

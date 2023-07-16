@@ -23,7 +23,7 @@ export default function EditableObjectInput({ name, value, path }: InputProps) {
 
   return (
     <form method="POST">
-      <div class={`flex gap-2 font-mono`}>
+      <div class={`flex gap-2 font-mono flex-wrap md:flex-nowrap`}>
         <label for="validator" class={styles.label}>
           <p class="truncate text-ellipsis">{name}:</p>
         </label>
