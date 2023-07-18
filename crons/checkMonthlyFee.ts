@@ -1,26 +1,33 @@
 import { Big } from "math";
+import "humanizer/toQuantity.ts";
 import dayjs from "dayjs/mod.ts";
 import utc from "dayjs/plugin/utc.ts";
 import { ObjectId } from "mongo/mod.ts";
 import { WEBSITE_URL } from "../env.ts";
 import cryptr from "../utils/cryptrInstance.ts";
 import handleError from "../utils/handleError.ts";
+import Node from "../types/collections/node.type.ts";
+import { ShowQuantityAs } from "humanizer/toQuantity.ts";
 import Account from "../types/collections/account.type.ts";
 import { getNodes } from "../controllers/node.controller.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
+import { InlineKeyboard } from "grammy/convenience/keyboard.ts";
 import objectToTableText from "../telegram/objectToTableText.ts";
 import submitTransaction from "../incognito/submitTransaction.ts";
 import { moveDecimalDot, toFixedS } from "../utils/numbersString.ts";
 import { getAccountById } from "../controllers/account.controller.ts";
 import { MonthlyPayments, monthlyPayments } from "../utils/variables.ts";
 import { getTotalEarnings } from "../controllers/nodeEarning.controller.ts";
+import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
 import { changeClient, getClients } from "../controllers/client.controller.ts";
 import { AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
-import { adminAccount, incognitoFee, incognitoFeeInt, maxNotPayedDays } from "../constants.ts";
+import { adminAccount, adminTelegram, incognitoFee, incognitoFeeInt, maxNotPayedDays } from "../constants.ts";
 
 dayjs.extend(utc);
+const { None } = ShowQuantityAs;
+const contactKeyboard = new InlineKeyboard().url("Contact us", `tg://user?id=${adminTelegram}`);
 
-export default async function checkMonthlyFee() {
+export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
   const thisMonth = dayjs().utc().month();
 
   const clients = await getClients({}, { projection: { account: 1, lastPayment: 1, telegram: 1 } });
@@ -82,6 +89,25 @@ export default async function checkMonthlyFee() {
         await sendAkcnowledgment(false, account, feeWithIncognitoFee, paymentData, telegram);
       }
     }
+    //
+    // don't continue if there was an error in the transaction
+    else if (paymentData.errorInTransaction) continue;
+    //
+    // if it's the day to remove the nodes
+    else if (removeNotPayedNodes) {
+      const nodes = await getNodes(
+        { client, inactive: false },
+        { projection: { _id: 0, dockerIndex: 1, number: 1 } }
+      );
+      for (const node of nodes)
+        await deleteDockerAndConfigs({
+          dockerIndex: node.dockerIndex,
+          clientId: client._id,
+          number: node.number,
+        });
+      await sendThatNodesHaveBeenRemoved(telegram, nodes);
+    }
+    //
     // if it does't have enough balance, send a warning if it hasn't been sent today.
     // don't send a warning if there was an error in the transaction
     else if (paymentData.lastWarningDay !== dayjs().utc().date() && !paymentData.errorInTransaction)
@@ -89,9 +115,11 @@ export default async function checkMonthlyFee() {
   }
 }
 
-/** Int format, without incognito fee */
+/** Int format, without incognito fee. Only from active nodes. */
 async function getMonthlyFee(client: ObjectId): Promise<number> {
-  const nodes = await getNodes({ client }, { projection: { _id: 1 } }).then((ns) => ns.map((n) => n._id));
+  const nodes = await getNodes({ client, inactive: false }, { projection: { _id: 1 } }).then((ns) =>
+    ns.map((n) => n._id)
+  );
   if (!nodes.length) return 0;
 
   const earningsLastMonth = await getTotalEarnings(nodes, 1);
@@ -193,6 +221,30 @@ async function sendWarning(
   // only if the user didn't blocked the bot and there's more than an hour left to the end of the day
   // count the message as sent
   if (typeof response === "object" && dayjs().utc().hour() < 23) paymentData.lastWarningDay = dayjs().utc().date();
+}
+
+async function sendThatNodesHaveBeenRemoved(
+  telegramID: string | number,
+  nodes: Pick<Node, "number" | "dockerIndex">[]
+) {
+  const many = nodes.length !== 1;
+  const keyboard = contactKeyboard.clone().url("Reactivate nodes", `${WEBSITE_URL}/nodes/new`);
+  await sendHTMLMessage(
+    `Hello. Your ${"node".toQuantity(nodes.length, None)} ` +
+      `<code>${nodes.map((n) => n.number).join("</code>, <code>")}</code>` +
+      ` ${many ? "have" : "has"} been removed because you didn't pay the monthly fee.\n\n` +
+      `If you wish to continue using our services, you can pay the initial ` +
+      `setup again for ${many ? "each one" : "it"}.`,
+    telegramID,
+    { disable_web_page_preview: true, reply_markup: keyboard },
+    "notificationsBot"
+  );
+  await sendHTMLMessage(
+    `Nodes <code>${nodes.map((n) => n.dockerIndex).join("</code>, <code>")}</code>` +
+      ` have been deleted because they weren't paid for the last month.`,
+    undefined,
+    { reply_markup: new InlineKeyboard().url("View nodes", `${WEBSITE_URL}/admin/nodes`) }
+  );
 }
 
 async function markAsCompleted(paymentData: MonthlyPayments, clientId: ObjectId) {

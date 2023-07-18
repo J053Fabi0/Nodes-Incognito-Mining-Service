@@ -30,4 +30,6 @@ new Cron("*/30 * * * *", { protect: true, ...options }, checkNotStakedNodes);
 new Cron("*/5 * * * *", options, cacheNodesStatistics);
 
 // check the monthly fee every 1st day of the month until the maxNotPayedDays
-new Cron(`0 0 1-${maxNotPayedDays + 1} * *`, options, checkMonthlyFee);
+new Cron(`0 0 1-${maxNotPayedDays} * *`, options, checkMonthlyFee.bind(null, false));
+// remove the nodes that haven't paid after maxNotPayedDays
+new Cron(`0 1 ${maxNotPayedDays + 1} * *`, options, checkMonthlyFee.bind(null, true));

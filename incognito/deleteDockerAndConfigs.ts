@@ -24,7 +24,7 @@ export default async function deleteDockerAndConfigs({
   await deleteDocker(dockerIndex);
   await deleteNginxConfig(clientId, number);
 
-  // Delete from db
+  // Set as inactive
   await changeNode({ dockerIndex }, { $set: { inactive: true } });
 
   // Remove from constants
