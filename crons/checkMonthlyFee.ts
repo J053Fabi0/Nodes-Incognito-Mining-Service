@@ -25,7 +25,7 @@ import { adminAccount, adminTelegram, incognitoFee, incognitoFeeInt, maxNotPayed
 
 dayjs.extend(utc);
 const { None } = ShowQuantityAs;
-const contactKeyboard = new InlineKeyboard().url("Contact us", `tg://user?id=${adminTelegram}`);
+const contactKeyboard = new InlineKeyboard().url("Contact", `tg://user?id=${adminTelegram}`);
 
 export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
   const thisMonth = dayjs().utc().month();
@@ -157,7 +157,7 @@ async function sendAkcnowledgment(
         `\n\n${details}\n\n` +
         `Have a nice month!`,
       telegramID,
-      { disable_web_page_preview: true },
+      { disable_web_page_preview: true, reply_markup: contactKeyboard },
       "notificationsBot"
     );
   // error in transaction
@@ -168,7 +168,7 @@ async function sendAkcnowledgment(
         "\n\nPlease don't worry, we'll handle the payment manually. Your nodes won't be suspended, " +
         "unless you withdraw your balance.",
       telegramID,
-      { disable_web_page_preview: true },
+      { disable_web_page_preview: true, reply_markup: contactKeyboard },
       "notificationsBot"
     );
   // past error in transaction, but it was solved
@@ -178,7 +178,7 @@ async function sendAkcnowledgment(
         `${details}\n\n` +
         `Have a nice month!`,
       telegramID,
-      { disable_web_page_preview: true },
+      { disable_web_page_preview: true, reply_markup: contactKeyboard },
       "notificationsBot"
     );
 }
@@ -214,7 +214,7 @@ async function sendWarning(
           `in which case you'll need to pay the initial setup again for each one if you wish to continue using our services.` +
           `\n\n${details}`,
     telegramID,
-    { disable_web_page_preview: true },
+    { disable_web_page_preview: true, reply_markup: contactKeyboard },
     "notificationsBot"
   );
 
