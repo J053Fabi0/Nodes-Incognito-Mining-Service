@@ -33,12 +33,3 @@ new Cron("*/5 * * * *", options, cacheNodesStatistics);
 new Cron(`*/30 * 1-${maxNotPayedDays} * *`, options, checkMonthlyFee.bind(null, false));
 // remove the nodes that haven't paid after maxNotPayedDays
 new Cron(`*/20 1 ${maxNotPayedDays + 1} * *`, options, checkMonthlyFee.bind(null, true));
-
-import sendMessage from "../telegram/sendMessage.ts";
-new Cron("0 0 * * *", options, () => sendMessage("0"));
-new Cron("0 0 * * *", { catch: handleError, utcOffset: new Date().getTimezoneOffset() }, () =>
-  sendMessage("getTimezoneOffset")
-);
-new Cron("0 0 * * *", { catch: handleError, utcOffset: new Date().getTimezoneOffset() * -1 }, () =>
-  sendMessage("getTimezoneOffset * -1")
-);
