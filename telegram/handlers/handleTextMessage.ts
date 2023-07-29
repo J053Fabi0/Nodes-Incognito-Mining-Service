@@ -9,7 +9,15 @@ import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import getNodesStatus, { NodeRoles, NodeStatus } from "../../utils/getNodesStatus.ts";
 
-const allKeys = ["name", "role", "shard", "isSlashed", "isOldVersion", "alert", "epochsToNextEvent"] as const;
+const allKeys = [
+  "dockerIndex",
+  "role",
+  "shard",
+  "isSlashed",
+  "isOldVersion",
+  "alert",
+  "epochsToNextEvent",
+] as const;
 const booleanKeys = ["isSlashed", "isOldVersion", "alert"] as const;
 type Keys = (typeof allKeys)[number];
 
@@ -28,7 +36,7 @@ export default async function handleTextMessage(
   if (text === "full" || text === "fulltext") keys.push(...allKeys);
   else {
     // minimal information to show
-    keys.push("name", "role", "epochsToNextEvent");
+    keys.push("dockerIndex", "role", "epochsToNextEvent");
 
     // get the keys that are relevant
     for (const key of booleanKeys) if (nodes.find((node) => node[key])) keys.push(key);
@@ -137,9 +145,11 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
     "</code>\n\n<code>" +
     normalizedNodes
       .map(
-        ({ name, ...otherData }) =>
-          `${otherData.status} ${name}: ${" ".repeat(maxLength.name - (name as string).length)}` +
-          (shorterKeys.slice(1) as Exclude<(typeof shorterKeys)[number], "name">[])
+        ({ dockerIndex, ...otherData }) =>
+          `${otherData.status} ${dockerIndex}: ${" ".repeat(
+            maxLength.dockerIndex - (dockerIndex as string).length
+          )}` +
+          (shorterKeys.slice(1) as Exclude<(typeof shorterKeys)[number], "dockerIndex">[])
             .map(
               (key, i) =>
                 otherData[key] +
@@ -189,7 +199,7 @@ export function roleToEmoji(role: NodeRoles) {
 }
 function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; table: string } {
   const normalizedNodes: NormalizedNode[] = nodes.map((node) => ({
-    name: node.name,
+    dockerIndex: node.dockerIndex,
     shard: node.shard,
     epochsToNextEvent: node.epochsToNextEvent,
     alert: node.alert ? "Yes ⚠️" : "No",
@@ -210,6 +220,9 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; 
           ${newKeys
             .map((key) => {
               switch (key) {
+                case "dockerIndex":
+                  return "i";
+
                 case "isOldVersion":
                   return img("👴", key);
 
