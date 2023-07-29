@@ -80,7 +80,7 @@ export default function Home({ data }: PageProps<HomeProps>) {
         <tbody>
           <tr>
             <td class={styles.td}>
-              <Typography variant="h4">Nodes</Typography>
+              <Typography variant="h4">Hosted nodes</Typography>
             </td>
             <td class={styles.td}>
               <Typography variant="h4">

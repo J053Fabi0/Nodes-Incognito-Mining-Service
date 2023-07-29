@@ -122,9 +122,7 @@ export default function Account({ data }: PageProps<AccountProps>) {
       </Typography>
       <Typography variant="p">
         The balance will be used to pay your monthly fee automatically if it is enough, else a message will be
-        delivered via Telegram asking you to deposit more. If no payment is recieved in less than{" "}
-        {"day".toQuantity(maxNotPayedDays)}, the node will be suspended and the initial setup will be charged again
-        to reactivate it.
+        delivered via Telegram asking you to deposit more.
       </Typography>
       <Typography variant="p">
         The next payment will be on <LocaleDate date={nextPayment} />, <RelativeDate date={nextPayment} />
