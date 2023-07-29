@@ -1,11 +1,7 @@
-import { ObjectId } from "mongo/mod.ts";
 import State from "../../types/state.type.ts";
+import { maxNotPayedDays } from "../../constants.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
-import getMonthlyFee from "../../utils/getMonthlyFee.ts";
-import getIsTimeToPay from "../../utils/getIsTimeToPay.ts";
-import getPaymentStatus from "../../utils/getPaymentStatus.ts";
-import { incognitoFeeInt, maxNotPayedDays } from "../../constants.ts";
-import { getAccountById } from "../../controllers/account.controller.ts";
+import getTimeToPayData from "../../utils/getTimeToPayData.ts";
 import TimeToPay, { PaymentStatus } from "../../islands/Nodes/TimeToPay.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 
@@ -23,13 +19,11 @@ interface NodesProps {
 
 export const handler: Handlers<NodesProps, State> = {
   async GET(_, ctx) {
-    const isTimeToPay = getIsTimeToPay();
-
-    const monthlyFee = (await getMonthlyFee(new ObjectId(ctx.state.userId!))) + incognitoFeeInt;
-    const balance = (await getAccountById(ctx.state.user!.account, { projection: { balance: 1, _id: 0 } }))!
-      .balance;
-
-    const paymentStatus = getPaymentStatus(ctx.state.userId!, ctx.state.user!.lastPayment, isTimeToPay);
+    const { balance, monthlyFee, paymentStatus } = await getTimeToPayData(
+      ctx.state.userId!,
+      ctx.state.user!.lastPayment,
+      ctx.state.user!.account
+    );
 
     return ctx.render({
       balance,

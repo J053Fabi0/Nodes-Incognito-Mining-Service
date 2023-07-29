@@ -22,7 +22,7 @@ const styles = {
   td: "py-2 px-3 text-left",
 };
 
-interface TimeToPayProps {
+export interface TimeToPayProps {
   balance: number;
   monthlyFee: number;
   paymentStatus: PaymentStatus;
