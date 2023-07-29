@@ -39,7 +39,17 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
         return {
           pillColor: "green",
           pillText: PaymentStatus.PAYED.toUpperCase(),
-          text: "The payment for the last month has been payed.",
+          // text: "The payment for the last month has been payed. The next one will be charged automatically.",
+          text: (
+            <>
+              The payment for the last month has been payed. The next one will be charged automatically. Visit{" "}
+              <a href="/me" class="w-min whitespace-nowrap hover:underline text-blue-600">
+                your account
+              </a>{" "}
+              to know more.
+            </>
+          ),
+        };
 
       case PaymentStatus.EXPIRED:
         return {
