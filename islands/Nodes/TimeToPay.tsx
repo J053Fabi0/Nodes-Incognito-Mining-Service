@@ -25,13 +25,16 @@ const styles = {
 export interface TimeToPayProps {
   balance: number;
   /** Plus the incognito fee */
+  path: string;
   monthlyFee: number;
-  paymentStatus: PaymentStatus;
   maxNotPayedDays: number;
+  paymentStatus: PaymentStatus;
 }
-export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPayedDays }: TimeToPayProps) {
+export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPayedDays, path }: TimeToPayProps) {
+  const isInAccountPage = path === "/me";
+
   const { text, pillColor, pillText } = ((): {
-    text: string | JSX.Element;
+    text: string | JSX.Element | null;
     pillColor: Exclude<PillProps["color"], undefined>;
     pillText: string;
   } => {
@@ -40,10 +43,9 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
         return {
           pillColor: "green",
           pillText: PaymentStatus.PAYED.toUpperCase(),
-          // text: "The payment for the last month has been payed. The next one will be charged automatically.",
-          text: (
+          text: isInAccountPage ? null : (
             <>
-              The payment for the last month has been payed. The next one will be charged automatically. Visit{" "}
+              The next one will be charged automatically. Visit{" "}
               <a href="/me" class="w-min whitespace-nowrap hover:underline text-blue-600">
                 your account
               </a>{" "}
@@ -74,8 +76,8 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
             pillColor: "red",
             pillText: PaymentStatus.ERROR.toUpperCase(),
             text:
-              "There has been an error while processing the payment, but we'll " +
-              "handle it, you don't need to do anything, so long as you don't withdraw your balance.",
+              "There has been an error while processing the payment. We'll " +
+              "handle it, you only need to keep your balance enough to pay.",
           };
 
       /* falls through */
@@ -83,7 +85,7 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
         return {
           text:
             balance >= monthlyFee ? (
-              "You have enough balance to pay the monthly fee. It'l be charged automatically."
+              "You have enough balance to pay the monthly fee. It'l be shortly charged automatically."
             ) : (
               <>
                 Please pay the monthly fee. If you don't, your node(s) will be stopped.
@@ -124,14 +126,16 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
       <Typography variant="p">{text}</Typography>
 
       {[PaymentStatus.PAYED, PaymentStatus.EXPIRED].includes(paymentStatus) ? null : (
-        <table class="table-auto mt-5">
+        <table class="table-auto mt-3">
           <tbody>
-            <tr>
-              <th class={styles.th}>Balance</th>
-              <td class={styles.td}>
-                <code>{moveDecimalDot(balance, -9)}</code> PRV
-              </td>
-            </tr>
+            {isInAccountPage ? null : (
+              <tr>
+                <th class={styles.th}>Balance</th>
+                <td class={styles.td}>
+                  <code>{moveDecimalDot(balance, -9)}</code> PRV
+                </td>
+              </tr>
+            )}
             <tr>
               <th class={styles.th}>Last month fee</th>
               <td class={styles.td}>
@@ -139,7 +143,9 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
               </td>
             </tr>
             <tr>
-              <th class={styles.th}>{balance >= monthlyFee ? "After automatic payment" : "Deposit at least"}</th>
+              <th class={styles.th}>
+                {balance >= monthlyFee ? "Balance after automatic payment" : "Deposit at least"}
+              </th>
               <td class={styles.td}>
                 <code>{moveDecimalDot(Math.abs(balance - monthlyFee), -9)}</code> PRV
               </td>

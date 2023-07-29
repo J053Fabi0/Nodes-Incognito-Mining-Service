@@ -9,7 +9,7 @@ export default async function getTimeToPayData(
   userId: string | ObjectId,
   lastPayment: Date,
   account: string | ObjectId
-): Promise<TimeToPayProps> {
+): Promise<Omit<TimeToPayProps, "path">> {
   const paymentStatus = getPaymentStatus(userId, lastPayment);
   const monthlyFee = (await getMonthlyFee(new ObjectId(userId))) + incognitoFeeInt;
   const balance = (await getAccountById(account, { projection: { balance: 1, _id: 0 } }))!.balance;

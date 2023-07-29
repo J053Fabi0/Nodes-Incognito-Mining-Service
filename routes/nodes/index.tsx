@@ -9,7 +9,7 @@ const styles = {
   li: `${getTypographyClass("lead")}`,
 };
 
-interface NodesProps extends Omit<TimeToPayProps, "maxNotPayedDays"> {
+interface NodesProps extends Pick<TimeToPayProps, "monthlyFee" | "paymentStatus" | "balance"> {
   isAdmin: boolean;
 }
 
@@ -30,7 +30,7 @@ export const handler: Handlers<NodesProps, State> = {
   },
 };
 
-export default function Nodes({ data }: PageProps<NodesProps>) {
+export default function Nodes({ data, url }: PageProps<NodesProps>) {
   const { monthlyFee, balance, paymentStatus } = data;
 
   return (
@@ -41,6 +41,7 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
 
       <TimeToPay
         balance={balance}
+        path={url.pathname}
         monthlyFee={monthlyFee}
         paymentStatus={paymentStatus}
         maxNotPayedDays={maxNotPayedDays}

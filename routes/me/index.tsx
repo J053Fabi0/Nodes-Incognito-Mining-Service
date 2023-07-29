@@ -13,6 +13,7 @@ import LocaleDate from "../../islands/LocaleDate.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import RelativeDate from "../../islands/RelativeDate.tsx";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
+import getTimeToPayData from "../../utils/getTimeToPayData.ts";
 import { getAccount } from "../../controllers/account.controller.ts";
 import submitTransaction from "../../incognito/submitTransaction.ts";
 import { moveDecimalDot, toFixedS } from "../../utils/numbersString.ts";
@@ -21,6 +22,7 @@ import PaymentAddress from "../../components/Account/PaymentAddress.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import { incognitoFee, incognitoFeeInt, maxNotPayedDays } from "../../constants.ts";
 import { AccountTransactionType } from "../../types/collections/accountTransaction.type.ts";
+import TimeToPay, { PaymentStatus, TimeToPayProps } from "../../islands/Nodes/TimeToPay.tsx";
 
 dayjs.extend(utc);
 
@@ -37,7 +39,7 @@ async function getProjectedAccount(id: ObjectId) {
   return { ...account, privateKey: await cryptr.decrypt(account.privateKey) };
 }
 
-interface AccountProps {
+interface AccountProps extends Pick<TimeToPayProps, "monthlyFee" | "paymentStatus"> {
   balance: number;
   isAdmin: boolean;
   paymentAddress: string;
@@ -50,8 +52,16 @@ interface AccountProps {
 export const handler: Handlers<AccountProps, State> = {
   async GET(_, ctx) {
     const account = await getProjectedAccount(ctx.state.user!.account);
+
+    const timeToPayData = await getTimeToPayData(
+      ctx.state.userId!,
+      ctx.state.user!.lastPayment,
+      ctx.state.user!.account
+    );
+
     return ctx.render({
       ...account,
+      ...timeToPayData,
       isAdmin: ctx.state.isAdmin,
       errors: ctx.state.session.flash("errors"),
       withdrawAmount: ctx.state.session.flash("withdrawAmount"),
@@ -100,9 +110,9 @@ export const handler: Handlers<AccountProps, State> = {
   },
 };
 
-export default function Account({ data }: PageProps<AccountProps>) {
-  const { withdrawPaymentAddress, balance, errors } = data;
+export default function Account({ data, url }: PageProps<AccountProps>) {
   const { paymentAddressImage, paymentAddress, withdrawAmount } = data;
+  const { withdrawPaymentAddress, balance, errors, monthlyFee, paymentStatus } = data;
   const nextPayment = dayjs().utc().add(1, "month").startOf("month").valueOf();
 
   return (
@@ -111,7 +121,17 @@ export default function Account({ data }: PageProps<AccountProps>) {
         Your account
       </Typography>
 
-      <Typography variant="h3" class="mt-5">
+      <TimeToPay
+        balance={balance}
+        path={url.pathname}
+        monthlyFee={monthlyFee}
+        paymentStatus={paymentStatus}
+        maxNotPayedDays={maxNotPayedDays}
+      />
+
+      <hr class="mb-5 mt-8" />
+
+      <Typography variant="h3">
         Balance:{" "}
         <b>
           <code>
