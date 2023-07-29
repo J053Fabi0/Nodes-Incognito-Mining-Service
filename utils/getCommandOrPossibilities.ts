@@ -62,6 +62,13 @@ export default function getCommandOrPossibilities(command: string) {
     // if only one possible command, return it
     if (possibleCommands.length === 1) return { command: possibleCommands[0].command, possibleCommands: null };
 
+    const possibleNonAliasCommands = new Set<string>();
+    for (const c of possibleCommands) possibleNonAliasCommands.add(c.command);
+
+    // if only one possible non alias command, return it
+    if (possibleNonAliasCommands.size === 1)
+      return { command: possibleCommands[0].command, possibleCommands: null };
+
     return {
       command: null,
       /** Ambiguous commands or aliases */
