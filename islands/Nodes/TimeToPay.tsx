@@ -14,6 +14,7 @@ export enum PaymentStatus {
   PAYED = "payed",
   ERROR = "error",
   PENDING = "pending",
+  EXPIRED = "expired",
 }
 
 const styles = {
@@ -39,6 +40,21 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
           pillColor: "green",
           pillText: PaymentStatus.PAYED.toUpperCase(),
           text: "The payment for the last month has been payed.",
+
+      case PaymentStatus.EXPIRED:
+        return {
+          pillColor: "orange",
+          pillText: PaymentStatus.EXPIRED.toUpperCase(),
+          text: (
+            <>
+              You didn't pay the last month fee before the grace period of {maxNotPayedDays} days. To activate your
+              nodes again go to{" "}
+              <a href="/nodes/new" class="w-min whitespace-nowrap hover:underline text-blue-600">
+                new node
+              </a>
+              . You'll be able to quickly select your old nodes after you deposit the setup fee.
+            </>
+          ),
         };
 
       case PaymentStatus.ERROR:
@@ -96,7 +112,7 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
 
       <Typography variant="p">{text}</Typography>
 
-      {PaymentStatus.PAYED === paymentStatus ? null : (
+      {[PaymentStatus.PAYED, PaymentStatus.EXPIRED].includes(paymentStatus) ? null : (
         <table class="table-auto mt-5">
           <tbody>
             <tr>
