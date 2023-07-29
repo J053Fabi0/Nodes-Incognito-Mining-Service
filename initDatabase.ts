@@ -7,7 +7,8 @@ export const client = new MongoClient();
 
 await client.connect(MONGO_URI);
 
-console.log("Connected to MongoDB", MONGO_URI);
+const isLocalhost = MONGO_URI.includes("localhost");
+console.log(`Connected to ${isLocalhost ? "localhost" : "external"} MongoDB`, MONGO_URI);
 
 const db = client.database();
 
