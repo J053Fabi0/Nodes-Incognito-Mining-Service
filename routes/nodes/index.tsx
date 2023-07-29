@@ -2,19 +2,15 @@ import State from "../../types/state.type.ts";
 import { maxNotPayedDays } from "../../constants.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import getTimeToPayData from "../../utils/getTimeToPayData.ts";
-import TimeToPay, { PaymentStatus } from "../../islands/Nodes/TimeToPay.tsx";
+import TimeToPay, { TimeToPayProps } from "../../islands/Nodes/TimeToPay.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 
 const styles = {
   li: `${getTypographyClass("lead")}`,
 };
 
-interface NodesProps {
+interface NodesProps extends Omit<TimeToPayProps, "maxNotPayedDays"> {
   isAdmin: boolean;
-  balance: number;
-  /** Plus the incognito fee */
-  monthlyFee: number;
-  paymentStatus: PaymentStatus;
 }
 
 export const handler: Handlers<NodesProps, State> = {

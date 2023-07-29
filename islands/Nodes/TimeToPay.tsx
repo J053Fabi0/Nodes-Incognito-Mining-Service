@@ -24,6 +24,7 @@ const styles = {
 
 export interface TimeToPayProps {
   balance: number;
+  /** Plus the incognito fee */
   monthlyFee: number;
   paymentStatus: PaymentStatus;
   maxNotPayedDays: number;
