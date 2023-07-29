@@ -11,11 +11,11 @@ import Withdraw from "../../islands/Withdraw.tsx";
 import cryptr from "../../utils/cryptrInstance.ts";
 import LocaleDate from "../../islands/LocaleDate.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
-import { toFixedS } from "../../utils/numbersString.ts";
 import RelativeDate from "../../islands/RelativeDate.tsx";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
 import { getAccount } from "../../controllers/account.controller.ts";
 import submitTransaction from "../../incognito/submitTransaction.ts";
+import { moveDecimalDot, toFixedS } from "../../utils/numbersString.ts";
 import { error, validateFormData, z, ZodIssue } from "fresh-validation";
 import PaymentAddress from "../../components/Account/PaymentAddress.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
@@ -140,7 +140,14 @@ export default function Account({ data }: PageProps<AccountProps>) {
 
       {balance <= incognitoFeeInt ? (
         <Typography variant="lead">
-          {balance === 0 ? "You don't have any balance to withdraw." : "Your balance is too low to withdraw."}
+          {balance === 0 ? (
+            "You don't have any balance to withdraw."
+          ) : (
+            <>
+              Your balance is too low to withdraw. You need at least{" "}
+              <code>{moveDecimalDot(incognitoFeeInt + 1, -9)}</code> PRV.
+            </>
+          )}
         </Typography>
       ) : (
         <>
