@@ -11,7 +11,7 @@ import { moveDecimalDot } from "../../utils/numbersString.ts";
 dayjs.extend(utc);
 
 export enum PaymentStatus {
-  DONE = "done",
+  PAYED = "payed",
   ERROR = "error",
   PENDING = "pending",
 }
@@ -34,11 +34,11 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
     pillText: string;
   } => {
     switch (paymentStatus) {
-      case PaymentStatus.DONE:
+      case PaymentStatus.PAYED:
         return {
           pillColor: "green",
-          pillText: PaymentStatus.DONE.toUpperCase(),
-          text: "The payment for the last month has been done.",
+          pillText: PaymentStatus.PAYED.toUpperCase(),
+          text: "The payment for the last month has been payed.",
         };
 
       case PaymentStatus.ERROR:
@@ -86,7 +86,7 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
   })();
 
   return (
-    <Paper class="p-4 mb-5" shadow="lg">
+    <Paper class="p-4 mb-5 bg-gray-50" shadow="lg">
       <Typography variant="lead">
         Last month payment status:{" "}
         <Pill color={pillColor}>
@@ -94,12 +94,10 @@ export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPa
         </Pill>
       </Typography>
 
-      <Typography variant="p" class="mb-5">
-        {text}
-      </Typography>
+      <Typography variant="p">{text}</Typography>
 
-      {PaymentStatus.DONE === paymentStatus ? null : (
-        <table class="table-auto">
+      {PaymentStatus.PAYED === paymentStatus ? null : (
+        <table class="table-auto mt-5">
           <tbody>
             <tr>
               <th class={styles.th}>Balance</th>

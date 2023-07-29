@@ -20,31 +20,25 @@ interface NodesProps {
   balance: number;
   /** Plus the incognito fee */
   monthlyFee: number;
-  isTimeToPay: boolean;
   paymentStatus: PaymentStatus;
 }
 
 const testTimeToPay = true && !IS_PRODUCTION;
 export const handler: Handlers<NodesProps, State> = {
   async GET(_, ctx) {
-    const isTimeToPay = testTimeToPay || (moment().utc().date() >= 1 && moment().utc().date() <= maxNotPayedDays);
-    const monthlyFee = isTimeToPay ? (await getMonthlyFee(new ObjectId(ctx.state.userId!))) + incognitoFeeInt : 0;
-    const balance = isTimeToPay
-      ? (await getAccountById(ctx.state.user!.account, { projection: { balance: 1, _id: 0 } }))!.balance
-      : 0;
+    const monthlyFee = (await getMonthlyFee(new ObjectId(ctx.state.userId!))) + incognitoFeeInt;
+    const balance = (await getAccountById(ctx.state.user!.account, { projection: { balance: 1, _id: 0 } }))!
+      .balance;
 
-    const paymentStatus = isTimeToPay
-      ? monthlyPayments[ctx.state.userId!].errorInTransaction
-        ? PaymentStatus.ERROR
-        : hasClientPayed(ctx.state.user!.lastPayment)
-        ? PaymentStatus.DONE
-        : PaymentStatus.PENDING
-      : PaymentStatus.DONE;
+    const paymentStatus = monthlyPayments[ctx.state.userId!].errorInTransaction
+      ? PaymentStatus.ERROR
+      : hasClientPayed(ctx.state.user!.lastPayment)
+      ? PaymentStatus.PAYED
+      : PaymentStatus.PENDING;
 
     return ctx.render({
       balance,
       monthlyFee,
-      isTimeToPay,
       paymentStatus,
       isAdmin: ctx.state.isAdmin,
     });
@@ -52,7 +46,7 @@ export const handler: Handlers<NodesProps, State> = {
 };
 
 export default function Nodes({ data }: PageProps<NodesProps>) {
-  const { monthlyFee, isTimeToPay, balance, paymentStatus } = data;
+  const { monthlyFee, balance, paymentStatus } = data;
 
   return (
     <>
@@ -60,14 +54,12 @@ export default function Nodes({ data }: PageProps<NodesProps>) {
         Your nodes
       </Typography>
 
-      {isTimeToPay && (
-        <TimeToPay
-          balance={balance}
-          monthlyFee={monthlyFee}
-          paymentStatus={paymentStatus}
-          maxNotPayedDays={maxNotPayedDays}
-        />
-      )}
+      <TimeToPay
+        balance={balance}
+        monthlyFee={monthlyFee}
+        paymentStatus={paymentStatus}
+        maxNotPayedDays={maxNotPayedDays}
+      />
 
       <ul class="list-disc list-inside mb-5">
         <li class={styles.li}>
