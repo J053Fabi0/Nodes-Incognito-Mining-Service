@@ -1,9 +1,11 @@
 import dayjs from "dayjs/mod.ts";
 import utc from "dayjs/plugin/utc.ts";
+import { ObjectId } from "mongo/mod.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import Balance from "../../islands/Balance.tsx";
 import TimeLeft from "../../islands/TimeLeft.tsx";
+import { prvToPay } from "../../utils/variables.ts";
 import newZodError from "../../utils/newZodError.ts";
 import submitNode from "../../incognito/submitNode.ts";
 import { toFixedS } from "../../utils/numbersString.ts";
@@ -13,13 +15,13 @@ import isResponse from "../../types/guards/isResponse.ts";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
 import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
+import { changeClient } from "../../controllers/client.controller.ts";
 import { HandlerContext, Handlers, PageProps } from "$fresh/server.ts";
 import { error, validateFormData, z, ZodIssue } from "fresh-validation";
-import { getNode, getNodes } from "../../controllers/node.controller.ts";
+import { countNodes, getNode, getNodes } from "../../controllers/node.controller.ts";
 import NewConfirmNodeSelector from "../../islands/NewConfirmNodeSelector.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import { incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
-import { prvToPay } from "../../utils/variables.ts";
 
 export const styles = {
   th: "py-2 px-3 text-right",
@@ -154,6 +156,10 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
         validator: validatedData.validator,
         validatorPublic: validatedData.validatorPublic,
         cost: dataOrRedirect.prvToPay * 1e9 - incognitoFeeInt,
+      }).then(async () => {
+        const activeNodes = await countNodes({ client: new ObjectId(ctx.state.userId!), inactive: false });
+        if (activeNodes === 0)
+          await changeClient({ _id: new ObjectId(ctx.state.userId!) }, { $set: { lastPayment: new Date() } });
       });
 
     // delete default values if the values are valid

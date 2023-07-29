@@ -1,4 +1,3 @@
-import moment from "moment";
 import { ObjectId } from "mongo/mod.ts";
 import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
@@ -8,8 +7,8 @@ import hasClientPayed from "../../utils/hasClientPayed.ts";
 import { monthlyPayments } from "../../utils/variables.ts";
 import { incognitoFeeInt, maxNotPayedDays } from "../../constants.ts";
 import { getAccountById } from "../../controllers/account.controller.ts";
-import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import TimeToPay, { PaymentStatus } from "../../islands/Nodes/TimeToPay.tsx";
+import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 
 const styles = {
   li: `${getTypographyClass("lead")}`,
