@@ -37,14 +37,14 @@ export default function MonthlyEarningsTable({
               <th class={styles.th}>Month</th>
 
               {monthEarnings.map((_, i) => (
-                <th class={styles.th}>{months[i]}</th>
+                <th class={styles.th}>{months.toReversed()[i]}</th>
               ))}
             </tr>
 
             <tr>
               <th class={styles.th}>Earnings</th>
 
-              {monthEarnings.map((earning) => (
+              {monthEarnings.toReversed().map((earning) => (
                 <td class={styles.td}>
                   <code>{earning}</code>
                 </td>
