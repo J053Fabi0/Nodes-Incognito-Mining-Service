@@ -35,6 +35,7 @@
     "joi": "https://esm.sh/joi@17.9.2",
     "math": "https://deno.land/x/math@v1.1.0/mod.ts",
     "mongo/": "https://deno.land/x/mongo@v0.31.2/",
+    "moment": "npm:moment@2.29.4",
     "notion/": "https://deno.land/x/notion_sdk@v2.2.3/src/",
     "preact-render-to-string": "https://esm.sh/*preact-render-to-string@6.1.0",
     "preact": "https://esm.sh/preact@10.15.1",

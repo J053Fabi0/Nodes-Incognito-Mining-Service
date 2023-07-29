@@ -1,4 +1,3 @@
-import { Big } from "math";
 import "humanizer/toQuantity.ts";
 import dayjs from "dayjs/mod.ts";
 import utc from "dayjs/plugin/utc.ts";
@@ -7,6 +6,8 @@ import { WEBSITE_URL } from "../env.ts";
 import cryptr from "../utils/cryptrInstance.ts";
 import handleError from "../utils/handleError.ts";
 import Node from "../types/collections/node.type.ts";
+import getMonthlyFee from "../utils/getMonthlyFee.ts";
+import hasClientPayed from "../utils/hasClientPayed.ts";
 import { ShowQuantityAs } from "humanizer/toQuantity.ts";
 import Account from "../types/collections/account.type.ts";
 import { getNodes } from "../controllers/node.controller.ts";
@@ -17,7 +18,6 @@ import submitTransaction from "../incognito/submitTransaction.ts";
 import { moveDecimalDot, toFixedS } from "../utils/numbersString.ts";
 import { getAccountById } from "../controllers/account.controller.ts";
 import { MonthlyPayments, monthlyPayments } from "../utils/variables.ts";
-import { getTotalEarnings } from "../controllers/nodeEarning.controller.ts";
 import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
 import { changeClient, getClients } from "../controllers/client.controller.ts";
 import { AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
@@ -38,7 +38,7 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
     if (telegram === null) continue;
 
     // if the client has already paid this month, skip it
-    if (dayjs(lastPayment).utc().month() === thisMonth) continue;
+    if (hasClientPayed(lastPayment)) continue;
     // if the forMonth is not this one,
     // delete the last record to create a new one the next time it's accessed
     else if (monthlyPayments[`${client._id}`].forMonth !== thisMonth) delete monthlyPayments[`${client._id}`];
@@ -80,13 +80,13 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
           },
           true
         );
-        await sendAkcnowledgment(true, account, feeWithIncognitoFee, paymentData, telegram);
+        await sendAcknowledgment(true, account, feeWithIncognitoFee, paymentData, telegram);
         await markAsCompleted(paymentData, client._id);
       } catch (e) {
         // say that an error occured
         handleError(e);
         paymentData.errorInTransaction = true;
-        await sendAkcnowledgment(false, account, feeWithIncognitoFee, paymentData, telegram);
+        await sendAcknowledgment(false, account, feeWithIncognitoFee, paymentData, telegram);
       }
     }
     //
@@ -115,23 +115,12 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
   }
 }
 
-/** Int format, without incognito fee. Only from active nodes. */
-async function getMonthlyFee(client: ObjectId): Promise<number> {
-  const nodes = await getNodes({ client, inactive: false }, { projection: { _id: 1 } }).then((ns) =>
-    ns.map((n) => n._id)
-  );
-  if (!nodes.length) return 0;
-
-  const earningsLastMonth = await getTotalEarnings(nodes, 1);
-  return +toFixedS(Big(earningsLastMonth).div(10).mul(1e9).valueOf(), 0);
-}
-
-async function sendAkcnowledgment(
+async function sendAcknowledgment(
   successfull: boolean,
   account: Pick<Account, "_id" | "privateKey" | "paymentAddress" | "balance">,
   feeWithIncognitoFee: number,
   paymentData: MonthlyPayments,
-  telegramID: number | string
+  telegramID?: number | string
 ) {
   const numbers = {
     ["Monthly fee - 10%"]: moveDecimalDot(paymentData.fee!, -9),
