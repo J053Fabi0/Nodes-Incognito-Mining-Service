@@ -79,7 +79,7 @@ export default function Nodes({ data, url }: PageProps<NodesProps>) {
           </a>
         </li>
 
-        {!isNewClient && (
+        {isNewClient ? null : (
           <li class={styles.li}>
             <a href="nodes/delete" class="underline">
               Delete nodes
