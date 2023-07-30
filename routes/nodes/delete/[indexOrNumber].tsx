@@ -11,6 +11,7 @@ import { getNode } from "../../../controllers/node.controller.ts";
 import { HandlerContext, Handlers, PageProps } from "$fresh/server.ts";
 import Button, { getButtonClasses } from "../../../components/Button.tsx";
 import deleteDockerAndConfigs from "../../../incognito/deleteDockerAndConfigs.ts";
+import { sendHTMLMessage } from "../../../telegram/sendMessage.ts";
 
 interface ConfirmDeleteNodeProps {
   number: number;
@@ -61,7 +62,13 @@ export const handler: Handlers<ConfirmDeleteNodeProps, State> = {
         number: nodeOrRedirect.number,
         clientId: nodeOrRedirect.client,
         dockerIndex: nodeOrRedirect.dockerIndex,
-      }).catch(handleError);
+      })
+        .catch(handleError)
+        .then(() => {
+          sendHTMLMessage(
+            `Node <code>${nodeOrRedirect.dockerIndex}</code> deleted by user ${nodeOrRedirect.client}.`
+          ).catch(handleError);
+        });
 
     return redirect("/nodes/monitor");
   },
