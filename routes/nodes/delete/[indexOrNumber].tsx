@@ -9,6 +9,7 @@ import { getNode } from "../../../controllers/node.controller.ts";
 import { HandlerContext, Handlers, PageProps } from "$fresh/server.ts";
 import Button, { getButtonClasses } from "../../../components/Button.tsx";
 import deleteDockerAndConfigs from "../../../incognito/deleteDockerAndConfigs.ts";
+import Paper from "../../../components/Paper.tsx";
 
 interface ConfirmDeleteNodeProps {
   number: number;
@@ -83,8 +84,23 @@ export default function ConfirmDeleteNode({ data }: PageProps<ConfirmDeleteNodeP
         Remebmer that you can always activate it later but the setup fee will be charged again.
       </Typography>
       <Typography variant="lead">
-        It might take a few minutes to delete the node. You can check its status in the monitor.
+        It might take a few minutes to delete the node form our system. You can check its status in the monitor.
       </Typography>
+
+      <Paper class="bg-yellow-200 p-4 mt-3" shadow="md">
+        <Typography variant="h5">⚠️ This won't unstake your node! ⚠️</Typography>
+        <Typography variant="lead" class="mt-2">
+          If you want to unstake it, do it before deleting it. You can do this in the app under More {">"} Power{" "}
+          {">"} Unstake.
+        </Typography>
+        <Typography variant="lead" class="mt-2">
+          You only need to send the unstake transaction once. After that you can delete the node here, no need to
+          wait for the unstake to finish.
+        </Typography>
+        <Typography variant="lead" class="mt-2">
+          It'll unstake when it tries to go to committee again, so it might take a few days.
+        </Typography>
+      </Paper>
 
       <form method="POST" class="mt-7 flex gap-3">
         <Button color="red" type="submit">
