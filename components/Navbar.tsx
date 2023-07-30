@@ -17,6 +17,11 @@ const pages: Page[] = [
     onlyLoggedIn: true,
   },
   {
+    name: "Monitor",
+    href: "/nodes/monitor",
+    onlyLoggedIn: true,
+  },
+  {
     name: "New node",
     href: "/nodes/new",
     onlyLoggedIn: true,
