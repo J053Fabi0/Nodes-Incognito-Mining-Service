@@ -1,6 +1,8 @@
+import { ObjectId } from "mongo/mod.ts";
 import { IS_PRODUCTION } from "../../../env.ts";
 import State from "../../../types/state.type.ts";
 import redirect from "../../../utils/redirect.ts";
+import Paper from "../../../components/Paper.tsx";
 import getNodeName from "../../../utils/getNodeName.ts";
 import handleError from "../../../utils/handleError.ts";
 import Typography from "../../../components/Typography.tsx";
@@ -9,7 +11,6 @@ import { getNode } from "../../../controllers/node.controller.ts";
 import { HandlerContext, Handlers, PageProps } from "$fresh/server.ts";
 import Button, { getButtonClasses } from "../../../components/Button.tsx";
 import deleteDockerAndConfigs from "../../../incognito/deleteDockerAndConfigs.ts";
-import Paper from "../../../components/Paper.tsx";
 
 interface ConfirmDeleteNodeProps {
   number: number;
@@ -25,9 +26,10 @@ async function getNodeOrRedirect(ctx: HandlerContext<ConfirmDeleteNodeProps, Sta
 
   if (!indexOrNumber || isNaN(+indexOrNumber)) return redirect("/nodes/delete");
 
-  const node = await getNode(isAdmin ? { dockerIndex: +indexOrNumber } : { number: +indexOrNumber }, {
-    projection: { _id: 0, dockerIndex: 1, number: 1, client: 1 },
-  });
+  const node = await getNode(
+    isAdmin ? { dockerIndex: +indexOrNumber } : { number: +indexOrNumber, client: new ObjectId(clientId) },
+    { projection: { _id: 0, dockerIndex: 1, number: 1, client: 1 } }
+  );
 
   if (!node) return redirect("/nodes/delete");
   if (!isAdmin && node.client + "" !== clientId) return redirect("/nodes/delete");
