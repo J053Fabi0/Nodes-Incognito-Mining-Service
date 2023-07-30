@@ -9,6 +9,7 @@ import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import NodePill from "../../components/Nodes/NodePill.tsx";
 import submitCommand from "../../telegram/submitCommand.ts";
 import { getNodes } from "../../controllers/node.controller.ts";
+import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { pendingNodesTest } from "../../utils/testingConstants.ts";
 import MonitorTable from "../../components/Nodes/MonitorTable.tsx";
 import { NewNode, pendingNodes } from "../../incognito/submitNode.ts";
@@ -149,8 +150,10 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
         ))}
       </ul>
 
+      {Object.values(nodesStatus).some((a) => a.role === "NOT_STAKED") && <AfterYouPay monitor class="mt-4" />}
+
       {!isAdmin && (
-        <Typography variant="smallP">
+        <Typography variant="smallP" class="mt-3">
           * Nodes become online only when needed. They are offline most of the time.
         </Typography>
       )}
