@@ -71,6 +71,12 @@ export default function Nodes({ data, url }: PageProps<NodesProps>) {
             Notifications
           </a>
         </li>
+
+        <li class={styles.li}>
+          <a href="nodes/delete" class="underline">
+            Delete nodes
+          </a>
+        </li>
       </ul>
     </>
   );
