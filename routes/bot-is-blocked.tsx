@@ -12,7 +12,7 @@ export const handler: Handlers<undefined, State> = {
   async GET(_, ctx) {
     if (!ctx.state.user?.isBotBlocked) return redirect(WEBSITE_URL);
 
-    const result = await sendMessage("Am I unblocked already?");
+    const result = await sendMessage("Am I unblocked already?", ctx.state.user.telegram!, {}, "notificationsBot");
     const isStillBlocked = result === BotBlocked.HANDLED || result === BotBlocked.NOT_HANDLED;
 
     if (!isStillBlocked) {
