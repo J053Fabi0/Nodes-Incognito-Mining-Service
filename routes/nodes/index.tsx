@@ -19,7 +19,7 @@ interface NodesProps extends Pick<TimeToPayProps, "monthlyFee" | "paymentStatus"
 export const handler: Handlers<NodesProps, State> = {
   async GET(_, ctx) {
     const clientId = ctx.state.userId!;
-    const isNewClient = (await countNodes({ client: new ObjectId(clientId) })) >= 1;
+    const isNewClient = (await countNodes({ client: new ObjectId(clientId) })) === 0;
 
     const { balance, monthlyFee, paymentStatus } = isNewClient
       ? { balance: 0, monthlyFee: 0, paymentStatus: PaymentStatus.PAYED }
@@ -44,7 +44,7 @@ export default function Nodes({ data, url }: PageProps<NodesProps>) {
         Your nodes
       </Typography>
 
-      {isNewClient && (
+      {isNewClient ? null : (
         <TimeToPay
           balance={balance}
           path={url.pathname}
