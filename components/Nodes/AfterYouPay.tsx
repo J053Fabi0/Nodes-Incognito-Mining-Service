@@ -22,8 +22,8 @@ export default function AfterYouPay({ confirming, monitor, ...props }: AfterYouP
           </li>
 
           <li>
-            Wait until the dot turns green. It means the node is online and ready to be staked. It might take a few
-            minutes to become green.
+            Wait until the dot turns green. It means the node is online and ready to be staked. It might take up to
+            an hour.
           </li>
 
           <li>
