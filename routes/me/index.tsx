@@ -23,6 +23,7 @@ import Typography, { getTypographyClass } from "../../components/Typography.tsx"
 import { incognitoFee, incognitoFeeInt, maxNotPayedDays } from "../../constants.ts";
 import { AccountTransactionType } from "../../types/collections/accountTransaction.type.ts";
 import TimeToPay, { PaymentStatus, TimeToPayProps } from "../../islands/Nodes/TimeToPay.tsx";
+import { countNodes } from "../../controllers/node.controller.ts";
 
 dayjs.extend(utc);
 
@@ -42,6 +43,7 @@ async function getProjectedAccount(id: ObjectId) {
 interface AccountProps extends Pick<TimeToPayProps, "monthlyFee" | "paymentStatus"> {
   balance: number;
   isAdmin: boolean;
+  isNewClient: boolean;
   paymentAddress: string;
   withdrawAmount?: string;
   paymentAddressImage: string;
@@ -52,16 +54,17 @@ interface AccountProps extends Pick<TimeToPayProps, "monthlyFee" | "paymentStatu
 export const handler: Handlers<AccountProps, State> = {
   async GET(_, ctx) {
     const account = await getProjectedAccount(ctx.state.user!.account);
+    const clientId = ctx.state.userId!;
+    const isNewClient = (await countNodes({ client: new ObjectId(clientId) })) >= 1;
 
-    const timeToPayData = await getTimeToPayData(
-      ctx.state.userId!,
-      ctx.state.user!.lastPayment,
-      ctx.state.user!.account
-    );
+    const timeToPayData = isNewClient
+      ? { balance: 0, monthlyFee: 0, paymentStatus: PaymentStatus.PAYED }
+      : await getTimeToPayData(clientId, ctx.state.user!.lastPayment, ctx.state.user!.account);
 
     return ctx.render({
       ...account,
       ...timeToPayData,
+      isNewClient,
       isAdmin: ctx.state.isAdmin,
       errors: ctx.state.session.flash("errors"),
       withdrawAmount: ctx.state.session.flash("withdrawAmount"),
@@ -111,7 +114,7 @@ export const handler: Handlers<AccountProps, State> = {
 };
 
 export default function Account({ data, url }: PageProps<AccountProps>) {
-  const { paymentAddressImage, paymentAddress, withdrawAmount } = data;
+  const { paymentAddressImage, paymentAddress, withdrawAmount, isNewClient } = data;
   const { withdrawPaymentAddress, balance, errors, monthlyFee, paymentStatus } = data;
   const nextPayment = dayjs().utc().add(1, "month").startOf("month").valueOf();
 
@@ -121,13 +124,15 @@ export default function Account({ data, url }: PageProps<AccountProps>) {
         Your account
       </Typography>
 
-      <TimeToPay
-        balance={balance}
-        path={url.pathname}
-        monthlyFee={monthlyFee}
-        paymentStatus={paymentStatus}
-        maxNotPayedDays={maxNotPayedDays}
-      />
+      {isNewClient && (
+        <TimeToPay
+          balance={balance}
+          path={url.pathname}
+          monthlyFee={monthlyFee}
+          paymentStatus={paymentStatus}
+          maxNotPayedDays={maxNotPayedDays}
+        />
+      )}
 
       <hr class="mb-5 mt-8" />
 
