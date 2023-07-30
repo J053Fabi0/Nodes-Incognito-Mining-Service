@@ -64,8 +64,8 @@ export const handler: Handlers<AccountProps, State> = {
 
     return ctx.render({
       ...account,
-      ...timeToPayData,
       isNewClient,
+      ...timeToPayData,
       isAdmin: ctx.state.isAdmin,
       errors: ctx.state.session.flash("errors"),
       withdrawAmount: ctx.state.session.flash("withdrawAmount"),

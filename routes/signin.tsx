@@ -122,6 +122,10 @@ export default function SignIn({ data }: PageProps<SigninProps>) {
             data-telegram-login={NOTIFICATIONS_BOT_USERNAME.toLowerCase()}
           />
         </div>
+
+        <Typography variant="smallP" class="mt-3">
+          <i>The login widget might take a few seconds to load at first.</i>
+        </Typography>
       </div>
     </>
   );
