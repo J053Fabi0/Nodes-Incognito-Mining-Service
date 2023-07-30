@@ -33,9 +33,9 @@ export const handler: Handlers<NotificationsProps, State> = {
 
     const nodesQuery: Parameters<typeof getNodes>[0] = { inactive: { $ne: true } };
     if (!isAdmin) nodesQuery.client = ctx.state.user!._id;
-    const nodes = (
-      await getNodes(nodesQuery, { projection: { number: 1, _id: 1, sendTo: 1, client: isAdmin as true } })
-    ).map((n) => ({ ...n, sendTo: n.sendTo.map((c) => `${c}`) }));
+    const nodes = (await getNodes(nodesQuery, { projection: { number: 1, _id: 1, sendTo: 1, client: 1 } })).map(
+      (n) => ({ ...n, sendTo: n.sendTo.map((c) => `${c}`) })
+    );
 
     const nodeEntities: Entity[] = nodes.map((n) => ({
       checked: n.sendTo.includes(userId),
