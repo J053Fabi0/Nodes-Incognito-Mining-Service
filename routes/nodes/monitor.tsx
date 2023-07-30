@@ -144,9 +144,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
 
       <ul class={`list-disc list-inside mt-2 ${getTypographyClass("p")}`}>
         {nodesUrl.map((url) => (
-          <li>
-            <a href={url}>{url}</a>
-          </li>
+          <li>{url}</li>
         ))}
       </ul>
 
