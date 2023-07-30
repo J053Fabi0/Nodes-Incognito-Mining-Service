@@ -18,10 +18,11 @@ import { getAccount } from "../../controllers/account.controller.ts";
 import { changeClient } from "../../controllers/client.controller.ts";
 import { HandlerContext, Handlers, PageProps } from "$fresh/server.ts";
 import { error, validateFormData, z, ZodIssue } from "fresh-validation";
-import { countNodes, getNode, getNodes } from "../../controllers/node.controller.ts";
 import NewConfirmNodeSelector from "../../islands/NewConfirmNodeSelector.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
+import { countNodes, getNode, getNodes } from "../../controllers/node.controller.ts";
 import { incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
+import { sendHTMLMessage } from "../../telegram/sendMessage.ts";
 
 export const styles = {
   th: "py-2 px-3 text-right",
@@ -157,6 +158,11 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
         validatorPublic: validatedData.validatorPublic,
         cost: dataOrRedirect.prvToPay * 1e9 - incognitoFeeInt,
       }).then(async () => {
+        await sendHTMLMessage(
+          `The user <code>${ctx.state.user!.name}</code> (<code>${ctx.state.user!.telegram}</code>) ` +
+            `has registered a new node`
+        );
+
         const activeNodes = await countNodes({ client: new ObjectId(ctx.state.userId!), inactive: false });
         if (activeNodes === 0)
           await changeClient({ _id: new ObjectId(ctx.state.userId!) }, { $set: { lastPayment: new Date() } });
