@@ -2,10 +2,11 @@ import { ObjectId } from "mongo/mod.ts";
 import State from "../../types/state.type.ts";
 import { maxNotPayedDays } from "../../constants.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
+import PaymentStatus from "../../types/PaymentStatus.type.ts";
 import getTimeToPayData from "../../utils/getTimeToPayData.ts";
 import { countNodes } from "../../controllers/node.controller.ts";
+import TimeToPay, { TimeToPayProps } from "../../islands/Nodes/TimeToPay.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
-import TimeToPay, { PaymentStatus, TimeToPayProps } from "../../islands/Nodes/TimeToPay.tsx";
 
 const styles = {
   li: `${getTypographyClass("lead")}`,

@@ -13,17 +13,18 @@ import LocaleDate from "../../islands/LocaleDate.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import RelativeDate from "../../islands/RelativeDate.tsx";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
+import PaymentStatus from "../../types/PaymentStatus.type.ts";
 import getTimeToPayData from "../../utils/getTimeToPayData.ts";
+import { countNodes } from "../../controllers/node.controller.ts";
 import { getAccount } from "../../controllers/account.controller.ts";
 import submitTransaction from "../../incognito/submitTransaction.ts";
 import { moveDecimalDot, toFixedS } from "../../utils/numbersString.ts";
 import { error, validateFormData, z, ZodIssue } from "fresh-validation";
 import PaymentAddress from "../../components/Account/PaymentAddress.tsx";
+import TimeToPay, { TimeToPayProps } from "../../islands/Nodes/TimeToPay.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import { incognitoFee, incognitoFeeInt, maxNotPayedDays } from "../../constants.ts";
 import { AccountTransactionType } from "../../types/collections/accountTransaction.type.ts";
-import TimeToPay, { PaymentStatus, TimeToPayProps } from "../../islands/Nodes/TimeToPay.tsx";
-import { countNodes } from "../../controllers/node.controller.ts";
 
 dayjs.extend(utc);
 

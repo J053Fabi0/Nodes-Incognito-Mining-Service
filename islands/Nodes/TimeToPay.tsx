@@ -7,15 +7,9 @@ import Paper from "../../components/Paper.tsx";
 import Typography from "../../components/Typography.tsx";
 import Pill, { PillProps } from "../../components/Pill.tsx";
 import { moveDecimalDot } from "../../utils/numbersString.ts";
+import PaymentStatus from "../../types/PaymentStatus.type.ts";
 
 dayjs.extend(utc);
-
-export enum PaymentStatus {
-  PAYED = "payed",
-  ERROR = "error",
-  PENDING = "pending",
-  EXPIRED = "expired",
-}
 
 const styles = {
   th: "py-2 px-3 text-right",
@@ -30,6 +24,7 @@ export interface TimeToPayProps {
   maxNotPayedDays: number;
   paymentStatus: PaymentStatus;
 }
+
 export default function TimeToPay({ balance, monthlyFee, paymentStatus, maxNotPayedDays, path }: TimeToPayProps) {
   const isInAccountPage = path === "/me";
 

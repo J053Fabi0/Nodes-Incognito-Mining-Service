@@ -2,7 +2,7 @@ import { ObjectId } from "mongo/mod.ts";
 import hasClientPayed from "./hasClientPayed.ts";
 import getIsTimeToPay from "./getIsTimeToPay.ts";
 import { monthlyPayments } from "./variables.ts";
-import { PaymentStatus } from "../islands/Nodes/TimeToPay.tsx";
+import PaymentStatus from "../types/PaymentStatus.type.ts";
 
 export default function getPaymentStatus(
   userId: string | ObjectId,
