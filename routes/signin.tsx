@@ -4,14 +4,16 @@ import State from "../types/state.type.ts";
 import redirect from "../utils/redirect.ts";
 import cryptr from "../utils/cryptrInstance.ts";
 import { checkSignature } from "grammy_validator";
+import handleError from "../utils/handleError.ts";
 import Typography from "../components/Typography.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import getQueryParams from "../utils/getQueryParams.ts";
 import IncognitoCli from "../incognito/IncognitoCli.ts";
+import { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import { isTelegramPayload } from "../types/telegramPayload.type.ts";
 import { createAccount } from "../controllers/account.controller.ts";
 import { createClient, getClient } from "../controllers/client.controller.ts";
-import { NOTIFICATIONS_BOT_TOKEN, NOTIFICATIONS_BOT_USERNAME } from "../env.ts";
+import { NOTIFICATIONS_BOT_TOKEN, NOTIFICATIONS_BOT_USERNAME, WEBSITE_URL } from "../env.ts";
 
 dayjs.extend(utc);
 
@@ -65,6 +67,15 @@ export const handler: Handlers<SigninProps, State> = {
           name: params.username || [params.first_name, params.last_name].filter(Boolean).join(" "),
         });
         ctx.state.session.set("userId", newUser._id.toString());
+
+        await sendHTMLMessage(
+          `<b>Welcome to the hosting service for Incognito nodes!</b>\n\n` +
+            `Please don't block this bot, it's necessary to send you notifications about your nodes.\n` +
+            `You can manage your notifications <a href="${WEBSITE_URL}/nodes/notifications">here</a>.`,
+          params.id,
+          {},
+          "notificationsBot"
+        ).catch(handleError);
       }
 
       return redirect(redirectTo);
