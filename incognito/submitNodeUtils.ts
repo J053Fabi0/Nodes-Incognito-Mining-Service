@@ -102,9 +102,7 @@ export async function getDockerIndex(
 
   return (newNode.dockerIndex =
     Math.max(
-      ...(
-        await getNodes({ client: new ObjectId(newNode.clientId) }, { projection: { _id: 0, dockerIndex: 1 } })
-      ).map((d) => d.dockerIndex),
+      ...(await getNodes({}, { projection: { _id: 0, dockerIndex: 1 } })).map((d) => d.dockerIndex),
       -1 // will become 0
     ) + 1);
 }
