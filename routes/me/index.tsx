@@ -56,9 +56,9 @@ export const handler: Handlers<AccountProps, State> = {
   async GET(_, ctx) {
     const account = await getProjectedAccount(ctx.state.user!.account);
     const clientId = ctx.state.userId!;
-    const isNewClient = (await countNodes({ client: new ObjectId(clientId) })) >= 1;
+    const isNewClient = (await countNodes({ client: new ObjectId(clientId) })) === 0;
 
-    const timeToPayData = isNewClient
+    const { balance: __, ...timeToPayData } = isNewClient
       ? { balance: 0, monthlyFee: 0, paymentStatus: PaymentStatus.PAYED }
       : await getTimeToPayData(clientId, ctx.state.user!.lastPayment, ctx.state.user!.account);
 

@@ -19,9 +19,7 @@ export const handler: Handlers = {
           },
         ],
       },
-      options: {
-        devicePixelRatio: 1,
-      },
+      options: { devicePixelRatio: 1 },
     });
   },
 };
