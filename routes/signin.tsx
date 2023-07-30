@@ -64,7 +64,7 @@ export const handler: Handlers<SigninProps, State> = {
           telegram: params.id,
           account: submittedAccount._id,
           lastPayment: dayjs().utc().startOf("month").toDate(),
-          name: params.username || [params.first_name, params.last_name].filter(Boolean).join(" "),
+          name: params.username || [params.first_name, params.last_name].join(" ").trim(),
         });
         ctx.state.session.set("userId", newUser._id.toString());
 
@@ -75,6 +75,13 @@ export const handler: Handlers<SigninProps, State> = {
           params.id,
           {},
           "notificationsBot"
+        ).catch(handleError);
+
+        await sendHTMLMessage(
+          `A new user has signed up!\n\n` +
+            `Name: <code>${newUser.name}</code>\n` +
+            `Telegram ID: <code>${newUser.telegram}</code>\n` +
+            `Account ID: <code>${submittedAccount._id}</code>`
         ).catch(handleError);
       }
 
