@@ -7,6 +7,7 @@ import getTimeToPayData from "../../utils/getTimeToPayData.ts";
 import { countNodes } from "../../controllers/node.controller.ts";
 import TimeToPay, { TimeToPayProps } from "../../islands/Nodes/TimeToPay.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
+import { AiFillPlusCircle } from "react-icons/ai";
 
 const styles = {
   li: `${getTypographyClass("lead")}`,
@@ -71,6 +72,12 @@ export default function Nodes({ data, url }: PageProps<NodesProps>) {
         <li class={styles.li}>
           <a href="nodes/earnings?relative" class="underline">
             All earnings records
+          </a>
+        </li>
+
+        <li class={styles.li}>
+          <a href="nodes/new" class="underline">
+            New node
           </a>
         </li>
 
