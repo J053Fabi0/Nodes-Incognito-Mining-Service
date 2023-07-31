@@ -5,10 +5,6 @@ import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 const errorKeys = Object.keys(ignore).sort((a, b) => a.length - b.length) as (keyof typeof ignore)[];
 type Type = (typeof errorKeys)[number] | "all";
 
-function isAll(type: string): type is "all" {
-  return type.toLowerCase() === "all";
-}
-
 function getType(type: string): Type | null {
   for (const t of [...errorKeys, "all"] as Type[]) if (type.toLowerCase() === t.toLowerCase()) return t;
   return null;
@@ -50,7 +46,7 @@ export default async function handleIgnore(args: string[], options?: CommandOpti
   )
     return sendError(options);
 
-  for (const t of isAll(type) ? errorKeys : [type]) {
+  for (const t of type === "all" ? errorKeys : [type]) {
     ignore[t].from = Date.now();
     ignore[t].minutes = number;
   }
