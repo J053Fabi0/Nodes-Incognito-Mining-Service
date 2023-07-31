@@ -5,6 +5,10 @@ import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 type Type = (typeof errorKeys)[number] | "all";
 const errorKeys = Object.keys(ignore).sort((a, b) => a.length - b.length) as (keyof typeof ignore)[];
 
+function isAll(type: string): type is "all" {
+  return type.toLowerCase() === "all";
+}
+
 export default async function handleIgnore(args: string[], options?: CommandOptions): Promise<CommandResponse> {
   let number = 0; // default value is 0, to disable the ignore
   let type: Type = "docker";
@@ -25,14 +29,17 @@ export default async function handleIgnore(args: string[], options?: CommandOpti
     return { successful: false, error };
   }
 
-  if ((type !== "all" && !errorKeys.includes(type)) || type.toLowerCase() === "codes") {
+  if (
+    (type.toLowerCase() !== "all" && !errorKeys.map((a) => a.toLowerCase()).includes(type.toLowerCase())) ||
+    type.toLowerCase() === "codes"
+  ) {
     const error = `Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`;
     if (options?.telegramMessages)
       await sendHTMLMessage(error, undefined, { disable_notification: options?.silent });
     return { successful: false, error };
   }
 
-  for (const t of type === "all" ? errorKeys : [type]) {
+  for (const t of isAll(type) ? errorKeys : [type]) {
     ignore[t].from = Date.now();
     ignore[t].minutes = number;
   }
