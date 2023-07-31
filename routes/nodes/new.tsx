@@ -136,7 +136,7 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
 
       <Typography variant="lead" class="mb-3">
         You'll be able to withdraw any deposited PRV form{" "}
-        <a class="underline" href="/me/balance">
+        <a class="underline" href="/me">
           the balance page
         </a>
         .

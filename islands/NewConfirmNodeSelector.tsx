@@ -112,7 +112,7 @@ export default function NewConfirmNodeSelector({
             </Typography>
           </Button>
 
-          <a class={`${getButtonClasses("red", false)} mt-3 py-1 px-2`} href="/me/balance">
+          <a class={`${getButtonClasses("red", false)} mt-3 py-1 px-2`} href="/me">
             <Typography variant="p" class="!normal-case h-min py-0">
               Cancel, get refund
             </Typography>
