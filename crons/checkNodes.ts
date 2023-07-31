@@ -84,15 +84,16 @@ export default async function checkNodes() {
     const prevLastErrorTime = { ...lastErrorTime };
 
     // check for errors
-    // alert, isSlashed, isOldVersion
-    for (const errorKey of ["isSlashed", "isOldVersion"] as const)
+    // isOldVersion
+    for (const errorKey of ["isOldVersion"] as const)
       setOrRemoveErrorTime(nodeStatus[errorKey], lastErrorTime, errorKey);
-    // alert only when online and in committee
-    setOrRemoveErrorTime(
-      nodeStatus.alert && nodeStatus.status === "ONLINE" && nodeStatus.role === "COMMITTEE",
-      lastErrorTime,
-      "alert"
-    );
+    // alert and isSlashed only when online and in committee
+    for (const errorKey of ["isSlashed", "alert"] as const)
+      setOrRemoveErrorTime(
+        nodeStatus[errorKey] && nodeStatus.status === "ONLINE" && nodeStatus.role === "COMMITTEE",
+        lastErrorTime,
+        errorKey
+      );
     // stalling
     setOrRemoveErrorTime(nodeStatus.syncState.endsWith("STALL"), lastErrorTime, "stalling");
     // offline
