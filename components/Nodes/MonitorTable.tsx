@@ -21,7 +21,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
       <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
         <thead>
           <tr>
-            <th class={styles.th}>Node</th>
+            <th class={styles.th}>Nodes ({nodesInfo.length})</th>
             <th class={styles.th}>Docker</th>
             <th class={styles.th}>Online</th>
             <th class={styles.th}>Sync</th>
