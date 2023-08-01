@@ -66,7 +66,15 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                   </code>
                 </td>
 
-                <td class={styles.td}>{status.status === "ONLINE" ? "🟢" : "🔴"}</td>
+                <td class={styles.td}>
+                  {status.status === "ONLINE" ? "🟢" : "🔴"}
+                  {isAdmin && (
+                    <code>
+                      <br />
+                      {status.voteStat === null ? "-" : `${status.voteStat}%`}
+                    </code>
+                  )}
+                </td>
 
                 <td class={styles.td}>
                   <code>

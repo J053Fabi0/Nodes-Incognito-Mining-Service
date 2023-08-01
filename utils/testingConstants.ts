@@ -25,6 +25,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 53,
     inactive: false,
     rcpPort: 8334,
+    voteStat: null,
   },
   "1": {
     _id: new ObjectId("648ea67e9d36345e94bff735"),
@@ -48,6 +49,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 96,
     inactive: false,
     rcpPort: 8335,
+    voteStat: 97,
   },
   "2": {
     _id: new ObjectId("648ea67e9d36345e94bff736"),
@@ -71,6 +73,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 0,
     inactive: false,
     rcpPort: 8336,
+    voteStat: 97,
   },
   "3": {
     _id: new ObjectId("648ea67e9d36345e94bff737"),
@@ -94,6 +97,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 74,
     inactive: false,
     rcpPort: 8337,
+    voteStat: 97,
   },
   "4": {
     _id: new ObjectId("648ea67e9d36345e94bff738"),
@@ -117,6 +121,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 11,
     inactive: false,
     rcpPort: 8338,
+    voteStat: 97,
   },
   "5": {
     _id: new ObjectId("648ea67e9d36345e94bff739"),
@@ -140,6 +145,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 72,
     inactive: false,
     rcpPort: 8339,
+    voteStat: 97,
   },
   "6": {
     _id: new ObjectId("648ea67f9d36345e94bff73a"),
@@ -163,6 +169,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 46,
     inactive: false,
     rcpPort: 8340,
+    voteStat: 97,
   },
   "7": {
     _id: new ObjectId("648ea67f9d36345e94bff73b"),
@@ -186,6 +193,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 5,
     inactive: false,
     rcpPort: 8341,
+    voteStat: 97,
   },
   "8": {
     _id: new ObjectId("648ea67f9d36345e94bff73c"),
@@ -209,6 +217,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 52,
     inactive: false,
     rcpPort: 8342,
+    voteStat: 97,
   },
   "9": {
     _id: new ObjectId("648ea67f9d36345e94bff73d"),
@@ -232,6 +241,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     epochsToNextEvent: 45,
     inactive: false,
     rcpPort: 8343,
+    voteStat: 97,
   },
 };
 

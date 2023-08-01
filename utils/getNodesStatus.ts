@@ -26,6 +26,7 @@ export interface NodeStatus extends Node {
   syncState: "BEACON SYNCING" | "LATEST" | "-" | "BEACON STALL" | "SHARD SYNCING" | "SHARD STALL";
   epochsToNextEvent: number;
   validatorPublic: string;
+  voteStat: null | number; // between 0 and 100
 }
 
 export default async function getNodesStatus(): Promise<NodeStatus[]> {
@@ -48,6 +49,7 @@ export default async function getNodesStatus(): Promise<NodeStatus[]> {
         isOldVersion: d.IsOldVersion,
         syncState: d.SyncState || "-",
         epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
+        voteStat: d.VoteStat[0] === "" ? null : Number(d.VoteStat[0]?.match(/\d+/)?.[0] ?? 0),
       } satisfies NodeStatus;
     })
     .filter((n) => n !== null) as NodeStatus[];
@@ -63,6 +65,7 @@ export interface NodeStatusRawData {
   Status: "ONLINE" | "OFFLINE";
   Role: "PENDING" | "COMMITTEE" | "WAITING" | "SYNCING" | "";
   SyncState: "BEACON SYNCING" | "LATEST" | "-" | "BEACON STALL" | "SHARD SYNCING" | "SHARD STALL" | "";
+  VoteStat: [string, string] | [undefined, undefined]; // 97 (epoch:10997) or an empty string
 }
 
 let lastRequestTime = 0;
