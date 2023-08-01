@@ -111,7 +111,7 @@ export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
   return (
     <>
       <Typography variant="h1" class="mt-3 mb-5">
-        Nodes
+        Nodes ({nodes.length})
       </Typography>
 
       <form method="post">
