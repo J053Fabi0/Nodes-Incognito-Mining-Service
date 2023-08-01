@@ -19,12 +19,16 @@ export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
 export type NodeInfoByDockerIndex = [string, Info & { shard: ShardsNames | "" }];
 export type NodesStatusByDockerIndex = Record<string, NodeStatus | undefined>;
 
-export default async function sortNodes(nodes: (string | number)[] = []) {
+/**
+ * @param nodes The docker indexes of the nodes to sort. If empty, all nodes will be sorted.
+ * @param fullData If true, returns the block height for each shard
+ */
+export default async function sortNodes(nodes: (string | number)[] = [], fullData?: boolean) {
   // nodesStr is only used for development
   const nodesStr = IS_PRODUCTION ? nodes : nodes.map((node) => `${node}`);
 
   const nodesStatusByDockerIndex: NodesStatusByDockerIndex = IS_PRODUCTION
-    ? (await getNodesStatus()).reduce<Record<string, NodeStatus>>(
+    ? (await getNodesStatus(fullData)).reduce<Record<string, NodeStatus>>(
         (obj, node) => ((obj[node.dockerIndex] = node), obj),
         {}
       )

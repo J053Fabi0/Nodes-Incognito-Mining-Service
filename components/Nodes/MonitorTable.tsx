@@ -1,5 +1,8 @@
 import NodePill from "./NodePill.tsx";
 import { lastRoles } from "../../utils/variables.ts";
+import { toFixedS } from "../../utils/numbersString.ts";
+import { NodeStatus } from "../../utils/getNodesStatus.ts";
+import { ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { roleToEmoji } from "../../telegram/handlers/handleTextMessage.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
@@ -34,6 +37,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
           {nodesInfo.map(([node, { docker, beacon, ...shards }]) => {
             const status = nodesStatus[node];
             if (!status) return null;
+            const { shardsBlockHeights } = status;
             const shard = shards[`shard${status.shard}`] ?? 0;
             const sync = status.syncState[0] + status.syncState.slice(1).toLowerCase();
             const roleSince = rangeMsToTimeDescription(lastRoles[+node].date, undefined, { short: true });
@@ -109,32 +113,28 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                   )}
                 </td>
 
-                <td class={styles.td}>
+                <td class={styles.td} title={isAdmin ? `${shard ?? 0} files` : undefined}>
                   {status.shard === "" ? (
                     "-"
                   ) : (
                     <>
                       <NodePill baseURL={null} nodeNumber={+status.shard} relative />
-                      {isAdmin && (
-                        <code>
-                          <br />
-                          {shard}
-                        </code>
+                      {isAdmin && shardsBlockHeights && (
+                        <>
+                          {" "}
+                          <ShardInfo shardsBlockHeights={shardsBlockHeights} shard={status.shard} />
+                        </>
                       )}
                     </>
                   )}
                 </td>
 
                 {isAdmin && (
-                  <td class={styles.td}>
-                    {beacon && beacon > 0 ? (
+                  <td class={styles.td} title={`${beacon ?? 0} files`}>
+                    {shardsBlockHeights && (
                       <>
-                        🟢
-                        <br />
-                        <code>{beacon}</code>
+                        {beacon ? "🟢" : "🔴"} <ShardInfo shardsBlockHeights={shardsBlockHeights} shard="-1" />
                       </>
-                    ) : (
-                      "🔴"
                     )}
                   </td>
                 )}
@@ -144,5 +144,22 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
         </tbody>
       </table>
     </div>
+  );
+}
+
+function ShardInfo({
+  shardsBlockHeights,
+  shard,
+}: {
+  shardsBlockHeights: Exclude<NodeStatus["shardsBlockHeights"], null>;
+  shard: ShardsStr | "-1";
+}) {
+  return (
+    <>
+      <code>{shardsBlockHeights[shard].node}</code>
+      <br />
+      <code>{toFixedS((shardsBlockHeights[shard].node / shardsBlockHeights[shard].latest) * 100, 2)}</code>% -{" "}
+      <code>{shardsBlockHeights[shard].latest - shardsBlockHeights[shard].node}</code>
+    </>
   );
 }
