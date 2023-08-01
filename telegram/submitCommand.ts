@@ -29,7 +29,7 @@ export const commands: Commands = (() => {
   return {
     resolved: new EventedArray<string>(({ array }) => {
       saveToRedis();
-      if (array.lengthNoEvent > 100) array.spliceNoEvent(0, array.lengthNoEvent - 100);
+      if (array.lengthNoEvent > 100) array.spliceNoEvent(100, Infinity);
     }),
     pending: new EventedArray<Command>(async ({ array: pending }) => {
       saveToRedis();
