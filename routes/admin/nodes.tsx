@@ -1,3 +1,4 @@
+import { ObjectId } from "mongo/mod.ts";
 import { FiTrash2 } from "react-icons/fi";
 import { IS_PRODUCTION } from "../../env.ts";
 import State from "../../types/state.type.ts";
@@ -8,16 +9,19 @@ import { Handlers, PageProps } from "$fresh/server.ts";
 import submitNode from "../../incognito/submitNode.ts";
 import Node from "../../types/collections/node.type.ts";
 import Typography from "../../components/Typography.tsx";
-import { getNodeById, getNodes } from "../../controllers/node.controller.ts";
 import deleteDockerAndConfigs from "../../incognito/deleteDockerAndConfigs.ts";
+import { aggregateNode, getNodeById } from "../../controllers/node.controller.ts";
 
 const styles = {
   th: "border border-slate-300 py-2 px-3",
   td: "border border-slate-300 py-2 px-3 text-center",
 } as const;
 
+type NodeWithClient = Pick<Node, "_id" | "dockerIndex" | "inactive" | "number"> & {
+  client: { _id: ObjectId; name: string };
+};
 interface AdminNodesProps {
-  nodes: Node[];
+  nodes: NodeWithClient[];
 }
 enum Action {
   ACTIVATE = "activate",
@@ -26,10 +30,36 @@ enum Action {
 
 export const handler: Handlers<AdminNodesProps, State> = {
   async GET(_, ctx) {
-    const nodes = (await getNodes()).sort((a, b) => a.dockerIndex - b.dockerIndex);
+    const nodes = (
+      await aggregateNode([
+        { $match: {} },
+        {
+          $lookup: {
+            from: "clients",
+            localField: "client",
+            foreignField: "_id",
+            as: "client",
+          },
+        },
+        // make client an object instead of an array
+        { $unwind: "$client" },
+        {
+          $project: {
+            number: 1,
+            inactive: 1,
+            dockerIndex: 1,
+            client: {
+              _id: 1,
+              name: 1,
+            },
+          },
+        },
+      ])
+    ).sort((a, b) => a.dockerIndex - b.dockerIndex) as unknown as NodeWithClient[];
 
     return ctx.render({ nodes });
   },
+
   async POST(req) {
     const form = await req.formData();
 
@@ -90,7 +120,9 @@ export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
               {nodes.map((node) => (
                 <tr>
                   <td class={styles.td}>
-                    <code>{`${node.client}`}</code>
+                    <code>{node.client.name}</code>
+                    <br />
+                    <code>{`${node.client._id}`}</code>
                   </td>
 
                   <td class={styles.td}>
