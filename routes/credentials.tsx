@@ -44,7 +44,7 @@ export default function Credentials({ data }: PageProps<CredentialProps>) {
             <li class={`mb-1 ${getTypographyClass("lead")}`}>
               <button type="submit" name="client" value={`${client._id}`} class="hover:underline">
                 {client.role === "admin" ? "👑 " : ""}
-                {`${client.name} - ${client.telegram}`}
+                {`${client.name} - ${client.telegram} - ${client._id}`}
               </button>
             </li>
           ))}
