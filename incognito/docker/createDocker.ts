@@ -19,7 +19,7 @@ export default async function createDocker(rpcPort: number, validatorKey: string
 
   return docker([
     "run",
-    "--restart=always",
+    "--restart=no",
     ...["--net", "inc_net"],
     ...["-p", `${nodePort}:${nodePort}`],
     ...["-p", `${rpcPort}:${rpcPort}`],
