@@ -125,7 +125,7 @@ export default function Account({ data, url }: PageProps<AccountProps>) {
         Your account
       </Typography>
 
-      {isNewClient && (
+      {isNewClient ? null : (
         <TimeToPay
           balance={balance}
           path={url.pathname}
