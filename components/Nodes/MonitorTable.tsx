@@ -156,9 +156,8 @@ function ShardInfo({
 }) {
   return (
     <>
-      <code>{shardsBlockHeights[shard].node}</code>
+      <code>{toFixedS((shardsBlockHeights[shard].node / shardsBlockHeights[shard].latest) * 100, 2)}</code>%
       <br />
-      <code>{toFixedS((shardsBlockHeights[shard].node / shardsBlockHeights[shard].latest) * 100, 2)}</code>% -{" "}
       <code>{shardsBlockHeights[shard].latest - shardsBlockHeights[shard].node}</code>
     </>
   );
