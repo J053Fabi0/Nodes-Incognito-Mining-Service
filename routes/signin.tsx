@@ -10,7 +10,6 @@ import { Handlers, PageProps } from "$fresh/server.ts";
 import getQueryParams from "../utils/getQueryParams.ts";
 import IncognitoCli from "../incognito/IncognitoCli.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
-import { InlineKeyboard } from "grammy/convenience/keyboard.ts";
 import { isTelegramPayload } from "../types/telegramPayload.type.ts";
 import { createAccount } from "../controllers/account.controller.ts";
 import { createClient, getClient } from "../controllers/client.controller.ts";
@@ -82,9 +81,7 @@ export const handler: Handlers<SigninProps, State> = {
           `A new user has signed up!\n\n` +
             `Name: <code>${newUser.name}</code>\n` +
             `Telegram ID: <code>${newUser.telegram}</code>\n` +
-            `Account ID: <code>${submittedAccount._id}</code>`,
-          undefined,
-          { reply_markup: new InlineKeyboard().url("Send message", `tg://user?id=${newUser.telegram}`) }
+            `Account ID: <code>${submittedAccount._id}</code>`
         ).catch(handleError);
       }
 
