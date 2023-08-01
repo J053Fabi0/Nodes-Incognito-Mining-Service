@@ -51,17 +51,18 @@ export default async function handleInfo(
       ...(beacon ? { beacon } : {}),
       ...info,
     };
-    text +=
-      `<code>#${node}  Sh${status.shard || " "}  ${status.role.charAt(0)}  ` +
-      `»${status.epochsToNextEvent.toString().padEnd(4)}` +
-      `${docker.running ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>` +
-      (Object.keys(normalizedInfo).length
-        ? `\n<code> ${escapeHtml(objectToTableText(normalizedInfo))
-            .split("\n")
-            .slice(0, -1)
-            .join("</code>\n<code> ")}</code>`
-        : "") +
-      "\n\n";
+    if (status)
+      text +=
+        `<code>#${node}  Sh${status.shard || " "}  ${status.role.charAt(0)}  ` +
+        `»${status.epochsToNextEvent.toString().padEnd(4)}` +
+        `${docker.running ? "🟢" : "🔴"}  ${beacon ? "*" : ""}</code>` +
+        (Object.keys(normalizedInfo).length
+          ? `\n<code> ${escapeHtml(objectToTableText(normalizedInfo))
+              .split("\n")
+              .slice(0, -1)
+              .join("</code>\n<code> ")}</code>`
+          : "") +
+        "\n\n";
   }
 
   // Add file system info

@@ -33,6 +33,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
         <tbody>
           {nodesInfo.map(([node, { docker, beacon, ...shards }]) => {
             const status = nodesStatus[node];
+            if (!status) return null;
             const shard = shards[`shard${status.shard}`] ?? 0;
             const sync = status.syncState[0] + status.syncState.slice(1).toLowerCase();
             const roleSince = rangeMsToTimeDescription(lastRoles[+node].date, undefined, { short: true });

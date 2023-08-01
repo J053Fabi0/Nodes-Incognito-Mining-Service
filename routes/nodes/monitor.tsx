@@ -153,7 +153,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
         ))}
       </ul>
 
-      {Object.values(nodesStatus).some((a) => a.role === "NOT_STAKED") && <AfterYouPay monitor class="mt-4" />}
+      {Object.values(nodesStatus).some((a) => a?.role === "NOT_STAKED") && <AfterYouPay monitor class="mt-4" />}
 
       {!isAdmin && (
         <Typography variant="smallP" class="mt-3">
