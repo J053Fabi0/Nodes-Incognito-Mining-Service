@@ -14,6 +14,7 @@ export default function GetInput({ id, value, placeholder }: GetInputProps) {
       value={value}
       placeholder={placeholder}
       type={isNumber ? "number" : "text"}
+      step={isNumber ? "0.1" : undefined}
       class="px-2 w-full bg-white/50 rounded"
     />
   );
