@@ -42,10 +42,9 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
               dockerIndex,
               {
                 ...info,
-                shard:
-                  nodesStatusByDockerIndex[dockerIndex].shard !== ""
-                    ? normalizeShard(nodesStatusByDockerIndex[dockerIndex].shard as ShardsStr)
-                    : "",
+                shard: nodesStatusByDockerIndex[dockerIndex]?.shard
+                  ? normalizeShard(nodesStatusByDockerIndex[dockerIndex].shard as ShardsStr)
+                  : "",
               },
             ] as NodeInfoByDockerIndex
         )
