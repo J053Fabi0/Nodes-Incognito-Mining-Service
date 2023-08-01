@@ -109,8 +109,13 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
       {!isAdmin && (
         <>
           <Typography variant="h1">Monitor</Typography>
-          <Typography variant="h3" class="mt-1 mb-5">
+          <Typography variant="h4" class="mt-1 mb-1">
             Sorted by epochs to next event and role.
+          </Typography>
+
+          <Typography variant="smallP" class="mb-3">
+            Nodes become online and get beacon and shard files when they are close to committee. Don't worry if
+            they are offline most of the time.
           </Typography>
         </>
       )}
