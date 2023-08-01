@@ -8,13 +8,14 @@ import Button from "../../components/Button.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import submitNode from "../../incognito/submitNode.ts";
 import Node from "../../types/collections/node.type.ts";
-import Typography from "../../components/Typography.tsx";
 import deleteDockerAndConfigs from "../../incognito/deleteDockerAndConfigs.ts";
+import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import { aggregateNode, getNodeById } from "../../controllers/node.controller.ts";
 
 const styles = {
   th: "border border-slate-300 py-2 px-3",
   td: "border border-slate-300 py-2 px-3 text-center",
+  li: `${getTypographyClass("lead")}`,
 } as const;
 
 type NodeWithClient = Pick<Node, "_id" | "dockerIndex" | "inactive" | "number"> & {
@@ -99,6 +100,14 @@ export const handler: Handlers<AdminNodesProps, State> = {
 export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
   const { nodes } = data;
 
+  const nodesPerClient: Record<string, { number: number; name: string } | undefined> = {};
+
+  for (const node of nodes) {
+    const { _id } = node.client;
+    if (!nodesPerClient[`${_id}`]) nodesPerClient[`${_id}`] = { number: 0, name: node.client.name };
+    nodesPerClient[`${_id}`]!.number++;
+  }
+
   return (
     <>
       <Typography variant="h1" class="mt-3 mb-5">
@@ -120,7 +129,7 @@ export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
               {nodes.map((node) => (
                 <tr>
                   <td class={styles.td}>
-                    <code>{node.client.name}</code>
+                    {node.client.name} ({nodesPerClient[`${node.client._id}`]!.number})
                     <br />
                     <code>{`${node.client._id}`}</code>
                   </td>
@@ -148,6 +157,16 @@ export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
           </table>
         </div>
       </form>
+
+      <ul class="list-disc list-inside mb-5">
+        {Object.entries(nodesPerClient)
+          .sort((a, b) => b[1]!.number - a[1]!.number)
+          .map(([clientId, nodes]) => (
+            <li class={styles.li} title={clientId}>
+              {nodes!.name} - {nodes!.number} nodes
+            </li>
+          ))}
+      </ul>
     </>
   );
 }
