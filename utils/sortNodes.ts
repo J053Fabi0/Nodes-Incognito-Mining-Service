@@ -17,7 +17,7 @@ export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
 ];
 
 export type NodeInfoByDockerIndex = [string, Info & { shard: ShardsNames | "" }];
-export type NodesStatusByDockerIndex = Record<string, NodeStatus>;
+export type NodesStatusByDockerIndex = Record<string, NodeStatus | undefined>;
 
 export default async function sortNodes(nodes: (string | number)[] = []) {
   // nodesStr is only used for development
@@ -43,7 +43,7 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
               {
                 ...info,
                 shard: nodesStatusByDockerIndex[dockerIndex]?.shard
-                  ? normalizeShard(nodesStatusByDockerIndex[dockerIndex].shard as ShardsStr)
+                  ? normalizeShard(nodesStatusByDockerIndex[dockerIndex]!.shard as ShardsStr)
                   : "",
               },
             ] as NodeInfoByDockerIndex
@@ -57,6 +57,8 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
       [
         ([dockerIndex]) => {
           const nodeStatus = nodesStatusByDockerIndex[dockerIndex];
+          if (!nodeStatus) return rolesOrder.length;
+
           const role = nodeStatus.role;
 
           // if the role is "SYNCING", make it the first one if it has less or 3 epochs to the next event
@@ -70,7 +72,7 @@ export default async function sortNodes(nodes: (string | number)[] = []) {
         byNumber(),
       ],
       // then by how many epochs to the next event
-      [([dockerIndex]) => nodesStatusByDockerIndex[dockerIndex].epochsToNextEvent, byNumber()],
+      [([dockerIndex]) => nodesStatusByDockerIndex[dockerIndex]?.epochsToNextEvent ?? 0, byNumber()],
     ])
   );
 
