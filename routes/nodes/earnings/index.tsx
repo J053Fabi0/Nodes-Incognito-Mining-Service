@@ -17,6 +17,7 @@ import { getNodeEarnings, countNodeEarnings } from "../../../controllers/nodeEar
 interface NodesEarningsProps {
   page: number;
   pages: number[];
+  isAdmin: boolean;
   relative: boolean;
   monthEarnings: string[];
   nodes: Record<string, number>;
@@ -75,6 +76,7 @@ export const handler: Handlers<NodesEarningsProps, State> = {
       relative,
       monthEarnings,
       nodes: nodesByNumber,
+      isAdmin: ctx.state.isAdmin,
     });
   },
 };

@@ -22,6 +22,7 @@ export default function MonthlyEarningsTable({
   ...props
 }: MonthlyEarningsProps) {
   const numberOfMonths = monthEarnings.length;
+
   const months = Array.from({ length: numberOfMonths })
     .map((_, i) => dayjs().utc().subtract(i, "month").startOf("month").toDate())
     .map((m) => nameOfMonth(m) + (numberOfMonths >= 13 ? ` ${m.getFullYear()}` : ""));

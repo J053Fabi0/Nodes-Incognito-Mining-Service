@@ -19,11 +19,11 @@ import { getNodeEarnings, getTotalEarnings } from "../../../controllers/nodeEarn
 dayjs.extend(utc);
 
 interface MonthlyNodesEarningsProps {
+  isAdmin: boolean;
   monthsLeft: number;
   monthEarnings: string[];
   nodes: Record<string, number>;
   earnings: EarningForEarningsTable[];
-  isAdmin: boolean;
 }
 
 const MAX_MONTHS = 5;
@@ -124,6 +124,7 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
       {head}
 
       <Typography variant="h3">Monthly earnings</Typography>
+
       <div class="flex flex-wrap gap-8 justify-center">
         <MonthlyEarningsTable class="mt-8" monthEarnings={monthEarnings} />
 
@@ -152,11 +153,11 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
             Load earlier {monthsLeft === 1 ? "" : monthsLeft} month{monthsLeft === 1 ? "" : "s"}
           </Button>
         </a>
-      ) : (
+      ) : monthEarnings.length > MAX_MONTHS ? (
         <a href="monthly">
           <Button class="mt-3">Show less</Button>
         </a>
-      )}
+      ) : null}
 
       {/* Latest earnings */}
       <hr class="my-5" />
