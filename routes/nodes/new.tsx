@@ -29,6 +29,7 @@ interface NewNodeProps {
   prvToPay: number;
   isAdmin: boolean;
   paymentAddress: string;
+  usedSetupFeeUSD: number;
   paymentAddressImage: string;
 }
 
@@ -53,13 +54,16 @@ export const handler: Handlers<NewNodeProps, State> = {
     if (account.balance >= savedPrvPrice.prvToPay * 1e9 && confirmationExpires > Date.now())
       return redirect("/nodes/new-confirm");
 
+    const { customSetupFeeUSD } = ctx.state.user!;
+    const usedSetupFeeUSD = customSetupFeeUSD ?? setupFeeUSD;
+
     // Set the new price if the previous one has expired
     if (savedPrvPrice.expires <= Date.now()) {
       savedPrvPrice.usd = await getPRVPrice();
       // add the fee to transfer the PRV to the admin account later
       savedPrvPrice.prvToPay = isAdmin
         ? 0
-        : +toFixedS(new Big(setupFeeUSD).div(savedPrvPrice.usd).add(incognitoFee).valueOf(), 2);
+        : +toFixedS(new Big(usedSetupFeeUSD).div(savedPrvPrice.usd).add(incognitoFee).valueOf(), 2);
       savedPrvPrice.expires = dayjs().utc().add(minutesOfPriceStability, "minute").valueOf();
     }
 
@@ -69,6 +73,7 @@ export const handler: Handlers<NewNodeProps, State> = {
 
     return ctx.render({
       isAdmin,
+      usedSetupFeeUSD,
       balance: account.balance,
       prvPrice: savedPrvPrice.usd,
       expires: savedPrvPrice.expires,
@@ -80,7 +85,7 @@ export const handler: Handlers<NewNodeProps, State> = {
 };
 
 export default function NewNode({ data }: PageProps<NewNodeProps>) {
-  const { prvPrice, paymentAddressImage, expires, prvToPay, paymentAddress } = data;
+  const { prvPrice, paymentAddressImage, expires, prvToPay, paymentAddress, usedSetupFeeUSD } = data;
 
   return (
     <>
@@ -147,8 +152,8 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         Why <code>{prvToPay}</code> PRV?
       </Typography>
       <Typography variant="lead">
-        It's a one-time fee to cover the cost of setting up a new node. It's equivalent to {setupFeeUSD} USD at the
-        current PRV price of <code>{prvPrice}</code> USD, fetched from{" "}
+        It's a one-time fee to cover the cost of setting up a new node. It's equivalent to {usedSetupFeeUSD} USD at
+        the current PRV price of <code>{prvPrice}</code> USD, fetched from{" "}
         <a class="underline" href="https://www.coingecko.com/en/coins/incognito">
           CoinGeko
         </a>

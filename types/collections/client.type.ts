@@ -9,4 +9,5 @@ export default interface Client extends CommonCollection {
   notionPage: string | null;
   isBotBlocked?: boolean;
   lastPayment: Date;
+  customSetupFeeUSD?: number;
 }
