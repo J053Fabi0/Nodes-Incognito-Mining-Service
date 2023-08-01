@@ -8,6 +8,7 @@ export enum Month {
   July = "July",
   August = "August",
   September = "September",
+  October = "October",
   November = "November",
   December = "December",
 }
@@ -33,8 +34,10 @@ export default function nameOfMonth(date = new Date()): Month {
     case 8:
       return Month.September;
     case 9:
-      return Month.November;
+      return Month.October;
     case 10:
+      return Month.November;
+    case 11:
       return Month.December;
     default:
       return "" as never;

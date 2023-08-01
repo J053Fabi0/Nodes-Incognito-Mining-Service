@@ -7,7 +7,6 @@ import getTimeToPayData from "../../utils/getTimeToPayData.ts";
 import { countNodes } from "../../controllers/node.controller.ts";
 import TimeToPay, { TimeToPayProps } from "../../islands/Nodes/TimeToPay.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
-import { AiFillPlusCircle } from "react-icons/ai";
 
 const styles = {
   li: `${getTypographyClass("lead")}`,
