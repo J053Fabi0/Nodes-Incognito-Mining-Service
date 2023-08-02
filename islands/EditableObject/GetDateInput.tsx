@@ -1,8 +1,8 @@
-import { MdSend, MdToday } from "react-icons/md";
-import Button, { getButtonClasses } from "../../components/Button.tsx";
 import { useSignal } from "@preact/signals";
+import { MdSend, MdToday } from "react-icons/md";
 import MonthSelect from "../../components/MonthSelect.tsx";
 import GetInput from "../../components/EditableObject/GetInput.tsx";
+import Button, { getButtonClasses } from "../../components/Button.tsx";
 
 export type DateElements = "day" | "month" | "year" | "hours" | "minutes" | "seconds";
 
@@ -46,9 +46,9 @@ export default function GetDateInput({ value, id }: EditableObjectDateInputProps
     <>
       {dateElements!.map(([key, value]) =>
         key === "month" ? (
-          <MonthSelect month={value} id={`${key}&${id}`} class="px-2 w-full bg-white/40 rounded" />
+          <MonthSelect key={key} month={value} id={`${key}&${id}`} class="px-2 w-full bg-white/40 rounded" />
         ) : (
-          <GetInput id={`${key}&${id}`} value={value} placeholder={key} />
+          <GetInput step="1" key={key} placeholder={key} value={value} id={`${key}&${id}`} />
         )
       )}
       <input type="hidden" name="offset" id="offset&" value={timezoneOffset} />

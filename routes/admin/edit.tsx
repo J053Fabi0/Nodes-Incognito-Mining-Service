@@ -1,9 +1,9 @@
-import dayjs from "dayjs/mod.ts";
+import moment from "moment";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import capitalize from "../../utils/capitalize.ts";
-import * as variablesObj from "../../utils/variables.ts";
 import Typography from "../../components/Typography.tsx";
+import * as variablesObj from "../../utils/variables.ts";
 import { commands } from "../../telegram/submitCommand.ts";
 import { pendingNodes } from "../../incognito/submitNode.ts";
 import { Handlers, RouteConfig, PageProps } from "$fresh/server.ts";
@@ -57,7 +57,7 @@ export const handler: Handlers<EditProps, State> = {
 
     return ctx.render({ name, object: getVariable(name) });
   },
-  async POST(req, ctx) {
+  async POST(req) {
     const form = await req.formData();
     const keys = [...form.keys()];
 
@@ -73,7 +73,7 @@ export const handler: Handlers<EditProps, State> = {
     // Date object
     else {
       const offset = +form.get("offset")!;
-      const date = dayjs().utcOffset(offset);
+      const date = moment().utcOffset(offset);
       let path = "";
 
       for (const key of keys) {
@@ -96,6 +96,9 @@ export const handler: Handlers<EditProps, State> = {
             break;
           case "minutes":
             date.minute(value);
+            break;
+          case "seconds":
+            date.second(value);
             break;
         }
 
