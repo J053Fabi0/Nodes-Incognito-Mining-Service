@@ -12,13 +12,12 @@ export default function GetInput({ id, value, placeholder, step, ...props }: Get
     <input
       {...props}
       id={id}
-      required
       name={id}
       value={value}
       placeholder={placeholder}
       type={isNumber ? "number" : "text"}
       class="px-2 w-full bg-white/50 rounded"
-      step={step ?? (isNumber ? "0.1" : undefined)}
+      step={step ?? (isNumber ? "0.000000001" : undefined)}
     />
   );
 }

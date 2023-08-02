@@ -44,6 +44,7 @@ interface EditProps {
   // deno-lint-ignore no-explicit-any
   object: any;
   name: string;
+  lastPath?: string[];
 }
 
 export const config: RouteConfig = {
@@ -55,9 +56,9 @@ export const handler: Handlers<EditProps, State> = {
     const url = new URL(req.url);
     const name = url.pathname.split("/").slice(-1)[0] as (typeof variablesToParse)[number];
 
-    return ctx.render({ name, object: getVariable(name) });
+    return ctx.render({ name, object: getVariable(name), lastPath: ctx.state.session.flash("lastPath") });
   },
-  async POST(req) {
+  async POST(req, ctx) {
     const form = await req.formData();
     const keys = [...form.keys()];
 
@@ -68,13 +69,15 @@ export const handler: Handlers<EditProps, State> = {
     // single value
     if (keys.length === 1) {
       const value = `${form.get(keys[0])}`;
-      setProperty(keys[0].split("."), value, obj as RecursiveObject);
+      const path = keys[0].split(".");
+      ctx.state.session.flash("lastPath", path);
+      setProperty(path, value, obj as RecursiveObject);
     }
     // Date object
     else {
       const offset = +form.get("offset")!;
       const date = moment().utcOffset(offset);
-      let path = "";
+      const path: string[] = [];
 
       for (const key of keys) {
         if (key === "offset") continue;
@@ -102,10 +105,11 @@ export const handler: Handlers<EditProps, State> = {
             break;
         }
 
-        if (!path) path = p;
+        if (path.length === 0) path.push(...p.split("."));
       }
 
-      setProperty(path.split("."), `${date.toDate().valueOf()}`, obj as RecursiveObject);
+      setProperty(path, `${date.toDate().valueOf()}`, obj as RecursiveObject);
+      ctx.state.session.flash("lastPath", path);
     }
 
     return redirect(req.url);
@@ -113,14 +117,14 @@ export const handler: Handlers<EditProps, State> = {
 };
 
 export default function Edit({ data }: PageProps<EditProps>) {
-  const { name, object } = data;
+  const { name, object, lastPath } = data;
   return (
     <>
       <Typography variant="h1" class="mb-5">
         {capitalize(name)}
       </Typography>
 
-      <EditableObject object={object} level={0} />
+      <EditableObject object={object} level={0} lastPath={lastPath} />
     </>
   );
 }
