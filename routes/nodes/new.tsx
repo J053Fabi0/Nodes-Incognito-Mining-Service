@@ -143,8 +143,8 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
         You'll be able to withdraw any deposited PRV form{" "}
         <a class="underline" href="/me">
           the balance page
-        </a>
-        .
+        </a>{" "}
+        if you change your mind before confirming.
       </Typography>
 
       {/* Why XX PRV? */}
