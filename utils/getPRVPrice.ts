@@ -1,6 +1,7 @@
 import axiod from "axiod";
 import moment from "moment";
 import { moveDecimalDot, toFixedS } from "./numbersString.ts";
+import handleError from "./handleError.ts";
 
 // To get this pair id, run pdexv3_getState with this filter:
 // "Key": "PoolPairs",
@@ -60,8 +61,9 @@ export default async function getPRVPrice(): Promise<number> {
   });
 
   if (data.Error) {
-    console.log(data.Error.Code, data.Error.StackTrace);
-    throw new Error(data.Error.Message);
+    console.error(data.Error.Code, data.Error.StackTrace);
+    handleError(new Error(data.Error.Message));
+    return lastestPrice;
   }
 
   const { Token0VirtualAmount, Token1VirtualAmount } = data.Result.PoolPairs[PAIR_ID].State;
