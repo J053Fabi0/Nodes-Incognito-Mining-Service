@@ -153,11 +153,8 @@ export default function NewNode({ data }: PageProps<NewNodeProps>) {
       </Typography>
       <Typography variant="lead">
         It's a one-time fee to cover the cost of setting up a new node. It's equivalent to {usedSetupFeeUSD} USD at
-        the current PRV price of <code>{prvPrice}</code> USD, fetched from{" "}
-        <a class="underline" href="https://www.coingecko.com/en/coins/incognito">
-          CoinGeko
-        </a>
-        .
+        the current PRV price of <code>{prvPrice}</code> USD, fetched directly from the USDT-PRV pair on the
+        Incognito pDEX.
       </Typography>
 
       {/* After you pay */}
