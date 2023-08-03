@@ -17,7 +17,9 @@ export const variablesToParse: (keyof typeof variablesObj | SeparateVariables)[]
   "lastErrorTimes",
   "monthlyPayments",
   "nodesStatistics",
+  "lastAccessedPages",
   "lastGlobalErrorTimes",
+  "monitorInfoByDockerIndex",
 ];
 
 export const config: RouteConfig = {

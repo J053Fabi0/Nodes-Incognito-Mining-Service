@@ -45,12 +45,10 @@ export const handler: Handlers<MonitorProps, State> = {
       : { client: new ObjectId(userId!), inactive: false };
     const nodes = await getNodes(nodesQuery, { projection: { _id: 0, dockerIndex: 1, name: 1 } });
 
-    const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = nodes.length
-      ? await sortNodes(
-          nodes.map((n) => n.dockerIndex),
-          shouldGetAll
-        )
-      : { nodesInfoByDockerIndex: [], nodesStatusByDockerIndex: {} };
+    const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(
+      nodes.map((n) => n.dockerIndex),
+      { fullData: shouldGetAll, fromCacheIfConvenient: true }
+    );
 
     // admin can see all pending nodes, client can only see their own
     const userPendingNodes = isAdmin ? pendingNodes : pendingNodes.filter((n) => `${n.clientId}` === userId!);

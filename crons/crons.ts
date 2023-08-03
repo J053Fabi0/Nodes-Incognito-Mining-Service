@@ -1,5 +1,6 @@
 import checkNodes from "./checkNodes.ts";
 import Cron, { CronOptions } from "croner";
+import cacheMonitor from "./cacheMonitor.ts";
 import checkEarnings from "./checkEarnings.ts";
 import handleError from "../utils/handleError.ts";
 import { maxNotPayedDays } from "../constants.ts";
@@ -33,3 +34,6 @@ new Cron("*/5 * * * *", options, cacheNodesStatistics);
 new Cron(`*/30 * 1-${maxNotPayedDays} * *`, options, checkMonthlyFee.bind(null, false));
 // remove the nodes that haven't paid after maxNotPayedDays
 new Cron(`*/20 1 ${maxNotPayedDays + 1} * *`, options, checkMonthlyFee.bind(null, true));
+
+// cache the monitor responses every 10 seconds
+new Cron("*/10 * * * * *", { protect: true, ...options }, cacheMonitor);

@@ -1,6 +1,7 @@
-import { NodeRoles } from "./getNodesStatus.ts";
 import createTrueRecord from "./createTrueRecord.ts";
+import { NodeInfoByDockerIndex } from "./sortNodes.ts";
 import { NodesStatistics } from "./getNodesStatistics.ts";
+import { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 import getProxyAndRedisValue from "./getProxyAndRedisValue.ts";
 
 export type ErrorTypes = "alert" | "isSlashed" | "isOldVersion" | "offline" | "stalling" | "unsynced";
@@ -118,4 +119,23 @@ export type MonthlyPayments = {
 export const monthlyPayments = createTrueRecord(
   await getProxyAndRedisValue<Record<string, MonthlyPayments>>("monthlyPayments", {}),
   () => ({ errorInTransaction: false, fee: null, forMonth: new Date().getUTCMonth(), lastWarningDay: null })
+);
+
+/** For one node */
+export interface MonitorInfo {
+  date: number;
+  nodeStatus: NodeStatus;
+  nodeInfo: NodeInfoByDockerIndex[1];
+}
+
+export const monitorInfoByDockerIndex: Record<string, MonitorInfo | undefined> = {};
+
+interface LastAccessedPage {
+  lastAccesed: number;
+}
+
+/** The last time a page has been accessed. The key is the page path */
+export const lastAccessedPages = createTrueRecord(
+  await getProxyAndRedisValue<Record<string, LastAccessedPage>>("lastAccessedPages", {}),
+  () => ({ lastAccesed: 0 })
 );

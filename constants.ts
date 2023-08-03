@@ -94,3 +94,4 @@ export const { waitingTimes } = json;
 export const { minEpochsToLetSync } = json;
 export const { minEpochsToBeOnline } = json;
 export const { maxDiskPercentageUsage } = json;
+export const maxMinutesMonitorInfo = 5;

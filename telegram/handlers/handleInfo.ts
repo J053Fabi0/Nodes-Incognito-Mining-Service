@@ -36,7 +36,9 @@ export default async function handleInfo(
   });
   if (isError(nodes)) return { successful: false, error: nodes.message };
 
-  const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(nodes);
+  const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(
+    nodes.length ? nodes : undefined
+  );
 
   let text = "";
 

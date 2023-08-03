@@ -1,10 +1,10 @@
 import axiod from "axiod";
-import constants from "../constants.ts";
 import Node from "../types/collections/node.type.ts";
 import getSyncState from "../incognito/getSyncState.ts";
 import { getNodes } from "../controllers/node.controller.ts";
 import getBlockchainInfo from "../incognito/getBlockchainInfo.ts";
-import { ShardsStr, ShardsNumbers, shardsNumbersStr } from "duplicatedFilesCleanerIncognito";
+import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
+import { ShardsStr, shardsNumbersStr } from "duplicatedFilesCleanerIncognito";
 
 export type NodeStatusKeys =
   | "role"
@@ -32,11 +32,27 @@ export interface NodeStatus extends Node {
   shardsBlockHeights: Record<ShardsStr | "-1", { node: number; latest: number }> | null;
 }
 
-/** @param fullData If true, returns the block height for each shard */
-export default async function getNodesStatus(fullData?: boolean): Promise<NodeStatus[]> {
-  const validatorKeys = constants.map((c) => c.validatorPublic);
-  const nodes = await getNodes({ inactive: { $ne: true }, validatorPublic: { $in: validatorKeys } });
-  const rawData = await getRawData(validatorKeys);
+interface GetNodesStatusOptions {
+  dockerIndexes?: (number | string)[];
+  fullData?: boolean;
+}
+
+/**
+ * @param param0.dockerIndexes The docker indexes to get the status from. If not provided, it will get the status from all the nodes. If it's an empty array, it will return an empty array.
+ * @param param0.fullData If true, returns the block height for each shard
+ * @returns
+ */
+export default async function getNodesStatus({
+  dockerIndexes = duplicatedFilesCleaner.dockerIndexes,
+  fullData,
+}: GetNodesStatusOptions = {}): Promise<NodeStatus[]> {
+  if (dockerIndexes.length === 0) return [];
+
+  const nodes = await getNodes({
+    inactive: { $ne: true },
+    dockerIndex: { $in: dockerIndexes.map((d) => Number(d)) },
+  });
+  const rawData = await getRawData(nodes.map((n) => n.validatorPublic));
 
   const blockchainInfo = fullData ? await getBlockchainInfo() : null;
 
@@ -52,12 +68,12 @@ export default async function getNodesStatus(fullData?: boolean): Promise<NodeSt
       status: d.Status,
       isSlashed: d.IsSlashed,
       shard: d.CommitteeChain,
+      shardsBlockHeights: null,
       role: d.Role || "NOT_STAKED",
       isOldVersion: d.IsOldVersion,
       syncState: d.SyncState || "-",
       epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
       voteStat: d.VoteStat[0] === "" ? null : Number(d.VoteStat[0]?.match(/\d+/)?.[0] ?? 0),
-      shardsBlockHeights: null,
     };
 
     thisIf: if (blockchainInfo) {

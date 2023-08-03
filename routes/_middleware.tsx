@@ -7,6 +7,7 @@ import { redisSession } from "fresh-session/mod.ts";
 import LastAccess from "../types/lastAccess.type.ts";
 import { Middleware } from "$fresh/src/server/types.ts";
 import isLoggedInPage from "../utils/isLoggedInPage.tsx";
+import { lastAccessedPages } from "../utils/variables.ts";
 import isFreshOrStaticPage from "../utils/isFreshOrStatic.ts";
 import { getClient } from "../controllers/client.controller.ts";
 
@@ -19,6 +20,14 @@ export const { handler }: Middleware<State> = {
       sameSite: "Strict",
       maxAge: Number.MAX_SAFE_INTEGER,
     }),
+
+    // set last access
+    (req, ctx) => {
+      if (isFreshOrStaticPage(req.url)) return ctx.next();
+      const url = new URL(req.url);
+      lastAccessedPages[url.pathname].lastAccesed = Date.now();
+      return ctx.next();
+    },
 
     // parse the session data
     (req, ctx) => {

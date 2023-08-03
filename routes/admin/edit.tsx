@@ -2,6 +2,7 @@ import moment from "moment";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import capitalize from "../../utils/capitalize.ts";
+import { variablesToParse } from "../api/variables.ts";
 import Typography from "../../components/Typography.tsx";
 import * as variablesObj from "../../utils/variables.ts";
 import { commands } from "../../telegram/submitCommand.ts";
@@ -11,21 +12,6 @@ import setProperty, { RecursiveObject } from "../../utils/setProperty.ts";
 import { DateElements } from "../../islands/EditableObject/GetDateInput.tsx";
 import EditableObject from "../../components/EditableObject/EditableObject.tsx";
 import { pendingTransactionsByAccount } from "../../incognito/submitTransaction.ts";
-
-type SeparateVariables = "commands" | "pendingNodes" | "transactions";
-export const variablesToParse: (keyof typeof variablesObj | SeparateVariables)[] = [
-  "ignore",
-  "commands",
-  "prvToPay",
-  "lastRoles",
-  "syncedNodes",
-  "transactions",
-  "pendingNodes",
-  "lastErrorTimes",
-  "monthlyPayments",
-  "nodesStatistics",
-  "lastGlobalErrorTimes",
-];
 
 function getVariable(name: (typeof variablesToParse)[number]) {
   switch (name) {
