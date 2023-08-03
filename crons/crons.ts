@@ -3,7 +3,7 @@ import Cron, { CronOptions } from "croner";
 import cacheMonitor from "./cacheMonitor.ts";
 import checkEarnings from "./checkEarnings.ts";
 import handleError from "../utils/handleError.ts";
-import { maxNotPayedDays } from "../constants.ts";
+import { cacheMonitorInfoEvery, maxNotPayedDays } from "../constants.ts";
 import checkMonthlyFee from "./checkMonthlyFee.ts";
 import checkAccounts, { Unit } from "./checkAccounts.ts";
 import deleteEmptySessions from "./deleteEmptySessions.ts";
@@ -36,4 +36,4 @@ new Cron(`*/30 * 1-${maxNotPayedDays} * *`, options, checkMonthlyFee.bind(null, 
 new Cron(`*/20 1 ${maxNotPayedDays + 1} * *`, options, checkMonthlyFee.bind(null, true));
 
 // cache the monitor responses every 10 seconds
-new Cron("*/10 * * * * *", { protect: true, ...options }, cacheMonitor);
+new Cron(`*/${cacheMonitorInfoEvery} * * * * *`, { protect: true, ...options }, cacheMonitor);

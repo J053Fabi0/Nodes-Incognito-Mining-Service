@@ -23,6 +23,8 @@ interface Json {
   maxNotPayedDays: number;
   /** the max time in minutes to keep loading the monitor info since the last time it was loaded */
   maxMinutesMonitorInfo: number;
+  /** in seconds */
+  cacheMonitorInfoEvery: number;
 }
 
 const schema = joi.object<Json>({
@@ -40,6 +42,7 @@ const schema = joi.object<Json>({
   maxNotStakedDays: joi.number().integer().allow(0).default(3),
   maxNotStakedDaysForNew: joi.number().integer().min(4).default(10),
   maxMinutesMonitorInfo: joi.number().integer().min(1).default(5),
+  cacheMonitorInfoEvery: joi.number().integer().min(1).default(15),
 });
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
@@ -100,4 +103,4 @@ export const { waitingTimes } = json;
 export const { minEpochsToLetSync } = json;
 export const { minEpochsToBeOnline } = json;
 export const { maxDiskPercentageUsage } = json;
-export const { maxMinutesMonitorInfo } = json;
+export const { maxMinutesMonitorInfo, cacheMonitorInfoEvery } = json;
