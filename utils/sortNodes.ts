@@ -1,9 +1,9 @@
 import { IS_PRODUCTION } from "../env.ts";
 import { byNumber, byValues } from "sort-es";
-import isMonitorInfoTooOld from "./isMonitorDataTooOld.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
 import getNodesStatus, { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
+import shouldContinueRefreshingMonitorInfo from "./shouldContinueRefreshingMonitorInfo.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 
@@ -31,6 +31,9 @@ export default async function sortNodes(
 ) {
   if (nodes.length === 0) return { nodesStatusByDockerIndex: {}, nodesInfoByDockerIndex: [] };
 
+  // don't fetch from cache if it's no longer refreshing the monitor info
+  if (fromCacheIfConvenient && !shouldContinueRefreshingMonitorInfo()) fromCacheIfConvenient = false;
+
   const nodesToFetch = fromCacheIfConvenient ? [] : nodes;
   const nodesFromCache: typeof nodes = [];
 
@@ -40,8 +43,7 @@ export default async function sortNodes(
       const cacheInfo = monitorInfoByDockerIndex[dockerIndex];
       if (
         !cacheInfo || // fetch those who are not in the cache
-        isMonitorInfoTooOld(cacheInfo) || // those who are too old
-        (cacheInfo.nodeStatus.shardsBlockHeights === null && fullData) // and those who don't have the full data if we want it
+        (fullData && cacheInfo.nodeStatus.shardsBlockHeights === null) // and those who don't have the full data if we want it
       ) {
         nodesToFetch.push(dockerIndex);
       } else nodesFromCache.push(dockerIndex);
