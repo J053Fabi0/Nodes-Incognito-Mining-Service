@@ -12,7 +12,7 @@ const getShouldBeOffline = (
     Pick<NodeStatus, "epochsToNextEvent" | "role" | "validatorPublic" | "syncState">
 ) => {
   // SYNCING is important because it must be online to move to PENDING.
-  if (nodeStatus.role === "SYNCING" && nodeStatus.epochsToNextEvent <= 1) return false;
+  if (nodeStatus.role === "SYNCING" && nodeStatus.epochsToNextEvent <= 3) return false;
 
   if (alwaysOfflineRoles.includes(nodeStatus.role)) return true;
   if (alwaysOnlineRoles.includes(nodeStatus.role)) return false;
