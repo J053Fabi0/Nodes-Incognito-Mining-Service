@@ -10,9 +10,9 @@ import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./test
 export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
   "COMMITTEE",
   "PENDING",
-  "WAITING",
   // SYNCING has a conditional priority, going first if it has less or 3 epochs to the next event
   "SYNCING",
+  "WAITING",
   // NOT_STAKED is the last because it's not important that it has files, only that
   // it's online to be able to stake
   "NOT_STAKED",
