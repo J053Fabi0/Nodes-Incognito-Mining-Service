@@ -75,7 +75,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
 
                 {/* Online */}
                 <td class={styles.td}>
-                  {status.status === "ONLINE" && docker.running ? "🟢" : "🔴"}
+                  {status.status === "ONLINE" && (isAdmin ? true : docker.running) ? "🟢" : "🔴"}
                   {isAdmin && (
                     <code>
                       <br />
