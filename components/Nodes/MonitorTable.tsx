@@ -43,6 +43,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
             const roleSince = rangeMsToTimeDescription(lastRoles[+node].date, undefined, { short: true });
             return (
               <tr>
+                {/* Nodes */}
                 <td class={styles.td}>
                   <NodePill baseURL={null} nodeNumber={isAdmin ? +node : status.number} relative />
                   {isAdmin && (
@@ -55,6 +56,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                   )}
                 </td>
 
+                {/* Docker */}
                 <td class={styles.td}>
                   {docker.restarting && isAdmin && (
                     <code class="text-red-600 font-bold">
@@ -71,8 +73,9 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                   </code>
                 </td>
 
+                {/* Online */}
                 <td class={styles.td}>
-                  {status.status === "ONLINE" ? "🟢" : "🔴"}
+                  {status.status === "ONLINE" && docker.running ? "🟢" : "🔴"}
                   {isAdmin && (
                     <code>
                       <br />
@@ -81,6 +84,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                   )}
                 </td>
 
+                {/* Sync */}
                 <td class={styles.td}>
                   <code>
                     {sync === "-" || sync === "Latest" ? (
@@ -95,6 +99,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                   </code>
                 </td>
 
+                {/* Role */}
                 <td class={styles.td} title={roleSince}>
                   <code>
                     {roleToEmoji(status.role)}
@@ -113,6 +118,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                   )}
                 </td>
 
+                {/* Shard */}
                 <td class={styles.td} title={isAdmin ? `${shard ?? 0} files` : undefined}>
                   {status.shard === "" ? (
                     "-"
@@ -129,6 +135,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                   )}
                 </td>
 
+                {/* Beacon */}
                 {isAdmin && (
                   <td class={styles.td} title={`${beacon ?? 0} files`}>
                     {shardsBlockHeights && (
