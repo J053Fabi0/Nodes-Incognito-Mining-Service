@@ -16,8 +16,8 @@ import { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import getShouldBeOffline from "../utils/getShouldBeOffline.ts";
 import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
 import { waitingTimes, maxDiskPercentageUsage } from "../constants.ts";
-import { df, docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import handleTextMessage from "../telegram/handlers/handleTextMessage.ts";
+import { df, docker, dockerPs, DockersInfo } from "duplicatedFilesCleanerIncognito";
 import getInstructionsToMoveOrDelete from "../utils/getInstructionsToMoveOrDelete.ts";
 import duplicatedFilesCleaner, { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
 
@@ -28,7 +28,9 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, number
 
 export default async function checkNodes() {
   const nodesStatus = await getNodesStatus();
-  const dockerStatuses = flags.ignoreDocker ? {} : await dockerPs(duplicatedFilesCleaner.dockerIndexes);
+  const dockerStatuses: Partial<DockersInfo> = flags.ignoreDocker
+    ? {}
+    : await dockerPs(duplicatedFilesCleaner.dockerIndexes);
   const fixes: string[] = [];
 
   // Check for global errors
@@ -62,13 +64,13 @@ export default async function checkNodes() {
 
     const shouldBeOffline = getShouldBeOffline(nodeStatus);
     const dockerInfo = dockerStatuses[nodeStatus.dockerIndex];
-    const isAllOnline = dockerInfo.running && nodeStatus.status === "ONLINE";
+    const isAllOnline = Boolean(dockerInfo?.running && nodeStatus.status === "ONLINE");
 
     // check if the docker is as it should be, and if not, fix it
     if (
       !flags.ignoreDocker &&
       !isBeingIgnored("docker") &&
-      ((dockerInfo.running && shouldBeOffline) || (!dockerInfo.running && !shouldBeOffline))
+      ((dockerInfo?.running && shouldBeOffline) || (!dockerInfo?.running && !shouldBeOffline))
     ) {
       console.log(
         `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} ` +
@@ -132,8 +134,8 @@ export default async function checkNodes() {
       for (const instruction of instructionsToMoveOrDelete) {
         const nodeTo = nodesStatus.find((node) => `${node.dockerIndex}` === instruction.to);
         const nodeFrom = nodesStatus.find((node) => `${node.dockerIndex}` === instruction.from);
-        const isToRunning = nodeTo ? dockerStatuses[nodeTo.dockerIndex].running : true;
-        const isFromRunning = nodeFrom ? dockerStatuses[nodeFrom.dockerIndex].running : true;
+        const isToRunning = nodeTo ? dockerStatuses[nodeTo.dockerIndex]?.running : true;
+        const isFromRunning = nodeFrom ? dockerStatuses[nodeFrom.dockerIndex]?.running : true;
 
         if (instruction.action === "move") {
           if (!isToRunning && !isFromRunning)
