@@ -61,13 +61,14 @@ export default async function checkNodes() {
     };
 
     const shouldBeOffline = getShouldBeOffline(nodeStatus);
+    const dockerInfo = dockerStatuses[nodeStatus.dockerIndex];
+    const isAllOnline = dockerInfo.running && nodeStatus.status === "ONLINE";
 
     // check if the docker is as it should be, and if not, fix it
     if (
       !flags.ignoreDocker &&
       !isBeingIgnored("docker") &&
-      ((dockerStatuses[nodeStatus.dockerIndex].running && shouldBeOffline) ||
-        (!dockerStatuses[nodeStatus.dockerIndex].running && !shouldBeOffline))
+      ((dockerInfo.running && shouldBeOffline) || (!dockerInfo.running && !shouldBeOffline))
     ) {
       console.log(
         `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} ` +
@@ -86,12 +87,12 @@ export default async function checkNodes() {
     // alert and isSlashed only when online and in committee
     for (const errorKey of ["isSlashed", "alert"] as const)
       setOrRemoveErrorTime(
-        nodeStatus[errorKey] && nodeStatus.status === "ONLINE" && nodeStatus.role === "COMMITTEE",
+        nodeStatus[errorKey] && isAllOnline && nodeStatus.role === "COMMITTEE",
         lastErrorTime,
         errorKey
       );
     // stalling
-    setOrRemoveErrorTime(nodeStatus.syncState.endsWith("STALL"), lastErrorTime, "stalling");
+    setOrRemoveErrorTime(isAllOnline && nodeStatus.syncState.endsWith("STALL"), lastErrorTime, "stalling");
     // offline
     setOrRemoveErrorTime(nodeStatus.status === "OFFLINE" && !shouldBeOffline, lastErrorTime, "offline");
     // unsynced
@@ -103,7 +104,7 @@ export default async function checkNodes() {
         // its role is different than NOT_STAKED
         nodeStatus.role !== "NOT_STAKED" &&
         // and it's online, so don't report it if it's offline
-        nodeStatus.status === "ONLINE",
+        isAllOnline,
       lastErrorTime,
       "unsynced"
     );
