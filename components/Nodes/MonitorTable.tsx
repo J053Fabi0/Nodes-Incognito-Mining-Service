@@ -1,8 +1,9 @@
 import NodePill from "./NodePill.tsx";
+import { ComponentChildren } from "preact";
 import { lastRoles } from "../../utils/variables.ts";
-import { toFixedS } from "../../utils/numbersString.ts";
 import { NodeStatus } from "../../utils/getNodesStatus.ts";
 import { ShardsStr } from "duplicatedFilesCleanerIncognito";
+import { numberWithCommas, toFixedS } from "../../utils/numbersString.ts";
 import { roleToEmoji } from "../../telegram/handlers/handleTextMessage.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
@@ -119,7 +120,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                 </td>
 
                 {/* Shard */}
-                <td class={styles.td} title={isAdmin ? `${shard || 0} files` : undefined}>
+                <td class={styles.td} title={isAdmin ? `${numberWithCommas(shard || 0)} files` : undefined}>
                   {status.shard === "" ? (
                     "-"
                   ) : (
@@ -128,8 +129,10 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                       {isAdmin && shardsBlockHeights && (
                         <>
                           {" "}
-                          {shard ? "🟢" : "🔴"}{" "}
-                          <ShardInfo shardsBlockHeights={shardsBlockHeights} shard={status.shard} />
+                          <ShardInfo shardsBlockHeights={shardsBlockHeights} shard={status.shard}>
+                            {" "}
+                            {shard ? "🟢" : "🔴"}
+                          </ShardInfo>
                         </>
                       )}
                     </>
@@ -158,15 +161,18 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
 function ShardInfo({
   shardsBlockHeights,
   shard,
+  children,
 }: {
   shardsBlockHeights: Exclude<NodeStatus["shardsBlockHeights"], null>;
   shard: ShardsStr | "-1";
+  children?: ComponentChildren;
 }) {
   return (
     <>
       <code>{toFixedS((shardsBlockHeights[shard].node / shardsBlockHeights[shard].latest) * 100, 2)}</code>%
+      {children}
       <br />
-      <code>{shardsBlockHeights[shard].latest - shardsBlockHeights[shard].node}</code>
+      <code>{numberWithCommas(shardsBlockHeights[shard].latest - shardsBlockHeights[shard].node)}</code>
     </>
   );
 }
