@@ -1,4 +1,5 @@
 import axiod from "axiod";
+import moment from "moment";
 import { lodash as _ } from "lodash";
 import Node from "../types/collections/node.type.ts";
 import getSyncState from "../incognito/getSyncState.ts";
@@ -112,25 +113,40 @@ export interface NodeStatusRawData {
   VoteStat: [string, string] | [undefined, undefined]; // 97 (epoch:10997) or an empty string
 }
 
-let lastRequestTime = 0;
-const minRequestInterval = 5_000; // 5 seconds
-let lastRequest: NodeStatusRawData[] | undefined = undefined;
+const maxRequestSeconds = 10;
+const lastRequests: Record<
+  string,
+  | {
+      data: NodeStatusRawData;
+      time: number;
+    }
+  | undefined
+> = {};
 
 /** @param mpk The public validator keys separated by commas without spaces, or an array of public validator keys */
-async function getRawData(mpk: string | string[]) {
-  if (lastRequest && Date.now() - lastRequestTime < minRequestInterval) return lastRequest;
-
-  const results: NodeStatusRawData[] = [];
+async function getRawData(mpk: string | string[], fetchAll = false): Promise<NodeStatusRawData[]> {
   const mpks = Array.isArray(mpk) ? mpk : mpk.split(",");
+  const toFetch: string[] = fetchAll ? mpks : [];
+  const results: NodeStatusRawData[] = [];
+
+  if (toFetch.length === 0)
+    for (const mpk of mpks) {
+      const lastRequest = lastRequests[mpk];
+      if (lastRequest && moment().diff(moment(lastRequest.time), "seconds") < maxRequestSeconds)
+        results.push(lastRequest.data);
+      else toFetch.push(mpk);
+    }
+
+  if (toFetch.length === 0) return results;
 
   for (const chunk of _.chunk(mpks, 50)) {
     const { data } = await axiod.post<NodeStatusRawData[]>("https://monitor.incognito.org/pubkeystat/stat", {
       mpk: chunk.join(","),
     });
     results.push(...data);
+
+    for (const d of data) lastRequests[d.MiningPubkey] = { data: d, time: Date.now() };
   }
 
-  lastRequestTime = Date.now();
-  lastRequest = results;
   return results;
 }
