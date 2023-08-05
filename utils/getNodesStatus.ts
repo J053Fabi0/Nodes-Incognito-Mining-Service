@@ -1,4 +1,5 @@
 import axiod from "axiod";
+import { lodash as _ } from "lodash";
 import Node from "../types/collections/node.type.ts";
 import getSyncState from "../incognito/getSyncState.ts";
 import { getNodes } from "../controllers/node.controller.ts";
@@ -119,10 +120,17 @@ let lastRequest: NodeStatusRawData[] | undefined = undefined;
 async function getRawData(mpk: string | string[]) {
   if (lastRequest && Date.now() - lastRequestTime < minRequestInterval) return lastRequest;
 
-  const { data } = await axiod.post<NodeStatusRawData[]>("https://monitor.incognito.org/pubkeystat/stat", {
-    mpk: Array.isArray(mpk) ? mpk.join(",") : mpk,
-  });
+  const results: NodeStatusRawData[] = [];
+  const mpks = Array.isArray(mpk) ? mpk : mpk.split(",");
+
+  for (const chunk of _.chunk(mpks, 50)) {
+    const { data } = await axiod.post<NodeStatusRawData[]>("https://monitor.incognito.org/pubkeystat/stat", {
+      mpk: chunk.join(","),
+    });
+    results.push(...data);
+  }
+
   lastRequestTime = Date.now();
-  lastRequest = data;
-  return data;
+  lastRequest = results;
+  return results;
 }
