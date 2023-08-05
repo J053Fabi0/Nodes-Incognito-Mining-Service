@@ -17,6 +17,9 @@ export default function MonitorCommands({ route, commandResponse }: MonitorComma
     <>
       {/* The command history */}
       <form method="post">
+        {/* This hidden button is necessary to submit the form without sending "noWait", but instead sending "submit" */}
+        <button name="submit" value="submit" class="invisible p-0 ml-[-0.5rem]" />
+
         {commands.resolved
           .slice(0, 5)
           .toReversed()
