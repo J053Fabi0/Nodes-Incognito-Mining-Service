@@ -21,11 +21,11 @@ import sortNodes, { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../.
 interface MonitorProps {
   isAdmin: boolean;
   /** number, URL */
-  nodesUrl: string[];
   pendingNodes: NewNode[];
   nodesInfo: NodeInfoByDockerIndex[];
   nodesStatus: NodesStatusByDockerIndex;
   commandResponse?: CommandResponse | null;
+  nodesUrl: { url: string; dockerIndex: number }[];
 }
 
 // Only change the last boolean value if you want to test
@@ -53,7 +53,10 @@ export const handler: Handlers<MonitorProps, State> = {
     // admin can see all pending nodes, client can only see their own
     const userPendingNodes = isAdmin ? pendingNodes : pendingNodes.filter((n) => `${n.clientId}` === userId!);
 
-    const nodesUrl: MonitorProps["nodesUrl"] = nodes.map((n) => getNodeUrl(n.name));
+    const nodesUrl: MonitorProps["nodesUrl"] = nodes.map((n) => ({
+      url: getNodeUrl(n.name),
+      dockerIndex: n.dockerIndex,
+    }));
 
     return ctx.render({
       nodesUrl,
@@ -149,8 +152,11 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
       <Typography variant="h5">Node URLs</Typography>
 
       <ul class={`list-disc list-inside mt-2 ${getTypographyClass("p")}`}>
-        {nodesUrl.map((url) => (
-          <li>{url}</li>
+        {nodesUrl.map(({ url, dockerIndex }) => (
+          <li>
+            {isAdmin ? `${dockerIndex} - ` : ""}
+            {url}
+          </li>
         ))}
       </ul>
 
