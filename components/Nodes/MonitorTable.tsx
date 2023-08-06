@@ -78,7 +78,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                 <td class={styles.td}>
                   {status.status === "ONLINE" && (isAdmin ? true : docker.running) ? "🟢" : "🔴"}
                   {isAdmin && (
-                    <code>
+                    <code title="Vote stat">
                       <br />
                       {status.voteStat === null ? "-" : `${status.voteStat}%`}
                     </code>
