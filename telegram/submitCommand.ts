@@ -42,12 +42,14 @@ export const commands: Commands = (() => {
             const command = pending[0];
             if (!command) continue;
             // execute the command
-            const successful = await handleCommands(command.command, command.options);
+            const successful = await handleCommands(command);
             // remove it
             pending.shiftNoEvent();
             saveToRedis();
             // resolve the promise
             command.resolve?.(successful);
+            // add the command to the list of resolved commands
+            if (successful) commands.resolved.unshift(command.command);
           }
         } catch (e) {
           handleError(e);
@@ -61,16 +63,22 @@ export const commands: Commands = (() => {
 /**
  * @returns true if the command was handled successfully
  */
-async function handleCommands(fullCommand: string, options?: CommandOptions): Promise<CommandResponse> {
+// async function handleCommands(fullCommand: string, options?: CommandOptions): Promise<CommandResponse> {
+async function handleCommands(commandObj: Command): Promise<CommandResponse> {
   try {
-    const repeating = fullCommand.startsWith("repeat");
-    if (repeating && commands.resolved.lengths === 0) {
-      if (options?.telegramMessages)
-        await sendMessage("No previous messages to repeat.", undefined, { disable_notification: options?.silent });
-      return { successful: false, error: "No previous messages to repeat." };
+    const options = commandObj.options;
+
+    if (commandObj.command.startsWith("repeat")) {
+      if (commands.resolved.lengths === 0) {
+        if (options?.telegramMessages)
+          await sendMessage("No previous messages to repeat.", undefined, {
+            disable_notification: options?.silent,
+          });
+        return { successful: false, error: "No previous messages to repeat." };
+      } else commandObj.command = commands.resolved[0];
     }
 
-    const [command, ...args] = fullCommand.split(" ") as [Exclude<AllowedCommands, "repeat">, ...string[]];
+    const [command, ...args] = commandObj.command.split(" ") as [Exclude<AllowedCommands, "repeat">, ...string[]];
 
     switch (command) {
       case "help":
@@ -167,12 +175,6 @@ export default async function submitCommand(
       promises.push(
         new Promise<CommandResponse>((r) => {
           commands.pending.push(addSaveToRedisProxy({ resolve: r, command: finalFullCommand, options }));
-        }).then((response) => {
-          if (response.successful)
-            // add the command to the list of resolved commands
-            commands.resolved.unshift(finalFullCommand);
-
-          return response;
         })
       );
     }
