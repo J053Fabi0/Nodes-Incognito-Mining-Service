@@ -84,6 +84,27 @@ export default class EventedArray<Type = any> extends Array<Type> {
     return typeof deleteCount === "undefined" ? super.splice(start) : super.splice(start, deleteCount, ...items);
   }
 
+  filter<S extends Type>(predicate: (value: Type, index: number, array: Type[]) => value is S, thisArg?: any): S[];
+  filter(predicate: (value: Type, index: number, array: Type[]) => unknown, thisArg?: any): Type[];
+  filter(predicate: unknown, thisArg?: unknown): Type[] {
+    const filteredArray: Type[] = [];
+    for (let i = 0; i < this.lengths; i++)
+      if (typeof predicate !== "function" || predicate(this[i], i, this)) filteredArray.push(this[i]);
+    return filteredArray;
+  }
+
+  map<U>(callbackfn: (value: Type, index: number, array: Type[]) => U, thisArg?: any): U[] {
+    const mappedArray: U[] = [];
+    for (let i = 0; i < this.lengths; i++) mappedArray.push(callbackfn(this[i], i, this));
+    return mappedArray;
+  }
+
+  slice(start?: number, end?: number): Type[] {
+    const slicedArray: Type[] = [];
+    for (let i = start ?? 0; i < (end ?? this.lengths); i++) slicedArray.push(this[i]);
+    return slicedArray;
+  }
+
   get lengths(): number {
     return this.length;
   }
@@ -104,6 +125,9 @@ export default class EventedArray<Type = any> extends Array<Type> {
   get length(): number {
     return this.length;
   }
+  /**
+   * @deprecated Use `lengths` instead, to trigger the handler.
+   */
   set length(value: number) {
     this.length = value;
   }
