@@ -1,6 +1,6 @@
 import { IS_PRODUCTION } from "../env.ts";
 import { byNumber, byValues } from "sort-es";
-import getShouldBeOffline from "./getShouldBeOffline.ts";
+import { getShouldBeOnline } from "./getShouldBeOffline.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
@@ -11,10 +11,11 @@ import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./test
 export const rolesOrder: ((nodeStatus: NodeStatus) => boolean)[] = [
   ({ role }) => role === "COMMITTEE",
 
+  (ns) => ns.role === "PENDING" && getShouldBeOnline(ns),
+
   ({ role, epochsToNextEvent }) => epochsToNextEvent <= 3 && role === "SYNCING",
 
-  (ns) => ns.role === "PENDING" && !getShouldBeOffline(ns),
-  (ns) => ns.role === "PENDING" && getShouldBeOffline(ns),
+  (ns) => ns.role === "PENDING" && !getShouldBeOnline(ns),
 
   ({ role, epochsToNextEvent }) => epochsToNextEvent > 3 && role === "SYNCING",
 
