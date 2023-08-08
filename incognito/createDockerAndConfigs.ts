@@ -1,6 +1,7 @@
 import { ObjectId } from "mongo/mod.ts";
 import isError from "../types/guards/isError.ts";
 import createDocker from "./docker/createDocker.ts";
+import deleteDocker from "./docker/deleteDocker.ts";
 import constants, { adminId } from "../constants.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { changeNode, createNode, getNodes } from "../controllers/node.controller.ts";
@@ -51,7 +52,6 @@ export default async function createDockerAndConfigs({
 
   const clientIdStr = clientId.toString();
 
-  const { name, url } = await createNginxConfig(clientIdStr, number, portAndIndex.rcpPort);
   while (true)
     try {
       await createDocker(portAndIndex.rcpPort, validator, portAndIndex.dockerIndex);
@@ -62,8 +62,13 @@ export default async function createDockerAndConfigs({
         console.error(`Port ${portAndIndex.rcpPort} is already in use, trying with the next one...`);
         portAndIndex.rcpPort++;
         continue;
+      } else if (e.message.includes("is already in use by container")) {
+        console.error(`Docker index ${portAndIndex.dockerIndex} is already in use, trying to delete it.`);
+        await deleteDocker(portAndIndex.dockerIndex);
       } else throw e;
     }
+
+  const { name, url } = await createNginxConfig(clientIdStr, number, portAndIndex.rcpPort);
 
   if (nodeId)
     // Update node in the database
