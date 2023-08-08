@@ -24,11 +24,14 @@ export default class EventedArray<Type = any> extends Array<Type> {
    */
   constructor(handler: Handler<Type>, ...items: [number] | Type[]) {
     super(...(items as Type[]));
+    console.log("a", handler.toString());
     this.handler = handler;
+    console.log("b", this.handler.toString());
   }
 
   push(...items: Type[]): number {
     super.push(...items);
+    console.log("c", this.handler);
     this.handler({ array: this, added: items, removed: null, method: "push" });
     return this.length;
   }
