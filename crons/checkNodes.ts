@@ -132,15 +132,13 @@ export default async function checkNodes() {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
     if (instructionsToMoveOrDelete.length > 0) {
       for (const instruction of instructionsToMoveOrDelete) {
-        const nodeTo = nodesStatus.find((node) => `${node.dockerIndex}` === instruction.to);
         const nodeFrom = nodesStatus.find((node) => `${node.dockerIndex}` === instruction.from);
-        const isToRunning = nodeTo ? dockerStatuses[nodeTo.dockerIndex]?.running : true;
         const isFromRunning = nodeFrom ? dockerStatuses[nodeFrom.dockerIndex]?.running : true;
 
         if (instruction.action === "move") {
-          if (!isToRunning && !isFromRunning)
+          if (!isFromRunning)
             submitCommand(`move ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`);
-        } else if (!isToRunning) submitCommand(`delete ${instruction.from} ${instruction.shards.join(" ")}`);
+        } else submitCommand(`delete ${instruction.from} ${instruction.shards.join(" ")}`);
       }
     }
   }
