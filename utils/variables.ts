@@ -41,10 +41,7 @@ export const ignore = await getProxyAndRedisValue<Ignore>("ignore", {
 });
 
 /** Node's public validator key as key */
-export const syncedNodes = await getProxyAndRedisValue<Record<string | number, boolean | undefined>>(
-  "syncedNodes",
-  {}
-);
+export const syncedNodes = await getProxyAndRedisValue<Record<string, boolean | undefined>>("syncedNodes", {});
 
 type LastRole = {
   /** The date in which the role changed */

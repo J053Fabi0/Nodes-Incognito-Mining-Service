@@ -1,21 +1,28 @@
 import { IS_PRODUCTION } from "../env.ts";
 import { byNumber, byValues } from "sort-es";
+import getShouldBeOffline from "./getShouldBeOffline.ts";
+import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
-import getNodesStatus, { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 import shouldContinueRefreshingMonitorInfo from "./shouldContinueRefreshingMonitorInfo.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 
-export const rolesOrder: (NodeRoles | NodeRoles[])[] = [
-  "COMMITTEE",
-  "PENDING",
-  // SYNCING has a conditional priority, going first if it has less or 3 epochs to the next event
-  "SYNCING",
-  "WAITING",
+export const rolesOrder: ((nodeStatus: NodeStatus) => boolean)[] = [
+  ({ role }) => role === "COMMITTEE",
+
+  ({ role, epochsToNextEvent }) => epochsToNextEvent >= 3 && role === "SYNCING",
+
+  (ns) => getShouldBeOffline(ns) && ns.role === "PENDING",
+  (ns) => !getShouldBeOffline(ns) && ns.role === "PENDING",
+
+  ({ role, epochsToNextEvent }) => epochsToNextEvent < 3 && role === "SYNCING",
+
+  ({ role }) => role === "WAITING",
+
   // NOT_STAKED is the last because it's not important that it has files, only that
   // it's online to be able to stake
-  "NOT_STAKED",
+  ({ role }) => role === "NOT_STAKED",
 ];
 
 export type NodeInfoByDockerIndex = [string, Info & { shard: ShardsNames | "" }];
@@ -64,14 +71,7 @@ export default async function sortNodes(
           const nodeStatus = nodesStatusByDockerIndex[dockerIndex];
           if (!nodeStatus) return rolesOrder.length;
 
-          const role = nodeStatus.role;
-
-          // if the role is "SYNCING", make it the first one if it has 3 or less epochs to the next event
-          if (role === "SYNCING" && nodeStatus.epochsToNextEvent <= 3) return 0;
-
-          const roleIndex = rolesOrder.findIndex((roles) =>
-            Array.isArray(roles) ? roles.includes(role) : roles === nodeStatus.role
-          );
+          const roleIndex = rolesOrder.findIndex((fn) => fn(nodeStatus));
           return roleIndex === -1 ? rolesOrder.length : roleIndex;
         },
         byNumber(),
