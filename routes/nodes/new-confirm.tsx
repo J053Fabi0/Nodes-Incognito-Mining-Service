@@ -157,15 +157,17 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
         validator: validatedData.validator,
         validatorPublic: validatedData.validatorPublic,
         cost: dataOrRedirect.prvToPay * 1e9 - incognitoFeeInt,
-      }).then(async () => {
-        await sendHTMLMessage(
-          `The user <code>${ctx.state.user!.name}</code> (<code>${ctx.state.user!.telegram}</code>) ` +
-            `has registered a new node`
-        );
+      }).then(async (data) => {
+        if (data.success) {
+          await sendHTMLMessage(
+            `The user <code>${ctx.state.user!.name}</code> (<code>${ctx.state.user!.telegram}</code>) ` +
+              `has registered a new node.\n\nIndex: <code>${data.dockerIndex}</code> - <code>#${data.number}</code>`
+          );
 
-        const activeNodes = await countNodes({ client: new ObjectId(ctx.state.userId!), inactive: false });
-        if (activeNodes === 0)
-          await changeClient({ _id: new ObjectId(ctx.state.userId!) }, { $set: { lastPayment: new Date() } });
+          const activeNodes = await countNodes({ client: new ObjectId(ctx.state.userId!), inactive: false });
+          if (activeNodes === 0)
+            await changeClient({ _id: new ObjectId(ctx.state.userId!) }, { $set: { lastPayment: new Date() } });
+        }
       });
 
     // delete default values if the values are valid

@@ -16,7 +16,11 @@ export function resolveAndForget<S extends boolean>(
   pending: EventedArrayWithoutHandler<NewNode>,
   success: S
 ): S {
-  newNode.resolve?.(success);
+  const { resolve } = newNode;
+  if (resolve)
+    if (success) resolve({ success: true, dockerIndex: newNode.dockerIndex!, number: newNode.number! });
+    else resolve({ success: false });
+
   pending.shiftNoEvent();
   saveToRedis();
   return success;

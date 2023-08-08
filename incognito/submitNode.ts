@@ -24,11 +24,12 @@ import { changeNode, getNode } from "../controllers/node.controller.ts";
 import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
+type ResolveData = { success: true; dockerIndex: number; number: number } | { success: false };
 export interface NewNode extends Omit<CreateDockerAndConfigsOptions, "number" | "inactive"> {
   number?: number;
   /** In PRV. Int format. It MUST NOT have the incognitoFee included. */
   cost: number;
-  resolve?: (success: boolean) => void;
+  resolve?: (data: ResolveData) => void;
 }
 
 const MAX_RETRIES = 1;
@@ -166,6 +167,6 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
   return resolveAndForget(newNode, pending, true);
 }
 
-export default function submitNode(newNode: Omit<NewNode, "resolve">): Promise<boolean> {
+export default function submitNode(newNode: Omit<NewNode, "resolve">): Promise<ResolveData> {
   return new Promise((resolve) => pendingNodes.push(addSaveToRedisProxy({ ...newNode, resolve })));
 }
