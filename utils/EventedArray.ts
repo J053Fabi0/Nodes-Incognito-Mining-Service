@@ -15,7 +15,7 @@ export type Handler<Type = any> = ({}: {
 }) => void;
 
 export default class EventedArray<Type = any> extends Array<Type> {
-  private handler: Handler<Type>;
+  #handlerFunction: Handler<Type>;
 
   /**
    *
@@ -25,14 +25,14 @@ export default class EventedArray<Type = any> extends Array<Type> {
   constructor(handler: Handler<Type>, ...items: [number] | Type[]) {
     super(...(items as Type[]));
     console.log("a", handler.toString());
-    this.handler = handler;
-    console.log("b", this.handler.toString());
+    this.#handlerFunction = handler;
+    console.log("b", this.#handlerFunction.toString());
   }
 
   push(...items: Type[]): number {
     super.push(...items);
-    console.log("c", this.handler);
-    this.handler({ array: this, added: items, removed: null, method: "push" });
+    console.log("c", this.#handlerFunction);
+    this.#handlerFunction({ array: this, added: items, removed: null, method: "push" });
     return this.length;
   }
   pushNoEvent(...items: Type[]): number {
@@ -42,7 +42,7 @@ export default class EventedArray<Type = any> extends Array<Type> {
   pop(): Type | undefined {
     const length = this.length; // this.length gets the length before the pop. Using super.length gets the length after the pop.
     const removed = length > 0 ? [super.pop() as Type] : [];
-    this.handler({ array: this, added: null, removed, method: "pop" });
+    this.#handlerFunction({ array: this, added: null, removed, method: "pop" });
     return length > 0 ? removed[0] : undefined;
   }
   popNoEvent(): Type | undefined {
@@ -51,7 +51,7 @@ export default class EventedArray<Type = any> extends Array<Type> {
 
   unshift(...items: Type[]): number {
     super.unshift(...items);
-    this.handler({ array: this, added: items, removed: null, method: "unshift" });
+    this.#handlerFunction({ array: this, added: items, removed: null, method: "unshift" });
     return this.length;
   }
   unshiftNoEvent(...items: Type[]): number {
@@ -61,7 +61,7 @@ export default class EventedArray<Type = any> extends Array<Type> {
   shift(): Type | undefined {
     const length = this.length; // this.length gets the length before the shift. Using super.length gets the length after the shift.
     const removed = length > 0 ? [super.shift() as Type] : [];
-    this.handler({ array: this, added: null, removed, method: "shift" });
+    this.#handlerFunction({ array: this, added: null, removed, method: "shift" });
     return length > 0 ? removed[0] : undefined;
   }
   shiftNoEvent(): Type | undefined {
@@ -74,7 +74,7 @@ export default class EventedArray<Type = any> extends Array<Type> {
     const deletedItems: Type[] =
       typeof deleteCount === "undefined" ? super.splice(start) : super.splice(start, deleteCount, ...items);
 
-    this.handler({ array: this, added: items, removed: deletedItems, method: "splice" });
+    this.#handlerFunction({ array: this, added: items, removed: deletedItems, method: "splice" });
     return deletedItems;
   }
   spliceNoEvent(start: number, deleteCount?: number): Type[];
@@ -88,7 +88,7 @@ export default class EventedArray<Type = any> extends Array<Type> {
   }
   set lengths(value: number) {
     const removed = super.splice(value);
-    this.handler({ array: this, added: null, removed, method: "length" });
+    this.#handlerFunction({ array: this, added: null, removed, method: "length" });
   }
   get lengthNoEvent(): number {
     return this.length;
