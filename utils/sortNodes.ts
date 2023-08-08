@@ -11,12 +11,12 @@ import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./test
 export const rolesOrder: ((nodeStatus: NodeStatus) => boolean)[] = [
   ({ role }) => role === "COMMITTEE",
 
-  ({ role, epochsToNextEvent }) => epochsToNextEvent >= 3 && role === "SYNCING",
+  ({ role, epochsToNextEvent }) => epochsToNextEvent <= 3 && role === "SYNCING",
 
   (ns) => getShouldBeOffline(ns) && ns.role === "PENDING",
   (ns) => !getShouldBeOffline(ns) && ns.role === "PENDING",
 
-  ({ role, epochsToNextEvent }) => epochsToNextEvent < 3 && role === "SYNCING",
+  ({ role, epochsToNextEvent }) => epochsToNextEvent > 3 && role === "SYNCING",
 
   ({ role }) => role === "WAITING",
 
