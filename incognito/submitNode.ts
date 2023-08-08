@@ -120,7 +120,13 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
   // If it couldn't be created, delete the docker and configs, and alert the admin
   if (!success) {
     sendErrorToClient(client.telegram);
-    handleError(new Error(`Couldn't create node #${dockerIndex} for client ${newNode.clientId}`));
+    handleError(
+      new Error(
+        `Couldn't create node #${dockerIndex} for client ${newNode.clientId}\n\n` +
+          `Validator: ${newNode.validator}\n\n` +
+          `Validator public: ${newNode.validatorPublic}`
+      )
+    );
     await deleteDockerAndConfigs({ dockerIndex, number, clientId: newNode.clientId });
     return resolveAndForget(newNode, pending, false);
   }
