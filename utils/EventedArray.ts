@@ -24,6 +24,10 @@ export default class EventedArray<Type = any> extends Array<Type> {
    */
   constructor(handler: Handler<Type>, ...items: [number] | Type[]) {
     super(...(items as Type[]));
+    if (typeof handler !== "function") {
+      console.error(new Error("The handler must be a function."));
+      handler = () => {};
+    }
     console.log("a", handler.toString());
     this.#handlerFunction = handler;
     console.log("b", this.#handlerFunction.toString());
