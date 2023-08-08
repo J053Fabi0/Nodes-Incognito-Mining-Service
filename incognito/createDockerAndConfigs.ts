@@ -1,4 +1,5 @@
 import { ObjectId } from "mongo/mod.ts";
+import isError from "../types/guards/isError.ts";
 import createDocker from "./docker/createDocker.ts";
 import constants, { adminId } from "../constants.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
@@ -36,7 +37,7 @@ export default async function createDockerAndConfigs({
   inactive = false,
   ...optionals
 }: CreateDockerAndConfigsOptions): Promise<CreateDockerAndConfigsReturn> {
-  const { rcpPort, dockerIndex } = await (async function (): Promise<Required<typeof optionals>> {
+  const portAndIndex = await (async function (): Promise<Required<typeof optionals>> {
     if (optionals.rcpPort && optionals.dockerIndex)
       return { rcpPort: optionals.rcpPort, dockerIndex: optionals.dockerIndex };
 
@@ -50,8 +51,19 @@ export default async function createDockerAndConfigs({
 
   const clientIdStr = clientId.toString();
 
-  const { name, url } = await createNginxConfig(clientIdStr, number, rcpPort);
-  await createDocker(rcpPort, validator, dockerIndex);
+  const { name, url } = await createNginxConfig(clientIdStr, number, portAndIndex.rcpPort);
+  while (true)
+    try {
+      await createDocker(portAndIndex.rcpPort, validator, portAndIndex.dockerIndex);
+      break;
+    } catch (e) {
+      if (!isError(e)) throw e;
+      if (e.message.includes("address already in use")) {
+        console.error(`Port ${portAndIndex.rcpPort} is already in use, trying with the next one...`);
+        portAndIndex.rcpPort++;
+        continue;
+      } else throw e;
+    }
 
   if (nodeId)
     // Update node in the database
@@ -62,10 +74,10 @@ export default async function createDockerAndConfigs({
           // the only fields that don't change are validator and validatorPublic
           name,
           number,
-          rcpPort,
           inactive,
-          dockerIndex,
+          rcpPort: portAndIndex.rcpPort,
           client: new ObjectId(clientId),
+          dockerIndex: portAndIndex.dockerIndex,
           sendTo: [adminId, new ObjectId(clientId)],
         },
       }
@@ -76,20 +88,20 @@ export default async function createDockerAndConfigs({
       await createNode({
         name,
         number,
-        rcpPort,
         inactive,
         validator,
-        dockerIndex,
         validatorPublic,
+        rcpPort: portAndIndex.rcpPort,
         client: new ObjectId(clientId),
+        dockerIndex: portAndIndex.dockerIndex,
         sendTo: [adminId, new ObjectId(clientId)],
       })
     )._id;
 
   // Update configurations only if the node is active
-  if (inactive === false) addNodeToConfigs(dockerIndex, name, validatorPublic);
+  if (inactive === false) addNodeToConfigs(portAndIndex.dockerIndex, name, validatorPublic);
 
-  return { name, url, nodeId, dockerIndex };
+  return { name, url, nodeId, dockerIndex: portAndIndex.dockerIndex };
 }
 
 export function addNodeToConfigs(dockerIndex: number, name: string, validatorPublic: string) {
