@@ -13,8 +13,8 @@ export const rolesOrder: ((nodeStatus: NodeStatus) => boolean)[] = [
 
   ({ role, epochsToNextEvent }) => epochsToNextEvent <= 3 && role === "SYNCING",
 
-  (ns) => !getShouldBeOffline(ns) && ns.role === "PENDING",
-  (ns) => getShouldBeOffline(ns) && ns.role === "PENDING",
+  (ns) => ns.role === "PENDING" && !getShouldBeOffline(ns),
+  (ns) => ns.role === "PENDING" && getShouldBeOffline(ns),
 
   ({ role, epochsToNextEvent }) => epochsToNextEvent > 3 && role === "SYNCING",
 
