@@ -62,7 +62,10 @@ export const pendingNodes = new EventedArray<NewNode>(
   )()
 );
 // Add the pending nodes from redis
-getPendingNodesFromRedis().then((pending) => pending && pendingNodes.map(addSaveToRedisProxy).push(...pending));
+getPendingNodesFromRedis().then((pending) => {
+  if (!pending) return;
+  pendingNodes.push(...pending.map(addSaveToRedisProxy));
+});
 
 async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode>): Promise<boolean> {
   const [newNode] = pending;
