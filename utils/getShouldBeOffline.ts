@@ -38,6 +38,13 @@ const getShouldBeOffline = (
   return nodeStatus.epochsToNextEvent > minEpochsToLetSync && offlineRoles.includes(nodeStatus.role);
 };
 
+export function getShouldBeOnline(
+  nodeStatus: Partial<NodeStatus> &
+    Pick<NodeStatus, "epochsToNextEvent" | "role" | "validatorPublic" | "syncState">
+) {
+  return !getShouldBeOffline(nodeStatus);
+}
+
 export default getShouldBeOffline;
 
 // Test. All should log true.
