@@ -25,7 +25,7 @@ export default class EventedArray<Type = any> extends Array<Type> {
   constructor(handler: Handler<Type>, ...items: [number] | Type[]) {
     super(...(items as Type[]));
     if (typeof handler !== "function") {
-      console.error(new Error("The handler must be a function.", handler));
+      console.error(new Error("The handler must be a function."), handler, typeof handler);
       handler = () => {};
     }
     this.#handlerFunction = handler;
@@ -72,8 +72,10 @@ export default class EventedArray<Type = any> extends Array<Type> {
   splice(start: number, deleteCount?: number): Type[];
   splice(start: number, deleteCount: number, ...items: Type[]): Type[];
   splice(start: number, deleteCount?: number, ...items: Type[]): Type[] {
-    const deletedItems: Type[] =
-      typeof deleteCount === "undefined" ? super.splice(start) : super.splice(start, deleteCount, ...items);
+    const deletedItems =
+      typeof deleteCount === "undefined"
+        ? this.spliceNoEvent(start)
+        : this.spliceNoEvent(start, deleteCount, ...items);
 
     this.#handlerFunction({ array: this, added: items, removed: deletedItems, method: "splice" });
     return deletedItems;
@@ -81,7 +83,24 @@ export default class EventedArray<Type = any> extends Array<Type> {
   spliceNoEvent(start: number, deleteCount?: number): Type[];
   spliceNoEvent(start: number, deleteCount: number, ...items: Type[]): Type[];
   spliceNoEvent(start: number, deleteCount?: number, ...items: Type[]): Type[] {
-    return typeof deleteCount === "undefined" ? super.splice(start) : super.splice(start, deleteCount, ...items);
+    const deletedItems: Type[] = [];
+    const length = this.length;
+    if (start < 0) start = length + start;
+    if (start < 0) start = 0;
+    if (start > length) start = length;
+    if (typeof deleteCount === "undefined") deleteCount = length - start;
+    if (deleteCount < 0) deleteCount = 0;
+    if (deleteCount > length - start) deleteCount = length - start;
+    for (let i = start; i < start + deleteCount; i++) deletedItems.push(this[i]);
+    for (let i = start + deleteCount; i < length; i++) this[i - deleteCount] = this[i];
+    this.length = length - deleteCount;
+    if (typeof items !== "undefined") {
+      for (let i = this.length - 1; i >= start; i--) this[i + items.length] = this[i];
+      for (let i = 0; i < items.length; i++) this[i + start] = items[i];
+      this.length = length - deleteCount + items.length;
+    }
+
+    return deletedItems;
   }
 
   filter<S extends Type>(predicate: (value: Type, index: number, array: Type[]) => value is S, thisArg?: any): S[];
