@@ -52,10 +52,10 @@
     "react-icons/io": "https://cdn.jsdelivr.net/gh/urielch/react-icons-io@1.0.9/mod.ts",
     "react-icons/md": "https://cdn.jsdelivr.net/gh/urielch/react-icons-md@1.0.9/mod.ts",
     "react-icons/tb": "https://cdn.jsdelivr.net/gh/urielch/react-icons-tb@1.0.9/mod.ts",
-    "redis/": "https://deno.land/x/redis@v0.30.0/",
+    "redis/": "https://deno.land/x/redis@v0.31.0/",
     "sleep": "https://deno.land/x/sleep@v1.2.1/mod.ts",
-    "sort-es": "https://esm.sh/sort-es@1.6.12/",
-    "std/": "https://deno.land/std@0.193.0/"
+    "sort-es": "https://esm.sh/sort-es@1.6.15/",
+    "std/": "https://deno.land/std@0.197.0/"
   },
   "lint": {
     "rules": {
