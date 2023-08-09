@@ -9,6 +9,7 @@ import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
 
 const styles = {
+  tr: "even:bg-gray-50",
   th: "border border-slate-300 py-2 px-3",
   td: "border border-slate-300 py-2 px-3 text-center",
 };
@@ -43,7 +44,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
             const sync = status.syncState[0] + status.syncState.slice(1).toLowerCase();
             const roleSince = rangeMsToTimeDescription(lastRoles[+node].date, undefined, { short: true });
             return (
-              <tr>
+              <tr class={styles.tr}>
                 {/* Nodes */}
                 <td class={styles.td}>
                   <NodePill baseURL={null} nodeNumber={isAdmin ? +node : status.number} relative />
