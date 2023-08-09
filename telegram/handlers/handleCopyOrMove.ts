@@ -98,5 +98,7 @@ export default async function handleCopyOrMove(
     responses.push("Starting nodes...");
   }
 
+  if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });
+
   return { successful: true, response: responses.join("\n") };
 }
