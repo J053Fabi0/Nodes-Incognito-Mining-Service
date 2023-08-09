@@ -77,7 +77,7 @@ export default async function handleTextMessage(
   // if the html hasn't changed, send the last photo
   if (lastPhotoId && lastPhotoIdTime && Deno.readTextFileSync("./full.html") === html) {
     const timeString = rangeMsToTimeDescription(lastPhotoIdTime);
-    await bot.api.sendPhoto(ADMIN_ID, lastPhotoId, {
+    await bot.api.sendDocument(ADMIN_ID, lastPhotoId, {
       caption: `<i>Nothing changed since last time you checked ${timeString} ago.</i>`,
       parse_mode: "HTML",
     });
@@ -91,8 +91,8 @@ export default async function handleTextMessage(
       if (e.message.includes("decrease")) return e.message;
       throw e;
     });
-    const { photo } = await bot.api.sendPhoto(ADMIN_ID, new InputFile("./full.png"));
-    lastPhotoId = photo[0].file_id;
+    const { document } = await bot.api.sendDocument(ADMIN_ID, new InputFile("./full.png"));
+    lastPhotoId = document.file_id;
     lastPhotoIdTime = Date.now();
   }
 
