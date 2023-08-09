@@ -34,14 +34,14 @@ export default class EventedArray<Type = any> extends Array<Type> {
   push(...items: Type[]): number {
     super.push(...items);
     this.#handlerFunction({ array: this, added: items, removed: null, method: "push" });
-    return this.length;
+    return this.lengthNoEvent;
   }
   pushNoEvent(...items: Type[]): number {
     return super.push(...items);
   }
 
   pop(): Type | undefined {
-    const length = this.length; // this.length gets the length before the pop. Using super.length gets the length after the pop.
+    const length = this.lengthNoEvent; // this.length gets the length before the pop. Using super.length gets the length after the pop.
     const removed = length > 0 ? [super.pop() as Type] : [];
     this.#handlerFunction({ array: this, added: null, removed, method: "pop" });
     return length > 0 ? removed[0] : undefined;
@@ -53,14 +53,14 @@ export default class EventedArray<Type = any> extends Array<Type> {
   unshift(...items: Type[]): number {
     super.unshift(...items);
     this.#handlerFunction({ array: this, added: items, removed: null, method: "unshift" });
-    return this.length;
+    return this.lengthNoEvent;
   }
   unshiftNoEvent(...items: Type[]): number {
     return super.unshift(...items);
   }
 
   shift(): Type | undefined {
-    const length = this.length; // this.length gets the length before the shift. Using super.length gets the length after the shift.
+    const length = this.lengthNoEvent; // this.length gets the length before the shift. Using super.length gets the length after the shift.
     const removed = length > 0 ? [super.shift() as Type] : [];
     this.#handlerFunction({ array: this, added: null, removed, method: "shift" });
     return length > 0 ? removed[0] : undefined;
@@ -84,7 +84,7 @@ export default class EventedArray<Type = any> extends Array<Type> {
   spliceNoEvent(start: number, deleteCount: number, ...items: Type[]): Type[];
   spliceNoEvent(start: number, deleteCount?: number, ...items: Type[]): Type[] {
     const deletedItems: Type[] = [];
-    const length = this.length;
+    const length = this.lengthNoEvent;
     if (start < 0) start = length + start;
     if (start < 0) start = 0;
     if (start > length) start = length;
@@ -93,11 +93,11 @@ export default class EventedArray<Type = any> extends Array<Type> {
     if (deleteCount > length - start) deleteCount = length - start;
     for (let i = start; i < start + deleteCount; i++) deletedItems.push(this[i]);
     for (let i = start + deleteCount; i < length; i++) this[i - deleteCount] = this[i];
-    this.length = length - deleteCount;
+    this.lengthNoEvent = length - deleteCount;
     if (typeof items !== "undefined") {
-      for (let i = this.length - 1; i >= start; i--) this[i + items.length] = this[i];
+      for (let i = this.lengthNoEvent - 1; i >= start; i--) this[i + items.length] = this[i];
       for (let i = 0; i < items.length; i++) this[i + start] = items[i];
-      this.length = length - deleteCount + items.length;
+      this.lengthNoEvent = length - deleteCount + items.length;
     }
 
     return deletedItems;
@@ -105,6 +105,7 @@ export default class EventedArray<Type = any> extends Array<Type> {
 
   filter<S extends Type>(predicate: (value: Type, index: number, array: Type[]) => value is S, thisArg?: any): S[];
   filter(predicate: (value: Type, index: number, array: Type[]) => unknown, thisArg?: any): Type[];
+  // deno-lint-ignore no-unused-vars
   filter(predicate: unknown, thisArg?: unknown): Type[] {
     const filteredArray: Type[] = [];
     for (let i = 0; i < this.lengths; i++)
@@ -112,6 +113,7 @@ export default class EventedArray<Type = any> extends Array<Type> {
     return filteredArray;
   }
 
+  // deno-lint-ignore no-unused-vars
   map<U>(callbackfn: (value: Type, index: number, array: Type[]) => U, thisArg?: any): U[] {
     const mappedArray: U[] = [];
     for (let i = 0; i < this.lengths; i++) mappedArray.push(callbackfn(this[i], i, this));
