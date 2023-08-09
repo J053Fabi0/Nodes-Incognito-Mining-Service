@@ -140,8 +140,9 @@ export default async function submitCommand(
 ): Promise<CommandResponse[]> {
   const fullCommands = command
     .toLowerCase()
-    .split("\n")
-    .filter((x) => x.trim());
+    .split(/\n|;/)
+    .filter((x) => x.trim())
+    .map((x) => x.trim());
 
   const promises: Promise<CommandResponse>[] = [];
 
