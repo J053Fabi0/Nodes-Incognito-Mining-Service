@@ -4,3 +4,7 @@ import { ObjectId } from "mongo/mod.ts";
 export default function isObjectId(id: unknown): id is ObjectId {
   return typeof id === "object" && id instanceof ObjectId;
 }
+
+export function isObjectIdLike(id: string): boolean {
+  return ObjectId.isValid(id);
+}
