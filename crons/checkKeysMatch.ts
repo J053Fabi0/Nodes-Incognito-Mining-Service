@@ -27,8 +27,9 @@ export default async function checkKeysMatch() {
       if (real !== db)
         await sendHTMLMessage(
           `The public key of <code>${node.dockerIndex}</code> is not equal to the one in the database.\n\n` +
-            `DB: <code>${db}<code/>\n` +
-            `Real: <code>${real}<code/>`
+            `DB: <code>${db}</code>\n` +
+            `Real: <code>${real}</code>\n` +
+            `<code>http://${node.name}.nodes.josefabio.com</code>`
         );
     } catch {
       //
