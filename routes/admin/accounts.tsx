@@ -51,13 +51,15 @@ export const handler: Handlers<AccountsProps, State> = {
     }[];
 
     const privateKeys: AccountsProps["privateKeys"] = [];
-    for (const { name, account } of accounts)
+    for (const { name, account } of accounts) {
+      const address = await cryptr.decrypt(account.privateKey);
       privateKeys.push({
         name,
-        image: await qrcode(account.privateKey, { size: 200, errorCorrectLevel: "L" }),
+        address,
         balance: account.balance,
-        address: await cryptr.decrypt(account.privateKey),
+        image: await qrcode(address, { size: 200, errorCorrectLevel: "L" }),
       });
+    }
 
     return ctx.render({ privateKeys });
   },
