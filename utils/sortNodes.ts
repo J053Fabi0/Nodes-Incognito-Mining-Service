@@ -4,7 +4,6 @@ import { getShouldBeOnline } from "./getShouldBeOffline.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
-import shouldContinueRefreshingMonitorInfo from "./shouldContinueRefreshingMonitorInfo.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 
@@ -38,9 +37,6 @@ export default async function sortNodes(
   { fullData, fromCacheIfConvenient }: { fullData?: boolean; fromCacheIfConvenient?: boolean } = {}
 ) {
   if (nodes.length === 0) return { nodesStatusByDockerIndex: {}, nodesInfoByDockerIndex: [] };
-
-  // don't fetch from cache if it's no longer refreshing the monitor info
-  if (fromCacheIfConvenient && !shouldContinueRefreshingMonitorInfo()) fromCacheIfConvenient = false;
 
   const nodesToFetch = fromCacheIfConvenient ? [] : nodes;
   const nodesFromCache: typeof nodes = [];
