@@ -11,7 +11,6 @@ import { escapeHtml } from "escapeHtml";
 import { df } from "duplicatedFilesCleanerIncognito";
 import { NodeStatus } from "../utils/getNodesStatus.ts";
 import isBeingIgnored from "../utils/isBeingIgnored.ts";
-import submitCommand from "../telegram/submitCommand.ts";
 import handleNodeError from "../utils/handleNodeError.ts";
 import sortNodes, { NodeInfo } from "../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
@@ -20,6 +19,7 @@ import getMaxNodesOnline from "../utils/getMaxNodesOnline.ts";
 import { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
 import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
 import calculateOnlineQueue from "../utils/calculateOnlineQueue.ts";
+import submitCommand, { commands } from "../telegram/submitCommand.ts";
 import { waitingTimes, maxDiskPercentageUsage } from "../constants.ts";
 import handleTextMessage from "../telegram/handlers/handleTextMessage.ts";
 import getInstructionsToMoveOrDelete from "../utils/getInstructionsToMoveOrDelete.ts";
@@ -87,7 +87,16 @@ export default async function checkNodes() {
         `${shouldBeOnline ? "Start" : "Stop"}ing docker ${nodeStatus.dockerIndex} ` +
           `for node ${nodeStatus.dockerIndex}.`
       );
-      await submitCommand(`docker ${shouldBeOnline ? "start" : "stop"} ${nodeStatus.dockerIndex}`);
+      // check in the pending commands if there is a command that is copying from or to the node
+      const isCopying =
+        commands.pending.findIndex((command) => {
+          if (!command.command.startsWith("copy")) return false;
+
+          const fromTo = command.command.split(" ").slice(1, 2);
+          return fromTo.includes(nodeStatus.dockerIndex.toString());
+        }) !== -1;
+
+      if (!isCopying) await submitCommand(`docker ${shouldBeOnline ? "start" : "stop"} ${nodeStatus.dockerIndex}`);
     }
 
     // save the previous lastErrorTime to check later if it any error was fixed

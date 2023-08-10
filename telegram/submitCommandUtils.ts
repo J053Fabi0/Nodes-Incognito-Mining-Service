@@ -2,6 +2,7 @@ import { redis } from "../initDatabase.ts";
 import { commands } from "./submitCommand.ts";
 import handleError from "../utils/handleError.ts";
 import EventedArray from "../utils/EventedArray.ts";
+import { AllowedCommandsWithOptions } from "../utils/getCommandOrPossibilities.ts";
 
 const redisKey = "commands";
 
@@ -12,13 +13,14 @@ export interface CommandOptions {
   telegramMessages?: boolean;
 }
 export interface Command {
-  command: string;
+  /** Full command, with the first word always as an allowed command */
+  command: AllowedCommandsWithOptions;
   options?: CommandOptions;
   resolve?: (response: CommandResponse) => void;
 }
 export type Commands = {
   /** The first one is the oldest */
-  resolved: EventedArray<string>;
+  resolved: EventedArray<AllowedCommandsWithOptions>;
   /** The first one is the oldest */
   pending: EventedArray<Command>;
 };

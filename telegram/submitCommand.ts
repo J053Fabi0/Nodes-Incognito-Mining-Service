@@ -7,6 +7,10 @@ import {
   addSaveToRedisProxy,
   getCommandsFromReds,
 } from "./submitCommandUtils.ts";
+import getCommandOrPossibilities, {
+  AllowedCommands,
+  AllowedCommandsWithOptions,
+} from "../utils/getCommandOrPossibilities.ts";
 import isError from "../types/guards/isError.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
@@ -21,13 +25,12 @@ import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
-import getCommandOrPossibilities, { AllowedCommands } from "../utils/getCommandOrPossibilities.ts";
 
 export const commands: Commands = (() => {
   let working = false;
   setTimeout(getCommandsFromReds, 100);
   return {
-    resolved: new EventedArray<string>(({ array }) => {
+    resolved: new EventedArray<AllowedCommandsWithOptions>(({ array }) => {
       saveToRedis();
       if (array.lengthNoEvent > 100) array.spliceNoEvent(100, Infinity);
     }),
@@ -171,7 +174,7 @@ export default async function submitCommand(
     }
     // push the command to the queue
     else {
-      const finalFullCommand = [commandOrPossibilities.command, ...args].join(" ");
+      const finalFullCommand = [commandOrPossibilities.command, ...args].join(" ") as AllowedCommandsWithOptions;
 
       promises.push(
         new Promise<CommandResponse>((r) => {

@@ -13,6 +13,7 @@ export type AllowedCommands =
   | "info"
   | "instructions"
   | "help";
+export type AllowedCommandsWithOptions = `${AllowedCommands}${string}`;
 interface CommandWithAliases {
   command: AllowedCommands;
   aliases: string[];
