@@ -14,6 +14,9 @@ const styles = {
   td: "border border-slate-300 py-2 px-3 text-center",
 };
 
+const chooseBackground = (isGreen: boolean | number | string | undefined, isAdmin: boolean) =>
+  isAdmin ? (isGreen ? " bg-green-100" : " bg-red-100") : "";
+
 interface MonitorTableProps {
   isAdmin: boolean;
   nodesInfo: NodeInfoByDockerIndex[];
@@ -59,7 +62,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                 </td>
 
                 {/* Docker */}
-                <td class={styles.td}>
+                <td class={styles.td + chooseBackground(docker.running, isAdmin)}>
                   {docker.restarting && isAdmin && (
                     <code class="text-red-600 font-bold">
                       ⚠️ Restarting ⚠️
@@ -76,7 +79,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                 </td>
 
                 {/* Online */}
-                <td class={styles.td}>
+                <td class={styles.td + chooseBackground(status.status === "ONLINE", isAdmin)}>
                   {status.status === "ONLINE" && (isAdmin ? true : docker.running) ? "🟢" : "🔴"}
                   {isAdmin && (
                     <code title="Vote stat">
@@ -121,7 +124,10 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                 </td>
 
                 {/* Shard */}
-                <td class={styles.td} title={isAdmin ? `${numberWithCommas(shard || 0)} files` : undefined}>
+                <td
+                  class={styles.td + chooseBackground(shard, isAdmin)}
+                  title={isAdmin ? `${numberWithCommas(shard || 0)} files` : undefined}
+                >
                   {status.shard === "" ? (
                     "-"
                   ) : (
@@ -142,7 +148,7 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
 
                 {/* Beacon */}
                 {isAdmin && (
-                  <td class={styles.td} title={`${beacon ?? 0} files`}>
+                  <td class={styles.td + chooseBackground(beacon, isAdmin)} title={`${beacon ?? 0} files`}>
                     {shardsBlockHeights && (
                       <>
                         {beacon ? "🟢" : "🔴"} <ShardInfo shardsBlockHeights={shardsBlockHeights} shard="-1" />
