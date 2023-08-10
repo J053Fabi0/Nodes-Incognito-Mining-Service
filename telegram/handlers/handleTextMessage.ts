@@ -1,9 +1,9 @@
 import bot from "../initBots.ts";
 import { ADMIN_ID } from "../../env.ts";
 import { InputFile } from "grammy/mod.ts";
-import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
+import getShouldBeOnline from "../../utils/getShouldBeOnline.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
-import getShouldBeOffline from "../../utils/getShouldBeOffline.ts";
+import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import emojisCodes, { splitEmoji } from "../../utils/emojisCodes.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
@@ -45,7 +45,7 @@ export default async function handleTextMessage(
     nodes = nodes.filter((node) => {
       if (node.syncState.endsWith("STALL")) return true;
       for (const key of booleanKeys) if (node[key]) return true;
-      if (node.status === "OFFLINE" && !getShouldBeOffline(node)) return true;
+      if (node.status === "OFFLINE" && getShouldBeOnline(node)) return true;
       return false;
     });
   }
@@ -126,7 +126,7 @@ function getMessageText(keys: (Keys | "status")[], nodes: NodeStatus[]) {
     Ol: node.isOldVersion ? "Yes" : "No",
     role: node.role.substring(0, 1) + node.role.substring(1, 4).toLowerCase(),
     syncState: node.syncState.charAt(0) + node.syncState.slice(1).toLowerCase(),
-    status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
+    status: node.status === "OFFLINE" ? (getShouldBeOnline(node) ? "⚠️" : "🔴") : "🟢",
   }));
 
   const maxLength = shorterKeys.reduce(
@@ -210,7 +210,7 @@ function getTableHTML(newKeys: NewKeys[], nodes: NodeStatus[]): { html: string; 
       node.syncState.charAt(0) +
       node.syncState.slice(1).toLowerCase() +
       (node.syncState.endsWith("STALL") ? " ⚠️" : ""),
-    status: node.status === "OFFLINE" ? (getShouldBeOffline(node) ? "🔴" : "⚠️") : "🟢",
+    status: node.status === "OFFLINE" ? (getShouldBeOnline(node) ? "⚠️" : "🔴") : "🟢",
   }));
 
   const table = `

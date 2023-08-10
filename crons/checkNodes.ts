@@ -8,18 +8,21 @@ import {
 } from "../utils/variables.ts";
 import flags from "../utils/flags.ts";
 import { escapeHtml } from "escapeHtml";
-import getNodesStatus from "../utils/getNodesStatus.ts";
+import { df } from "duplicatedFilesCleanerIncognito";
+import { NodeStatus } from "../utils/getNodesStatus.ts";
 import isBeingIgnored from "../utils/isBeingIgnored.ts";
 import submitCommand from "../telegram/submitCommand.ts";
 import handleNodeError from "../utils/handleNodeError.ts";
+import sortNodes, { NodeInfo } from "../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
-import getShouldBeOffline from "../utils/getShouldBeOffline.ts";
+import getShouldBeOnline from "../utils/getShouldBeOnline.ts";
+import getMaxNodesOnline from "../utils/getMaxNodesOnline.ts";
+import { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
 import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
+import calculateOnlineQueue from "../utils/calculateOnlineQueue.ts";
 import { waitingTimes, maxDiskPercentageUsage } from "../constants.ts";
 import handleTextMessage from "../telegram/handlers/handleTextMessage.ts";
-import { df, docker, dockerPs, DockersInfo } from "duplicatedFilesCleanerIncognito";
 import getInstructionsToMoveOrDelete from "../utils/getInstructionsToMoveOrDelete.ts";
-import duplicatedFilesCleaner, { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
 
 function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, number | undefined>, errorKey: string) {
   if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || Date.now();
@@ -27,10 +30,15 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, number
 }
 
 export default async function checkNodes() {
-  const nodesStatus = await getNodesStatus();
-  const dockerStatuses: Partial<DockersInfo> = flags.ignoreDocker
+  const { nodesInfoByDockerIndex, nodesStatusByDockerIndex } = await sortNodes(undefined, {
+    fromCacheIfConvenient: true,
+  });
+  const nodesStatus = Object.values(nodesStatusByDockerIndex).filter((ns) => ns !== undefined) as NodeStatus[];
+
+  const dockerStatuses: Record<string, NodeInfo | undefined> = flags.ignoreDocker
     ? {}
-    : await dockerPs(duplicatedFilesCleaner.dockerIndexes);
+    : Object.fromEntries(nodesInfoByDockerIndex);
+
   const fixes: string[] = [];
 
   // Check for global errors
@@ -48,6 +56,9 @@ export default async function checkNodes() {
       await handleErrors(fixes, lastGlobalErrorTimes[errorKey], prevLastGlobalErrorTime[errorKey], errorKey);
   }
 
+  const maxNodesOnline = await getMaxNodesOnline(nodesInfoByDockerIndex);
+  calculateOnlineQueue(nodesStatus);
+
   // Check for errors in each node
   for (const nodeStatus of nodesStatus) {
     if (!(nodeStatus.validatorPublic in lastErrorTimes)) lastErrorTimes[nodeStatus.validatorPublic] = {};
@@ -62,21 +73,21 @@ export default async function checkNodes() {
       client: nodeStatus.client.toString(),
     };
 
-    const shouldBeOffline = getShouldBeOffline(nodeStatus);
-    const dockerInfo = dockerStatuses[nodeStatus.dockerIndex];
+    const shouldBeOnline = getShouldBeOnline(nodeStatus, maxNodesOnline, nodesInfoByDockerIndex);
+    const dockerInfo = dockerStatuses[nodeStatus.dockerIndex]?.docker;
     const isAllOnline = Boolean(dockerInfo?.running && nodeStatus.status === "ONLINE");
 
     // check if the docker is as it should be, and if not, fix it
     if (
       !flags.ignoreDocker &&
       !isBeingIgnored("docker") &&
-      ((dockerInfo?.running && shouldBeOffline) || (!dockerInfo?.running && !shouldBeOffline))
+      ((dockerInfo?.running && !shouldBeOnline) || (!dockerInfo?.running && shouldBeOnline))
     ) {
       console.log(
-        `${shouldBeOffline ? "Stop" : "Start"}ing docker ${nodeStatus.dockerIndex} ` +
+        `${shouldBeOnline ? "Start" : "Stop"}ing docker ${nodeStatus.dockerIndex} ` +
           `for node ${nodeStatus.dockerIndex}.`
       );
-      await docker(`inc_mainnet_${nodeStatus.dockerIndex}`, shouldBeOffline ? "stop" : "start");
+      await submitCommand(`docker ${shouldBeOnline ? "start" : "stop"} ${nodeStatus.dockerIndex}`);
     }
 
     // save the previous lastErrorTime to check later if it any error was fixed
@@ -96,13 +107,13 @@ export default async function checkNodes() {
     // stalling
     setOrRemoveErrorTime(isAllOnline && nodeStatus.syncState.endsWith("STALL"), lastErrorTime, "stalling");
     // offline
-    setOrRemoveErrorTime(nodeStatus.status === "OFFLINE" && !shouldBeOffline, lastErrorTime, "offline");
+    setOrRemoveErrorTime(nodeStatus.status === "OFFLINE" && shouldBeOnline, lastErrorTime, "offline");
     // unsynced
     setOrRemoveErrorTime(
       // is not latest
       nodeStatus.syncState !== "LATEST" &&
         // should be online
-        !shouldBeOffline &&
+        shouldBeOnline &&
         // its role is different than NOT_STAKED
         nodeStatus.role !== "NOT_STAKED" &&
         // and it's online, so don't report it if it's offline
@@ -129,7 +140,7 @@ export default async function checkNodes() {
 
   // Check if there are shards that need to be moved or deleted
   if (!isBeingIgnored("autoMove") && !flags.ignoreDocker) {
-    const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
+    const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete(nodesInfoByDockerIndex);
     if (instructionsToMoveOrDelete.length > 0)
       for (const instruction of instructionsToMoveOrDelete)
         if (instruction.action === "move") {

@@ -40,9 +40,6 @@ export const ignore = await getProxyAndRedisValue<Ignore>("ignore", {
   lowDiskSpace: { minutes: 0, from: Date.now() },
 });
 
-/** Node's public validator key as key */
-export const syncedNodes = await getProxyAndRedisValue<Record<string, boolean | undefined>>("syncedNodes", {});
-
 type LastRole = {
   /** The date in which the role changed */
   date: number;
@@ -135,4 +132,16 @@ interface LastAccessedPage {
 export const lastAccessedPages = createTrueRecord(
   await getProxyAndRedisValue<Record<string, LastAccessedPage>>("lastAccessedPages", {}),
   () => ({ lastAccesed: 0 })
+);
+
+export interface NodeInQueue {
+  dockerIndex: number;
+  date: number;
+}
+
+export type OnlineQueue = Record<NodeRoles, NodeInQueue[]>;
+/** These nodes can be online, but won't necessarily be. The complex logic is in getShouldBeOnline */
+export const onlineQueue = createTrueRecord(
+  await getProxyAndRedisValue<OnlineQueue>("onlineQueue", {} as OnlineQueue),
+  () => []
 );

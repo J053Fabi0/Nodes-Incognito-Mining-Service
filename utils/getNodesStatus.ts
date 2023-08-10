@@ -20,6 +20,7 @@ export type NodeStatusKeys =
   | "validatorPublic";
 
 export type NodeRoles = "PENDING" | "COMMITTEE" | "WAITING" | "SYNCING" | "NOT_STAKED";
+export const allNodeRoles: NodeRoles[] = ["PENDING", "COMMITTEE", "WAITING", "SYNCING", "NOT_STAKED"];
 export interface NodeStatus extends Node {
   alert: boolean;
   status: "ONLINE" | "OFFLINE";

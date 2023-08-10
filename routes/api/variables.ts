@@ -11,7 +11,7 @@ export const variablesToParse: (keyof typeof variablesObj | SeparateVariables)[]
   "commands",
   "prvToPay",
   "lastRoles",
-  "syncedNodes",
+  "onlineQueue",
   "transactions",
   "pendingNodes",
   "lastErrorTimes",

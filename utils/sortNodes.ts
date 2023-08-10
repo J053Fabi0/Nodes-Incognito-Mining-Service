@@ -1,6 +1,6 @@
 import { IS_PRODUCTION } from "../env.ts";
 import { byNumber, byValues } from "sort-es";
-import { getShouldBeOnline } from "./getShouldBeOffline.ts";
+import getShouldBeOnline from "./getShouldBeOnline.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
@@ -11,22 +11,29 @@ export const rolesOrder: ((nodeStatus: NodeStatus) => boolean)[] = [
   ({ role }) => role === "COMMITTEE",
 
   (ns) => ns.role === "PENDING" && getShouldBeOnline(ns),
-
-  ({ role, epochsToNextEvent }) => epochsToNextEvent <= 3 && role === "SYNCING",
+  (ns) => ns.role === "SYNCING" && getShouldBeOnline(ns),
 
   (ns) => ns.role === "PENDING" && !getShouldBeOnline(ns),
-
-  ({ role, epochsToNextEvent }) => epochsToNextEvent > 3 && role === "SYNCING",
+  (ns) => ns.role === "SYNCING" && !getShouldBeOnline(ns),
 
   ({ role }) => role === "WAITING",
 
-  // NOT_STAKED is the last because it's not important that it has files, only that
-  // it's online to be able to stake
+  // NOT_STAKED is the last on because it's not important that it has files, only that
+  // it's online to be able to add it to the app
   ({ role }) => role === "NOT_STAKED",
+
+  // this will trigger if the role is not one of the above
+  () => true,
 ];
 
-export type NodeInfoByDockerIndex = [string, Info & { shard: ShardsNames | "" }];
+export type NodeInfo = Info & { shard: ShardsNames | "" };
+export type NodeInfoByDockerIndex = [string, NodeInfo];
 export type NodesStatusByDockerIndex = Record<string, NodeStatus | undefined>;
+export type SortedNodes = {
+  nodesStatusByDockerIndex: NodesStatusByDockerIndex;
+  /** An array of sorted nodes. Each element is [dockerIndex, Info] */
+  nodesInfoByDockerIndex: NodeInfoByDockerIndex[];
+};
 
 /**
  * @param nodes The docker indexes of the nodes to sort. If undefined, all nodes will be sorted. If empty, no nodes will be sorted.
@@ -35,7 +42,7 @@ export type NodesStatusByDockerIndex = Record<string, NodeStatus | undefined>;
 export default async function sortNodes(
   nodes: (string | number)[] = duplicatedFilesCleaner.dockerIndexes,
   { fullData, fromCacheIfConvenient }: { fullData?: boolean; fromCacheIfConvenient?: boolean } = {}
-) {
+): Promise<SortedNodes> {
   if (nodes.length === 0) return { nodesStatusByDockerIndex: {}, nodesInfoByDockerIndex: [] };
 
   const nodesToFetch = fromCacheIfConvenient ? [] : nodes;
@@ -69,7 +76,8 @@ export default async function sortNodes(
           if (!nodeStatus) return rolesOrder.length;
 
           const roleIndex = rolesOrder.findIndex((fn) => fn(nodeStatus));
-          return roleIndex === -1 ? rolesOrder.length : roleIndex;
+
+          return roleIndex;
         },
         byNumber(),
       ],

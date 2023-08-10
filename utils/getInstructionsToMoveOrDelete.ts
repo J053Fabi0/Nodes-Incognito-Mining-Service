@@ -1,4 +1,4 @@
-import sortNodes from "./sortNodes.ts";
+import sortNodes, { NodeInfoByDockerIndex } from "./sortNodes.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
 
@@ -6,8 +6,16 @@ type InstructionToMoveOrDelete =
   | { shards: ShardsNames[]; from: string; to: string; action: "move" }
   | { shards: ShardsNames[]; from: string; to?: undefined; action: "delete" };
 
-export default async function getInstructionsToMoveOrDelete() {
-  const { nodesInfoByDockerIndex: nodesInfo } = await sortNodes();
+/**
+ * @param nodesInfoByDockerIndex If undefined, it will be fetched from sortNodes()
+ */
+export default async function getInstructionsToMoveOrDelete(
+  nodesInfoByDockerIndex: NodeInfoByDockerIndex[] | Promise<NodeInfoByDockerIndex[]> = sortNodes().then(
+    (a) => a.nodesInfoByDockerIndex
+  )
+) {
+  const nodesInfo =
+    nodesInfoByDockerIndex instanceof Promise ? await nodesInfoByDockerIndex : nodesInfoByDockerIndex;
 
   const instructions: InstructionToMoveOrDelete[] = [];
 

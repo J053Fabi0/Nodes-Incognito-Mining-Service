@@ -4,7 +4,7 @@ import deleteDocker from "./docker/deleteDocker.ts";
 import deleteNginxConfig from "./nginx/deleteNginxConfig.ts";
 import { changeNode } from "../controllers/node.controller.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { lastErrorTimes, lastRoles, syncedNodes } from "../utils/variables.ts";
+import { lastErrorTimes, lastRoles, onlineQueue } from "../utils/variables.ts";
 
 interface DeleteDockerAndConfigsOptions {
   number: number;
@@ -42,7 +42,13 @@ export function removeNodeFromConfigs(dockerIndex: number) {
     if (index !== -1) {
       const [{ validatorPublic }] = constants.splice(index, 1);
       delete lastErrorTimes[validatorPublic];
-      delete syncedNodes[validatorPublic];
+
+      for (const queue of Object.values(onlineQueue)) {
+        const index = queue.findIndex((i) => i.dockerIndex === dockerIndex);
+        if (index !== -1) {
+          queue.splice(index, 1);
+        }
+      }
     }
   }
 

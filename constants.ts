@@ -10,8 +10,9 @@ interface Json {
   infuraURL: string;
   /** Decimal format */
   incognitoFee: number;
-  minEpochsToLetSync: number;
-  minEpochsToBeOnline: number;
+  minEpochsToBeOnlinePending: number;
+  minEpochsToBeOnlineSyncing: number;
+  maxOnlineNodesNotStaked: number;
   adminTelegramUsername: string;
   maxDiskPercentageUsage: number;
   waitingTimes: Record<AllErrorTypes, number>;
@@ -23,12 +24,14 @@ interface Json {
   maxNotPayedDays: number;
   /** in seconds */
   cacheMonitorInfoEvery: number;
+  /** The max numbers of minutes a not-staked node can be online */
+  maxOnlineMinutesNotStaked: number;
 }
 
 const schema = joi.object<Json>({
   infuraURL: joi.string().uri().required(),
-  minEpochsToLetSync: joi.number().required(),
-  minEpochsToBeOnline: joi.number().required(),
+  minEpochsToBeOnlinePending: joi.number().required(),
+  minEpochsToBeOnlineSyncing: joi.number().required(),
   maxDiskPercentageUsage: joi.number().required(),
   maxNotPayedDays: joi.number().integer().default(3),
   incognitoFee: joi.number().positive().allow(0).default(0.1),
@@ -40,6 +43,8 @@ const schema = joi.object<Json>({
   maxNotStakedDays: joi.number().integer().allow(0).default(3),
   maxNotStakedDaysForNew: joi.number().integer().min(4).default(10),
   cacheMonitorInfoEvery: joi.number().integer().min(1).default(15),
+  maxOnlineNodesNotStaked: joi.number().integer().allow(0).default(3),
+  maxOnlineMinutesNotStaked: joi.number().integer().min(1).default(20),
 });
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
@@ -97,7 +102,8 @@ export const BAR_COLORS = [
   "#bae1ff",
 ] as const;
 export const { waitingTimes } = json;
-export const { minEpochsToLetSync } = json;
-export const { minEpochsToBeOnline } = json;
 export const { maxDiskPercentageUsage } = json;
+export const { maxOnlineNodesNotStaked } = json;
+export const { maxOnlineMinutesNotStaked } = json;
 export const { cacheMonitorInfoEvery } = json;
+export const { minEpochsToBeOnlinePending, minEpochsToBeOnlineSyncing } = json;
