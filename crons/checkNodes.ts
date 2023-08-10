@@ -130,17 +130,11 @@ export default async function checkNodes() {
   // Check if there are shards that need to be moved or deleted
   if (!isBeingIgnored("autoMove") && !flags.ignoreDocker) {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete();
-    if (instructionsToMoveOrDelete.length > 0) {
-      for (const instruction of instructionsToMoveOrDelete) {
-        const nodeFrom = nodesStatus.find((node) => `${node.dockerIndex}` === instruction.from);
-        const isFromRunning = nodeFrom ? dockerStatuses[nodeFrom.dockerIndex]?.running : true;
-
+    if (instructionsToMoveOrDelete.length > 0)
+      for (const instruction of instructionsToMoveOrDelete)
         if (instruction.action === "move") {
-          if (!isFromRunning)
-            submitCommand(`move ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`);
+          submitCommand(`move ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`);
         } else submitCommand(`delete ${instruction.from} ${instruction.shards.join(" ")}`);
-      }
-    }
   }
 }
 
