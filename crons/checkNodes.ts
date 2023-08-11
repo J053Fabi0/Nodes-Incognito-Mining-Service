@@ -73,15 +73,21 @@ export default async function checkNodes() {
     };
 
     const shouldBeOnline = getShouldBeOnline(nodeStatus, maxNodesOnline, nodesInfoByDockerIndex);
-    const dockerInfo = dockerStatuses[nodeStatus.dockerIndex]?.docker;
+    const nodeInfo = dockerStatuses[nodeStatus.dockerIndex];
+    const dockerInfo = nodeInfo?.docker;
     const isAllOnline = Boolean(dockerInfo?.running && nodeStatus.status === "ONLINE");
 
     // check if the docker is as it should be, and if not, fix it
-    if (
+    thisIf: if (
       !flags.ignoreDocker &&
       !isBeingIgnored("docker") &&
-      ((dockerInfo?.running && !shouldBeOnline) || (!dockerInfo?.running && shouldBeOnline))
+      dockerInfo &&
+      ((dockerInfo.running && !shouldBeOnline) || (!dockerInfo.running && shouldBeOnline))
     ) {
+      // if shouldBeOnline, check if it has the shard data
+      if (shouldBeOnline && nodeInfo.shard && nodeInfo.shard !== "beacon" && !nodeInfo[nodeInfo.shard])
+        break thisIf;
+
       console.log(
         `${shouldBeOnline ? "Start" : "Stop"}ing docker ${nodeStatus.dockerIndex} ` +
           `for node ${nodeStatus.dockerIndex}.`
