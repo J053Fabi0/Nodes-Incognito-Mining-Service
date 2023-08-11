@@ -25,7 +25,16 @@ interface MonitorTableProps {
 
 export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: MonitorTableProps) {
   const totalBeacon = isAdmin ? nodesInfo.reduce((n, [, a]) => n + +Boolean(a.beacon), 0) : 0;
-  const totalShard = isAdmin ? <> {nodesInfo.reduce((n, [, a]) => n + +Boolean(a.shard), 0)}</> : null;
+  const totalShard = isAdmin ? (
+    <>
+      {" "}
+      {nodesInfo.reduce((n, [node, a]) => {
+        const status = nodesStatus[node];
+        if (!status) return n;
+        return n + +Boolean(a[`shard${status.shard}`]);
+      }, 0)}
+    </>
+  ) : null;
 
   return (
     <div class="overflow-x-auto">
