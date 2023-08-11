@@ -1,8 +1,8 @@
 import { join } from "std/path/mod.ts";
 import sendMessage from "../sendMessage.ts";
+import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
 import validateItems from "../../utils/validateItems.ts";
-import isBeingIgnored from "../../utils/isBeingIgnored.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
@@ -54,14 +54,14 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   const responses: string[] = [];
 
   // Stop the docker regardless of the ignore value if at least one of them is online
-  const dockerStatus = await dockerPs([fromNodeIndex]);
-  if (dockerStatus[fromNodeIndex].running) {
+  const fromRunning = (await dockerPs([fromNodeIndex]))[fromNodeIndex].running;
+  if (fromRunning) {
     await Promise.all([
-      options?.telegramMessages
-        ? sendMessage("Stopping node...", undefined, { disable_notification: options?.silent })
-        : null,
+      options?.telegramMessages &&
+        sendMessage("Stopping node...", undefined, { disable_notification: options?.silent }),
       docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
+    setCache(fromNodeIndex, "docker.running", false);
     responses.push("Stopping node...");
   }
 
@@ -87,13 +87,13 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   ignore.docker.minutes = lastIgnoreMinutes;
 
   // start the docker if they were not being ignored
-  if (isBeingIgnored("docker") && dockerStatus[fromNodeIndex].running) {
+  if (fromRunning) {
     await Promise.all([
-      options?.telegramMessages
-        ? sendMessage("Starting node...", undefined, { disable_notification: options?.silent })
-        : null,
+      options?.telegramMessages &&
+        sendMessage("Starting node...", undefined, { disable_notification: options?.silent }),
       docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
+    setCache(fromNodeIndex, "docker.running", true);
     responses.push("Starting node...");
   }
 

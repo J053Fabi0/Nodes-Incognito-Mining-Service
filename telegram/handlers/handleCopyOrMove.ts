@@ -1,4 +1,5 @@
 import sendMessage from "../sendMessage.ts";
+import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
@@ -50,14 +51,18 @@ export default async function handleCopyOrMove(
 
   // Stop the dockers regardless of the ignore value if at least one of them is online
   const dockerStatus = await dockerPs([fromNodeIndex, toNodeIndex]);
-  if (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running) {
+  const fromRunning = dockerStatus[fromNodeIndex].running;
+  const toRunning = dockerStatus[toNodeIndex].running;
+
+  if (toRunning || fromRunning) {
     await Promise.all([
-      options?.telegramMessages
-        ? sendMessage("Stopping nodes...", undefined, { disable_notification: options?.silent })
-        : null,
-      dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
-      dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
+      options?.telegramMessages &&
+        sendMessage("Stopping nodes...", undefined, { disable_notification: options?.silent }),
+      toRunning && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
+      fromRunning && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
     ]);
+    if (fromRunning) setCache(fromNodeIndex, "docker.running", false);
+    if (toRunning) setCache(toNodeIndex, "docker.running", false);
     responses.push("Stopping nodes...");
   }
 
@@ -92,13 +97,15 @@ export default async function handleCopyOrMove(
   ignore.docker.minutes = lastIgnoreMinutes;
 
   // start the dockers if they were not being ignored
-  if (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running) {
+  if (toRunning || fromRunning) {
     await Promise.all([
       options?.telegramMessages &&
         sendMessage("Starting nodes...", undefined, { disable_notification: options?.silent }),
-      dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "start"),
-      dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
+      toRunning && docker(`inc_mainnet_${toNodeIndex}`, "start"),
+      fromRunning && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
+    if (fromRunning) setCache(fromNodeIndex, "docker.running", true);
+    if (toRunning) setCache(toNodeIndex, "docker.running", true);
     responses.push("Starting nodes...");
   }
 
