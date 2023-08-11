@@ -1,3 +1,4 @@
+import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
 import { docker } from "duplicatedFilesCleanerIncognito";
 import validateItems from "../../utils/validateItems.ts";
@@ -32,6 +33,8 @@ export default async function handleDocker(
 
   for (const node of nodes) {
     await docker(`inc_mainnet_${node}`, action);
+
+    setCache(node, "docker.running", action === "start");
 
     const response = `Docker <code>${node}</code> ${action === "stop" ? "stopp" : "start"}ed.`;
     if (options?.telegramMessages)
