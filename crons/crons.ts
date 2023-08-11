@@ -13,31 +13,35 @@ import { cacheMonitorInfoEvery, maxNotPayedDays } from "../constants.ts";
 
 const options: CronOptions = { catch: handleError, utcOffset: 0 };
 
-new Cron("*/5 * * * *", options, checkEarnings);
+cacheMonitor().finally(startCrons);
 
-new Cron("*/30 * * * * *", { protect: true, ...options }, checkNodes);
+function startCrons() {
+  new Cron("*/5 * * * *", options, checkEarnings);
 
-// every minute, check the accounts that have used the website in the last 5 minutes
-new Cron("*/1 * * * *", { protect: true, ...options }, checkAccounts.bind(null, 5, Unit.minute));
-// every hour, check the accounts that have used the website in the last day
-new Cron("0 * * * *", { protect: true, ...options }, checkAccounts.bind(null, 1, Unit.day));
+  new Cron("*/30 * * * * *", { protect: true, ...options }, checkNodes);
 
-// delete empty sessions every hour
-new Cron("0 * * * *", { protect: true, ...options }, deleteEmptySessions);
+  // every minute, check the accounts that have used the website in the last 5 minutes
+  new Cron("*/1 * * * *", { protect: true, ...options }, checkAccounts.bind(null, 5, Unit.minute));
+  // every hour, check the accounts that have used the website in the last day
+  new Cron("0 * * * *", { protect: true, ...options }, checkAccounts.bind(null, 1, Unit.day));
 
-// check not staked nodes every 30 minutes
-new Cron("*/30 * * * *", { protect: true, ...options }, checkNotStakedNodes);
+  // delete empty sessions every hour
+  new Cron("0 * * * *", { protect: true, ...options }, deleteEmptySessions);
 
-// cache nodes statistics every 5 minutes
-new Cron("*/5 * * * *", options, cacheNodesStatistics);
+  // check not staked nodes every 30 minutes
+  new Cron("*/30 * * * *", { protect: true, ...options }, checkNotStakedNodes);
 
-// check the monthly fee every 1st day of the month until the maxNotPayedDays
-new Cron(`*/30 * 1-${maxNotPayedDays} * *`, options, checkMonthlyFee.bind(null, false));
-// remove the nodes that haven't paid after maxNotPayedDays
-new Cron(`*/20 1 ${maxNotPayedDays + 1} * *`, options, checkMonthlyFee.bind(null, true));
+  // cache nodes statistics every 5 minutes
+  new Cron("*/5 * * * *", options, cacheNodesStatistics);
 
-// cache the monitor responses every 10 seconds
-new Cron(`*/${cacheMonitorInfoEvery} * * * * *`, { protect: true, ...options }, cacheMonitor);
+  // check the monthly fee every 1st day of the month until the maxNotPayedDays
+  new Cron(`*/30 * 1-${maxNotPayedDays} * *`, options, checkMonthlyFee.bind(null, false));
+  // remove the nodes that haven't paid after maxNotPayedDays
+  new Cron(`*/20 1 ${maxNotPayedDays + 1} * *`, options, checkMonthlyFee.bind(null, true));
 
-// every day at 00:00
-new Cron("0 0 * * *", options, checkKeysMatch);
+  // cache the monitor responses every 10 seconds
+  new Cron(`*/${cacheMonitorInfoEvery} * * * * *`, { protect: true, ...options }, cacheMonitor);
+
+  // every day at 00:00
+  new Cron("0 0 * * *", options, checkKeysMatch);
+}
