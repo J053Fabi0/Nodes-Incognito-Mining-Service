@@ -8,6 +8,7 @@ import getBlockchainInfo from "../incognito/getBlockchainInfo.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import iteratePromisesInChunks from "./promisesYieldedInChunks.ts";
 import { ShardsStr, shardsNumbersStr, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
+import { cronsStarted } from "../crons/crons.ts";
 
 export type NodeStatusKeys =
   | "role"
@@ -141,8 +142,7 @@ async function getRawData(mpk: string | string[], fetchAll = false): Promise<Nod
 
   if (toFetch.length === 0) return results;
 
-  const timerName = "getAllRawData" + Math.random();
-  console.time(timerName);
+  if (!cronsStarted) console.time("getAllRawData");
   const allData = await iteratePromisesInChunks(
     _.chunk(mpks, 20).map(
       (c) => () =>
@@ -154,7 +154,7 @@ async function getRawData(mpk: string | string[], fetchAll = false): Promise<Nod
     ),
     6
   );
-  console.timeEnd(timerName);
+  if (!cronsStarted) console.timeEnd("getAllRawData");
 
   for (const data of allData) {
     if (data.status === "fulfilled") {

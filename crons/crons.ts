@@ -15,11 +15,12 @@ const options: CronOptions = { catch: handleError, utcOffset: 0 };
 
 export let cronsStarted = false;
 
+console.time("startCrons");
 cacheMonitor().finally(startCrons);
 
 function startCrons() {
   cronsStarted = true;
-  console.log("Starting crons");
+  console.timeEnd("startCrons");
 
   new Cron("*/5 * * * *", options, checkEarnings);
 
