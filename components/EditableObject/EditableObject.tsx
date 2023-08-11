@@ -27,7 +27,7 @@ export default function EditableObject({ object, level, path = "", lastPath = []
           const open = firstPath === key;
           return (
             <details open={open}>
-              <summary class="truncate text-ellipsis ">
+              <summary class="truncate text-ellipsis">
                 <Typography variant="lead" class="font-semibold inline">
                   {capitalize(key)}
                 </Typography>

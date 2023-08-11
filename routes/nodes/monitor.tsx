@@ -149,16 +149,22 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
 
       {nodesInfo.length > 0 && <MonitorTable isAdmin={isAdmin} nodesInfo={nodesInfo} nodesStatus={nodesStatus} />}
 
-      <Typography variant="h5">Node URLs</Typography>
+      <details>
+        <summary class="truncate text-ellipsis">
+          <Typography variant="h5" class="inline">
+            Node URLs
+          </Typography>
+        </summary>
 
-      <ul class={`list-disc list-inside mt-2 ${getTypographyClass("p")}`}>
-        {nodesUrl.map(({ url, dockerIndex }) => (
-          <li>
-            {isAdmin ? `${dockerIndex} - ` : ""}
-            {url}
-          </li>
-        ))}
-      </ul>
+        <ul class={`list-disc list-inside mt-2 ml-3 ${getTypographyClass("p")}`}>
+          {nodesUrl.map(({ url, dockerIndex }) => (
+            <li>
+              {isAdmin ? `${dockerIndex} - ` : ""}
+              {url}
+            </li>
+          ))}
+        </ul>
+      </details>
 
       {Object.values(nodesStatus).some((a) => a?.role === "NOT_STAKED") && <AfterYouPay monitor class="mt-4" />}
 
