@@ -85,8 +85,7 @@ export default async function getInstructionsToMoveOrDelete(
       if (!shard) continue;
 
       if (shardsCount[shard] > minShardsToKeep) {
-        // instructions.push({ from, action: "delete", shards: [shard] });
-        console.log("delete", from, shard);
+        instructions.push({ from, action: "delete", shards: [shard] });
         shardsCount[shard]--;
       }
     }
