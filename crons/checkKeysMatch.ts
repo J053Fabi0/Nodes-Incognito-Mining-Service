@@ -1,17 +1,18 @@
 import axiod from "axiod";
-import { getNodes } from "../controllers/node.controller.ts";
+import sortNodes from "../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
-import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 
 export default async function checkKeysMatch() {
-  const nodesInfo = await duplicatedFilesCleaner.getInfo();
-  const nodes = await getNodes({}, { projection: { name: 1, validatorPublic: 1, dockerIndex: 1 } });
+  const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex } = await sortNodes();
 
-  for (const node of nodes) {
-    if (nodesInfo[node.dockerIndex].docker.running === false) continue;
+  for (const [dockerIndex, node] of nodesInfo) {
+    if (node.docker.running === false) continue;
+
+    const nodeStatus = nodesStatusByDockerIndex[dockerIndex];
+    if (!nodeStatus) continue;
 
     try {
-      const a = await axiod.post(`http://${node.name}.nodes.josefabio.com`, {
+      const a = await axiod.post(`http://${nodeStatus.name}.nodes.josefabio.com`, {
         jsonrpc: "1.0",
         method: "getmininginfo",
         params: "",
@@ -22,14 +23,14 @@ export default async function checkKeysMatch() {
       if (typeof a.data.Result.MiningPublickey !== "string") throw new Error("Public key is not a string");
 
       const real = a.data.Result.MiningPublickey;
-      const db = node.validatorPublic;
+      const db = nodeStatus.validatorPublic;
 
       if (real !== db)
         await sendHTMLMessage(
-          `The public key of <code>${node.dockerIndex}</code> is not equal to the one in the database.\n\n` +
+          `The public key of <code>${dockerIndex}</code> is not equal to the one in the database.\n\n` +
             `DB: <code>${db}</code>\n` +
             `Real: <code>${real}</code>\n` +
-            `<code>http://${node.name}.nodes.josefabio.com</code>`
+            `<code>http://${nodeStatus.name}.nodes.josefabio.com</code>`
         );
     } catch {
       //
