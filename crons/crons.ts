@@ -16,6 +16,8 @@ const options: CronOptions = { catch: handleError, utcOffset: 0 };
 cacheMonitor().finally(startCrons);
 
 function startCrons() {
+  console.log("Starting crons");
+
   new Cron("*/5 * * * *", options, checkEarnings);
 
   new Cron("*/30 * * * * *", { protect: true, ...options }, checkNodes);
