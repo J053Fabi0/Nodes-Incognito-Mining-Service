@@ -141,6 +141,7 @@ async function getRawData(mpk: string | string[], fetchAll = false): Promise<Nod
 
   if (toFetch.length === 0) return results;
 
+  console.time("getAllRawData");
   const allData = await iteratePromisesInChunks(
     _.chunk(mpks, 20).map(
       (c) => () =>
@@ -152,6 +153,7 @@ async function getRawData(mpk: string | string[], fetchAll = false): Promise<Nod
     ),
     4
   );
+  console.timeEnd("getAllRawData");
 
   for (const data of allData) {
     if (data.status === "fulfilled") {
