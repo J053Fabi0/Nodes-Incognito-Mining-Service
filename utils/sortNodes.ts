@@ -35,13 +35,20 @@ export type SortedNodes = {
   nodesInfoByDockerIndex: NodeInfoByDockerIndex[];
 };
 
+export type SortNodesOptions = {
+  /** If true, returns the block height for each shard */
+  fullData?: boolean;
+  /** If true, returns the data from the cache if it's convenient */
+  fromCacheIfConvenient?: boolean;
+};
+
 /**
  * @param nodes The docker indexes of the nodes to sort. If undefined, all nodes will be sorted. If empty, no nodes will be sorted.
  * @param fullData If true, returns the block height for each shard
  */
 export default async function sortNodes(
   nodes: (string | number)[] = duplicatedFilesCleaner.dockerIndexes,
-  { fullData, fromCacheIfConvenient }: { fullData?: boolean; fromCacheIfConvenient?: boolean } = {}
+  { fullData, fromCacheIfConvenient }: SortNodesOptions = {}
 ): Promise<SortedNodes> {
   if (nodes.length === 0) return { nodesStatusByDockerIndex: {}, nodesInfoByDockerIndex: [] };
 

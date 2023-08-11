@@ -4,6 +4,7 @@ import Pill from "../../components/Pill.tsx";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
 import getNodeUrl from "../../utils/getNodeUrl.ts";
+import { cronsStarted } from "../../crons/crons.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import NodePill from "../../components/Nodes/NodePill.tsx";
@@ -46,7 +47,7 @@ export const handler: Handlers<MonitorProps, State> = {
     const nodes = await getNodes(nodesQuery, { projection: { _id: 0, dockerIndex: 1, name: 1 } });
 
     const { nodesInfoByDockerIndex: nodesInfo, nodesStatusByDockerIndex: nodesStatus } = await sortNodes(
-      nodes.map((n) => n.dockerIndex),
+      cronsStarted ? nodes.map((n) => n.dockerIndex) : [],
       { fullData: shouldGetAll, fromCacheIfConvenient: true }
     );
 
@@ -103,6 +104,17 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
       <>
         {head}
         <Typography variant="h3">You don't have any nodes yet.</Typography>
+      </>
+    );
+
+  if (!cronsStarted)
+    return (
+      <>
+        {head}
+        <Typography variant="h3">
+          The server has been recently restarted, and the cache for the monitor is still being fetched. Try again
+          soon.
+        </Typography>
       </>
     );
 

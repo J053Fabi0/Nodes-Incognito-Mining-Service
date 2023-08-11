@@ -13,9 +13,12 @@ import { cacheMonitorInfoEvery, maxNotPayedDays } from "../constants.ts";
 
 const options: CronOptions = { catch: handleError, utcOffset: 0 };
 
+export let cronsStarted = false;
+
 cacheMonitor().finally(startCrons);
 
 function startCrons() {
+  cronsStarted = true;
   console.log("Starting crons");
 
   new Cron("*/5 * * * *", options, checkEarnings);
