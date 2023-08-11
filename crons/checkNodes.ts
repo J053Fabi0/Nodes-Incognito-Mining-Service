@@ -150,12 +150,15 @@ export default async function checkNodes() {
   if (!isBeingIgnored("autoMove") && !flags.ignoreDocker) {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete(sortedNodes);
     if (instructionsToMoveOrDelete.length > 0)
-      for (const instruction of instructionsToMoveOrDelete)
-        if (instruction.action === "move" || instruction.action === "copy") {
-          submitCommand(
-            `${instruction.action} ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`
-          );
-        } else submitCommand(`delete ${instruction.from} ${instruction.shards.join(" ")}`);
+      for (const instruction of instructionsToMoveOrDelete) {
+        const command: `${typeof instruction.action}${string}` =
+          instruction.action === "delete"
+            ? `delete ${instruction.from} ${instruction.shards.join(" ")}`
+            : `${instruction.action} ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`;
+
+        // if the command is not already in the queue, submit it
+        if (commands.pending.findIndex((c) => c.command === command) === -1) submitCommand(command);
+      }
   }
 }
 
