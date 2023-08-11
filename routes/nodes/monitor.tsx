@@ -99,7 +99,7 @@ export default function Monitor({ data, route }: PageProps<MonitorProps>) {
     </Head>
   );
 
-  if (nodesInfo.length === 0 && pendingNodes.length === 0)
+  if (nodesUrl.length === 0 && pendingNodes.length === 0)
     return (
       <>
         {head}
