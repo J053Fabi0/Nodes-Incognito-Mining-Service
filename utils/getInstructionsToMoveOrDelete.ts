@@ -69,8 +69,7 @@ export default async function getInstructionsToMoveOrDelete(
       if (!nodeWithShard) continue;
       const [from] = nodeWithShard;
 
-      // instructions.push({ to, from, action: "copy", shards: [shard] });
-      console.log(`copy ${from} ${to} ${shard}`);
+      instructions.push({ to, from, action: "copy", shards: [shard] });
     }
   }
 
