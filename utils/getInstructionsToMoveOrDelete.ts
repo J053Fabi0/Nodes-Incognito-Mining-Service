@@ -1,3 +1,4 @@
+import { minShardsToKeep } from "../constants.ts";
 import sortNodes, { SortedNodes } from "./sortNodes.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
@@ -71,6 +72,25 @@ export default async function getInstructionsToMoveOrDelete(
 
       instructions.push({ to, from, action: "copy", shards: [shard] });
     }
+
+    // delete shards that are not being used
+    const nodesWithShardButNoBeacon = nodesInfo.filter(([, n]) => n.shard && n[n.shard] && !n.beacon);
+    const shardsCount = {} as Record<ShardsNames, number>;
+    for (const shard of shardsNames) shardsCount[shard] = 0;
+    for (const [, node] of nodesWithShardButNoBeacon) if (node.shard) shardsCount[node.shard]++;
+    console.log(shardsCount);
+
+    for (const [from, node] of nodesWithShardButNoBeacon) {
+      const shard = node.shard;
+      if (!shard) continue;
+
+      if (shardsCount[shard] > minShardsToKeep) {
+        // instructions.push({ from, action: "delete", shards: [shard] });
+        console.log("delete", from, shard);
+        shardsCount[shard]--;
+      }
+    }
+    console.log(shardsCount);
   }
 
   return instructions;

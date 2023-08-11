@@ -26,6 +26,8 @@ interface Json {
   cacheMonitorInfoEvery: number;
   /** The max numbers of minutes a not-staked node can be online */
   maxOnlineMinutesNotStaked: number;
+  /** The min shards to keep for each one. For example, always keep at least 2 shard4. */
+  minShardsToKeep: number;
 }
 
 const schema = joi.object<Json>({
@@ -45,6 +47,7 @@ const schema = joi.object<Json>({
   cacheMonitorInfoEvery: joi.number().integer().min(1).default(15),
   maxOnlineNodesNotStaked: joi.number().integer().allow(0).default(3),
   maxOnlineMinutesNotStaked: joi.number().integer().min(1).default(20),
+  minShardsToKeep: joi.number().integer().min(1).default(2),
 });
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
@@ -102,8 +105,9 @@ export const BAR_COLORS = [
   "#bae1ff",
 ] as const;
 export const { waitingTimes } = json;
+export const { minShardsToKeep } = json;
+export const { cacheMonitorInfoEvery } = json;
 export const { maxDiskPercentageUsage } = json;
 export const { maxOnlineNodesNotStaked } = json;
 export const { maxOnlineMinutesNotStaked } = json;
-export const { cacheMonitorInfoEvery } = json;
 export const { minEpochsToBeOnlinePending, minEpochsToBeOnlineSyncing } = json;
