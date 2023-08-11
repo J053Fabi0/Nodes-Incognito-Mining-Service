@@ -1,6 +1,7 @@
 import axiod from "axiod";
 import moment from "moment";
 import { lodash as _ } from "lodash";
+import { cronsStarted } from "../crons/crons.ts";
 import Node from "../types/collections/node.type.ts";
 import getSyncState from "../incognito/getSyncState.ts";
 import { getNodes } from "../controllers/node.controller.ts";
@@ -8,7 +9,6 @@ import getBlockchainInfo from "../incognito/getBlockchainInfo.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import iteratePromisesInChunks from "./promisesYieldedInChunks.ts";
 import { ShardsStr, shardsNumbersStr, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
-import { cronsStarted } from "../crons/crons.ts";
 
 export type NodeStatusKeys =
   | "role"
@@ -63,42 +63,49 @@ export default async function getNodesStatus({
 
   const results: NodeStatus[] = [];
 
-  for (const d of rawData) {
-    const node = nodes.find((n) => n.validatorPublic === d.MiningPubkey);
-    if (!node) continue;
+  if (!cronsStarted) console.time("getAllSyncState");
+  await iteratePromisesInChunks(
+    rawData.map((d) => async () => {
+      const node = nodes.find((n) => n.validatorPublic === d.MiningPubkey);
+      if (!node) return;
 
-    const result: NodeStatus = {
-      ...node,
-      alert: d.Alert,
-      status: d.Status,
-      isSlashed: d.IsSlashed,
-      shard: d.CommitteeChain,
-      shardsBlockHeights: null,
-      role: d.Role || "NOT_STAKED",
-      isOldVersion: d.IsOldVersion,
-      syncState: d.SyncState || "-",
-      epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
-      voteStat: d.VoteStat[0] === "" ? null : Number(d.VoteStat[0]?.match(/\d+/)?.[0] ?? 0),
-    };
+      const result: NodeStatus = {
+        ...node,
+        alert: d.Alert,
+        status: d.Status,
+        isSlashed: d.IsSlashed,
+        shard: d.CommitteeChain,
+        shardsBlockHeights: null,
+        role: d.Role || "NOT_STAKED",
+        isOldVersion: d.IsOldVersion,
+        syncState: d.SyncState || "-",
+        epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
+        voteStat: d.VoteStat[0] === "" ? null : Number(d.VoteStat[0]?.match(/\d+/)?.[0] ?? 0),
+      };
 
-    thisIf: if (blockchainInfo) {
-      const syncState = await getSyncState(d.MiningPubkey);
-      if (!syncState) break thisIf;
+      thisIf: if (blockchainInfo) {
+        const syncState = await repeatUntilNoError(() => getSyncState(node.validatorPublic), 5);
+        if (!syncState) break thisIf;
 
-      const shardsBlockHeights = {} as Exclude<NodeStatus["shardsBlockHeights"], null>;
+        const shardsBlockHeights = {} as Exclude<NodeStatus["shardsBlockHeights"], null>;
 
-      for (const shard of [...shardsNumbersStr, "-1" as const]) {
-        const shardBlockHeight =
-          shard === "-1" ? syncState.Beacon.BlockHeight : syncState.Shard[shard].BlockHeight;
-        const latestBlockHeight = blockchainInfo.BestBlocks[shard].Height;
-        shardsBlockHeights[shard] = { node: shardBlockHeight, latest: latestBlockHeight };
+        for (const shard of [...shardsNumbersStr, "-1" as const]) {
+          const shardBlockHeight =
+            shard === "-1" ? syncState.Beacon.BlockHeight : syncState.Shard[shard].BlockHeight;
+          const latestBlockHeight = blockchainInfo.BestBlocks[shard].Height;
+          shardsBlockHeights[shard] = { node: shardBlockHeight, latest: latestBlockHeight };
+        }
+
+        result.shardsBlockHeights = shardsBlockHeights;
       }
 
-      result.shardsBlockHeights = shardsBlockHeights;
-    }
+      results.push(result);
 
-    results.push(result);
-  }
+      return;
+    }),
+    20
+  );
+  if (!cronsStarted) console.timeEnd("getAllSyncState");
 
   return results;
 }
