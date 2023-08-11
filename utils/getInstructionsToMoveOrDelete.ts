@@ -77,7 +77,7 @@ export default async function getInstructionsToMoveOrDelete(
     const nodesWithShardButNoBeacon = nodesInfo.filter(([, n]) => n.shard && n[n.shard] && !n.beacon);
     const shardsCount = {} as Record<ShardsNames, number>;
     for (const shard of shardsNames) shardsCount[shard] = 0;
-    for (const [, node] of nodesInfo) if (node.shard) shardsCount[node.shard]++;
+    for (const [, node] of nodesInfo) if (node.shard && node[node.shard]) shardsCount[node.shard]++;
 
     for (const [from, node] of nodesWithShardButNoBeacon) {
       const shard = node.shard;
