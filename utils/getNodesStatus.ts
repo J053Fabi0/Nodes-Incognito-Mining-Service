@@ -6,7 +6,8 @@ import getSyncState from "../incognito/getSyncState.ts";
 import { getNodes } from "../controllers/node.controller.ts";
 import getBlockchainInfo from "../incognito/getBlockchainInfo.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { ShardsStr, shardsNumbersStr } from "duplicatedFilesCleanerIncognito";
+import iteratePromisesInChunks from "./promisesYieldedInChunks.ts";
+import { ShardsStr, shardsNumbersStr, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 
 export type NodeStatusKeys =
   | "role"
@@ -140,13 +141,23 @@ async function getRawData(mpk: string | string[], fetchAll = false): Promise<Nod
 
   if (toFetch.length === 0) return results;
 
-  for (const chunk of _.chunk(mpks, 50)) {
-    const { data } = await axiod.post<NodeStatusRawData[]>("https://monitor.incognito.org/pubkeystat/stat", {
-      mpk: chunk.join(","),
-    });
-    results.push(...data);
+  const allData = await iteratePromisesInChunks(
+    _.chunk(mpks, 20).map(
+      (c) => () =>
+        repeatUntilNoError(
+          () =>
+            axiod.post<NodeStatusRawData[]>("https://monitor.incognito.org/pubkeystat/stat", { mpk: c.join(",") }),
+          3
+        )
+    ),
+    4
+  );
 
-    for (const d of data) lastRequests[d.MiningPubkey] = { data: d, time: Date.now() };
+  for (const data of allData) {
+    if (data.status === "fulfilled") {
+      results.push(...data.value.data);
+      for (const d of data.value.data) lastRequests[d.MiningPubkey] = { data: d, time: Date.now() };
+    }
   }
 
   return results;
