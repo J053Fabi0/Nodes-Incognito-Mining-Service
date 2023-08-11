@@ -24,6 +24,9 @@ interface MonitorTableProps {
 }
 
 export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: MonitorTableProps) {
+  const totalBeacon = isAdmin ? nodesInfo.reduce((n, [, a]) => n + +Boolean(a.beacon), 0) : 0;
+  const totalShard = isAdmin ? <> {nodesInfo.reduce((n, [, a]) => n + +Boolean(a.shard), 0)}</> : null;
+
   return (
     <div class="overflow-x-auto">
       <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
@@ -34,8 +37,8 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
             <th class={styles.th}>Online</th>
             <th class={styles.th}>Sync</th>
             <th class={styles.th}>Role</th>
-            <th class={styles.th}>Shard</th>
-            {isAdmin && <th class={styles.th}>Beacon</th>}
+            <th class={styles.th}>Shard{totalShard}</th>
+            {isAdmin && <th class={styles.th}>Beacon {totalBeacon}</th>}
           </tr>
         </thead>
         <tbody>
