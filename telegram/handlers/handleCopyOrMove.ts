@@ -43,6 +43,12 @@ export default async function handleCopyOrMove(
         })) as ShardsNames[] | Error);
   if (isError(shards)) return { successful: false, error: shards.message };
 
+  // check if from is not empty
+  const files = await duplicatedFilesCleaner.getFilesOfNodes({ nodes: [fromNodeIndex] });
+  for (const shard of shards)
+    if (files[shard][fromNodeIndex].length === 0)
+      return { successful: false, error: `Node ${fromNodeIndex} doesn't have any files for ${shard}.` };
+
   // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
   const lastIgnoreMinutes = ignore.docker.minutes;
   ignore.docker.minutes = Infinity;
@@ -51,6 +57,7 @@ export default async function handleCopyOrMove(
 
   // Stop the dockers regardless of the ignore value if at least one of them is online
   const dockerStatus = await dockerPs([fromNodeIndex, toNodeIndex]);
+
   const fromRunning = dockerStatus[fromNodeIndex].running;
   const toRunning = dockerStatus[toNodeIndex].running;
 
