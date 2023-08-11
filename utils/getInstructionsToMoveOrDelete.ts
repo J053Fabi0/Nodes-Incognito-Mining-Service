@@ -3,8 +3,8 @@ import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
 
 type InstructionToMoveOrDelete =
-  | { shards: ShardsNames[]; from: string; to: string; action: "move" }
-  | { shards: ShardsNames[]; from: string; to?: undefined; action: "delete" };
+  | { shards: ShardsNames[]; from: string; to?: undefined; action: "delete" }
+  | { shards: ShardsNames[]; from: string; to: string; action: "move" | "copy" };
 
 /**
  * @param nodesInfoByDockerIndex If undefined, it will be fetched from sortNodes()
@@ -40,12 +40,33 @@ export default async function getInstructionsToMoveOrDelete(
       else {
         const to = nodesWhoShouldHaveShard.shift();
         const existingInstruction = instructions.find(
-          ({ to: t, action, from }) => t === to && action === "move" && from === dockerIndex
+          ({ to: t, action, from }) => action === "move" && t === to && from === dockerIndex
         );
         if (existingInstruction) existingInstruction.shards.push(shard);
         else if (to) instructions.push({ to, from: dockerIndex, shards: [shard], action: "move" });
         else instructions.push({ from: dockerIndex, shards: [shard], action: "delete" });
       }
+    }
+  }
+
+  // if there are no shards to move or delete, see if there's any to copy
+  if (instructions.length === 0) {
+    const nodesWithBeacon = nodesInfo.filter(([, n]) => Boolean(n.beacon));
+
+    for (const [to, nodeWithBeacon] of nodesWithBeacon) {
+      const shard = nodeWithBeacon.shard;
+      if (!shard) continue;
+
+      const hasShard = Boolean(nodeWithBeacon[shard]);
+      if (hasShard) continue;
+
+      // it doesn't have a shard, so find a node that has it
+      const nodeWithShard = nodesWithBeacon.find(([, n]) => Boolean(n[shard]));
+      if (!nodeWithShard) continue;
+      const [from] = nodeWithShard;
+
+      // instructions.push({ to, from, action: "copy", shards: [shard] });
+      console.log(`copy ${from} ${to} ${shard}`);
     }
   }
 
