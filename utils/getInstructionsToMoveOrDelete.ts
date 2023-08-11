@@ -78,7 +78,6 @@ export default async function getInstructionsToMoveOrDelete(
     const shardsCount = {} as Record<ShardsNames, number>;
     for (const shard of shardsNames) shardsCount[shard] = 0;
     for (const [, node] of nodesInfo) if (node.shard) shardsCount[node.shard]++;
-    console.log(shardsCount);
 
     for (const [from, node] of nodesWithShardButNoBeacon) {
       const shard = node.shard;
@@ -89,7 +88,6 @@ export default async function getInstructionsToMoveOrDelete(
         shardsCount[shard]--;
       }
     }
-    console.log(shardsCount);
   }
 
   return instructions;
