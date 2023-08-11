@@ -30,9 +30,8 @@ function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, number
 }
 
 export default async function checkNodes() {
-  const { nodesInfoByDockerIndex, nodesStatusByDockerIndex } = await sortNodes(undefined, {
-    fromCacheIfConvenient: true,
-  });
+  const sortedNodes = await sortNodes(undefined, { fromCacheIfConvenient: true });
+  const { nodesInfoByDockerIndex, nodesStatusByDockerIndex } = sortedNodes;
   const nodesStatus = Object.values(nodesStatusByDockerIndex).filter((ns) => ns !== undefined) as NodeStatus[];
 
   const dockerStatuses: Record<string, NodeInfo | undefined> = flags.ignoreDocker
@@ -149,7 +148,7 @@ export default async function checkNodes() {
 
   // Check if there are shards that need to be moved or deleted
   if (!isBeingIgnored("autoMove") && !flags.ignoreDocker) {
-    const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete(nodesInfoByDockerIndex);
+    const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete(sortedNodes);
     if (instructionsToMoveOrDelete.length > 0)
       for (const instruction of instructionsToMoveOrDelete)
         if (instruction.action === "move") {
