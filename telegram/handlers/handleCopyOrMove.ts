@@ -62,6 +62,8 @@ export default async function handleCopyOrMove(
   const toRunning = dockerStatus[toNodeIndex].running;
 
   if (toRunning || fromRunning) {
+    if (fromRunning) setCache(fromNodeIndex, "docker.running", false);
+    if (toRunning) setCache(toNodeIndex, "docker.running", false);
     await Promise.all([
       options?.telegramMessages &&
         sendMessage("Stopping nodes...", undefined, { disable_notification: options?.silent }),
@@ -79,11 +81,14 @@ export default async function handleCopyOrMove(
       `from node ${fromNodeIndex} to node ${toNodeIndex}...`;
 
     // change the cache
-    const fromNodeIndexData = monitorInfoByDockerIndex[fromNodeIndex];
-    const toNodeIndexData = monitorInfoByDockerIndex[toNodeIndex];
-    if (toNodeIndexData) toNodeIndexData.nodeInfo[shard] = fromNodeIndexData?.nodeInfo[shard];
-    if (action === "move" && fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
+    const changeCache = () => {
+      const fromNodeIndexData = monitorInfoByDockerIndex[fromNodeIndex];
+      const toNodeIndexData = monitorInfoByDockerIndex[toNodeIndex];
+      if (toNodeIndexData) toNodeIndexData.nodeInfo[shard] = fromNodeIndexData?.nodeInfo[shard];
+      if (action === "move" && fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
+    };
 
+    changeCache();
     await Promise.all([
       options?.telegramMessages
         ? sendMessage(response, undefined, { disable_notification: options?.silent })
@@ -96,6 +101,7 @@ export default async function handleCopyOrMove(
           })
         : duplicatedFilesCleaner.move(fromNodeIndex, toNodeIndex, [shard]),
     ]);
+    changeCache();
 
     responses.push(response);
   }
@@ -105,6 +111,8 @@ export default async function handleCopyOrMove(
 
   // start the dockers if they were not being ignored
   if (toRunning || fromRunning) {
+    if (fromRunning) setCache(fromNodeIndex, "docker.running", true);
+    if (toRunning) setCache(toNodeIndex, "docker.running", true);
     await Promise.all([
       options?.telegramMessages &&
         sendMessage("Starting nodes...", undefined, { disable_notification: options?.silent }),

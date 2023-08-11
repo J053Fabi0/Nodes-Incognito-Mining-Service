@@ -50,6 +50,7 @@ async function deleteFiles(notStakedNodes: string[]) {
   );
 
   // Stop all the nodes
+  for (const node of nodesOnline) setCache(node, "docker.running", false);
   await Promise.allSettled(nodesOnline.map((dockerIndex) => docker(`inc_mainnet_${dockerIndex}`, "stop")));
   for (const node of nodesOnline) setCache(node, "docker.running", false);
 
@@ -59,6 +60,7 @@ async function deleteFiles(notStakedNodes: string[]) {
   );
 
   // Start them
+  for (const node of nodesOnline) setCache(node, "docker.running", true);
   await Promise.allSettled(nodesOnline.map((dockerIndex) => docker(`inc_mainnet_${dockerIndex}`, "start")));
   for (const node of nodesOnline) setCache(node, "docker.running", true);
 

@@ -56,6 +56,7 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   // Stop the docker regardless of the ignore value if at least one of them is online
   const fromRunning = (await dockerPs([fromNodeIndex]))[fromNodeIndex].running;
   if (fromRunning) {
+    setCache(fromNodeIndex, "docker.running", false);
     await Promise.all([
       options?.telegramMessages &&
         sendMessage("Stopping node...", undefined, { disable_notification: options?.silent }),
@@ -67,6 +68,14 @@ export default async function handleDelete(args: string[], options?: CommandOpti
 
   for (const shard of shards) {
     responses.push(`Deleting ${shard} from node ${fromNodeIndex}...`);
+
+    // change the cache
+    const changeCache = () => {
+      const fromNodeIndexData = monitorInfoByDockerIndex[fromNodeIndex];
+      if (fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
+    };
+
+    changeCache();
     await Promise.all([
       options?.telegramMessages
         ? sendMessage(`Deleting ${shard} from node ${fromNodeIndex}...`, undefined, {
@@ -77,10 +86,7 @@ export default async function handleDelete(args: string[], options?: CommandOpti
         recursive: true,
       }).catch(() => {}),
     ]);
-
-    // change the cache
-    const fromNodeIndexData = monitorInfoByDockerIndex[fromNodeIndex];
-    if (fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
+    changeCache();
   }
 
   // restore the ignore value
@@ -88,6 +94,7 @@ export default async function handleDelete(args: string[], options?: CommandOpti
 
   // start the docker if they were not being ignored
   if (fromRunning) {
+    setCache(fromNodeIndex, "docker.running", true);
     await Promise.all([
       options?.telegramMessages &&
         sendMessage("Starting node...", undefined, { disable_notification: options?.silent }),
