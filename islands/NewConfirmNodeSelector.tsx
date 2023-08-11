@@ -12,29 +12,21 @@ const styles = {
 
 interface NewConfirmNodeSelectorProps {
   validatorRegex: string;
-  validatorPublicRegex: string;
   validatorError: string | undefined;
-  validatorPublicError: string | undefined;
   defaultValidator: string;
-  defaultValidatorPublic: string;
-  inactiveNodes: Pick<Node, "number" | "validatorPublic" | "validator">[];
+  inactiveNodes: Pick<Node, "number" | "validator">[];
 }
 
 export default function NewConfirmNodeSelector({
   inactiveNodes,
   validatorRegex,
-  validatorPublicRegex,
   validatorError,
-  validatorPublicError,
   defaultValidator,
-  defaultValidatorPublic,
 }: NewConfirmNodeSelectorProps) {
   const validator = useSignal<string>(defaultValidator);
-  const validatorPublic = useSignal<string>(defaultValidatorPublic);
 
-  const handleExistingNode = (v: string, vp: string) => () => {
+  const handleExistingNode = (v: string) => () => {
     validator.value = v;
-    validatorPublic.value = vp;
   };
 
   return (
@@ -46,7 +38,7 @@ export default function NewConfirmNodeSelector({
           <Typography>Your inactive nodes:</Typography>
 
           {inactiveNodes.map((n, i) => (
-            <Button color={i % 2 ? "blue" : "green"} onClick={handleExistingNode(n.validator, n.validatorPublic)}>
+            <Button color={i % 2 ? "blue" : "green"} onClick={handleExistingNode(n.validator)}>
               {n.number}
             </Button>
           ))}
@@ -78,30 +70,6 @@ export default function NewConfirmNodeSelector({
               </Typography>
             )}
           </div>
-
-          <div>
-            <label for="validatorPublic" class={styles.label}>
-              Validator public key
-              <AiOutlineInfoCircle class="hidden sm:block" title="Used to check the node status" size={18} />
-              <span class="block sm:hidden">(used to check the node status)</span>
-            </label>
-
-            <input
-              required
-              type="text"
-              id="validatorPublic"
-              name="validatorPublic"
-              value={validatorPublic.value}
-              class="p-2 border border-gray-300 rounded w-full"
-              pattern={validatorPublicRegex}
-            />
-          </div>
-
-          {validatorPublicError && (
-            <Typography variant="p" class="mt-1 text-red-600 break-words">
-              {validatorPublicError}
-            </Typography>
-          )}
         </div>
 
         <div class="flex items-end justify-center gap-5 mt-3">

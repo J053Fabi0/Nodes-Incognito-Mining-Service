@@ -45,8 +45,8 @@ export default function AfterYouPay({ confirming, monitor, ...props }: AfterYouP
       <ol class={`list-decimal list-inside mt-2 ${getTypographyClass("lead")} flex gap-2 flex-col`}>
         {!confirming && (
           <li>
-            We'll ask you to create a new account in the Incognito app and give us the validator and validator
-            public keys. The private key stays with you.
+            We'll ask you to create a new keychain in the Incognito app and give us only its validator key. The
+            private key stays with you.
           </li>
         )}
 

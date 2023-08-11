@@ -1,9 +1,11 @@
 import { ObjectId } from "mongo/mod.ts";
 import isError from "../types/guards/isError.ts";
+import getNodeName from "../utils/getNodeName.ts";
 import createDocker from "./docker/createDocker.ts";
 import deleteDocker from "./docker/deleteDocker.ts";
 import constants, { adminId } from "../constants.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
+import getPublicValidatorKey from "../utils/getPublicValidatorKey.ts";
 import { changeNode, createNode, getNodes } from "../controllers/node.controller.ts";
 import createNginxConfig, { CreateNginxConfigResponse } from "./nginx/createNginxConfig.ts";
 
@@ -16,12 +18,13 @@ export interface CreateDockerAndConfigsOptions {
   validator: string;
   inactive?: boolean;
   dockerIndex?: number;
-  validatorPublic: string;
+  validatorPublic?: string;
 }
 
 export interface CreateDockerAndConfigsReturn {
   nodeId: ObjectId;
   dockerIndex: number;
+  validatorPublic: string;
   url: CreateNginxConfigResponse["url"];
   name: CreateNginxConfigResponse["name"];
 }
@@ -70,6 +73,10 @@ export default async function createDockerAndConfigs({
 
   const { name, url } = await createNginxConfig(clientIdStr, number, portAndIndex.rcpPort);
 
+  const validatorPublicForSure =
+    validatorPublic ??
+    (await getPublicValidatorKey(getNodeName(clientId, portAndIndex.dockerIndex), portAndIndex.dockerIndex));
+
   if (nodeId)
     // Update node in the database
     await changeNode(
@@ -95,18 +102,18 @@ export default async function createDockerAndConfigs({
         number,
         inactive,
         validator,
-        validatorPublic,
         rcpPort: portAndIndex.rcpPort,
         client: new ObjectId(clientId),
         dockerIndex: portAndIndex.dockerIndex,
+        validatorPublic: validatorPublicForSure,
         sendTo: [adminId, new ObjectId(clientId)],
       })
     )._id;
 
   // Update configurations only if the node is active
-  if (inactive === false) addNodeToConfigs(portAndIndex.dockerIndex, name, validatorPublic);
+  if (inactive === false) addNodeToConfigs(portAndIndex.dockerIndex, name, validatorPublicForSure);
 
-  return { name, url, nodeId, dockerIndex: portAndIndex.dockerIndex };
+  return { name, url, nodeId, dockerIndex: portAndIndex.dockerIndex, validatorPublic: validatorPublicForSure };
 }
 
 export function addNodeToConfigs(dockerIndex: number, name: string, validatorPublic: string) {

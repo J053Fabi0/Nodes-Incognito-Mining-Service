@@ -30,13 +30,12 @@ interface GetMiningInfoResponse {
 export default async function getPublicValidatorKey(
   nodeName: string,
   dockerIndex: string | number
-): Promise<string | null> {
+): Promise<string> {
   try {
     const miningInfo = await getMiningInfo(nodeName, dockerIndex);
     return miningInfo.MiningPublickey;
   } catch (e) {
-    await handleError(e);
-    return null;
+    throw handleError(e);
   }
 }
 
@@ -61,7 +60,7 @@ function getMiningInfo(nodeName: string, dockerIndex: string | number) {
 
       return result;
     },
-    60,
+    120,
     2
   );
 }

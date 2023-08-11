@@ -1,5 +1,4 @@
-import dayjs from "dayjs/mod.ts";
-import utc from "dayjs/plugin/utc.ts";
+import moment from "moment";
 import { ObjectId } from "mongo/mod.ts";
 import State from "../../types/state.type.ts";
 import redirect from "../../utils/redirect.ts";
@@ -13,6 +12,7 @@ import Node from "../../types/collections/node.type.ts";
 import { IS_PRODUCTION, WEBSITE_URL } from "../../env.ts";
 import isResponse from "../../types/guards/isResponse.ts";
 import IncognitoCli from "../../incognito/IncognitoCli.ts";
+import { sendHTMLMessage } from "../../telegram/sendMessage.ts";
 import AfterYouPay from "../../components/Nodes/AfterYouPay.tsx";
 import { getAccount } from "../../controllers/account.controller.ts";
 import { changeClient } from "../../controllers/client.controller.ts";
@@ -22,15 +22,12 @@ import NewConfirmNodeSelector from "../../islands/NewConfirmNodeSelector.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import { countNodes, getNode, getNodes } from "../../controllers/node.controller.ts";
 import { incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
-import { sendHTMLMessage } from "../../telegram/sendMessage.ts";
 
 export const styles = {
   th: "py-2 px-3 text-right",
   td: "py-2 px-3 text-left",
   ol: `list-decimal list-inside mt-2 ${getTypographyClass("lead")} flex gap-2 flex-col`,
 };
-
-dayjs.extend(utc);
 
 const NEW_URL = `${WEBSITE_URL}/nodes/new`;
 const MONITOR_URL = `${WEBSITE_URL}/nodes/monitor`;
@@ -45,8 +42,7 @@ interface NewNodeConfirmProps {
   defaultValidator: string;
   confirmationExpires: number;
   errors: ZodIssue[] | undefined;
-  defaultValidatorPublic: string;
-  inactiveNodes: Pick<Node, "number" | "validatorPublic" | "validator">[];
+  inactiveNodes: Pick<Node, "number" | "validator">[];
 }
 
 async function getDataOrRedirect(
@@ -58,7 +54,7 @@ async function getDataOrRedirect(
   if (savedPrvPrice.prvToPay !== 0 && isAdmin) savedPrvPrice.prvToPay = 0;
 
   // the confirmation expires in the previous time plus an exatra minutesOfPriceStability
-  const confirmationExpires = dayjs(savedPrvPrice.expires).utc().add(minutesOfPriceStability, "minute").valueOf();
+  const confirmationExpires = moment(savedPrvPrice.expires).utc().add(minutesOfPriceStability, "minute").valueOf();
 
   // if the confirmation expires, redirect to the new node page
   if (confirmationExpires <= Date.now()) return redirect(NEW_URL);
@@ -67,7 +63,7 @@ async function getDataOrRedirect(
 
   const inactiveNodes = await getNodes(
     { inactive: true, client: ctx.state.user!._id },
-    { projection: { validator: 1, validatorPublic: 1, number: 1 } }
+    { projection: { validator: 1, number: 1 } }
   );
 
   // if it is not enough balance to pay for the node, redirect to the new node page
@@ -82,7 +78,6 @@ async function getDataOrRedirect(
     prvToPay: savedPrvPrice.prvToPay,
     errors: ctx.state.session.flash("errors"),
     defaultValidator: ctx.state.session.flash("defaultValidator"),
-    defaultValidatorPublic: ctx.state.session.flash("defaultValidatorPublic"),
   };
 }
 
@@ -101,15 +96,10 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
 
     const form = await req.formData();
     ctx.state.session.flash("defaultValidator", form.get("validator") ?? "");
-    ctx.state.session.flash("defaultValidatorPublic", form.get("validatorPublic") ?? "");
     const { errors, ...data } = await validateFormData(form, {
       validator: z.string().trim().regex(IncognitoCli.validatorKeyRegex, "Invalid validator key."),
-      validatorPublic: z
-        .string()
-        .trim()
-        .regex(IncognitoCli.validatorPublicKeyRegex, "Invalid validator public key."),
     });
-    const validatedData = data.validatedData as { validator: string; validatorPublic: string };
+    const validatedData = data.validatedData as { validator: string };
 
     if (errors) {
       ctx.state.session.flash("errors", errors);
@@ -117,8 +107,8 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
     }
 
     const existingNode = await getNode(
-      { $or: [{ validator: validatedData.validator }, { validatorPublic: validatedData.validatorPublic }] },
-      { projection: { client: 1, validator: 1, validatorPublic: 1, inactive: 1 } }
+      { validator: validatedData.validator },
+      { projection: { client: 1, validator: 1, inactive: 1 } }
     );
 
     if (existingNode) {
@@ -137,15 +127,14 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
         return redirect(THIS_URL);
       } else {
         const vDiferent = existingNode.validator !== validatedData.validator;
-        const vpDifferent = existingNode.validatorPublic !== validatedData.validatorPublic;
 
         // if the keys are different
-        if (vDiferent || vpDifferent) {
+        if (vDiferent) {
           const e =
-            `The validator${vDiferent ? " public" : ""} key exists in one of your inactive nodes, ` +
-            `but the validator${vDiferent ? "" : " public"} key provided is different. ` +
-            `Its value is: ${vDiferent ? existingNode.validator : existingNode.validatorPublic}`;
-          ctx.state.session.flash("errors", [await newZodError(vDiferent ? "validator" : "validatorPublic", e)]);
+            `The validator key exists in one of your inactive nodes, ` +
+            `but the validator key provided is different. ` +
+            `Its value is: ${existingNode.validator}`;
+          ctx.state.session.flash("errors", [await newZodError("validator", e)]);
           return redirect(THIS_URL);
         }
       }
@@ -155,7 +144,6 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
       submitNode({
         clientId: ctx.state.user!._id,
         validator: validatedData.validator,
-        validatorPublic: validatedData.validatorPublic,
         cost: dataOrRedirect.prvToPay * 1e9 - incognitoFeeInt,
       }).then(async (data) => {
         if (data.success) {
@@ -172,7 +160,6 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
 
     // delete default values if the values are valid
     ctx.state.session.flash("defaultValidator");
-    ctx.state.session.flash("defaultValidatorPublic");
     return redirect(MONITOR_URL);
   },
 };
@@ -181,7 +168,6 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
   const { confirmationExpires, balance, prvToPay, errors, inactiveNodes } = data;
 
   const validatorError = error(errors, "validator");
-  const validatorPublicError = error(errors, "validatorPublic");
 
   return (
     <>
@@ -265,11 +251,8 @@ export default function newConfirm({ data }: PageProps<NewNodeConfirmProps>) {
       <NewConfirmNodeSelector
         inactiveNodes={inactiveNodes}
         validatorError={validatorError?.message}
-        validatorPublicError={validatorPublicError?.message}
         validatorRegex={IncognitoCli.validatorKeyRegex.source}
-        validatorPublicRegex={IncognitoCli.validatorPublicKeyRegex.source}
         defaultValidator={data.defaultValidator}
-        defaultValidatorPublic={data.defaultValidatorPublic}
       />
     </>
   );

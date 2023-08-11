@@ -162,7 +162,7 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
 
   // Activate the node and configs
   await changeNode({ dockerIndex }, { $set: { inactive: false } });
-  addNodeToConfigs(dockerIndex, success.name, newNode.validatorPublic);
+  addNodeToConfigs(dockerIndex, success.name, success.validatorPublic);
 
   return resolveAndForget(newNode, pending, true);
 }
