@@ -152,7 +152,7 @@ async function getRawData(mpk: string | string[], fetchAll = false): Promise<Nod
           3
         )
     ),
-    8
+    6
   );
   console.timeEnd(timerName);
 
