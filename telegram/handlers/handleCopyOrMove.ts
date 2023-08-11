@@ -81,12 +81,15 @@ export default async function handleCopyOrMove(
       `from node ${fromNodeIndex} to node ${toNodeIndex}...`;
 
     // change the cache
-    const changeCache = () => {
+    const changeCache = (() => {
       const fromNodeIndexData = monitorInfoByDockerIndex[fromNodeIndex];
       const toNodeIndexData = monitorInfoByDockerIndex[toNodeIndex];
-      if (toNodeIndexData) toNodeIndexData.nodeInfo[shard] = fromNodeIndexData?.nodeInfo[shard];
-      if (action === "move" && fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
-    };
+      const fromShard = fromNodeIndexData?.nodeInfo[shard];
+      return () => {
+        if (toNodeIndexData) toNodeIndexData.nodeInfo[shard] = fromShard;
+        if (action === "move" && fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
+      };
+    })();
 
     changeCache();
     await Promise.all([
