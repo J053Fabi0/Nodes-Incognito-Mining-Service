@@ -1,11 +1,11 @@
 import { join } from "std/path/mod.ts";
 import sendMessage from "../sendMessage.ts";
-import { ignore } from "../../utils/variables.ts";
 import isError from "../../types/guards/isError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import isBeingIgnored from "../../utils/isBeingIgnored.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
+import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
 import { ShardsNames, dockerPs, docker, shardsNames } from "duplicatedFilesCleanerIncognito";
 
 export default async function handleDelete(args: string[], options?: CommandOptions): Promise<CommandResponse> {
@@ -66,6 +66,7 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   }
 
   for (const shard of shards) {
+    responses.push(`Deleting ${shard} from node ${fromNodeIndex}...`);
     await Promise.all([
       options?.telegramMessages
         ? sendMessage(`Deleting ${shard} from node ${fromNodeIndex}...`, undefined, {
@@ -76,7 +77,10 @@ export default async function handleDelete(args: string[], options?: CommandOpti
         recursive: true,
       }).catch(() => {}),
     ]);
-    responses.push(`Deleting ${shard} from node ${fromNodeIndex}...`);
+
+    // change the cache
+    const fromNodeIndexData = monitorInfoByDockerIndex[fromNodeIndex];
+    if (fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
   }
 
   // restore the ignore value

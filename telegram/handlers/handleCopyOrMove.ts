@@ -1,12 +1,11 @@
 import sendMessage from "../sendMessage.ts";
-import { ignore } from "../../utils/variables.ts";
 import isError from "../../types/guards/isError.ts";
 import validateItems from "../../utils/validateItems.ts";
-import isBeingIgnored from "../../utils/isBeingIgnored.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
+import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
 
 export default async function handleCopyOrMove(
   args: string[],
@@ -67,6 +66,12 @@ export default async function handleCopyOrMove(
       `${action === "copy" ? "Copying" : "Moving"} ${shard} ` +
       `from node ${fromNodeIndex} to node ${toNodeIndex}...`;
 
+    // change the cache
+    const fromNodeIndexData = monitorInfoByDockerIndex[fromNodeIndex];
+    const toNodeIndexData = monitorInfoByDockerIndex[toNodeIndex];
+    if (toNodeIndexData) toNodeIndexData.nodeInfo[shard] = fromNodeIndexData?.nodeInfo[shard];
+    if (action === "move" && fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
+
     await Promise.all([
       options?.telegramMessages
         ? sendMessage(response, undefined, { disable_notification: options?.silent })
@@ -87,11 +92,10 @@ export default async function handleCopyOrMove(
   ignore.docker.minutes = lastIgnoreMinutes;
 
   // start the dockers if they were not being ignored
-  if (isBeingIgnored("docker") && (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running)) {
+  if (dockerStatus[fromNodeIndex].running || dockerStatus[toNodeIndex].running) {
     await Promise.all([
-      options?.telegramMessages
-        ? sendMessage("Starting nodes...", undefined, { disable_notification: options?.silent })
-        : null,
+      options?.telegramMessages &&
+        sendMessage("Starting nodes...", undefined, { disable_notification: options?.silent }),
       dockerStatus[toNodeIndex].running && docker(`inc_mainnet_${toNodeIndex}`, "start"),
       dockerStatus[fromNodeIndex].running && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
     ]);
