@@ -151,8 +151,10 @@ export default async function checkNodes() {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete(sortedNodes);
     if (instructionsToMoveOrDelete.length > 0)
       for (const instruction of instructionsToMoveOrDelete)
-        if (instruction.action === "move") {
-          submitCommand(`move ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`);
+        if (instruction.action === "move" || instruction.action === "copy") {
+          submitCommand(
+            `${instruction.action} ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`
+          );
         } else submitCommand(`delete ${instruction.from} ${instruction.shards.join(" ")}`);
   }
 }
