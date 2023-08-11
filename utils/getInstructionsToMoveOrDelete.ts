@@ -88,7 +88,6 @@ export default async function getInstructionsToMoveOrDelete(
         shardsCount[shard]--;
       }
     }
-    console.log(shardsCount);
   }
 
   return instructions;
