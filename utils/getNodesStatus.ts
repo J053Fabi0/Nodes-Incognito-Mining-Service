@@ -60,7 +60,6 @@ export default async function getNodesStatus({
   const rawData = await getRawData(nodes.map((n) => n.validatorPublic));
 
   const blockchainInfo = fullData ? await getBlockchainInfo() : null;
-  console.log(blockchainInfo);
 
   const results: NodeStatus[] = [];
 
@@ -86,6 +85,7 @@ export default async function getNodesStatus({
 
       thisIf: if (blockchainInfo) {
         const syncState = await repeatUntilNoError(() => getSyncState(node.validatorPublic), 5);
+        if (!syncState) console.log("syncState is null");
         if (!syncState) break thisIf;
 
         const shardsBlockHeights = {} as Exclude<NodeStatus["shardsBlockHeights"], null>;
