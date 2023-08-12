@@ -48,6 +48,6 @@ function startCrons() {
   // cache the monitor responses every 10 seconds
   new Cron(`*/${cacheMonitorInfoEvery} * * * * *`, { protect: true, ...options }, cacheMonitor);
 
-  // every 2 hours
-  new Cron("20 */2 * * *", { protect: true, ...options }, copyPendingBeacons);
+  // every hour copy the pending beacons
+  new Cron("20 */1 * * *", { protect: true, ...options }, copyPendingBeacons);
 }
