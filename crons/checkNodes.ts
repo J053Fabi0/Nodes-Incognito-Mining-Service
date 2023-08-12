@@ -36,6 +36,7 @@ function setOrRemoveErrorTime(
 }
 
 export default async function checkNodes() {
+  console.time("checkNodes");
   const sortedNodes = await sortNodes(undefined, { fromCacheIfConvenient: true });
   const { nodesInfoByDockerIndex, nodesStatusByDockerIndex } = sortedNodes;
   const nodesStatus = Object.values(nodesStatusByDockerIndex).filter((ns) => ns !== undefined) as NodeStatus[];
@@ -172,6 +173,7 @@ export default async function checkNodes() {
         if (commands.pending.findIndex((c) => c.command === command) === -1) submitCommand(command);
       }
   }
+  console.timeEnd("checkNodes");
 }
 
 async function handleErrors(
