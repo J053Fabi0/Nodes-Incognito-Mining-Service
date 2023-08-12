@@ -12,7 +12,16 @@ interface InputProps {
   path: string;
 }
 
-const dateKeys = ["expires", "removeOnDate", "from", "createdAt", "date", "lastAccesed"];
+const dateKeys = [
+  "from",
+  "date",
+  "expires",
+  "createdAt",
+  "startedAt",
+  "notifiedAt",
+  "lastAccesed",
+  "removeOnDate",
+];
 const keysToIgnore = ["handler"];
 
 export default function EditableObjectInput({ name, value, path }: InputProps) {

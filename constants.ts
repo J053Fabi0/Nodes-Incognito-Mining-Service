@@ -28,6 +28,8 @@ interface Json {
   maxOnlineMinutesNotStaked: number;
   /** The min shards to keep for each one. For example, always keep at least 2 shard4. */
   minShardsToKeep: number;
+  /** Minutes to repeat an alert */
+  minutesToRepeatAlert: number;
 }
 
 const schema = joi.object<Json>({
@@ -48,6 +50,7 @@ const schema = joi.object<Json>({
   maxOnlineNodesNotStaked: joi.number().integer().allow(0).default(3),
   maxOnlineMinutesNotStaked: joi.number().integer().min(1).default(20),
   minShardsToKeep: joi.number().integer().min(1).default(2),
+  minutesToRepeatAlert: joi.number().integer().min(1).default(30),
 });
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
@@ -106,6 +109,7 @@ export const BAR_COLORS = [
 ] as const;
 export const { waitingTimes } = json;
 export const { minShardsToKeep } = json;
+export const { minutesToRepeatAlert } = json;
 export const { cacheMonitorInfoEvery } = json;
 export const { maxDiskPercentageUsage } = json;
 export const { maxOnlineNodesNotStaked } = json;

@@ -1,4 +1,5 @@
 import {
+  ErrorInfo,
   ErrorTypes,
   AllErrorTypes,
   allErrorTypes,
@@ -13,8 +14,6 @@ import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
 import getMinutesSinceError from "../../utils/getMinutesSinceError.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
-
-type NodesByPublicKey = Record<string, { name: string; dockerIndex: number }>;
 
 export default async function handleErrorsInfo(
   rawErrorCodes: string[],
@@ -35,14 +34,16 @@ export default async function handleErrorsInfo(
 
   let text = "";
 
-  for (const [error, date] of Object.entries(lastGlobalErrorTimes) as [GlobalErrorTypes, number][]) {
+  for (const [error, date] of Object.entries(lastGlobalErrorTimes) as [GlobalErrorTypes, ErrorInfo][]) {
     if (!errorCodesToShow.includes(error)) continue;
-    text += `<code>${error}</code><code>: </code><code>${getMinutesSinceError(date).toFixed(1)} min</code>\n`;
+    text +=
+      `<code>${error}</code><code>: </code>` +
+      `<code>${getMinutesSinceError(date.startedAt).toFixed(1)} min</code>\n`;
   }
   if (text) text += "\n";
 
   for (const dockerIndex of Object.keys(lastErrorTimes)) {
-    const errors = (Object.entries(lastErrorTimes[dockerIndex]) as [ErrorTypes, number][]).filter(([error]) =>
+    const errors = (Object.entries(lastErrorTimes[dockerIndex]) as [ErrorTypes, ErrorInfo][]).filter(([error]) =>
       errorCodesToShow.includes(error)
     );
     if (!errors.length) continue;
@@ -51,7 +52,7 @@ export default async function handleErrorsInfo(
       `<code>${escapeHtml(
         objectToTableText(
           Object.fromEntries(
-            errors.map(([error, date]) => [error, `${getMinutesSinceError(date).toFixed(1)} min`])
+            errors.map(([error, { startedAt }]) => [error, `${getMinutesSinceError(startedAt).toFixed(1)} min`])
           )
         )
       )

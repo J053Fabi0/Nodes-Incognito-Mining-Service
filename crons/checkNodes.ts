@@ -1,5 +1,6 @@
 import {
   lastRoles,
+  ErrorInfo,
   errorTypes,
   AllErrorTypes,
   lastErrorTimes,
@@ -20,13 +21,18 @@ import { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
 import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
 import calculateOnlineQueue from "../utils/calculateOnlineQueue.ts";
 import submitCommand, { commands } from "../telegram/submitCommand.ts";
-import { waitingTimes, maxDiskPercentageUsage } from "../constants.ts";
 import handleTextMessage from "../telegram/handlers/handleTextMessage.ts";
 import getInstructionsToMoveOrDelete from "../utils/getInstructionsToMoveOrDelete.ts";
+import { waitingTimes, maxDiskPercentageUsage, minutesToRepeatAlert } from "../constants.ts";
 
-function setOrRemoveErrorTime(set: boolean, lastErrorTime: Record<string, number | undefined>, errorKey: string) {
-  if (set) lastErrorTime[errorKey] = lastErrorTime[errorKey] || Date.now();
-  else delete lastErrorTime[errorKey];
+function setOrRemoveErrorTime(
+  set: boolean,
+  lastErrorTime: Partial<Record<AllErrorTypes, ErrorInfo>>,
+  errorKey: AllErrorTypes
+): void {
+  if (set) {
+    if (!lastErrorTime[errorKey]) lastErrorTime[errorKey] = { startedAt: Date.now(), notifiedAt: 0 };
+  } else delete lastErrorTime[errorKey];
 }
 
 export default async function checkNodes() {
@@ -170,23 +176,27 @@ export default async function checkNodes() {
 
 async function handleErrors(
   fixes: string[],
-  date: number | undefined,
-  lastDate: number | undefined,
+  date: ErrorInfo | undefined,
+  lastDate: ErrorInfo | undefined,
   errorKey: AllErrorTypes,
   dockerIndex?: number
 ) {
   if (date) {
-    const minutes = getMinutesSinceError(date);
+    const minutesSinceError = getMinutesSinceError(date.startedAt);
+    const minutesSinceReported = getMinutesSinceError(date.notifiedAt);
     if (
+      minutesSinceReported >= minutesToRepeatAlert &&
       // if it has been present for longer than established
-      minutes >= waitingTimes[errorKey] &&
+      minutesSinceError >= waitingTimes[errorKey] &&
       // and it's not being ignored
       !isBeingIgnored(errorKey)
-    )
-      await handleNodeError(errorKey, dockerIndex, minutes);
+    ) {
+      await handleNodeError(errorKey, dockerIndex, minutesSinceError);
+      date.notifiedAt = Date.now();
+    }
   }
   // if it had a problem before but it's now fixed, report it even if it's being ignored
-  else if (lastDate && getMinutesSinceError(lastDate) >= waitingTimes[errorKey])
+  else if (lastDate && getMinutesSinceError(lastDate.startedAt) >= waitingTimes[errorKey])
     fixes.push(
       (dockerIndex ? `<b>${dockerIndex}</b> - ` : "") +
         `<code>${escapeHtml(errorKey)}</code><code>: Fixed ✅</code>`

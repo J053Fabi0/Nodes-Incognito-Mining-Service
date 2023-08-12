@@ -20,11 +20,12 @@ export const globalErrorTypes: GlobalErrorTypes[] = ["lowDiskSpace"];
 export type AllErrorTypes = ErrorTypes | GlobalErrorTypes;
 export const allErrorTypes: readonly AllErrorTypes[] = [...errorTypes, ...globalErrorTypes];
 
-export type LastErrorTime = Partial<Record<ErrorTypes, number>>;
+export type ErrorInfo = { startedAt: number; notifiedAt: number };
+export type LastErrorTime = Partial<Record<ErrorTypes, ErrorInfo>>;
 /** Docker index as key of lastErrorTimes. The number is Date.now() */
 export const lastErrorTimes = await getProxyAndRedisValue<Record<string, LastErrorTime>>("lastErrorTimes", {});
 
-export type LastGlobalErrorTime = Partial<Record<GlobalErrorTypes, number>>;
+export type LastGlobalErrorTime = Partial<Record<GlobalErrorTypes, ErrorInfo>>;
 export const lastGlobalErrorTimes = await getProxyAndRedisValue<LastGlobalErrorTime>("lastGlobalErrorTimes", {});
 
 export type Ignore = Record<AllErrorTypes | "docker" | "autoMove", { minutes: number; from: number }>;
