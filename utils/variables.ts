@@ -21,7 +21,7 @@ export type AllErrorTypes = ErrorTypes | GlobalErrorTypes;
 export const allErrorTypes: readonly AllErrorTypes[] = [...errorTypes, ...globalErrorTypes];
 
 export type LastErrorTime = Partial<Record<ErrorTypes, number>>;
-// Node's public validator key as key of lastErrorTimes
+/** Docker index as key of lastErrorTimes. The number is Date.now() */
 export const lastErrorTimes = await getProxyAndRedisValue<Record<string, LastErrorTime>>("lastErrorTimes", {});
 
 export type LastGlobalErrorTime = Partial<Record<GlobalErrorTypes, number>>;

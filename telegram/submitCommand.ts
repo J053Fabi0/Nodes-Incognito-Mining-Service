@@ -118,7 +118,7 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
       }
 
       case "reset":
-        for (const key of Object.keys(lastErrorTimes)) delete lastErrorTimes[key];
+        for (const dockerIndex of Object.keys(lastErrorTimes)) delete lastErrorTimes[dockerIndex];
         if (options?.telegramMessages)
           await sendMessage("Reset successful.", undefined, { disable_notification: options?.silent });
         return { successful: true, response: "Reset successful." };

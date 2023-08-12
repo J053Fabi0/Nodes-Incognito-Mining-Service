@@ -60,8 +60,8 @@ export default async function checkNodes() {
 
   // Check for errors in each node
   for (const nodeStatus of nodesStatus) {
-    if (!(nodeStatus.validatorPublic in lastErrorTimes)) lastErrorTimes[nodeStatus.validatorPublic] = {};
-    const { [nodeStatus.validatorPublic]: lastErrorTime } = lastErrorTimes;
+    if (!(nodeStatus.dockerIndex in lastErrorTimes)) lastErrorTimes[nodeStatus.dockerIndex] = {};
+    const { [nodeStatus.dockerIndex]: lastErrorTime } = lastErrorTimes;
 
     // update the last role of the node
     lastRoles[nodeStatus.dockerIndex] = {

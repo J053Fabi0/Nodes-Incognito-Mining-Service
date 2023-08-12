@@ -7,7 +7,6 @@ import {
   lastGlobalErrorTimes,
 } from "../../utils/variables.ts";
 import { escapeHtml } from "escapeHtml";
-import constants from "../../constants.ts";
 import { sendHTMLMessage } from "../sendMessage.ts";
 import isError from "../../types/guards/isError.ts";
 import objectToTableText from "../objectToTableText.ts";
@@ -42,16 +41,11 @@ export default async function handleErrorsInfo(
   }
   if (text) text += "\n";
 
-  const nodesByPublicKey: NodesByPublicKey = Object.fromEntries(
-    constants.map(({ validatorPublic, ...data }) => [validatorPublic, data])
-  );
-
-  for (const publicKey of Object.keys(lastErrorTimes)) {
-    const errors = (Object.entries(lastErrorTimes[publicKey]) as [ErrorTypes, number][]).filter(([error]) =>
+  for (const dockerIndex of Object.keys(lastErrorTimes)) {
+    const errors = (Object.entries(lastErrorTimes[dockerIndex]) as [ErrorTypes, number][]).filter(([error]) =>
       errorCodesToShow.includes(error)
     );
     if (!errors.length) continue;
-    const { dockerIndex } = nodesByPublicKey[publicKey];
     text +=
       `<code>${dockerIndex}</code>\n` +
       `<code>${escapeHtml(
