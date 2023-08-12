@@ -26,24 +26,27 @@ export default function getShouldBeOnline(
   if (useSortOrder && rolesThatUseSortOrder.includes(nodeStatus.role)) {
     const index = nodesInfoByDockerIndex.findIndex(([index]) => +index === nodeStatus.dockerIndex);
     if (index === -1) return false;
-    return index + 1 <= maxNodesOnline;
+    return index + 1 <= maxNodesOnline && switchMethod(nodeStatus);
   }
   //
-  else
-    switch (nodeStatus.role) {
-      case "PENDING":
-        return nodeStatus.epochsToNextEvent <= minEpochsToBeOnlinePending;
+  else return switchMethod(nodeStatus);
+}
 
-      case "SYNCING":
-        return nodeStatus.epochsToNextEvent <= minEpochsToBeOnlineSyncing;
+function switchMethod(nodeStatus: PartialNodeStatus) {
+  switch (nodeStatus.role) {
+    case "PENDING":
+      return nodeStatus.epochsToNextEvent <= minEpochsToBeOnlinePending;
 
-      case "NOT_STAKED": {
-        const index = onlineQueue.NOT_STAKED.findIndex((ns) => ns.dockerIndex === nodeStatus.dockerIndex);
-        if (index === -1) return false;
-        return index + 1 <= maxOnlineNodesNotStaked;
-      }
+    case "SYNCING":
+      return nodeStatus.epochsToNextEvent <= minEpochsToBeOnlineSyncing;
 
-      default:
-        return false;
+    case "NOT_STAKED": {
+      const index = onlineQueue.NOT_STAKED.findIndex((ns) => ns.dockerIndex === nodeStatus.dockerIndex);
+      if (index === -1) return false;
+      return index + 1 <= maxOnlineNodesNotStaked;
     }
+
+    default:
+      return false;
+  }
 }
