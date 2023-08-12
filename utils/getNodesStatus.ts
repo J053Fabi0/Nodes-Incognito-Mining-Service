@@ -60,6 +60,7 @@ export default async function getNodesStatus({
   const rawData = await getRawData(nodes.map((n) => n.validatorPublic));
 
   const blockchainInfo = fullData ? await getBlockchainInfo() : null;
+  console.log(blockchainInfo);
 
   const results: NodeStatus[] = [];
 
