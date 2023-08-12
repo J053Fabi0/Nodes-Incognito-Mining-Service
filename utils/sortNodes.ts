@@ -6,6 +6,7 @@ import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
+import { cronsStarted } from "../crons/crons.ts";
 
 export const rolesOrder: ((nodeStatus: NodeStatus) => boolean)[] = [
   ({ role }) => role === "COMMITTEE",
@@ -156,7 +157,10 @@ async function getNodesInfoByDockerIndex(
     if (!IS_PRODUCTION)
       return nodesInfoByDockerIndexTest.filter(([doIdx]) => nodesToFetch.some((n) => `${n}` === doIdx));
 
+    if (!cronsStarted) console.time("getInfo");
     const nodesInfo = await duplicatedFilesCleaner.getInfo(nodesToFetch);
+    if (!cronsStarted) console.timeEnd("getInfo");
+
     return Object.entries(nodesInfo).map(
       ([dockerIndex, info]) =>
         [
