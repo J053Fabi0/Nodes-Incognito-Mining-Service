@@ -24,7 +24,7 @@ function startCrons() {
 
   new Cron("*/5 * * * *", options, checkEarnings);
 
-  new Cron("*/30 * * * * *", { protect: true, ...options }, checkNodes);
+  new Cron("*/10 * * * * *", { protect: true, ...options }, checkNodes);
 
   // every minute, check the accounts that have used the website in the last 5 minutes
   new Cron("*/1 * * * *", { protect: true, ...options }, checkAccounts.bind(null, 5, Unit.minute));
