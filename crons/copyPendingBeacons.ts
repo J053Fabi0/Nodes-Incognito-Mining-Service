@@ -9,11 +9,12 @@ export default async function copyPendingBeacons() {
   const nodesInfo = Object.fromEntries(nodesInfoByDockerIndex);
 
   const pendingNodes = Object.values(nodesStatusByDockerIndex).filter(
-    (node) => node?.role === "PENDING" && nodesInfo[node.dockerIndex].beacon
+    (node) => (node?.role === "PENDING" || node?.role === "SYNCING") && nodesInfo[node.dockerIndex].beacon
   ) as NodeStatus[];
 
   if (pendingNodes.length <= 1) return;
 
   const firstNode = pendingNodes.shift()!.dockerIndex;
-  for (const { dockerIndex } of pendingNodes) submitCommand(`copy ${firstNode} ${dockerIndex} beacon`);
+  for (const { dockerIndex } of pendingNodes.slice(0, 10))
+    submitCommand(`copy ${firstNode} ${dockerIndex} beacon`);
 }

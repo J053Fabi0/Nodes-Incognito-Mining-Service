@@ -49,5 +49,5 @@ function startCrons() {
   new Cron(`*/${cacheMonitorInfoEvery} * * * * *`, { protect: true, ...options }, cacheMonitor);
 
   // every hour copy the pending beacons
-  new Cron("20 */1 * * *", { protect: true, ...options }, copyPendingBeacons);
+  new Cron("20 */1 * * *", options, copyPendingBeacons);
 }
