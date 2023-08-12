@@ -2,7 +2,6 @@ import checkNodes from "./checkNodes.ts";
 import Cron, { CronOptions } from "croner";
 import cacheMonitor from "./cacheMonitor.ts";
 import checkEarnings from "./checkEarnings.ts";
-import checkKeysMatch from "./checkKeysMatch.ts";
 import handleError from "../utils/handleError.ts";
 import checkMonthlyFee from "./checkMonthlyFee.ts";
 import checkAccounts, { Unit } from "./checkAccounts.ts";
@@ -47,7 +46,4 @@ function startCrons() {
 
   // cache the monitor responses every 10 seconds
   new Cron(`*/${cacheMonitorInfoEvery} * * * * *`, { protect: true, ...options }, cacheMonitor);
-
-  // every day at 00:00
-  new Cron("0 0 * * *", options, checkKeysMatch);
 }
