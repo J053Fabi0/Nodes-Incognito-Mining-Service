@@ -26,7 +26,7 @@ export default function getShouldBeOnline(
   if (useSortOrder && rolesThatUseSortOrder.includes(nodeStatus.role)) {
     const index = nodesInfoByDockerIndex.findIndex(([index]) => +index === nodeStatus.dockerIndex);
     if (index === -1) return false;
-    return index + 1 <= maxNodesOnline && switchMethod(nodeStatus);
+    return index + 1 <= maxNodesOnline;
   }
   //
   else return switchMethod(nodeStatus);
