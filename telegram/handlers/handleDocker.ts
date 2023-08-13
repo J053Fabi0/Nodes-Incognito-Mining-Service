@@ -32,6 +32,8 @@ export default async function handleDocker(
   const responses: string[] = [];
 
   for (const node of nodes) {
+    setCache(node, "docker.running", action === "start");
+
     await docker(`inc_mainnet_${node}`, action);
 
     setCache(node, "docker.running", action === "start");
