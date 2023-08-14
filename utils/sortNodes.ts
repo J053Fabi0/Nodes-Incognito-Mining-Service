@@ -81,7 +81,7 @@ export default async function sortNodes(
       [
         ([dockerIndex]) => {
           const nodeStatus = nodesStatusByDockerIndex[dockerIndex];
-          if (!nodeStatus) return rolesOrder.length;
+          if (!nodeStatus) return rolesOrder.length - 1;
 
           const roleIndex = rolesOrder.findIndex((fn) => fn(nodeStatus));
 
