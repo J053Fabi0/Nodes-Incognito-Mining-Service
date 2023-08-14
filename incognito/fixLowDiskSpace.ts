@@ -4,7 +4,6 @@ import { NodeRoles } from "../utils/getNodesStatus.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import { lastGlobalErrorTimes } from "../utils/variables.ts";
 import checkGlobalErrors from "../utils/checkGlobalErrors.ts";
-import { nodesInfoByDockerIndexTest } from "../utils/testingConstants.ts";
 
 const rolesOrder: NodeRoles[] = ["PENDING", "SYNCING", "COMMITTEE"];
 
@@ -16,7 +15,7 @@ export default async function fixLowDiskSpace() {
   });
   const nodesInfo = Object.fromEntries(nodesInfoByDockerIndex);
 
-  const pendingNodes = nodesInfoByDockerIndexTest
+  const pendingNodes = nodesInfoByDockerIndex
     .filter(([dockerIndex]) => {
       const node = nodesStatusByDockerIndex[dockerIndex];
 
