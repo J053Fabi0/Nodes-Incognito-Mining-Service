@@ -1,4 +1,3 @@
-import { minShardsToKeep } from "../constants.ts";
 import sortNodes, { SortedNodes } from "./sortNodes.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
@@ -43,7 +42,7 @@ export default async function getInstructionsToMoveOrDelete(
         );
         if (existingInstruction) existingInstruction.shards.push(shard);
         else if (to) instructions.push({ to, from: dockerIndex, shards: [shard], action: "move" });
-        else instructions.push({ from: dockerIndex, shards: [shard], action: "delete" });
+        // else instructions.push({ from: dockerIndex, shards: [shard], action: "delete" });
       }
     }
   }
@@ -74,20 +73,20 @@ export default async function getInstructionsToMoveOrDelete(
     }
 
     // delete shards that are not being used
-    const nodesWithShardButNoBeacon = nodesInfo.filter(([, n]) => n.shard && n[n.shard] && !n.beacon);
-    const shardsCount = {} as Record<ShardsNames, number>;
-    for (const shard of shardsNames) shardsCount[shard] = 0;
-    for (const [, node] of nodesInfo) if (node.shard && node[node.shard]) shardsCount[node.shard]++;
+    // const nodesWithShardButNoBeacon = nodesInfo.filter(([, n]) => n.shard && n[n.shard] && !n.beacon);
+    // const shardsCount = {} as Record<ShardsNames, number>;
+    // for (const shard of shardsNames) shardsCount[shard] = 0;
+    // for (const [, node] of nodesInfo) if (node.shard && node[node.shard]) shardsCount[node.shard]++;
 
-    for (const [from, node] of nodesWithShardButNoBeacon) {
-      const shard = node.shard;
-      if (!shard) continue;
+    // for (const [from, node] of nodesWithShardButNoBeacon) {
+    //   const shard = node.shard;
+    //   if (!shard) continue;
 
-      if (shardsCount[shard] > minShardsToKeep) {
-        instructions.push({ from, action: "delete", shards: [shard] });
-        shardsCount[shard]--;
-      }
-    }
+    //   if (shardsCount[shard] > minShardsToKeep) {
+    //     instructions.push({ from, action: "delete", shards: [shard] });
+    //     shardsCount[shard]--;
+    //   }
+    // }
   }
 
   return instructions;
