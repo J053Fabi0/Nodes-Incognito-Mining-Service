@@ -1,14 +1,22 @@
+import moment from "moment";
 import { byNumber, byValues } from "sort-es";
 import sortNodes from "../utils/sortNodes.ts";
 import { NodeRoles } from "../utils/getNodesStatus.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import { lastGlobalErrorTimes } from "../utils/variables.ts";
 import checkGlobalErrors from "../utils/checkGlobalErrors.ts";
+import { minutesBetweenFixLowDiskSpace } from "../constants.ts";
 
 const rolesOrder: NodeRoles[] = ["PENDING", "SYNCING", "COMMITTEE"];
 
+let lastAttempt = 0;
+
 export default async function fixLowDiskSpace() {
   if (!lastGlobalErrorTimes.lowDiskSpace) return;
+
+  const minutesSinceLastAttempt = moment().diff(lastAttempt, "minutes");
+  if (minutesSinceLastAttempt < minutesBetweenFixLowDiskSpace) return;
+  lastAttempt = Date.now();
 
   const { nodesStatusByDockerIndex, nodesInfoByDockerIndex } = await sortNodes(undefined, {
     fromCacheIfConvenient: true,

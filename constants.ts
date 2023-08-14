@@ -30,6 +30,8 @@ interface Json {
   minShardsToKeep: number;
   /** Minutes to repeat an alert */
   minutesToRepeatAlert: number;
+  /** Minutes between attempts to fix low disk space */
+  minutesBetweenFixLowDiskSpace: number;
 }
 
 const schema = joi.object<Json>({
@@ -51,6 +53,7 @@ const schema = joi.object<Json>({
   maxOnlineMinutesNotStaked: joi.number().integer().min(1).default(20),
   minShardsToKeep: joi.number().integer().min(1).default(2),
   minutesToRepeatAlert: joi.number().integer().min(1).default(30),
+  minutesBetweenFixLowDiskSpace: joi.number().integer().min(1).default(20),
 });
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
@@ -114,4 +117,5 @@ export const { cacheMonitorInfoEvery } = json;
 export const { maxDiskPercentageUsage } = json;
 export const { maxOnlineNodesNotStaked } = json;
 export const { maxOnlineMinutesNotStaked } = json;
+export const { minutesBetweenFixLowDiskSpace } = json;
 export const { minEpochsToBeOnlinePending, minEpochsToBeOnlineSyncing } = json;
