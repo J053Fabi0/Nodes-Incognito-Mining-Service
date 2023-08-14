@@ -73,9 +73,7 @@ export default async function createDockerAndConfigs({
 
   const { name, url } = await createNginxConfig(clientIdStr, number, portAndIndex.rcpPort);
 
-  const validatorPublicForSure =
-    validatorPublic ??
-    (await getPublicValidatorKey(getNodeName(clientId, portAndIndex.dockerIndex), portAndIndex.dockerIndex));
+  const validatorPublicForSure = validatorPublic || (await getPublicValidatorKey(name, portAndIndex.dockerIndex));
 
   if (nodeId)
     // Update node in the database

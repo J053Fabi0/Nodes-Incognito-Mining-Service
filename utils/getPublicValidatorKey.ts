@@ -1,9 +1,7 @@
 import axiod from "axiod";
-import sortNodes from "./sortNodes.ts";
 import handleError from "./handleError.ts";
 import { NodeRoles } from "./getNodesStatus.ts";
-import submitCommand from "../telegram/submitCommand.ts";
-import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
+import { docker, dockerPs, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 
 interface GetMiningInfoResult {
   ShardHeight: number;
@@ -42,11 +40,8 @@ export default async function getPublicValidatorKey(
 function getMiningInfo(nodeName: string, dockerIndex: string | number) {
   return repeatUntilNoError(
     async () => {
-      const { nodesInfoByDockerIndex } = await sortNodes(undefined, { fromCacheIfConvenient: true });
-      const nodeInfo = nodesInfoByDockerIndex.find(([di]) => di === dockerIndex);
-      const isDockerRunning = Boolean(nodeInfo?.[1].docker.running);
-
-      if (!isDockerRunning) await submitCommand(`docker start ${dockerIndex}`);
+      const dockerStatus = await dockerPs([dockerIndex]);
+      if (!dockerStatus[dockerIndex]?.running) await docker(`inc_mainnet_${dockerIndex}`, "start");
 
       const {
         data: { Result: result, Error: error },
@@ -56,7 +51,9 @@ function getMiningInfo(nodeName: string, dockerIndex: string | number) {
         jsonrpc: "1.0",
         method: "getmininginfo",
       });
-      if (!result) throw new Error(error!);
+      if (error) throw new Error(error);
+      if (!result) throw new Error("No result");
+      if (!result.MiningPublickey) throw new Error("No MiningPublickey");
 
       return result;
     },
