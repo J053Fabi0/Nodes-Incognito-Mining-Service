@@ -10,7 +10,7 @@ const rolesOrder: NodeRoles[] = ["PENDING", "SYNCING", "COMMITTEE"];
 
 let hasLogged = false;
 
-export default async function copyPendingBeacons() {
+export default async function fixLowDiskSpace() {
   if (!lastGlobalErrorTimes.lowDiskSpace) return;
 
   const { nodesStatusByDockerIndex, nodesInfoByDockerIndex } = await sortNodes(undefined, {

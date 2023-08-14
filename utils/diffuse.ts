@@ -1,5 +1,5 @@
-import copyPendingBeacons from "../incognito/copyPendingBeacons.ts";
+import fixLowDiskSpace from "../incognito/fixLowDiskSpace.ts";
 
 export default async function diffuse() {
-  await copyPendingBeacons();
+  await fixLowDiskSpace();
 }
