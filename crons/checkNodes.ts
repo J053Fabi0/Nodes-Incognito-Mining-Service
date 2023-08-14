@@ -146,6 +146,8 @@ export default async function checkNodes() {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete(sortedNodes);
     if (instructionsToMoveOrDelete.length > 0)
       for (const instruction of instructionsToMoveOrDelete) {
+        if (instruction.action.includes("delete")) continue; // temporarily disable deleting shards
+
         const command: `${typeof instruction.action}${string}` =
           instruction.action === "delete"
             ? `delete ${instruction.from} ${instruction.shards.join(" ")}`
