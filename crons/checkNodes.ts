@@ -9,7 +9,7 @@ import {
 } from "../utils/variables.ts";
 import flags from "../utils/flags.ts";
 import { escapeHtml } from "escapeHtml";
-import { df } from "duplicatedFilesCleanerIncognito";
+import getDiskUsage from "../utils/getDiskUsage.ts";
 import { NodeStatus } from "../utils/getNodesStatus.ts";
 import isBeingIgnored from "../utils/isBeingIgnored.ts";
 import handleNodeError from "../utils/handleNodeError.ts";
@@ -17,7 +17,6 @@ import sortNodes, { NodeInfo } from "../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import getShouldBeOnline from "../utils/getShouldBeOnline.ts";
 import getMaxNodesOnline from "../utils/getMaxNodesOnline.ts";
-import { duplicatedConstants } from "../duplicatedFilesCleaner.ts";
 import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
 import calculateOnlineQueue from "../utils/calculateOnlineQueue.ts";
 import submitCommand, { commands } from "../telegram/submitCommand.ts";
@@ -50,12 +49,10 @@ export default async function checkNodes() {
   {
     const prevLastGlobalErrorTime = { ...lastGlobalErrorTimes };
     // Check if the file system is at or above the maximum acceptable percentage
-    if (duplicatedConstants.fileSystem) {
-      const percentage = +(
-        (await df(["-h", duplicatedConstants.fileSystem, "--output=pcent"])).match(/\d+(?=%)/)?.[0] ?? 0
-      );
+    const percentage = await getDiskUsage();
+    if (percentage !== null)
       setOrRemoveErrorTime(percentage >= maxDiskPercentageUsage, lastGlobalErrorTimes, "lowDiskSpace");
-    }
+
     // report errors if they have been present for longer than established
     for (const errorKey of globalErrorTypes)
       await handleErrors(fixes, lastGlobalErrorTimes[errorKey], prevLastGlobalErrorTime[errorKey], errorKey);
