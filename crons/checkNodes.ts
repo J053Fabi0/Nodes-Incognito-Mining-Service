@@ -17,6 +17,7 @@ import { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import getShouldBeOnline from "../utils/getShouldBeOnline.ts";
 import getMaxNodesOnline from "../utils/getMaxNodesOnline.ts";
 import checkGlobalErrors from "../utils/checkGlobalErrors.ts";
+import copyPendingBeacons from "../incognito/copyPendingBeacons.ts";
 import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
 import calculateOnlineQueue from "../utils/calculateOnlineQueue.ts";
 import setOrRemoveErrorTime from "../utils/setOrRemoveErrorTime.ts";
@@ -153,6 +154,8 @@ export default async function checkNodes() {
         // if the command is not already in the queue, submit it
         if (commands.pending.findIndex((c) => c.command === command) === -1) await submitCommand(command);
       }
+
+    await copyPendingBeacons();
   }
 }
 

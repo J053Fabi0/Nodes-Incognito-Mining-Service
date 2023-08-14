@@ -5,7 +5,6 @@ import checkEarnings from "./checkEarnings.ts";
 import handleError from "../utils/handleError.ts";
 import checkMonthlyFee from "./checkMonthlyFee.ts";
 import checkAccounts, { Unit } from "./checkAccounts.ts";
-import copyPendingBeacons from "./copyPendingBeacons.ts";
 import deleteEmptySessions from "./deleteEmptySessions.ts";
 import checkNotStakedNodes from "./checkNotStakedNodes.ts";
 import cacheNodesStatistics from "./cacheNodesStatistics.ts";
@@ -47,7 +46,4 @@ function startCrons() {
 
   // cache the monitor responses every 10 seconds
   new Cron(`*/${cacheMonitorInfoEvery} * * * * *`, { protect: true, ...options }, cacheMonitor);
-
-  // every hour copy the pending beacons
-  new Cron("20 */1 * * *", options, copyPendingBeacons);
 }

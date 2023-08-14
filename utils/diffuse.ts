@@ -1,4 +1,4 @@
-import copyPendingBeacons from "../crons/copyPendingBeacons.ts";
+import copyPendingBeacons from "../incognito/copyPendingBeacons.ts";
 
 export default async function diffuse() {
   await copyPendingBeacons();
