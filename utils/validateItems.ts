@@ -34,7 +34,9 @@ export default async function validateItems<T extends string | number>({
       const error =
         `${name[0].toUpperCase() + name.substring(1).toLowerCase()} ` +
         `<code>${rawItem}</code> is not found.\n\n` +
-        `Valid ${pluralName}:\n- <code>${validItems.join("</code>\n- <code>")}</code>`;
+        (validItems.length < 20
+          ? `Valid ${pluralName}:\n- <code>${validItems.join("</code>\n- <code>")}</code>`
+          : "");
 
       await sendHTMLMessage(error);
       throw new Error(error);
