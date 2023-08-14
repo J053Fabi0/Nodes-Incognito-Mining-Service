@@ -169,7 +169,7 @@ export default async function checkNodes() {
             : `${instruction.action} ${instruction.from} ${instruction.to} ${instruction.shards.join(" ")}`;
 
         // if the command is not already in the queue, submit it
-        if (commands.pending.findIndex((c) => c.command === command) === -1) submitCommand(command);
+        if (commands.pending.findIndex((c) => c.command === command) === -1) await submitCommand(command);
       }
   }
 }
