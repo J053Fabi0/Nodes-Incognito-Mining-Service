@@ -9,7 +9,6 @@ import {
 } from "../utils/variables.ts";
 import flags from "../utils/flags.ts";
 import { escapeHtml } from "escapeHtml";
-import getDiskUsage from "../utils/getDiskUsage.ts";
 import { NodeStatus } from "../utils/getNodesStatus.ts";
 import isBeingIgnored from "../utils/isBeingIgnored.ts";
 import handleNodeError from "../utils/handleNodeError.ts";
@@ -17,22 +16,14 @@ import sortNodes, { NodeInfo } from "../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import getShouldBeOnline from "../utils/getShouldBeOnline.ts";
 import getMaxNodesOnline from "../utils/getMaxNodesOnline.ts";
+import checkGlobalErrors from "../utils/checkGlobalErrors.ts";
 import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
 import calculateOnlineQueue from "../utils/calculateOnlineQueue.ts";
+import setOrRemoveErrorTime from "../utils/setOrRemoveErrorTime.ts";
+import { waitingTimes, minutesToRepeatAlert } from "../constants.ts";
 import submitCommand, { commands } from "../telegram/submitCommand.ts";
 import handleTextMessage from "../telegram/handlers/handleTextMessage.ts";
 import getInstructionsToMoveOrDelete from "../utils/getInstructionsToMoveOrDelete.ts";
-import { waitingTimes, maxDiskPercentageUsage, minutesToRepeatAlert } from "../constants.ts";
-
-function setOrRemoveErrorTime(
-  set: boolean,
-  lastErrorTime: Partial<Record<AllErrorTypes, ErrorInfo>>,
-  errorKey: AllErrorTypes
-): void {
-  if (set) {
-    if (!lastErrorTime[errorKey]) lastErrorTime[errorKey] = { startedAt: Date.now(), notifiedAt: 0 };
-  } else delete lastErrorTime[errorKey];
-}
 
 export default async function checkNodes() {
   const sortedNodes = await sortNodes(undefined, { fromCacheIfConvenient: true });
@@ -46,17 +37,11 @@ export default async function checkNodes() {
   const fixes: string[] = [];
 
   // Check for global errors
-  {
-    const prevLastGlobalErrorTime = { ...lastGlobalErrorTimes };
-    // Check if the file system is at or above the maximum acceptable percentage
-    const percentage = await getDiskUsage();
-    if (percentage !== null)
-      setOrRemoveErrorTime(percentage >= maxDiskPercentageUsage, lastGlobalErrorTimes, "lowDiskSpace");
-
-    // report errors if they have been present for longer than established
-    for (const errorKey of globalErrorTypes)
-      await handleErrors(fixes, lastGlobalErrorTimes[errorKey], prevLastGlobalErrorTime[errorKey], errorKey);
-  }
+  const prevLastGlobalErrorTime = { ...lastGlobalErrorTimes };
+  await checkGlobalErrors();
+  // report errors if they have been present for longer than established
+  for (const errorKey of globalErrorTypes)
+    await handleErrors(fixes, lastGlobalErrorTimes[errorKey], prevLastGlobalErrorTime[errorKey], errorKey);
 
   const maxNodesOnline = await getMaxNodesOnline(nodesInfoByDockerIndex);
   calculateOnlineQueue(nodesStatus);
