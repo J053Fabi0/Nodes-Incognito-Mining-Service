@@ -29,6 +29,7 @@ const LIMIT = 30;
 export const handler: Handlers<NodesEarningsProps, State> = {
   async GET(req, ctx) {
     const params = getQueryParams(req.url);
+    const isAdmin = ctx.state.isAdmin;
 
     const relative = "relative" in params;
     const page = Math.ceil(Number(params.page) || 1);
@@ -36,10 +37,9 @@ export const handler: Handlers<NodesEarningsProps, State> = {
     if ((page === 1 && params.page) || page < 1)
       return redirect("/nodes/earnings" + (relative ? "?relative" : ""));
 
-    const nodes = await getNodes(
-      { inactive: { $ne: true }, client: new ObjectId(ctx.state.userId!) },
-      { projection: { _id: 1, number: 1 } }
-    );
+    const nodesQuery: Parameters<typeof getNodes>[0] = { inactive: { $ne: true } };
+    if (!isAdmin) nodesQuery.client = new ObjectId(ctx.state.userId!);
+    const nodes = await getNodes(nodesQuery, { projection: { _id: 1, number: 1 } });
     const nodesIds = nodes.map((node) => node._id);
     const nodesByNumber: NodesEarningsProps["nodes"] = {};
     for (const node of nodes) nodesByNumber[`${node._id}`] = node.number;
@@ -72,11 +72,11 @@ export const handler: Handlers<NodesEarningsProps, State> = {
     return ctx.render({
       page,
       pages,
+      isAdmin,
       earnings,
       relative,
       monthEarnings,
       nodes: nodesByNumber,
-      isAdmin: ctx.state.isAdmin,
     });
   },
 };
