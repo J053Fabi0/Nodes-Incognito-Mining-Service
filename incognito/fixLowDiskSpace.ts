@@ -15,37 +15,25 @@ export default async function fixLowDiskSpace() {
   });
   const nodesInfo = Object.fromEntries(nodesInfoByDockerIndex);
 
-  const pendingNodes = nodesInfoByDockerIndex
+  const onlineNodes = nodesInfoByDockerIndex
     .filter(([dockerIndex]) => {
       const node = nodesStatusByDockerIndex[dockerIndex];
-
-      if (dockerIndex === "168")
-        console.log(
-          node,
-          node?.status === "ONLINE",
-          node?.role,
-          rolesOrder.includes(node?.role || "NOT_STAKED"),
-          nodesInfo[dockerIndex].beacon
-        );
-
       return node && node.status === "ONLINE" && rolesOrder.includes(node.role) && nodesInfo[dockerIndex].beacon;
     })
     // sort them by the online time. The first one will be the oldest
     .sort(
       byValues([
         [([dockerIndex]) => rolesOrder.indexOf(nodesStatusByDockerIndex[dockerIndex]!.role), byNumber()],
-        [([, node]) => node.docker.startedAt.valueOf(), byNumber({ desc: true })],
+        [([, node]) => node.docker.startedAt.valueOf(), byNumber({ desc: false })],
       ])
     );
 
-  console.log(pendingNodes);
-
-  if (pendingNodes.length <= 1) return;
+  if (onlineNodes.length <= 1) return;
 
   const submittedCommands: string[] = [];
-  const firstNode = pendingNodes.shift()![0];
+  const firstNode = onlineNodes.shift()![0];
 
-  for (const [dockerIndex] of pendingNodes) {
+  for (const [dockerIndex] of onlineNodes) {
     const command = `copy ${firstNode} ${dockerIndex} beacon`;
     console.log(command);
     // await submitCommand(command);
