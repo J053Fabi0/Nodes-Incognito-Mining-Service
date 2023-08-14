@@ -8,8 +8,6 @@ import { nodesInfoByDockerIndexTest } from "../utils/testingConstants.ts";
 
 const rolesOrder: NodeRoles[] = ["PENDING", "SYNCING", "COMMITTEE"];
 
-let hasLogged = false;
-
 export default async function fixLowDiskSpace() {
   if (!lastGlobalErrorTimes.lowDiskSpace) return;
 
@@ -21,9 +19,17 @@ export default async function fixLowDiskSpace() {
   const pendingNodes = nodesInfoByDockerIndexTest
     .filter(([dockerIndex]) => {
       const node = nodesStatusByDockerIndex[dockerIndex];
-      return (
-        node && node.status === "ONLINE" && rolesOrder.includes(node.role) && nodesInfo[node.dockerIndex].beacon
-      );
+
+      if (dockerIndex === "168")
+        console.log(
+          node,
+          node?.status === "ONLINE",
+          node?.role,
+          rolesOrder.includes(node?.role || "NOT_STAKED"),
+          nodesInfo[dockerIndex].beacon
+        );
+
+      return node && node.status === "ONLINE" && rolesOrder.includes(node.role) && nodesInfo[dockerIndex].beacon;
     })
     // sort them by the online time. The first one will be the oldest
     .sort(
@@ -33,7 +39,7 @@ export default async function fixLowDiskSpace() {
       ])
     );
 
-  if (!hasLogged) console.log((hasLogged = true), pendingNodes);
+  console.log(pendingNodes);
 
   if (pendingNodes.length <= 1) return;
 
