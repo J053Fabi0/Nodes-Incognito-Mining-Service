@@ -155,7 +155,7 @@ export default async function checkNodes() {
         if (commands.pending.findIndex((c) => c.command === command) === -1) await submitCommand(command);
       }
 
-    await fixLowDiskSpace();
+    await fixLowDiskSpace(true);
   }
 }
 
