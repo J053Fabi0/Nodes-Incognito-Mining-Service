@@ -33,11 +33,11 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
   async GET(req, ctx) {
     const params = getQueryParams(req.url);
     const all = "all" in params;
+    const isAdmin = ctx.state.isAdmin;
 
-    const nodes = await getNodes(
-      { inactive: { $ne: true }, client: new ObjectId(ctx.state.userId!) },
-      { projection: { _id: 1, number: 1, createdAt: 1 } }
-    );
+    const nodesQuery: Parameters<typeof getNodes>[0] = { inactive: { $ne: true } };
+    if (!isAdmin) nodesQuery.client = new ObjectId(ctx.state.userId!);
+    const nodes = await getNodes(nodesQuery, { projection: { _id: 1, number: 1, createdAt: 1 } });
     const nodesIds = nodes.map((node) => node._id);
     const nodesByNumber: MonthlyNodesEarningsProps["nodes"] = {};
     for (const node of nodes) nodesByNumber[`${node._id}`] = node.number;
@@ -78,11 +78,11 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
     const monthsLeft = Math.max(0, dayjs().utc().diff(oldestEarning, "month") - monthEarnings.length);
 
     return ctx.render({
+      isAdmin,
       earnings,
       monthsLeft,
       monthEarnings,
       nodes: nodesByNumber,
-      isAdmin: ctx.state.isAdmin,
     });
   },
 };
