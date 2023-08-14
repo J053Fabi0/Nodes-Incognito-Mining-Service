@@ -112,21 +112,6 @@ export default async function handleCopyOrMove(
   // restore the ignore value
   ignore.docker.minutes = lastIgnoreMinutes;
 
-  // start the dockers if they were not being ignored
-  if (toRunning || fromRunning) {
-    if (fromRunning) setCache(fromNodeIndex, "docker.running", true);
-    if (toRunning) setCache(toNodeIndex, "docker.running", true);
-    await Promise.all([
-      options?.telegramMessages &&
-        sendMessage("Starting nodes...", undefined, { disable_notification: options?.silent }),
-      toRunning && docker(`inc_mainnet_${toNodeIndex}`, "start"),
-      fromRunning && docker(`inc_mainnet_${fromNodeIndex}`, "start"),
-    ]);
-    if (fromRunning) setCache(fromNodeIndex, "docker.running", true);
-    if (toRunning) setCache(toNodeIndex, "docker.running", true);
-    responses.push("Starting nodes...");
-  }
-
   if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });
 
   return { successful: true, response: responses.join("\n") };
