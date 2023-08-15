@@ -11,7 +11,7 @@ function emptyQueue() {
   for (const role of allNodeRoles) onlineQueue[role].splice(0, Infinity);
 }
 
-const sleepFor = 0.01;
+const sleepFor = 0.2;
 
 Deno.test("calculateOnlineQueue", async function (t) {
   emptyQueue();
@@ -39,7 +39,6 @@ Deno.test("calculateOnlineQueue", async function (t) {
 
     await t.step("should not add nodes that are already in the queue", async function (t) {
       const queueCopy = [...onlineQueue.NOT_STAKED];
-      const queueRef = onlineQueue.NOT_STAKED;
 
       calculateOnlineQueue([
         { role: "NOT_STAKED", dockerIndex: 0 },
@@ -51,7 +50,6 @@ Deno.test("calculateOnlineQueue", async function (t) {
 
       await t.step("should not modify the queue", function () {
         assertEquals(onlineQueue.NOT_STAKED, queueCopy);
-        assertStrictEquals(onlineQueue.NOT_STAKED, queueRef);
       });
     });
 

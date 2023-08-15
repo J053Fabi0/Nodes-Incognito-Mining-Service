@@ -12,18 +12,22 @@ function isRecord<T extends AcceptedRecord>(data: AcceptedRecord): data is T {
   return typeof data === "object" && data !== null;
 }
 
-function setProxy<T extends AcceptedRecord>(data: T, redisKey: string, rootData: AcceptedRecord): T {
+const DEPTH_LIMIT = 10;
+
+function setProxy<T extends AcceptedRecord>(data: T, redisKey: string, rootData: AcceptedRecord, depth = 1): T {
+  if (depth > DEPTH_LIMIT) return data;
+
   const keys = Object.keys(data) as (keyof T)[];
   for (const key of keys) {
     const value = data[key];
-    if (isRecord(value)) data[key] = setProxy(value, redisKey, rootData);
+    if (isRecord(value)) data[key] = setProxy(value, redisKey, rootData, depth + 1);
   }
 
   return new Proxy<T>(data, {
     set: (target, key, value) => {
       const a = Reflect.set(target, key, value);
       if (typeof key === "string" && isRecord(value))
-        Object.defineProperty(target, key, { value: setProxy(value, redisKey, rootData) });
+        Object.defineProperty(target, key, { value: setProxy(value, redisKey, rootData, depth + 1) });
       setTimeout(() => redis.set(redisPrefix + redisKey, JSON.stringify(rootData)), 0);
       return a;
     },

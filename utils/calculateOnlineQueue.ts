@@ -34,7 +34,7 @@ function calculateNotStakedOnlineQueue() {
   for (let i = maxOnlineNodesNotStaked; i < queue.length; i++) queue[i].date = Date.now();
 
   // move to the end the nodes that are in the online range are have been there for more than maxOnlineMinutesNotStaked
-  moveToEnd(
+  onlineQueue.NOT_STAKED = moveToEnd(
     queue,
     (node, index) =>
       index + 1 <= maxOnlineNodesNotStaked && moment().diff(node.date, "minutes") >= maxOnlineMinutesNotStaked
