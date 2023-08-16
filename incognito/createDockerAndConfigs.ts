@@ -1,11 +1,11 @@
 import { ObjectId } from "mongo/mod.ts";
 import isError from "../types/guards/isError.ts";
-import getNodeName from "../utils/getNodeName.ts";
 import createDocker from "./docker/createDocker.ts";
 import deleteDocker from "./docker/deleteDocker.ts";
 import constants, { adminId } from "../constants.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import getPublicValidatorKey from "../utils/getPublicValidatorKey.ts";
+import { getServerWithLessNodes } from "../controllers/server.controller.ts";
 import { changeNode, createNode, getNodes } from "../controllers/node.controller.ts";
 import createNginxConfig, { CreateNginxConfigResponse } from "./nginx/createNginxConfig.ts";
 
@@ -105,6 +105,7 @@ export default async function createDockerAndConfigs({
         dockerIndex: portAndIndex.dockerIndex,
         validatorPublic: validatorPublicForSure,
         sendTo: [adminId, new ObjectId(clientId)],
+        server: (await getServerWithLessNodes())._id,
       })
     )._id;
 
