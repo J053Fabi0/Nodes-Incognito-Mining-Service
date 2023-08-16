@@ -14,4 +14,5 @@ export default interface Node extends CommonCollection {
   /** To whom send notifications. This can or cannot include the owner */
   sendTo: ObjectId[];
   rcpPort: number;
+  server: ObjectId;
 }
