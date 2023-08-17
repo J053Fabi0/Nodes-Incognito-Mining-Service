@@ -83,7 +83,7 @@ export default async function handleTextMessage(
     });
   } else {
     Deno.writeTextFileSync("./full.html", html);
-    await wkhtmltoimage(["--width", "0", "full.html", "full.png"]).catch((e) => {
+    await wkhtmltoimage(["--width", "0", "--quality", "100", "full.html", "full.png"]).catch((e) => {
       if (e.message.includes("Done")) return e.message;
       throw e;
     });
