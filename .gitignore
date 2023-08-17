@@ -4,3 +4,4 @@
 full.*
 deno.lock
 constants.jsonc
+_fresh
