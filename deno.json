@@ -59,7 +59,7 @@
     "redis/": "https://deno.land/x/redis@v0.31.0/",
     "sleep": "https://deno.land/x/sleep@v1.2.1/mod.ts",
     "sort-es": "https://esm.sh/sort-es@1.6.15/",
-    "std/": "https://deno.land/std@0.198.0/"
+    "std/": "https://deno.land/std@0.199.0/"
   },
   "lint": {
     "rules": {
