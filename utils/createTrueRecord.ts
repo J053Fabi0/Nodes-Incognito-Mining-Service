@@ -1,4 +1,4 @@
-import { AcceptedRecord } from "./getProxyAndRedisValue.ts";
+import { AcceptedRecord } from "./getRedisValue.ts";
 
 export const notAssignableKeys = ["toJSON"];
 
