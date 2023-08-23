@@ -4,12 +4,12 @@ import { IS_PRODUCTION } from "../../env.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { dockerPs, docker, normalizeShards, ShardsNames, ShardsStr } from "duplicatedFilesCleanerIncognito";
 
-interface DeleteShard {
+interface DeleteShardsBody {
   node: number;
   shards: (ShardsNames | ShardsStr)[];
 }
 export default async function deleteShards(c: Context) {
-  const { node, shards } = (await c.req.json()) as DeleteShard;
+  const { node, shards } = (await c.req.json()) as DeleteShardsBody;
 
   // check if the node and shards are valid
   if (!duplicatedFilesCleaner.dockerIndexes.includes(node))
