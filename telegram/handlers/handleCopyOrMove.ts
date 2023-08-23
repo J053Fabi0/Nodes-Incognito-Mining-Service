@@ -1,11 +1,10 @@
+import axiod from "axiod";
 import sendMessage from "../sendMessage.ts";
-import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
 import validateItems from "../../utils/validateItems.ts";
-import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
-import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
-import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
+import { getNodeServer } from "../../controllers/node.controller.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
+import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
 
 export default async function handleCopyOrMove(
@@ -22,9 +21,9 @@ export default async function handleCopyOrMove(
   });
   if (isError(nodesOrError)) return { successful: false, error: nodesOrError.message };
 
-  const [fromNodeIndex = null, toNodeIndex = null] = nodesOrError;
-  if (fromNodeIndex === null) return { successful: false, error: "Missing 1st argument: from node index." };
-  if (toNodeIndex === null) return { successful: false, error: "Missing 2nd argument: to node index." };
+  const [from = null, to = null] = nodesOrError;
+  if (from === null) return { successful: false, error: "Missing 1st argument: from node index." };
+  if (to === null) return { successful: false, error: "Missing 2nd argument: to node index." };
 
   // Validate and get the shards
   const shards: ShardsNames[] | Error =
@@ -43,76 +42,36 @@ export default async function handleCopyOrMove(
         })) as ShardsNames[] | Error);
   if (isError(shards)) return { successful: false, error: shards.message };
 
-  // check if from is not empty
-  const files = await duplicatedFilesCleaner.getFilesOfNodes({ nodes: [fromNodeIndex] });
-  for (const shard of shards)
-    if (files[shard][fromNodeIndex].length === 0)
-      return { successful: false, error: `Node ${fromNodeIndex} doesn't have any files for ${shard}.` };
+  // check the servers of the nodes
+  const fromServer = await getNodeServer({ dockerIndex: +from });
+  if (!fromServer) return { successful: false, error: `Node ${from} doesn't have a server.` };
+  const toServer = await getNodeServer({ dockerIndex: +to });
+  if (!toServer) return { successful: false, error: `Node ${to} doesn't have a server.` };
+  if (fromServer.url !== toServer.url) return { successful: false, error: "Nodes are not on the same server." };
+
+  // change the cache
+  const fromNodeIndexData = monitorInfoByDockerIndex[from];
+  const toNodeIndexData = monitorInfoByDockerIndex[to];
+  for (const shard of shards) {
+    if (toNodeIndexData) toNodeIndexData.nodeInfo[shard] = fromNodeIndexData?.nodeInfo[shard];
+    if (action === "move" && fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
+  }
 
   // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
   const lastIgnoreMinutes = ignore.docker.minutes;
   ignore.docker.minutes = Infinity;
 
-  const responses: string[] = [];
-
-  // Stop the dockers regardless of the ignore value if at least one of them is online
-  const dockerStatus = await dockerPs([fromNodeIndex, toNodeIndex]);
-
-  const fromRunning = dockerStatus[fromNodeIndex].running;
-  const toRunning = dockerStatus[toNodeIndex].running;
-
-  if (toRunning || fromRunning) {
-    if (fromRunning) setCache(fromNodeIndex, "docker.running", false);
-    if (toRunning) setCache(toNodeIndex, "docker.running", false);
-    await Promise.all([
-      options?.telegramMessages &&
-        sendMessage("Stopping nodes...", undefined, { disable_notification: options?.silent }),
-      toRunning && docker(`inc_mainnet_${toNodeIndex}`, "stop"),
-      fromRunning && docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
-    ]);
-    if (fromRunning) setCache(fromNodeIndex, "docker.running", false);
-    if (toRunning) setCache(toNodeIndex, "docker.running", false);
-    responses.push("Stopping nodes...");
+  try {
+    await axiod.post(`${fromServer.url}/shards`, { action, from, to, shards });
+  } finally {
+    // restore the ignore value
+    ignore.docker.minutes = lastIgnoreMinutes === Infinity ? 0 : lastIgnoreMinutes;
   }
-
-  for (const shard of shards) {
-    const response =
-      `${action === "copy" ? "Copying" : "Moving"} ${shard} ` +
-      `from node ${fromNodeIndex} to node ${toNodeIndex}...`;
-
-    // change the cache
-    const changeCache = (() => {
-      const fromNodeIndexData = monitorInfoByDockerIndex[fromNodeIndex];
-      const toNodeIndexData = monitorInfoByDockerIndex[toNodeIndex];
-      const fromShard = fromNodeIndexData?.nodeInfo[shard];
-      return () => {
-        if (toNodeIndexData) toNodeIndexData.nodeInfo[shard] = fromShard;
-        if (action === "move" && fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
-      };
-    })();
-
-    changeCache();
-    await Promise.all([
-      options?.telegramMessages
-        ? sendMessage(response, undefined, { disable_notification: options?.silent })
-        : null,
-      action === "copy"
-        ? duplicatedFilesCleaner.copyData({
-            from: fromNodeIndex as unknown as string,
-            to: toNodeIndex as unknown as string,
-            shards: [shard],
-          })
-        : duplicatedFilesCleaner.move(fromNodeIndex, toNodeIndex, [shard]),
-    ]);
-    changeCache();
-
-    responses.push(response);
-  }
-
-  // restore the ignore value
-  ignore.docker.minutes = lastIgnoreMinutes;
 
   if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });
 
-  return { successful: true, response: responses.join("\n") };
+  return {
+    successful: true,
+    response: `${shards.join(", ")} ${action}${action === "copy" ? "e" : ""}d from node ${from} to node ${to}.`,
+  };
 }
