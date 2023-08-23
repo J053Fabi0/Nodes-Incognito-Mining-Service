@@ -1,11 +1,12 @@
 import axiod from "axiod";
 import sendMessage from "../sendMessage.ts";
-import { ignore } from "../../utils/variables.ts";
+import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { getNodeServer } from "../../controllers/node.controller.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
+import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
 
 export default async function handleDelete(args: string[], options?: CommandOptions): Promise<CommandResponse> {
   const [nodeRaw, rawShards] = [args.slice(0, 1), args.slice(1)];
@@ -52,6 +53,11 @@ export default async function handleDelete(args: string[], options?: CommandOpti
 
   const server = await getNodeServer({ dockerIndex: +dockerIndex });
   if (!server) return { successful: false, error: `Node ${dockerIndex} doesn't have a server.` };
+
+  // change the cache
+  setCache(dockerIndex, "docker.running", false);
+  const fromNodeIndexData = monitorInfoByDockerIndex[dockerIndex];
+  if (fromNodeIndexData) for (const shard of shards) fromNodeIndexData.nodeInfo[shard] = 0;
 
   await axiod.delete(`${server.url}/shards`, { node: dockerIndex, shards });
 
