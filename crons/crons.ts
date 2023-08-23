@@ -1,3 +1,4 @@
+import { BUILDING } from "../env.ts";
 import checkNodes from "./checkNodes.ts";
 import Cron, { CronOptions } from "croner";
 import cacheMonitor from "./cacheMonitor.ts";
@@ -15,8 +16,10 @@ const options: CronOptions = { catch: handleError, utcOffset: 0 };
 
 export let cronsStarted = false;
 
-console.time("startCrons");
-cacheMonitor().finally(startCrons);
+if (!BUILDING) {
+  console.time("startCrons");
+  cacheMonitor().finally(startCrons);
+}
 
 function startCrons() {
   cronsStarted = true;
