@@ -1,8 +1,8 @@
+import getRedisValue from "./getRedisValue.ts";
 import createTrueRecord from "./createTrueRecord.ts";
 import { NodeInfoByDockerIndex } from "./sortNodes.ts";
 import { NodesStatistics } from "./getNodesStatistics.ts";
 import { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
-import getProxyAndRedisValue from "./getProxyAndRedisValue.ts";
 
 export type ErrorTypes = "alert" | "isSlashed" | "isOldVersion" | "offline" | "stalling" | "unsynced";
 export const errorTypes = [
@@ -23,13 +23,13 @@ export const allErrorTypes: readonly AllErrorTypes[] = [...errorTypes, ...global
 export type ErrorInfo = { startedAt: number; notifiedAt: number };
 export type LastErrorTime = Partial<Record<ErrorTypes, ErrorInfo>>;
 /** Docker index as key of lastErrorTimes. The number is Date.now() */
-export const lastErrorTimes = await getProxyAndRedisValue<Record<string, LastErrorTime>>("lastErrorTimes", {});
+export const lastErrorTimes = await getRedisValue<Record<string, LastErrorTime>>("lastErrorTimes", {});
 
 export type LastGlobalErrorTime = Partial<Record<GlobalErrorTypes, ErrorInfo>>;
-export const lastGlobalErrorTimes = await getProxyAndRedisValue<LastGlobalErrorTime>("lastGlobalErrorTimes", {});
+export const lastGlobalErrorTimes = await getRedisValue<LastGlobalErrorTime>("lastGlobalErrorTimes", {});
 
 export type Ignore = Record<AllErrorTypes | "docker" | "autoMove", { minutes: number; from: number }>;
-export const ignore = await getProxyAndRedisValue<Ignore>("ignore", {
+export const ignore = await getRedisValue<Ignore>("ignore", {
   alert: { minutes: 0, from: Date.now() },
   isSlashed: { minutes: 0, from: Date.now() },
   isOldVersion: { minutes: 0, from: Date.now() },
@@ -60,7 +60,7 @@ function isLastRole(a: unknown): a is LastRole {
 }
 /** Docker index as key */
 export const lastRoles = createTrueRecord(
-  await getProxyAndRedisValue<Record<string, LastRole>>("lastRoles", {}),
+  await getRedisValue<Record<string, LastRole>>("lastRoles", {}),
   () => ({
     client: "",
     createdAt: 1,
@@ -90,15 +90,14 @@ type PrvToPay = {
   confirmed: boolean;
 };
 /** Client Id as key */
-export const prvToPay = createTrueRecord(
-  await getProxyAndRedisValue<Record<string, PrvToPay>>("prvToPay", {}),
-  () => ({ usd: 0, expires: 0, prvToPay: 0, confirmed: false })
-);
+export const prvToPay = createTrueRecord(await getRedisValue<Record<string, PrvToPay>>("prvToPay", {}), () => ({
+  usd: 0,
+  expires: 0,
+  prvToPay: 0,
+  confirmed: false,
+}));
 
-export const nodesStatistics = await getProxyAndRedisValue<NodesStatistics>(
-  "nodesStatistics",
-  {} as NodesStatistics
-);
+export const nodesStatistics = await getRedisValue<NodesStatistics>("nodesStatistics", {} as NodesStatistics);
 
 export type MonthlyPayments = {
   /** If an error happened with us */
@@ -112,7 +111,7 @@ export type MonthlyPayments = {
 };
 /** Client id as key */
 export const monthlyPayments = createTrueRecord(
-  await getProxyAndRedisValue<Record<string, MonthlyPayments>>("monthlyPayments", {}),
+  await getRedisValue<Record<string, MonthlyPayments>>("monthlyPayments", {}),
   () => ({ errorInTransaction: false, fee: null, forMonth: new Date().getUTCMonth(), lastWarningDay: null })
 );
 
@@ -131,7 +130,7 @@ interface LastAccessedPage {
 
 /** The last time a page has been accessed. The key is the page path */
 export const lastAccessedPages = createTrueRecord(
-  await getProxyAndRedisValue<Record<string, LastAccessedPage>>("lastAccessedPages", {}),
+  await getRedisValue<Record<string, LastAccessedPage>>("lastAccessedPages", {}),
   () => ({ lastAccesed: 0 })
 );
 
@@ -143,6 +142,6 @@ export interface NodeInQueue {
 export type OnlineQueue = Record<NodeRoles, NodeInQueue[]>;
 /** These nodes can be online, but won't necessarily be. The complex logic is in getShouldBeOnline */
 export const onlineQueue = createTrueRecord(
-  await getProxyAndRedisValue<OnlineQueue>("onlineQueue", {} as OnlineQueue),
+  await getRedisValue<OnlineQueue>("onlineQueue", {} as OnlineQueue),
   () => []
 );

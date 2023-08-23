@@ -1,3 +1,4 @@
+import { BUILDING } from "../env.ts";
 import checkNodes from "./checkNodes.ts";
 import Cron, { CronOptions } from "croner";
 import cacheMonitor from "./cacheMonitor.ts";
@@ -8,14 +9,17 @@ import checkAccounts, { Unit } from "./checkAccounts.ts";
 import deleteEmptySessions from "./deleteEmptySessions.ts";
 import checkNotStakedNodes from "./checkNotStakedNodes.ts";
 import cacheNodesStatistics from "./cacheNodesStatistics.ts";
+import saveVariablesToRedis from "./saveVariablesToRedis.ts";
 import { cacheMonitorInfoEvery, maxNotPayedDays } from "../constants.ts";
 
 const options: CronOptions = { catch: handleError, utcOffset: 0 };
 
 export let cronsStarted = false;
 
-console.time("startCrons");
-cacheMonitor().finally(startCrons);
+if (!BUILDING) {
+  console.time("startCrons");
+  cacheMonitor().finally(startCrons);
+}
 
 function startCrons() {
   cronsStarted = true;
@@ -46,4 +50,7 @@ function startCrons() {
 
   // cache the monitor responses every 10 seconds
   new Cron(`*/${cacheMonitorInfoEvery} * * * * *`, { protect: true, ...options }, cacheMonitor);
+
+  // every second save the variables to redis
+  new Cron("*/1 * * * * *", { protect: true, ...options }, saveVariablesToRedis);
 }

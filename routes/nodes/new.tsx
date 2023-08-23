@@ -51,8 +51,8 @@ export const handler: Handlers<NewNodeProps, State> = {
 
     // if it is enough balance to pay for the node and the confirmation hasn't expired,
     // redirect to the confirmation page
-    if (account.balance >= savedPrvPrice.prvToPay * 1e9 && confirmationExpires > Date.now())
-      return redirect("/nodes/new-confirm");
+    // if (account.balance >= savedPrvPrice.prvToPay * 1e9 && confirmationExpires > Date.now())
+    //   return redirect("/nodes/new-confirm");
 
     const { customSetupFeeUSD } = ctx.state.user!;
     const usedSetupFeeUSD = customSetupFeeUSD ?? setupFeeUSD;
@@ -69,7 +69,7 @@ export const handler: Handlers<NewNodeProps, State> = {
 
     const base64Image = await qrcode(account.paymentAddress, { size: 300, errorCorrectLevel: "L" });
 
-    if (account.balance >= savedPrvPrice.prvToPay * 1e9) return redirect(CONFIRM_URL);
+    // if (account.balance >= savedPrvPrice.prvToPay * 1e9) return redirect(CONFIRM_URL);
 
     return ctx.render({
       isAdmin,
@@ -85,6 +85,19 @@ export const handler: Handlers<NewNodeProps, State> = {
 };
 
 export default function NewNode({ data }: PageProps<NewNodeProps>) {
+  return (
+    <>
+      <Typography variant="h1" class="mt-3 mb-5">
+        Host a new node
+      </Typography>
+
+      <Typography variant="lead" class="mb-3">
+        Unfortunately, we're not accepting new nodes at the moment. We're working on expanding our infrastructure
+        to support more nodes. Please check back later.
+      </Typography>
+    </>
+  );
+
   const { prvPrice, paymentAddressImage, expires, prvToPay, paymentAddress, usedSetupFeeUSD } = data;
 
   return (

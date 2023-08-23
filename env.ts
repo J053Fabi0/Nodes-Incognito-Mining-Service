@@ -15,3 +15,4 @@ export const WEBSITE_URL = env.WEBSITE_URL;
 export const IS_PRODUCTION = Boolean(Deno.env.get("DENO_DEPLOYMENT_ID"));
 export const REDIS_HOSTNAME = env.REDIS_HOSTNAME;
 export const REDIS_PORT = +env.REDIS_PORT;
+export const BUILDING = Boolean(Deno.env.get("BUILDING"));
