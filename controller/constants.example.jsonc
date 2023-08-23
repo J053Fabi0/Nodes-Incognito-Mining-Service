@@ -1,0 +1,10 @@
+{
+  "homePath": "/home/incognito",
+
+  // fileSystem: "/dev/sda3", // for the server
+  "fileSystem": "/dev/nvme0n1p2", // for the laptop
+
+  // The minimum number of files that a shard must have to be considered present, for example when
+  // getting the info of a node. If a shard has less files than this, it will be considered empty.
+  "minFilesToConsiderShard": 2000
+}

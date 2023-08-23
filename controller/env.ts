@@ -4,3 +4,4 @@ const env = loadSync({ examplePath: "./controller/.example.env", envPath: "./con
 
 export const PORT = +env.PORT;
 export const API_KEY = env.API_KEY;
+export const SERVER_ID = env.SERVER_ID;
