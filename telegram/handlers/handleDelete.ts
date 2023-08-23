@@ -53,7 +53,7 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   const server = await getNodeServer({ dockerIndex: +dockerIndex });
   if (!server) return { successful: false, error: `Node ${dockerIndex} doesn't have a server.` };
 
-  await axiod.delete(server.url, { node: dockerIndex, shards });
+  await axiod.delete(`${server.url}/shards`, { node: dockerIndex, shards });
 
   // restore the ignore value
   ignore.docker.minutes = lastIgnoreMinutes;
