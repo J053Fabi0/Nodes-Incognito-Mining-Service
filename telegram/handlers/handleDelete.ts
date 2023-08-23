@@ -47,10 +47,6 @@ export default async function handleDelete(args: string[], options?: CommandOpti
         })) as ShardsNames[] | Error);
   if (isError(shards)) return { successful: false, error: shards.message };
 
-  // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
-  const lastIgnoreMinutes = ignore.docker.minutes;
-  ignore.docker.minutes = Infinity;
-
   const server = await getNodeServer({ dockerIndex: +dockerIndex });
   if (!server) return { successful: false, error: `Node ${dockerIndex} doesn't have a server.` };
 
@@ -59,10 +55,16 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   const fromNodeIndexData = monitorInfoByDockerIndex[dockerIndex];
   if (fromNodeIndexData) for (const shard of shards) fromNodeIndexData.nodeInfo[shard] = 0;
 
-  await axiod.delete(`${server.url}/shards`, { node: dockerIndex, shards });
+  // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
+  const lastIgnoreMinutes = ignore.docker.minutes;
+  ignore.docker.minutes = Infinity;
 
-  // restore the ignore value
-  ignore.docker.minutes = lastIgnoreMinutes;
+  try {
+    await axiod.delete(`${server.url}/shards`, { node: dockerIndex, shards });
+  } finally {
+    // restore the ignore value
+    ignore.docker.minutes = lastIgnoreMinutes === Infinity ? 0 : lastIgnoreMinutes;
+  }
 
   return { successful: true, response: `${shards.join(", ")} deleted for node ${dockerIndex}.` };
 }
