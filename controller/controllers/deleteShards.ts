@@ -8,7 +8,7 @@ interface DeleteShard {
   node: number;
   shards: (ShardsNames | ShardsStr)[];
 }
-export async function deleteShards(c: Context) {
+export default async function deleteShards(c: Context) {
   const { node, shards } = (await c.req.json()) as DeleteShard;
 
   // check if the node and shards are valid
