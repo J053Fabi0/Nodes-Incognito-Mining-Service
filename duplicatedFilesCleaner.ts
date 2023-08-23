@@ -23,9 +23,6 @@ const nodes = await getNodes({ inactive: false }, { projection: { dockerIndex: 1
 
 export const duplicatedConstants: Constants = {
   ...json,
-  storageFolder: "",
-  filesToStripIfOnline: 0,
-  filesToStripIfOffline: 0,
   dockerIndexes: nodes.map((node) => node.dockerIndex),
 };
 
