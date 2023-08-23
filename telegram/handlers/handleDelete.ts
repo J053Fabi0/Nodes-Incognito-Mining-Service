@@ -1,12 +1,11 @@
-import { join } from "std/path/mod.ts";
+import axiod from "axiod";
 import sendMessage from "../sendMessage.ts";
-import setCache from "../../utils/setCache.ts";
+import { ignore } from "../../utils/variables.ts";
 import isError from "../../types/guards/isError.ts";
 import validateItems from "../../utils/validateItems.ts";
-import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
+import { getNodeServer } from "../../controllers/node.controller.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
-import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
-import { ShardsNames, dockerPs, docker, shardsNames } from "duplicatedFilesCleanerIncognito";
+import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
 
 export default async function handleDelete(args: string[], options?: CommandOptions): Promise<CommandResponse> {
   const [nodeRaw, rawShards] = [args.slice(0, 1), args.slice(1)];
@@ -28,7 +27,7 @@ export default async function handleDelete(args: string[], options?: CommandOpti
     throw e;
   });
   if (isError(nodeIndexOrError)) return { successful: false, error: nodeIndexOrError.message };
-  const [fromNodeIndex] = nodeIndexOrError;
+  const [dockerIndex] = nodeIndexOrError;
 
   // Validate and get the shards
   const shards: ShardsNames[] | Error =
@@ -51,58 +50,13 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   const lastIgnoreMinutes = ignore.docker.minutes;
   ignore.docker.minutes = Infinity;
 
-  const responses: string[] = [];
+  const server = await getNodeServer({ dockerIndex: +dockerIndex });
+  if (!server) return { successful: false, error: `Node ${dockerIndex} doesn't have a server.` };
 
-  // Stop the docker regardless of the ignore value if at least one of them is online
-  const fromRunning = (await dockerPs([fromNodeIndex]))[fromNodeIndex].running;
-  if (fromRunning) {
-    setCache(fromNodeIndex, "docker.running", false);
-    await Promise.all([
-      options?.telegramMessages &&
-        sendMessage("Stopping node...", undefined, { disable_notification: options?.silent }),
-      docker(`inc_mainnet_${fromNodeIndex}`, "stop"),
-    ]);
-    setCache(fromNodeIndex, "docker.running", false);
-    responses.push("Stopping node...");
-  }
-
-  for (const shard of shards) {
-    responses.push(`Deleting ${shard} from node ${fromNodeIndex}...`);
-
-    // change the cache
-    const changeCache = () => {
-      const fromNodeIndexData = monitorInfoByDockerIndex[fromNodeIndex];
-      if (fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
-    };
-
-    changeCache();
-    await Promise.all([
-      options?.telegramMessages
-        ? sendMessage(`Deleting ${shard} from node ${fromNodeIndex}...`, undefined, {
-            disable_notification: options?.silent,
-          })
-        : null,
-      Deno.remove(join(duplicatedFilesCleaner.homePath, `/node_data_${fromNodeIndex}/mainnet/block/${shard}`), {
-        recursive: true,
-      }).catch(() => {}),
-    ]);
-    changeCache();
-  }
+  await axiod.delete(server.url, { node: dockerIndex, shards });
 
   // restore the ignore value
   ignore.docker.minutes = lastIgnoreMinutes;
 
-  // start the docker if they were not being ignored
-  if (fromRunning) {
-    setCache(fromNodeIndex, "docker.running", true);
-    await Promise.all([
-      options?.telegramMessages &&
-        sendMessage("Starting node...", undefined, { disable_notification: options?.silent }),
-      docker(`inc_mainnet_${fromNodeIndex}`, "start"),
-    ]);
-    setCache(fromNodeIndex, "docker.running", true);
-    responses.push("Starting node...");
-  }
-
-  return { successful: true, response: responses.join("\n") };
+  return { successful: true, response: `${shards.join(", ")} deleted for node ${dockerIndex}.` };
 }
