@@ -7,7 +7,6 @@ import { getAccount } from "./controllers/account.controller.ts";
 import { allErrorTypes, AllErrorTypes } from "./utils/variables.ts";
 
 interface Json {
-  infuraURL: string;
   /** Decimal format */
   incognitoFee: number;
   minEpochsToBeOnlinePending: number;
@@ -35,7 +34,6 @@ interface Json {
 }
 
 const schema = joi.object<Json>({
-  infuraURL: joi.string().uri().required(),
   minEpochsToBeOnlinePending: joi.number().required(),
   minEpochsToBeOnlineSyncing: joi.number().required(),
   maxDiskPercentageUsage: joi.number().required(),
@@ -67,7 +65,6 @@ if (error) {
 /////////////////////
 ///// Incognito /////
 /////////////////////
-export const { infuraURL } = json;
 /** Decimal format */
 export const { incognitoFee } = json;
 export const incognitoFeeInt = json.incognitoFee * 1e9;

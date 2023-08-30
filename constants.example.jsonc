@@ -33,8 +33,6 @@
   // In decimal format
   "incognitoFee": 0.1,
 
-  "infuraURL": "",
-
   "maxNotStakedDays": 3, // for nodes with more than 1 month working
   "maxNotStakedDaysForNew": 10, // for nodes with less than 1 month working
 
