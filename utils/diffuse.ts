@@ -1,73 +1,34 @@
-import axiod from "axiod";
-import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
+import { getNodes, changeNode } from "../controllers/node.controller.ts";
 
 export default async function diffuse() {
-  function epochToHeight(epoch: number) {
-    return {
-      start: epoch * 350 + 1,
-      end: (epoch + 1) * 350,
-    };
-  }
-
   interface Data {
     lastEpoch: number;
     /** epoch: date */
     data: Record<number | string, { start?: number; end?: number } | undefined>;
   }
 
-  interface Result {
-    Result: [
-      {
-        Height: number;
-        Epoch: number;
-        Time: number;
-      }
-    ];
-  }
+  const data: Data = await Deno.readFile("epochsDates.json").then((x) => JSON.parse(new TextDecoder().decode(x)));
 
-  async function getEpochAndTime(height: number) {
-    const { data } = await axiod.post<Result>("https://mainnet.incognito.org/fullnode", {
-      id: 1,
-      jsonrpc: "1.0",
-      params: [height, "2"],
-      method: "retrievebeaconblockbyheight",
+  const nodes = await getNodes();
+
+  const entries = Object.entries(data.data);
+
+  for (const node of nodes) {
+    if (typeof node.epoch === "number") continue;
+
+    const a = entries.find(([, data]) => {
+      if (!data) return false;
+      return data.start && data.start <= +node.createdAt && data.end && data.end >= +node.createdAt;
     });
 
-    return {
-      epoch: data.Result[0].Epoch,
-      time: new Date(data.Result[0].Time * 1000),
-    };
-  }
+    console.log(node.name, a ? a[0] : "No data");
 
-  const data: Data = (await Deno.readFile("epochsDates.json")
-    .then((x) => JSON.parse(new TextDecoder().decode(x)))
-    .catch(() => {})) || { lastEpoch: -1, data: {} };
+    let epoch = a ? +a[0] : null;
+    if (node.name === "82-64d475bf684cbb1cf670250a") epoch = 11313;
 
-  async function loadMore(height: number, isStart: boolean) {
-    const { epoch, time } = await repeatUntilNoError(() => getEpochAndTime(height || 1), 20, 1);
-    console.log(`Epoch: ${epoch}, Time: ${time}`);
-
-    const key = isStart ? "start" : "end";
-
-    if (!data.data[epoch]) data.data[epoch] = {};
-
-    if (data.data[epoch]![key]) throw new Error(`Epoch ${epoch} already has ${key} defined`);
-
-    data.data[epoch]![key] = +time;
-  }
-
-  const simultaneous = 1;
-
-  while (false) {
-    await Promise.all(
-      Array.from({ length: simultaneous }, (_, i) => epochToHeight(data.lastEpoch + i + 1)).map(async (h) => {
-        await loadMore(h.start, true);
-        await loadMore(h.end, false);
-      })
-    );
-
-    data.lastEpoch += simultaneous;
-
-    await Deno.writeFile("epochsDates.json", new TextEncoder().encode(JSON.stringify(data, null, 2)));
+    if (epoch !== null) {
+      await changeNode({ _id: node._id }, { $set: { epoch } });
+      console.log(`Node ${node.name} has been updated to epoch ${epoch}`);
+    }
   }
 }
