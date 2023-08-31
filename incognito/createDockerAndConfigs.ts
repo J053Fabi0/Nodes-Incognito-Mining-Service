@@ -1,10 +1,11 @@
 import { ObjectId } from "mongo/mod.ts";
 import isError from "../types/guards/isError.ts";
-import getNodeName from "../utils/getNodeName.ts";
 import createDocker from "./docker/createDocker.ts";
 import deleteDocker from "./docker/deleteDocker.ts";
 import constants, { adminId } from "../constants.ts";
+import getBlockchainInfo from "./getBlockchainInfo.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
+import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 import getPublicValidatorKey from "../utils/getPublicValidatorKey.ts";
 import { changeNode, createNode, getNodes } from "../controllers/node.controller.ts";
 import createNginxConfig, { CreateNginxConfigResponse } from "./nginx/createNginxConfig.ts";
@@ -93,7 +94,17 @@ export default async function createDockerAndConfigs({
       }
     );
   // Create node in the database
-  else
+  else {
+    const info = (await repeatUntilNoError(
+      async () => {
+        const infoAttempt = await getBlockchainInfo();
+        if (!infoAttempt) throw new Error("info is null");
+        return infoAttempt;
+      },
+      60,
+      10
+    ))!;
+
     nodeId = (
       await createNode({
         name,
@@ -102,11 +113,13 @@ export default async function createDockerAndConfigs({
         validator,
         rcpPort: portAndIndex.rcpPort,
         client: new ObjectId(clientId),
+        epoch: info.BestBlocks["-1"].Epoch,
         dockerIndex: portAndIndex.dockerIndex,
         validatorPublic: validatorPublicForSure,
         sendTo: [adminId, new ObjectId(clientId)],
       })
     )._id;
+  }
 
   // Update configurations only if the node is active
   if (inactive === false) addNodeToConfigs(portAndIndex.dockerIndex, name, validatorPublicForSure);
