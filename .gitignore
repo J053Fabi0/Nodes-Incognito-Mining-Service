@@ -5,3 +5,4 @@ full.*
 deno.lock
 constants.jsonc
 _fresh
+data.json
