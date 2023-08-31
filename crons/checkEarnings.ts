@@ -18,7 +18,7 @@ function findClientById(clients: Pick<Client, "_id" | "notionPage" | "telegram">
 export default async function checkEarnings() {
   const nodes = await getNodes(
     { inactive: false },
-    { projection: { name: 1, sendTo: 1, number: 1, client: 1, validatorPublic: 1, _id: 1 } }
+    { projection: { name: 1, sendTo: 1, number: 1, client: 1, validatorPublic: 1, epoch: 1, _id: 1 } }
   );
   const clients = await getClients({}, { projection: { telegram: 1, notionPage: 1, _id: 1 } });
 
@@ -26,9 +26,8 @@ export default async function checkEarnings() {
   const nodesStatus = await getNodesStatus();
 
   for (const nodeStatus of nodesStatus) {
-    const { _id, sendTo, number, validatorPublic, client } = nodes.find(
-      (n) => n.validatorPublic === nodeStatus.validatorPublic
-    )!;
+    const node = nodes.find((n) => n.validatorPublic === nodeStatus.validatorPublic)!;
+    const { _id, sendTo, number, client, validatorPublic } = node;
 
     const { notionPage } = findClientById(clients, client);
     const nodeEarnings = await getNodeEarnings(validatorPublic);
@@ -38,6 +37,10 @@ export default async function checkEarnings() {
 
       // If no earing yet, continue.
       if (!earning) continue;
+
+      // If the earning's epoch is lower or equal than the node's epoch, continue.
+      // This is to avoid registering earnings that we have not mined.
+      if (epoch <= node.epoch) continue;
 
       const time = new Date(nodeEarning.time);
 
