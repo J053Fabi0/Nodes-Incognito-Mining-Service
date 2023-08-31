@@ -28,6 +28,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
     voteStat: null,
     shardsBlockHeights: null,
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
   "1": {
     _id: new ObjectId("648ea67e9d36345e94bff735"),
@@ -64,6 +65,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
       "7": { node: 1, latest: 3798310 },
     },
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
   "2": {
     _id: new ObjectId("648ea67e9d36345e94bff736"),
@@ -100,6 +102,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
       "7": { node: 1, latest: 3798310 },
     },
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
   "3": {
     _id: new ObjectId("648ea67e9d36345e94bff737"),
@@ -136,6 +139,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
       "7": { node: 1, latest: 3798310 },
     },
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
   "4": {
     _id: new ObjectId("648ea67e9d36345e94bff738"),
@@ -172,6 +176,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
       "7": { node: 1, latest: 3798310 },
     },
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
   "5": {
     _id: new ObjectId("648ea67e9d36345e94bff739"),
@@ -208,6 +213,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
       "7": { node: 1, latest: 3798310 },
     },
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
   "6": {
     _id: new ObjectId("648ea67f9d36345e94bff73a"),
@@ -244,6 +250,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
       "7": { node: 1, latest: 3798310 },
     },
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
   "7": {
     _id: new ObjectId("648ea67f9d36345e94bff73b"),
@@ -280,6 +287,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
       "7": { node: 1, latest: 3798310 },
     },
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
   "8": {
     _id: new ObjectId("648ea67f9d36345e94bff73c"),
@@ -316,6 +324,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
       "7": { node: 1, latest: 3798310 },
     },
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
   "9": {
     _id: new ObjectId("648ea67f9d36345e94bff73d"),
@@ -352,6 +361,7 @@ export const nodesStatusByDockerIndexTest: NodesStatusByDockerIndex = {
       "7": { node: 1, latest: 3798310 },
     },
     server: new ObjectId("64dcce3dd2b79a6414341501"),
+    epoch: 5055,
   },
 };
 

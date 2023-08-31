@@ -15,4 +15,6 @@ export default interface Node extends CommonCollection {
   sendTo: ObjectId[];
   rcpPort: number;
   server: ObjectId;
+  /** The latest epoch at the time of creation */
+  epoch: number;
 }
