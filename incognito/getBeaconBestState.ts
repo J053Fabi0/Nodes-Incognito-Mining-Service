@@ -4,6 +4,7 @@ import { ShardsNumbers } from "duplicatedFilesCleanerIncognito";
 interface BeaconCommittee {
   IncPubKey: string;
   MiningPubKey: {
+    /** Validator public key */
     bls: string;
     dsa: string;
   };
