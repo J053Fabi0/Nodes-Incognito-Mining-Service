@@ -11,6 +11,8 @@ export default interface Node extends CommonCollection {
   validator: string;
   dockerIndex: number;
   validatorPublic: string;
+  publicKey?: string;
+  rewardAddress?: string;
   /** To whom send notifications. This can or cannot include the owner */
   sendTo: ObjectId[];
   rcpPort: number;

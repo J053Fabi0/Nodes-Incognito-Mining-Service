@@ -3,6 +3,7 @@ import checkNodes from "./checkNodes.ts";
 import Cron, { CronOptions } from "croner";
 import cacheMonitor from "./cacheMonitor.ts";
 import checkEarnings from "./checkEarnings.ts";
+import getMissingKeys from "./getMissingKeys.ts";
 import handleError from "../utils/handleError.ts";
 import checkMonthlyFee from "./checkMonthlyFee.ts";
 import checkAccounts, { Unit } from "./checkAccounts.ts";
@@ -53,4 +54,7 @@ function startCrons() {
 
   // every second save the variables to redis
   new Cron("*/1 * * * * *", { protect: true, ...options }, saveVariablesToRedis);
+
+  // every 30 minutes get the missing keys
+  new Cron("*/30 * * * *", options, getMissingKeys);
 }
