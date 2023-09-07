@@ -45,7 +45,10 @@ export const commands: Commands = (() => {
             const command = pending[0];
             if (!command) continue;
             // execute the command
-            const successful = await handleCommands(command);
+            const successful = await handleCommands(command).catch((e) => {
+              if (isError(e)) return { successful: false, error: e.message } satisfies CommandResponse;
+              else return { successful: false, error: "Unknown error." } satisfies CommandResponse;
+            });
             // remove it
             pending.shiftNoEvent();
             saveToRedis();
