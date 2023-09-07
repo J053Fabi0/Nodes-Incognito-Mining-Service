@@ -19,8 +19,8 @@ export default async function updateDockers() {
     const [nodeStatus] = await getNodesStatus({ dockerIndexes: [node.dockerIndex], fullData: false });
 
     if (!getShouldBeOnline(nodeStatus)) {
-      await deleteDocker(node.dockerIndex, false);
-      await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
+      await deleteDocker(node.dockerIndex, false).catch(console.error);
+      await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex).catch(console.error);
       break;
     }
   }
