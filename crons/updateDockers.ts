@@ -39,7 +39,7 @@ export default async function updateDockers() {
 
     console.log("Waiting 20 seconds to continue updating dockers.");
     updatingDockers = false;
-    await sleep(20_000);
+    await sleep(20);
     // }
   }
 
