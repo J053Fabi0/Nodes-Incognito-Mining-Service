@@ -3,13 +3,16 @@ import { Handlers } from "$fresh/server.ts";
 import handleError from "../utils/handleError.ts";
 import diffuse from "../utils/diffuse.ts";
 
+let count = 0;
+
 export const handler: Handlers<null, State> = {
   async GET() {
-    console.time("Diffuser.");
+    const timerName = `Diffuser ${++count}`;
+    console.time(timerName);
     console.log("Diffusing...");
     await diffuse()
       .catch(handleError)
-      .finally(() => console.timeEnd("Diffuser."));
+      .finally(() => console.timeEnd(timerName));
     return new Response("Done");
   },
 };
