@@ -16,14 +16,14 @@ export default async function updateDockers() {
   instanceRunning = true;
 
   const latestTag = await getLatestTag();
-  const outdatedNodes = await getNodes({ dockerTag: { $ne: latestTag }, inactive: false });
-  const nodesInfo = await duplicatedFilesCleaner.getInfo(outdatedNodes.map((n) => n.dockerIndex));
+  const nodes = await getNodes({ inactive: false });
+  const nodesInfo = await duplicatedFilesCleaner.getInfo(nodes.map((n) => n.dockerIndex));
 
-  for (const node of outdatedNodes) {
+  for (const node of nodes) {
     const info = nodesInfo[node.dockerIndex];
 
     if (info.docker.tag === latestTag) {
-      await updateTagInDB(node);
+      if (node.dockerTag !== latestTag) await updateTagInDB(node);
       continue;
     }
 
@@ -32,7 +32,7 @@ export default async function updateDockers() {
     console.log(`Updating node ${node.dockerIndex} from ${info.docker.tag} to ${latestTag}`);
     updatingDockers = true;
 
-    await deleteDocker(node.dockerIndex, false).catch(console.error);
+    await deleteDocker(node.dockerIndex, false);
     await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex).catch(console.error);
 
     await updateTagInDB(node);
