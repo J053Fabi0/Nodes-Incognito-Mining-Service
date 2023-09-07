@@ -3,9 +3,10 @@ import { parse } from "std/jsonc/mod.ts";
 import { getNodes } from "./controllers/node.controller.ts";
 import DuplicatedFilesCleaner, { Constants } from "duplicatedFilesCleanerIncognito";
 
-type Json = Pick<Constants, "homePath" | "minFilesToConsiderShard">;
+type Json = Pick<Constants, "homePath" | "minFilesToConsiderShard" | "filesToStrip">;
 const schema = joi.object<Json>({
   homePath: joi.string().required(),
+  filesToStrip: joi.number().default(20_000),
   minFilesToConsiderShard: joi.number().required(),
 });
 
