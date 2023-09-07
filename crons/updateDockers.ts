@@ -10,6 +10,8 @@ import Node from "../types/collections/node.type.ts";
 export let updatingDockers = false;
 
 export default async function updateDockers() {
+  if (updatingDockers) return;
+
   const latestTag = await getLatestTag();
   const outdatedNodes = await getNodes({ dockerTag: { $ne: latestTag }, inactive: false });
   const nodesInfo = await duplicatedFilesCleaner.getInfo(outdatedNodes.map((n) => n.dockerIndex));
