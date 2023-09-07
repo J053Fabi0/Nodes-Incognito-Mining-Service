@@ -1,13 +1,13 @@
 import { ObjectId } from "mongo/mod.ts";
 import isError from "../types/guards/isError.ts";
-import createDocker from "./docker/createDocker.ts";
-import deleteDocker from "./docker/deleteDocker.ts";
 import constants, { adminId } from "../constants.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import getPublicValidatorKey from "../utils/getPublicValidatorKey.ts";
 import { getServerWithLessNodes } from "../controllers/server.controller.ts";
 import { changeNode, createNode, getNodes } from "../controllers/node.controller.ts";
 import createNginxConfig, { CreateNginxConfigResponse } from "./nginx/createNginxConfig.ts";
+import createDocker from "../controller/controllers/createNode/docker/createDocker.ts";
+import deleteDocker from "../controller/controllers/createNode/docker/deleteDocker.ts";
 
 export interface CreateDockerAndConfigsOptions {
   clientId: string | ObjectId;

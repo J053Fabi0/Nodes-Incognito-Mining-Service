@@ -8,11 +8,11 @@ import handleError from "../utils/handleError.ts";
 import relativeTime from "dayjs/plugin/relativeTime.ts";
 import { docker } from "duplicatedFilesCleanerIncognito";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
-import { dataDir } from "../incognito/docker/createDocker.ts";
 import { getClient } from "../controllers/client.controller.ts";
 import { maxNotStakedDays, maxNotStakedDaysForNew } from "../constants.ts";
 import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
 import { ignore, lastRoles, monitorInfoByDockerIndex } from "../utils/variables.ts";
+import { dataDir } from "../controller/controllers/createNode/docker/createDocker.ts";
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
