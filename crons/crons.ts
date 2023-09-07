@@ -3,6 +3,7 @@ import checkNodes from "./checkNodes.ts";
 import Cron, { CronOptions } from "croner";
 import cacheMonitor from "./cacheMonitor.ts";
 import checkEarnings from "./checkEarnings.ts";
+import updateDockers from "./updateDockers.ts";
 import handleError from "../utils/handleError.ts";
 import checkMonthlyFee from "./checkMonthlyFee.ts";
 import checkAccounts, { Unit } from "./checkAccounts.ts";
@@ -53,4 +54,7 @@ function startCrons() {
 
   // every second save the variables to redis
   new Cron("*/1 * * * * *", { protect: true, ...options }, saveVariablesToRedis);
+
+  // every 3 hours update the dockers
+  new Cron("0 */3 * * *", options, updateDockers);
 }
