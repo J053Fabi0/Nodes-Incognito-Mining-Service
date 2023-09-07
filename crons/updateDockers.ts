@@ -7,6 +7,7 @@ import deleteDocker from "../incognito/docker/deleteDocker.ts";
 import createDocker from "../incognito/docker/createDocker.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
+import { docker } from "duplicatedFilesCleanerIncognito";
 
 export let updatingDockers = false;
 let instanceRunning = false;
@@ -34,6 +35,7 @@ export default async function updateDockers() {
 
     await deleteDocker(node.dockerIndex, false);
     await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex).catch(console.error);
+    await docker(`inc_mainnet_${node.dockerIndex}`, "stop").catch(console.error);
 
     await updateTagInDB(node);
 
