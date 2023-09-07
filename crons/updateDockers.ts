@@ -1,13 +1,11 @@
 import { sleep } from "sleep";
 import Node from "../types/collections/node.type.ts";
 import getLatestTag from "../incognito/getLatestTag.ts";
-import getNodesStatus from "../utils/getNodesStatus.ts";
-import getShouldBeOnline from "../utils/getShouldBeOnline.ts";
+import { docker } from "duplicatedFilesCleanerIncognito";
 import deleteDocker from "../incognito/docker/deleteDocker.ts";
 import createDocker from "../incognito/docker/createDocker.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
-import { docker } from "duplicatedFilesCleanerIncognito";
 
 export let updatingDockers = false;
 let instanceRunning = false;
