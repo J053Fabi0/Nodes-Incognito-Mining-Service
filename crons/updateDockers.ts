@@ -13,6 +13,7 @@ export default async function updateDockers() {
 
   for (const node of outdatedNodes) {
     const info = nodesInfo[node.dockerIndex];
+    console.log(node.dockerIndex, info.docker.tag, latestTag);
     if (info.docker.tag === latestTag) continue;
 
     const [nodeStatus] = await getNodesStatus({ dockerIndexes: [node.dockerIndex], fullData: false });
@@ -20,6 +21,7 @@ export default async function updateDockers() {
     if (!getShouldBeOnline(nodeStatus)) {
       await deleteDocker(node.dockerIndex, false);
       await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
+      break;
     }
   }
 }
