@@ -8,7 +8,7 @@ import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 
 export default async function updateDockers() {
   const latestTag = await getLatestTag();
-  const outdatedNodes = await getNodes({ dockerTag: { $ne: latestTag } });
+  const outdatedNodes = await getNodes({ dockerTag: { $ne: latestTag }, inactive: false });
   const nodesInfo = await duplicatedFilesCleaner.getInfo(outdatedNodes.map((n) => n.dockerIndex));
 
   for (const node of outdatedNodes) {
