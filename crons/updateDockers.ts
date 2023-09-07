@@ -1,3 +1,5 @@
+import { sleep } from "sleep";
+import Node from "../types/collections/node.type.ts";
 import getLatestTag from "../incognito/getLatestTag.ts";
 import getNodesStatus from "../utils/getNodesStatus.ts";
 import getShouldBeOnline from "../utils/getShouldBeOnline.ts";
@@ -5,12 +7,13 @@ import deleteDocker from "../incognito/docker/deleteDocker.ts";
 import createDocker from "../incognito/docker/createDocker.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
-import Node from "../types/collections/node.type.ts";
 
 export let updatingDockers = false;
+let instanceRunning = false;
 
 export default async function updateDockers() {
-  if (updatingDockers) return;
+  if (instanceRunning) return;
+  instanceRunning = true;
 
   const latestTag = await getLatestTag();
   const outdatedNodes = await getNodes({ dockerTag: { $ne: latestTag }, inactive: false });
@@ -33,10 +36,15 @@ export default async function updateDockers() {
       await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex).catch(console.error);
 
       await updateTagInDB(node);
+
+      console.log("Waiting 20 seconds to continue updating dockers.");
+      updatingDockers = false;
+      await sleep(20_000);
     }
   }
 
   updatingDockers = false;
+  instanceRunning = false;
 }
 
 async function updateTagInDB(node: Node) {
