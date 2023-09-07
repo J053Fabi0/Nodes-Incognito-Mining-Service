@@ -1,12 +1,12 @@
 import { IS_PRODUCTION } from "../env.ts";
 import { byNumber, byValues } from "sort-es";
+import { cronsStarted } from "../crons/crons.ts";
 import getShouldBeOnline from "./getShouldBeOnline.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
-import { cronsStarted } from "../crons/crons.ts";
 
 export const rolesOrder: ((nodeStatus: NodeStatus) => boolean)[] = [
   ({ role }) => role === "COMMITTEE",
