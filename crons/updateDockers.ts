@@ -27,20 +27,20 @@ export default async function updateDockers() {
       continue;
     }
 
-    const [nodeStatus] = await getNodesStatus({ dockerIndexes: [node.dockerIndex], fullData: false });
-    if (!getShouldBeOnline(nodeStatus)) {
-      console.log(`Updating node ${node.dockerIndex} from ${info.docker.tag} to ${latestTag}`);
-      updatingDockers = true;
+    // const [nodeStatus] = await getNodesStatus({ dockerIndexes: [node.dockerIndex], fullData: false });
+    // if (!getShouldBeOnline(nodeStatus)) {
+    console.log(`Updating node ${node.dockerIndex} from ${info.docker.tag} to ${latestTag}`);
+    updatingDockers = true;
 
-      await deleteDocker(node.dockerIndex, false).catch(console.error);
-      await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex).catch(console.error);
+    await deleteDocker(node.dockerIndex, false).catch(console.error);
+    await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex).catch(console.error);
 
-      await updateTagInDB(node);
+    await updateTagInDB(node);
 
-      console.log("Waiting 20 seconds to continue updating dockers.");
-      updatingDockers = false;
-      await sleep(20_000);
-    }
+    console.log("Waiting 20 seconds to continue updating dockers.");
+    updatingDockers = false;
+    await sleep(20_000);
+    // }
   }
 
   updatingDockers = false;
