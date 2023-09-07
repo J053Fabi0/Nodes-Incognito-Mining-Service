@@ -33,7 +33,8 @@ export default async function updateDockers() {
 
     await deleteDocker(node.dockerIndex, false);
     await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex).catch(console.error);
-    await docker(`inc_mainnet_${node.dockerIndex}`, "stop").catch(console.error);
+    // stop the docker if it was stopped before
+    if (!info.docker.running) await docker(`inc_mainnet_${node.dockerIndex}`, "stop").catch(console.error);
 
     await updateTagInDB(node);
 
