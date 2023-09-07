@@ -1,10 +1,10 @@
 import getLatestTag from "../incognito/getLatestTag.ts";
 import getNodesStatus from "../utils/getNodesStatus.ts";
-import { getNodes } from "../controllers/node.controller.ts";
 import getShouldBeOnline from "../utils/getShouldBeOnline.ts";
 import deleteDocker from "../incognito/docker/deleteDocker.ts";
 import createDocker from "../incognito/docker/createDocker.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
+import { changeNode, getNodes } from "../controllers/node.controller.ts";
 
 export default async function updateDockers() {
   const latestTag = await getLatestTag();
@@ -21,6 +21,10 @@ export default async function updateDockers() {
     if (!getShouldBeOnline(nodeStatus)) {
       await deleteDocker(node.dockerIndex, false).catch(console.error);
       await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex).catch(console.error);
+
+      const { [node.dockerIndex]: nodeInfo } = await duplicatedFilesCleaner.getInfo([node.dockerIndex]);
+      await changeNode({ _id: node._id }, { $set: { dockerTag: nodeInfo.docker.tag } });
+
       break;
     }
   }
