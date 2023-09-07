@@ -3,13 +3,12 @@ import { parse } from "std/jsonc/mod.ts";
 import { getNodes } from "./controllers/node.controller.ts";
 import DuplicatedFilesCleaner, { Constants } from "duplicatedFilesCleanerIncognito";
 
+type Json = Pick<Constants, "homePath" | "minFilesToConsiderShard">;
 const schema = joi.object<Json>({
   homePath: joi.string().required(),
-  fileSystem: joi.string().required(),
   minFilesToConsiderShard: joi.number().required(),
 });
 
-type Json = Omit<Constants, "instructions" | "validatorPublicKeys">;
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
 const { error, value: json } = schema.validate(rawJson, { stripUnknown: true });
@@ -23,9 +22,6 @@ const nodes = await getNodes({ inactive: false }, { projection: { dockerIndex: 1
 
 export const duplicatedConstants: Constants = {
   ...json,
-  storageFolder: "",
-  filesToStripIfOnline: 0,
-  filesToStripIfOffline: 0,
   dockerIndexes: nodes.map((node) => node.dockerIndex),
 };
 
