@@ -11,6 +11,7 @@ import getCommandOrPossibilities, {
   AllowedCommands,
   AllowedCommandsWithOptions,
 } from "../utils/getCommandOrPossibilities.ts";
+import { BUILDING } from "../env.ts";
 import isError from "../types/guards/isError.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
@@ -28,7 +29,8 @@ import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMov
 
 export const commands: Commands = (() => {
   let working = false;
-  setTimeout(getCommandsFromReds, 100);
+  if (!BUILDING) setTimeout(getCommandsFromReds, 100);
+
   return {
     resolved: new EventedArray<AllowedCommandsWithOptions>(({ array }) => {
       saveToRedis();
@@ -45,7 +47,10 @@ export const commands: Commands = (() => {
             const command = pending[0];
             if (!command) continue;
             // execute the command
-            const successful = await handleCommands(command);
+            const successful = await handleCommands(command).catch((e) => {
+              if (isError(e)) return { successful: false, error: e.message } satisfies CommandResponse;
+              else return { successful: false, error: "Unknown error." } satisfies CommandResponse;
+            });
             // remove it
             pending.shiftNoEvent();
             saveToRedis();

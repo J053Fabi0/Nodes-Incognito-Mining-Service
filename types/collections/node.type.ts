@@ -17,4 +17,5 @@ export default interface Node extends CommonCollection {
   server: ObjectId;
   /** The latest epoch at the time of creation */
   epoch: number;
+  dockerTag: string;
 }

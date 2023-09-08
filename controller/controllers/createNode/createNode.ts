@@ -9,6 +9,9 @@ import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import getPublicValidatorKey from "../../../utils/getPublicValidatorKey.ts";
 import { getServerWithLessNodes } from "../../../controllers/server.controller.ts";
 import { changeNode, createNode as createNodeCtrl, getNodes } from "../../../controllers/node.controller.ts";
+import getLatestTag from "./getLatestTag.ts";
+import getBlockchainInfo from "../../../incognito/getBlockchainInfo.ts";
+import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 
 export interface CreateNodeBody {
   number: number;
@@ -56,10 +59,11 @@ export default async function createNode(c: Context) {
   })();
 
   const clientIdStr = clientId.toString();
+  const latestTag = await getLatestTag();
 
   while (true)
     try {
-      await createDocker(portAndIndex.rcpPort, validator, portAndIndex.dockerIndex);
+      await createDocker(portAndIndex.rcpPort, validator, portAndIndex.dockerIndex, latestTag);
       break;
     } catch (e) {
       if (!isError(e)) throw e;
@@ -94,21 +98,34 @@ export default async function createNode(c: Context) {
       }
     );
   // Create node in the database
-  else
+  else {
+    const info = (await repeatUntilNoError(
+      async () => {
+        const infoAttempt = await getBlockchainInfo();
+        if (!infoAttempt) throw new Error("info is null");
+        return infoAttempt;
+      },
+      60,
+      10
+    ))!;
+
     nodeId = (
       await createNodeCtrl({
         name,
         number,
         inactive,
         validator,
+        dockerTag: latestTag,
         rcpPort: portAndIndex.rcpPort,
         client: new ObjectId(clientId),
+        epoch: info.BestBlocks["-1"].Epoch,
         dockerIndex: portAndIndex.dockerIndex,
         validatorPublic: validatorPublicForSure,
         sendTo: [adminId, new ObjectId(clientId)],
         server: (await getServerWithLessNodes())._id,
       })
     )._id.toString();
+  }
 
   // Update configurations only if the node is active
   if (inactive === false) addNodeToConfigs(portAndIndex.dockerIndex, name, validatorPublicForSure);

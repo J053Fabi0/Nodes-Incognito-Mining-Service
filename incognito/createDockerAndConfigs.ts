@@ -6,10 +6,11 @@ import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 import getPublicValidatorKey from "../utils/getPublicValidatorKey.ts";
 import { getServerWithLessNodes } from "../controllers/server.controller.ts";
+import getLatestTag from "../controller/controllers/createNode/getLatestTag.ts";
 import { changeNode, createNode, getNodes } from "../controllers/node.controller.ts";
-import createNginxConfig, { CreateNginxConfigResponse } from "./nginx/createNginxConfig.ts";
 import createDocker from "../controller/controllers/createNode/docker/createDocker.ts";
 import deleteDocker from "../controller/controllers/createNode/docker/deleteDocker.ts";
+import createNginxConfig, { CreateNginxConfigResponse } from "./nginx/createNginxConfig.ts";
 
 export interface CreateDockerAndConfigsOptions {
   clientId: string | ObjectId;
@@ -114,6 +115,7 @@ export default async function createDockerAndConfigs({
         validator,
         rcpPort: portAndIndex.rcpPort,
         client: new ObjectId(clientId),
+        dockerTag: await getLatestTag(),
         epoch: info.BestBlocks["-1"].Epoch,
         dockerIndex: portAndIndex.dockerIndex,
         validatorPublic: validatorPublicForSure,

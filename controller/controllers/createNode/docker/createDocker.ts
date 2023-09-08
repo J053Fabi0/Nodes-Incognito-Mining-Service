@@ -10,12 +10,16 @@ const coinIndexAccessToken = "edeaaff3f1774ad2888673770c6d64097e391bc362d7d6fb34
 /**
  * @returns The container id
  */
-export default async function createDocker(rpcPort: number, validatorKey: string, dockerIndex: number) {
+export default async function createDocker(
+  rpcPort: number,
+  validatorKey: string,
+  dockerIndex: number,
+  dockerTag: string | Promise<string> = getLatestTag()
+) {
   // Run even if it fails, in case it already exists
   await docker(["network", "create", "--driver", "bridge", "inc_net"]).catch(() => {});
 
   const nodePort = rpcPort + nodePortDiff;
-  const latestTag = await getLatestTag();
 
   return docker([
     "run",
@@ -34,6 +38,6 @@ export default async function createDocker(rpcPort: number, validatorKey: string
     ...["-v", `${dataDir}_${dockerIndex}:/data`],
     "-d",
     ...["--name", `inc_mainnet_${dockerIndex}`],
-    `incognitochain/incognito-mainnet:${latestTag}`,
+    `incognitochain/incognito-mainnet:${await dockerTag}`,
   ]);
 }

@@ -53,7 +53,7 @@ const schema = joi.object<Json>({
   minShardsToKeep: joi.number().integer().min(1).default(2),
   minutesToRepeatAlert: joi.number().integer().min(1).default(30),
   minutesBetweenFixLowDiskSpace: joi.number().integer().min(1).default(20),
-  fileSystem: joi.string(),
+  fileSystem: joi.string().required(),
 });
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 

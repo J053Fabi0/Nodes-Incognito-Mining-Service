@@ -1,6 +1,7 @@
 import { escapeHtml } from "escapeHtml";
 import isError from "../types/guards/isError.ts";
 import sendMessage from "../telegram/sendMessage.ts";
+import { updatingDockers } from "../crons/updateDockers.ts";
 import isMongoServerError from "../types/guards/isMongoServerError.ts";
 
 const maxLength = 4096 - "<code></code>".length - 10;
@@ -16,6 +17,7 @@ export default async function handleError(e: any) {
     if (e.message.startsWith("error sending request for url")) return;
     if (e.message.includes("Resource temporarily unavailable")) Deno.exit(1); // exit with error so that PM2 restarts the process
     if (e.message.includes("Error when retrieving balance: cannot check spent coins")) return;
+    if (e.message.startsWith("Error: No such object: inc_mainnet_") && updatingDockers) return;
   }
   if (isMongoServerError(e) && e.codeName === "NotPrimaryNoSecondaryOk") Deno.exit(1); // exit with error so that PM2 restarts the process
 
