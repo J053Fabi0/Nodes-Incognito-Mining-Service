@@ -3,6 +3,7 @@ import { join } from "std/path/mod.ts";
 import { WEBSITE_URL } from "../../env.ts";
 import { systemctl } from "../../utils/commands.ts";
 import getNodeName from "../../utils/getNodeName.ts";
+import doesDirExists from "../../utils/doesDirExists.ts";
 
 const { hostname } = new URL(WEBSITE_URL);
 export const sitesEnabled = "/etc/nginx/sites-enabled/";
@@ -42,9 +43,11 @@ export default async function createNginxConfig(
 }`;
 
   const filePath = join(sitesAvailable, subdomain);
+  const destinationPath = join(sitesEnabled, subdomain);
 
   await Deno.writeTextFile(filePath, config);
-  await Deno.symlink(filePath, join(sitesEnabled, subdomain));
+  if (await doesDirExists(destinationPath)) await Deno.remove(destinationPath);
+  await Deno.symlink(filePath, destinationPath);
 
   await systemctl(["reload", "nginx"]);
 
