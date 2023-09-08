@@ -1,4 +1,5 @@
 import { ObjectId } from "mongo/mod.ts";
+import getLatestTag from "./getLatestTag.ts";
 import isError from "../types/guards/isError.ts";
 import createDocker from "./docker/createDocker.ts";
 import deleteDocker from "./docker/deleteDocker.ts";
@@ -113,6 +114,7 @@ export default async function createDockerAndConfigs({
         validator,
         rcpPort: portAndIndex.rcpPort,
         client: new ObjectId(clientId),
+        dockerTag: await getLatestTag(),
         epoch: info.BestBlocks["-1"].Epoch,
         dockerIndex: portAndIndex.dockerIndex,
         validatorPublic: validatorPublicForSure,

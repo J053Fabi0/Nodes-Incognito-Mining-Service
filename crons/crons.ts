@@ -3,6 +3,7 @@ import checkNodes from "./checkNodes.ts";
 import Cron, { CronOptions } from "croner";
 import cacheMonitor from "./cacheMonitor.ts";
 import checkEarnings from "./checkEarnings.ts";
+import updateDockers from "./updateDockers.ts";
 import getMissingKeys from "./getMissingKeys.ts";
 import handleError from "../utils/handleError.ts";
 import checkMonthlyFee from "./checkMonthlyFee.ts";
@@ -57,4 +58,7 @@ function startCrons() {
 
   // every 30 minutes get the missing keys
   new Cron("*/30 * * * *", options, getMissingKeys);
+
+  // every 3 hours update the dockers
+  new Cron("0 */3 * * *", options, updateDockers);
 }
