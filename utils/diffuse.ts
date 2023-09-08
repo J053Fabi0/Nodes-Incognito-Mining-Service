@@ -1,8 +1,5 @@
 import updateDockers from "../crons/updateDockers.ts";
 
 export default async function diffuse() {
-  await updateDockers({
-    force: true,
-    dockerIndexes: [199],
-  });
+  await updateDockers({ force: true });
 }
