@@ -56,6 +56,7 @@ export default function EarningsTable({ relative, earnings, nodes, baseURL }: Ea
               </td>
 
               <td class={styles.td}>
+                {/* It's in decimal format */}
                 <code>{e.earning}</code>
               </td>
             </tr>

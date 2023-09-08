@@ -1,6 +1,6 @@
 import axiod from "axiod";
 
-export default async function getNodeRewards(rewardAddress: string): Promise<number | null> {
+export default async function getNodeTotalRewards(rewardAddress: string): Promise<number | null> {
   const { data } = await axiod.post<{ Result: { PRV: number } | null; Error: null | { StackTrace: string } }>(
     "https://mainnet.incognito.org/fullnode",
     { jsonrpc: "1.0", method: "getrewardamount", params: [rewardAddress], id: 1 }

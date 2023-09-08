@@ -3,11 +3,11 @@ import { Head } from "$fresh/runtime.ts";
 import State from "../../../types/state.type.ts";
 import redirect from "../../../utils/redirect.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
-import { toFixedS } from "../../../utils/numbersString.ts";
 import Pagination from "../../../components/Pagination.tsx";
 import Typography from "../../../components/Typography.tsx";
 import getQueryParams from "../../../utils/getQueryParams.ts";
 import { getNodes } from "../../../controllers/node.controller.ts";
+import { moveDecimalDot, toFixedS } from "../../../utils/numbersString.ts";
 import { EarningForEarningsTable } from "../../../islands/EarningsTable.tsx";
 import { getTotalEarnings } from "../../../controllers/nodeEarning.controller.ts";
 import EarningsTableAndOptions from "../../../islands/EarningsTableAndOptions.tsx";
@@ -65,7 +65,7 @@ export const handler: Handlers<NodesEarningsProps, State> = {
     const monthEarnings: string[] = [];
     for (let i = 0; i < 2; i++) {
       const earning = await getTotalEarnings(nodesIds, i);
-      if (earning) monthEarnings.push(toFixedS(earning, 2));
+      if (earning) monthEarnings.push(toFixedS(moveDecimalDot(earning, -9), 2));
       else break;
     }
 
@@ -73,10 +73,10 @@ export const handler: Handlers<NodesEarningsProps, State> = {
       page,
       pages,
       isAdmin,
-      earnings,
       relative,
       monthEarnings,
       nodes: nodesByNumber,
+      earnings: earnings.map((e) => ({ ...e, earning: +moveDecimalDot(e.earning, -9) })),
     });
   },
 };

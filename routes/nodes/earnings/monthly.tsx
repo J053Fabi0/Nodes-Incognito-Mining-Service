@@ -8,9 +8,9 @@ import { BAR_COLORS } from "../../../constants.ts";
 import Button from "../../../components/Button.tsx";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import nameOfMonth from "../../../utils/nameOfMonth.ts";
-import { toFixedS } from "../../../utils/numbersString.ts";
 import Typography from "../../../components/Typography.tsx";
 import getQueryParams from "../../../utils/getQueryParams.ts";
+import { moveDecimalDot } from "../../../utils/numbersString.ts";
 import { getNodes } from "../../../controllers/node.controller.ts";
 import MonthlyEarningsTable from "../../../components/Nodes/MonthlyEarningsTable.tsx";
 import EarningsTable, { EarningForEarningsTable } from "../../../islands/EarningsTable.tsx";
@@ -62,7 +62,7 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
     const monthEarnings: MonthlyNodesEarningsProps["monthEarnings"] = [];
     if (earnings.length > 0)
       for (let i = 0; i <= (all ? months : MAX_MONTHS); i++) {
-        const total = toFixedS(await getTotalEarnings(nodesIds, i), 9);
+        const total = moveDecimalDot(await getTotalEarnings(nodesIds, i), -9);
 
         if (all) {
           // add all months, even if the earnings are 0
@@ -79,10 +79,10 @@ export const handler: Handlers<MonthlyNodesEarningsProps, State> = {
 
     return ctx.render({
       isAdmin,
-      earnings,
       monthsLeft,
       monthEarnings,
       nodes: nodesByNumber,
+      earnings: earnings.map((e) => ({ ...e, earning: +moveDecimalDot(e.earning, -9) })),
     });
   },
 };
@@ -137,9 +137,9 @@ export default function MonthlyEarnings({ data }: PageProps<MonthlyNodesEarnings
               labels: months.toReversed(),
               datasets: [
                 {
-                  data: monthEarnings.toReversed().map(Number),
-                  backgroundColor: BAR_COLORS,
                   label: "Monthly earnings",
+                  backgroundColor: BAR_COLORS,
+                  data: monthEarnings.toReversed().map(Number),
                 },
               ],
             }}
