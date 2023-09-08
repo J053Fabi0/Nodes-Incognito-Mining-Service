@@ -96,9 +96,13 @@ export default async function getInstructionsToMoveOrDelete(
 export async function getTextInstructionsToMoveOrDelete() {
   const instructions = await getInstructionsToMoveOrDelete();
 
-  if (instructions.length)
-    return `<code>${instructions
-      .map(({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`)
-      .join("</code>\n<code>")}</code>`;
-  else return "No moves necessary.";
+  if (instructions.length) {
+    const parsedInstructions = instructions.map(
+      ({ action, from, to, shards }) => `${action} ${from} ${to ? `${to} ` : ""}${shards.join(" ")}`
+    );
+    return (
+      `<code>${parsedInstructions.join("; </code>\n<code>")}; </code>\n\n` +
+      `<code>${parsedInstructions.join("; ")}</code>`
+    );
+  } else return "No moves necessary.";
 }
