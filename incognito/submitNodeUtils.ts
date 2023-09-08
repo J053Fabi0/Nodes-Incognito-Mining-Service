@@ -65,15 +65,6 @@ export async function saveToRedis() {
   await redis.set(redisKey, JSON.stringify(pendingNodes));
 }
 
-export function addSaveToRedisProxy<T extends NewNode>(obj: T): T {
-  return new Proxy(obj, {
-    set(target, name, value) {
-      saveToRedis();
-      return Reflect.set(target, name, value);
-    },
-  });
-}
-
 /** It returns the saved data or fetches and sets the data */
 export async function getNodeNumber(
   newNode: NewNode,
