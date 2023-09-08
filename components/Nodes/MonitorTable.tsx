@@ -25,16 +25,17 @@ interface MonitorTableProps {
 
 export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: MonitorTableProps) {
   const totalBeacon = isAdmin ? nodesInfo.reduce((n, [, a]) => n + +Boolean(a.beacon), 0) : 0;
-  const totalShard = isAdmin ? (
-    <>
-      {" "}
-      {nodesInfo.reduce((n, [node, a]) => {
+  const totalShard = isAdmin
+    ? ` ${nodesInfo.reduce((n, [node, a]) => {
         const status = nodesStatus[node];
         if (!status) return n;
         return n + +Boolean(a[`shard${status.shard}`]);
-      }, 0)}
-    </>
-  ) : null;
+      }, 0)}`
+    : "";
+  const totalOnlineDockers = isAdmin ? ` ${nodesInfo.reduce((n, [, a]) => n + +a.docker.running, 0)}` : "";
+  const totalOnlineNodes = isAdmin
+    ? ` ${nodesInfo.reduce((n, [node]) => n + +(nodesStatus[node]?.status === "ONLINE"), 0)}`
+    : "";
 
   return (
     <div class="overflow-x-auto">
@@ -42,8 +43,8 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
         <thead>
           <tr>
             <th class={styles.th}>Nodes ({nodesInfo.length})</th>
-            <th class={styles.th}>Docker</th>
-            <th class={styles.th}>Online</th>
+            <th class={styles.th}>Docker{totalOnlineDockers}</th>
+            <th class={styles.th}>Online{totalOnlineNodes}</th>
             <th class={styles.th}>Sync</th>
             <th class={styles.th}>Role</th>
             <th class={styles.th}>Shard{totalShard}</th>
