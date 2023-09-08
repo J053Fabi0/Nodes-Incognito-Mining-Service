@@ -1,3 +1,9 @@
+import {
+  ShardsStr,
+  shardsNumbersStr,
+  repeatUntilNoError,
+  iteratePromisesInChunks,
+} from "duplicatedFilesCleanerIncognito";
 import axiod from "axiod";
 import moment from "moment";
 import { lodash as _ } from "lodash";
@@ -7,8 +13,6 @@ import getSyncState from "../incognito/getSyncState.ts";
 import { getNodes } from "../controllers/node.controller.ts";
 import getBlockchainInfo from "../incognito/getBlockchainInfo.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import iteratePromisesInChunks from "./promisesYieldedInChunks.ts";
-import { ShardsStr, shardsNumbersStr, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 
 export type NodeStatusKeys =
   | "role"
