@@ -25,10 +25,11 @@ import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
+import { BUILDING } from "../env.ts";
 
 export const commands: Commands = (() => {
   let working = false;
-  setTimeout(getCommandsFromReds, 100);
+  if (!BUILDING) setTimeout(getCommandsFromReds, 100);
   return {
     resolved: new EventedArray<AllowedCommandsWithOptions>(({ array }) => {
       saveToRedis();
