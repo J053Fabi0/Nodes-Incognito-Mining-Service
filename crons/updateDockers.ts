@@ -34,6 +34,7 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
   const nodesQuery: Parameters<typeof getNodes>[0] = { inactive: false };
   if (dockerIndexes) nodesQuery.dockerIndex = { $in: dockerIndexes };
   const nodes = await getNodes(nodesQuery);
+  if (!nodes.length) return;
 
   const nodesInfo = await duplicatedFilesCleaner.getInfo(nodes.map((n) => n.dockerIndex));
 
