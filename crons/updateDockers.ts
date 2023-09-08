@@ -11,7 +11,6 @@ import { addNodeToConfigs } from "../incognito/createDockerAndConfigs.ts";
 import createDocker, { dataDir } from "../incognito/docker/createDocker.ts";
 import { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
 
-export let updatingDockers = false;
 let instanceRunning = false;
 
 interface UpdateDockersOptions {
@@ -47,7 +46,6 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
     }
 
     console.log(`Updating node ${node.dockerIndex} from ${info.docker.tag} to ${latestTag}`);
-    updatingDockers = true;
 
     // save the beacon and shard files somewhere else
     const blockDir = `${dataDir}_${node.dockerIndex}/mainnet/block`;
@@ -56,6 +54,7 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
     if (backup) await Deno.rename(blockDir, tempBlockDir);
 
     // delete and recreate the docker
+    await changeNode({ _id: node._id }, { $set: { inactive: true } });
     removeNodeFromConfigs(node.dockerIndex);
     await deleteDocker(node.dockerIndex, false);
     await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
@@ -96,16 +95,12 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
     // stop the docker if it was stopped before
     else if (!info.docker.running) await docker(`inc_mainnet_${node.dockerIndex}`, "stop");
 
+    await changeNode({ _id: node._id }, { $set: { inactive: false } });
     addNodeToConfigs(node.dockerIndex, node.name, node.validatorPublic);
 
     await updateTagInDB(node);
-
-    console.log("Waiting 20 seconds to continue updating dockers.");
-    updatingDockers = false;
-    await sleep(20);
   }
 
-  updatingDockers = false;
   instanceRunning = false;
 }
 
