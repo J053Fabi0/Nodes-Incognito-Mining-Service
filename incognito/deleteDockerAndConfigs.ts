@@ -2,7 +2,7 @@ import { ObjectId } from "mongo/mod.ts";
 import constants from "../constants.ts";
 import deleteNginxConfig from "./nginx/deleteNginxConfig.ts";
 import { changeNode } from "../controllers/node.controller.ts";
-import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner from "../controller/duplicatedFilesCleaner.ts";
 import { lastErrorTimes, lastRoles, onlineQueue } from "../utils/variables.ts";
 import deleteDocker from "../controller/controllers/createNode/docker/deleteDocker.ts";
 

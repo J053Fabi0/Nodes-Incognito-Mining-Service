@@ -3,8 +3,8 @@ import { byNumber, byValues } from "sort-es";
 import { cronsStarted } from "../crons/crons.ts";
 import getShouldBeOnline from "./getShouldBeOnline.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
-import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
+import duplicatedFilesCleaner from "../controller/duplicatedFilesCleaner.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 

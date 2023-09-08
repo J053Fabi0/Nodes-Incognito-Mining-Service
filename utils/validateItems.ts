@@ -1,5 +1,5 @@
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
-import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
+import duplicatedFilesCleaner from "../controller/duplicatedFilesCleaner.ts";
 
 interface GenericOptions {
   name?: string;
