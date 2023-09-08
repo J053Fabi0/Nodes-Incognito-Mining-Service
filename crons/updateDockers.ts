@@ -53,7 +53,7 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
     const blockDir = `${dataDir}_${node.dockerIndex}/mainnet/block`;
     const tempBlockDir = join((await createTempDataDir()).fullPath, "block");
     const backup = await doesDirExists(blockDir);
-    if (backup) await Deno.rename(blockDir, join(tempBlockDir, "block"));
+    if (backup) await Deno.rename(blockDir, tempBlockDir);
 
     // delete and recreate the docker
     removeNodeFromConfigs(node.dockerIndex);
@@ -88,7 +88,7 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
       await Deno.remove(blockDir, { recursive: true });
 
       // move the backup to the new block dir
-      await Deno.rename(join(tempBlockDir, "block"), blockDir);
+      await Deno.rename(tempBlockDir, blockDir);
 
       if (info.docker.running) await docker(`inc_mainnet_${node.dockerIndex}`, "start");
     }
