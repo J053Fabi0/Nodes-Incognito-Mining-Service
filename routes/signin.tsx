@@ -60,7 +60,6 @@ export const handler: Handlers<SigninProps, State> = {
 
         const newUser = await createClient({
           role: "client",
-          notionPage: null,
           telegram: params.id,
           account: submittedAccount._id,
           lastPayment: dayjs().utc().startOf("month").toDate(),
