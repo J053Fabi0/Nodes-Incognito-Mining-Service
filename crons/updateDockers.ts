@@ -61,7 +61,7 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
         // delete and recreate the docker
         await changeNode({ _id: node._id }, { $set: { inactive: true } });
         removeNodeFromConfigs(node.dockerIndex);
-        await deleteDocker(node.dockerIndex, false);
+        await deleteDocker(node.dockerIndex);
         await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
 
         // restore backup
