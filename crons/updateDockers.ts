@@ -1,47 +1,108 @@
 import { sleep } from "sleep";
+import { join } from "std/path/mod.ts";
 import Node from "../types/collections/node.type.ts";
+import doesDirExists from "../utils/doesDirExists.ts";
 import getLatestTag from "../incognito/getLatestTag.ts";
 import { docker } from "duplicatedFilesCleanerIncognito";
 import deleteDocker from "../incognito/docker/deleteDocker.ts";
-import createDocker from "../incognito/docker/createDocker.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
+import { addNodeToConfigs } from "../incognito/createDockerAndConfigs.ts";
+import createDocker, { dataDir } from "../incognito/docker/createDocker.ts";
+import { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
 
 export let updatingDockers = false;
 let instanceRunning = false;
 
-export default async function updateDockers() {
+interface UpdateDockersOptions {
+  force?: boolean;
+  dockerIndexes?: number[];
+}
+
+async function createTempDataDir() {
+  const tempDirName = Math.random().toString(36).slice(2);
+  const fullPath = join(duplicatedFilesCleaner.homePath, "temp", tempDirName);
+  await Deno.mkdir(fullPath, { recursive: true });
+  return { fullPath, tempDirName };
+}
+
+export default async function updateDockers({ force = false, dockerIndexes }: UpdateDockersOptions = {}) {
   if (instanceRunning) return;
   instanceRunning = true;
 
   const latestTag = await getLatestTag();
-  const nodes = await getNodes({ inactive: false });
+
+  const nodesQuery: Parameters<typeof getNodes>[0] = { inactive: false };
+  if (dockerIndexes) nodesQuery.dockerIndex = { $in: dockerIndexes };
+  const nodes = await getNodes(nodesQuery);
+
   const nodesInfo = await duplicatedFilesCleaner.getInfo(nodes.map((n) => n.dockerIndex));
 
   for (const node of nodes) {
     const info = nodesInfo[node.dockerIndex];
 
-    if (info.docker.tag === latestTag) {
+    if (info.docker.tag === latestTag && !force) {
       if (node.dockerTag !== latestTag) await updateTagInDB(node);
       continue;
     }
 
-    // const [nodeStatus] = await getNodesStatus({ dockerIndexes: [node.dockerIndex], fullData: false });
-    // if (!getShouldBeOnline(nodeStatus)) {
     console.log(`Updating node ${node.dockerIndex} from ${info.docker.tag} to ${latestTag}`);
     updatingDockers = true;
 
+    // save the beacon and shard files somewhere else
+    const blockDir = `${dataDir}_${node.dockerIndex}/mainnet/block`;
+    const tempBlockDir = join((await createTempDataDir()).fullPath, "block");
+    const backup = await doesDirExists(blockDir);
+    if (backup) await Deno.rename(blockDir, join(tempBlockDir, "block"));
+
+    // delete and recreate the docker
+    removeNodeFromConfigs(node.dockerIndex);
     await deleteDocker(node.dockerIndex, false);
-    await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex).catch(console.error);
+    await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
+
+    // restore backup
+    thisIf: if (backup) {
+      // wait until a new block dir is created
+      const doesExist = await (async (timedout = false, doesExist = false) => {
+        await Promise.race([
+          (async () => {
+            while (!timedout) {
+              if ((doesExist = await doesDirExists(blockDir))) break;
+              await sleep(1);
+            }
+          })(),
+          sleep(120).finally(() => (timedout = true)),
+        ]);
+        return doesExist;
+      })();
+
+      if (!doesExist) {
+        console.error(new Error(`The new block dir was not created in 120 seconds for node ${node.dockerIndex}.`));
+        break thisIf;
+      }
+
+      // stop the docker
+      await docker(`inc_mainnet_${node.dockerIndex}`, "stop");
+
+      // delete the new block dir
+      await Deno.remove(blockDir, { recursive: true });
+
+      // move the backup to the new block dir
+      await Deno.rename(join(tempBlockDir, "block"), blockDir);
+
+      if (info.docker.running) await docker(`inc_mainnet_${node.dockerIndex}`, "start");
+    }
+
     // stop the docker if it was stopped before
-    if (!info.docker.running) await docker(`inc_mainnet_${node.dockerIndex}`, "stop").catch(console.error);
+    else if (!info.docker.running) await docker(`inc_mainnet_${node.dockerIndex}`, "stop");
+
+    addNodeToConfigs(node.dockerIndex, node.name, node.validatorPublic);
 
     await updateTagInDB(node);
 
     console.log("Waiting 20 seconds to continue updating dockers.");
     updatingDockers = false;
     await sleep(20);
-    // }
   }
 
   updatingDockers = false;
