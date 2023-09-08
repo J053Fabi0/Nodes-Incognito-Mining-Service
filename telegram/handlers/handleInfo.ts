@@ -1,11 +1,11 @@
 import { escapeHtml } from "escapeHtml";
+import { fileSystem } from "../../constants.ts";
 import sortNodes from "../../utils/sortNodes.ts";
 import isError from "../../types/guards/isError.ts";
 import { df } from "duplicatedFilesCleanerIncognito";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
-import { duplicatedConstants } from "../../duplicatedFilesCleaner.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import getInstructionsToMoveOrDelete from "../../utils/getInstructionsToMoveOrDelete.ts";
@@ -19,12 +19,12 @@ export default async function handleInfo(
 ): Promise<CommandResponse> {
   const onlyFilesystem = rawNodes.length === 1 && rawNodes[0] === "fs";
   if (onlyFilesystem) {
-    if (!duplicatedConstants.fileSystem) {
+    if (!fileSystem) {
       if (options?.telegramMessages)
         await sendMessage("File system not configured", undefined, { disable_notification: options?.silent });
       return { successful: false, error: "File system not configured" };
     }
-    const response = await getFileSistemInfo(duplicatedConstants.fileSystem);
+    const response = await getFileSistemInfo(fileSystem);
     if (options?.telegramMessages)
       await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
     return { successful: true, response };
@@ -69,7 +69,7 @@ export default async function handleInfo(
   }
 
   // Add file system info
-  if (duplicatedConstants.fileSystem) text += (await getFileSistemInfo(duplicatedConstants.fileSystem)) + "\n";
+  if (fileSystem) text += (await getFileSistemInfo(fileSystem)) + "\n";
 
   // Add possible instructions
   const instructions = await getInstructionsToMoveOrDelete();

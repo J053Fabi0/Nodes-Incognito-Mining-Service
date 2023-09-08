@@ -7,8 +7,7 @@ import getSyncState from "../incognito/getSyncState.ts";
 import { getNodes } from "../controllers/node.controller.ts";
 import getBlockchainInfo from "../incognito/getBlockchainInfo.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import iteratePromisesInChunks from "./promisesYieldedInChunks.ts";
-import { ShardsStr, shardsNumbersStr, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
+import { ShardsStr, maxPromises, shardsNumbersStr, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 
 export type NodeStatusKeys =
   | "role"
@@ -64,7 +63,7 @@ export default async function getNodesStatus({
   const results: NodeStatus[] = [];
 
   if (!cronsStarted) console.time("getAllSyncState");
-  await iteratePromisesInChunks(
+  await maxPromises(
     rawData.map((d) => async () => {
       const node = nodes.find((n) => n.validatorPublic === d.MiningPubkey);
       if (!node) return;
@@ -151,13 +150,11 @@ async function getRawData(mpk: string | string[], fetchAll = false): Promise<Nod
   if (toFetch.length === 0) return results;
 
   if (!cronsStarted) console.time("getAllRawData");
-  const allData = await iteratePromisesInChunks(
+  const allData = await maxPromises(
     _.chunk(mpks, 20).map(
-      (c) => () =>
-        repeatUntilNoError(
-          () =>
-            axiod.post<NodeStatusRawData[]>("https://monitor.incognito.org/pubkeystat/stat", { mpk: c.join(",") }),
-          3
+      (c) => async () =>
+        await repeatUntilNoError(() =>
+          axiod.post<NodeStatusRawData[]>("https://monitor.incognito.org/pubkeystat/stat", { mpk: c.join(",") })
         )
     ),
     6
@@ -165,10 +162,8 @@ async function getRawData(mpk: string | string[], fetchAll = false): Promise<Nod
   if (!cronsStarted) console.timeEnd("getAllRawData");
 
   for (const data of allData) {
-    if (data.status === "fulfilled") {
-      results.push(...data.value.data);
-      for (const d of data.value.data) lastRequests[d.MiningPubkey] = { data: d, time: Date.now() };
-    }
+    results.push(...data.data);
+    for (const d of data.data) lastRequests[d.MiningPubkey] = { data: d, time: Date.now() };
   }
 
   return results;

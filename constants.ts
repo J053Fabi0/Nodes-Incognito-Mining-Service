@@ -32,6 +32,7 @@ interface Json {
   minutesToRepeatAlert: number;
   /** Minutes between attempts to fix low disk space */
   minutesBetweenFixLowDiskSpace: number;
+  fileSystem: string;
 }
 
 const schema = joi.object<Json>({
@@ -54,6 +55,7 @@ const schema = joi.object<Json>({
   minShardsToKeep: joi.number().integer().min(1).default(2),
   minutesToRepeatAlert: joi.number().integer().min(1).default(30),
   minutesBetweenFixLowDiskSpace: joi.number().integer().min(1).default(20),
+  fileSystem: joi.string().required(),
 });
 const rawJson = parse(await Deno.readTextFile("./constants.jsonc")) as Record<string, unknown>;
 
@@ -110,6 +112,7 @@ export const BAR_COLORS = [
   "#baffc9",
   "#bae1ff",
 ] as const;
+export const { fileSystem } = json;
 export const { waitingTimes } = json;
 export const { minShardsToKeep } = json;
 export const { minutesToRepeatAlert } = json;
