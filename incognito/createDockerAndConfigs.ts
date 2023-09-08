@@ -69,6 +69,7 @@ export default async function createDockerAndConfigs({
         portAndIndex.rcpPort++;
         continue;
       } else if (e.message.includes("is already in use by container")) {
+        console.error(e);
         console.error(`Docker index ${portAndIndex.dockerIndex} is already in use, trying to delete it.`);
         await deleteDocker(portAndIndex.dockerIndex);
       } else throw e;
