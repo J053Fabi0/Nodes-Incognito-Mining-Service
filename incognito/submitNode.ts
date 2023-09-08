@@ -4,7 +4,6 @@ import {
   getDockerIndex,
   resolveAndForget,
   sendErrorToClient,
-  addSaveToRedisProxy,
   getPendingNodesFromRedis,
 } from "./submitNodeUtils.ts";
 import { sleep } from "sleep";
@@ -65,7 +64,12 @@ export const pendingNodes = new EventedArray<NewNode>(
 // Add the pending nodes from redis
 getPendingNodesFromRedis().then((pending) => {
   if (!pending) return;
-  pendingNodes.push(...pending.map(addSaveToRedisProxy));
+  const newPending: NewNode[] = [];
+  for (const node of pending) {
+    if (newPending.find((n) => n.validatorPublic === node.validatorPublic)) continue;
+    newPending.push(node);
+  }
+  pendingNodes.push(...newPending);
 });
 
 async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode>): Promise<boolean> {
@@ -169,5 +173,7 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
 }
 
 export default function submitNode(newNode: Omit<NewNode, "resolve">): Promise<ResolveData> {
-  return new Promise((resolve) => pendingNodes.push(addSaveToRedisProxy({ ...newNode, resolve })));
+  if (pendingNodes.find((n) => n.validatorPublic === newNode.validatorPublic))
+    return Promise.reject(new Error("Node already pending"));
+  return new Promise((resolve) => pendingNodes.push({ ...newNode, resolve }));
 }
