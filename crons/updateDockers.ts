@@ -6,13 +6,12 @@ import doesDirExists from "../utils/doesDirExists.ts";
 import getLatestTag from "../incognito/getLatestTag.ts";
 import getNodesStatus from "../utils/getNodesStatus.ts";
 import { maxPromises } from "duplicatedFilesCleanerIncognito";
+import { dataDir } from "../incognito/docker/createDocker.ts";
 import { Info, docker } from "duplicatedFilesCleanerIncognito";
-import deleteDocker from "../incognito/docker/deleteDocker.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
-import { addNodeToConfigs } from "../incognito/createDockerAndConfigs.ts";
-import createDocker, { dataDir } from "../incognito/docker/createDocker.ts";
-import { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
+import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
+import createDockerAndConfigs, { addNodeToConfigs } from "../incognito/createDockerAndConfigs.ts";
 
 let instanceRunning = false;
 
@@ -64,10 +63,25 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
         if (backup) await Deno.rename(blockDir, tempBlockDir);
 
         // delete and recreate the docker
-        await changeNode({ _id: node._id }, { $set: { inactive: true } });
-        removeNodeFromConfigs(node.dockerIndex);
-        await deleteDocker(node.dockerIndex);
-        await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex, latestTag);
+        await deleteDockerAndConfigs({
+          number: node.number,
+          clientId: node.client,
+          dockerIndex: node.dockerIndex,
+        });
+        await createDockerAndConfigs({
+          inactive: true,
+          nodeId: node._id,
+          number: node.number,
+          clientId: node.client,
+          rcpPort: node.rcpPort,
+          validator: node.validator,
+          dockerIndex: node.dockerIndex,
+          validatorPublic: node.validatorPublic,
+        });
+        // await changeNode({ _id: node._id }, { $set: { inactive: true } });
+        // removeNodeFromConfigs(node.dockerIndex);
+        // await deleteDocker(node.dockerIndex);
+        // await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex, latestTag);
 
         await restoreAndExit(node, backup, blockDir, tempBlockDir, tempDir, info).catch(handleError);
       } catch (e) {
@@ -99,7 +113,8 @@ async function restoreAndExit(
       (async () => {
         while (!timedout) {
           const [nodeStatus] = await getNodesStatus({ dockerIndexes: [node.dockerIndex], onlyActive: false });
-          if (nodeStatus?.status === "ONLINE") break;
+          if (!nodeStatus) console.error(new Error(`Node ${node.dockerIndex} not found in the monitor`));
+          if (nodeStatus.status === "ONLINE") break;
           await sleep(5);
         }
       })(),
