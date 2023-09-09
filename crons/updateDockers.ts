@@ -155,9 +155,9 @@ async function restoreAndExit(
             await sleep(5);
           }
         })(),
-        sleep(60 * 5).finally(() => {
+        sleep(60 * 8).finally(() => {
           timedout = true;
-          console.error(new Error(`Node ${dockerIndex} did not come online in 5 minutes.`));
+          console.error(new Error(`Node ${dockerIndex} did not come online in 8 minutes.`));
         }),
       ]);
     })();
