@@ -3,6 +3,8 @@ import { byNumber, byValues } from "sort-es";
 import { cronsStarted } from "../crons/crons.ts";
 import isError from "../types/guards/isError.ts";
 import getShouldBeOnline from "./getShouldBeOnline.ts";
+import { getNode } from "../controllers/node.controller.ts";
+import createDocker from "../incognito/docker/createDocker.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
@@ -172,8 +174,15 @@ async function getNodesInfoByDockerIndex(
               console.error(
                 new Error(`Docker ${dockerIndex} not found. Removing it from the configs and trying again.`)
               );
-              removeNodeFromConfigs(+dockerIndex);
-              nodesToFetch.splice(nodesToFetch.indexOf(+dockerIndex), 1);
+              const node = await getNode({ dockerIndex: +dockerIndex });
+              if (!node) {
+                console.error(new Error(`Node ${dockerIndex} not found in the database.`));
+                nodesToFetch.splice(nodesToFetch.indexOf(+dockerIndex), 1);
+                removeNodeFromConfigs(+dockerIndex);
+              } else {
+                console.log(`Creating docker ${dockerIndex} again.`);
+                await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
+              }
             }
           } else throw e;
         }
