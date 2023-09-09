@@ -7,11 +7,11 @@ import getNodesStatus from "../utils/getNodesStatus.ts";
 import { maxPromises } from "duplicatedFilesCleanerIncognito";
 import { Info, docker } from "duplicatedFilesCleanerIncognito";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
-import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
 import duplicatedFilesCleaner from "../controller/duplicatedFilesCleaner.ts";
 import getLatestTag from "../controller/controllers/createNode/getLatestTag.ts";
 import { dataDir } from "../controller/controllers/createNode/docker/createDocker.ts";
 import createDockerAndConfigs, { addNodeToConfigs } from "../incognito/createDockerAndConfigs.ts";
+import deleteDockerAndConfigs, { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
 
 let instanceRunning = false;
 
@@ -63,6 +63,7 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
         if (backup) await Deno.rename(blockDir, tempBlockDir);
 
         // delete and recreate the docker
+        removeNodeFromConfigs(node.dockerIndex);
         await deleteDockerAndConfigs({
           number: node.number,
           clientId: node.client,
@@ -79,7 +80,6 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
           validatorPublic: node.validatorPublic,
         });
         // await changeNode({ _id: node._id }, { $set: { inactive: true } });
-        // removeNodeFromConfigs(node.dockerIndex);
         // await deleteDocker(node.dockerIndex);
         // await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex, latestTag);
 
