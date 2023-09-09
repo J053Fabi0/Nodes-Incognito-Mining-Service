@@ -11,7 +11,7 @@ if (flags.reloadRedisVariables) await redis.del(`${redisPrefix}*`);
 export type AcceptedRecord = Record<string, any>;
 
 /**
- * Returns an object with a proxy that saves the data to redis when it's changed and fetches the data
+ * Returns an object saved in redis, or the default value if it doesn't exist.
  * from redis when it's initialized
  * @param redisKey The key to get the value from redis
  * @param defaultValue The default value to return if the key doesn't exist in redis

@@ -16,27 +16,13 @@ import { AccountTransactionStatus, AccountTransactionType } from "../types/colle
 
 const redisKey = "transactions";
 
-export async function saveToRedis() {
-  const allPendingTransactions = Object.values(pendingTransactionsByAccount).flatMap((a) => a);
-  await redis.set(redisKey, JSON.stringify(allPendingTransactions));
-}
-
-export function addSaveToRedisProxy<T extends PendingTransaction>(obj: T): T {
-  return new Proxy(obj, {
-    set(target, name, value) {
-      saveToRedis();
-      return Reflect.set(target, name, value);
-    },
-  });
-}
-
 export async function fetchPendingTransactionsFromRedisAndDB() {
   // Get them from redis
   const redisTransactions = await redis.get(redisKey);
   if (redisTransactions)
     // without the balance, so it can be checked again
     for (const transaction of JSON.parse(redisTransactions) as PendingTransaction[])
-      pendingTransactionsByAccount[`${transaction.account}`].push(addSaveToRedisProxy(transaction));
+      pendingTransactionsByAccount[`${transaction.account}`].push(transaction);
 
   const pendingDBTransactions = await getAccountTransactions(
     { status: AccountTransactionStatus.PENDING },
@@ -148,7 +134,6 @@ export async function checkBalance(
     // remove it from the array
     const index = pending.indexOf(transaction);
     if (index !== -1) pending.spliceNoEvent(index, 1);
-    saveToRedis();
 
     // resolve the promise
     transaction.resolve?.({

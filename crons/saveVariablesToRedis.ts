@@ -1,5 +1,6 @@
 import { redis } from "../initDatabase.ts";
 import { variablesToSave } from "../utils/getRedisValue.ts";
+import { maxPromises } from "duplicatedFilesCleanerIncognito";
 
 globalThis.addEventListener("unload", async () => {
   await saveVariablesToRedis();
@@ -7,5 +8,12 @@ globalThis.addEventListener("unload", async () => {
 });
 
 export default async function saveVariablesToRedis() {
-  await Promise.all(variablesToSave.map(([key, value]) => redis.set(key, JSON.stringify(value))));
+  await maxPromises(
+    variablesToSave.map(
+      ([key, value]) =>
+        () =>
+          redis.set(key, JSON.stringify(value))
+    ),
+    3
+  );
 }
