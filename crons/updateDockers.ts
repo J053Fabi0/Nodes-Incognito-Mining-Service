@@ -20,8 +20,8 @@ interface UpdateDockersOptions {
   dockerIndexes?: number[];
 }
 
-async function createTempDataDir() {
-  const tempDirName = Math.random().toString(36).slice(2);
+async function createTempDataDir(startText = "") {
+  const tempDirName = `${startText}_${Math.random().toString(36).slice(2)}`;
   const fullPath = join(duplicatedFilesCleaner.homePath, "temp", tempDirName);
   await Deno.mkdir(fullPath, { recursive: true });
   return { fullPath, tempDirName };
@@ -56,7 +56,7 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
         console.log(`Updating node ${node.dockerIndex} from ${info.docker.tag} to ${latestTag}`);
 
         // save the beacon and shard files somewhere else
-        const tempDir = await createTempDataDir().then((dir) => dir.fullPath);
+        const tempDir = await createTempDataDir(`node_${node.dockerIndex}`).then((dir) => dir.fullPath);
         const blockDir = `${dataDir}_${node.dockerIndex}/mainnet/block`;
         const tempBlockDir = join(tempDir, "block");
         const backup = await doesDirExists(blockDir);
