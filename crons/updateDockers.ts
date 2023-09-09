@@ -53,8 +53,9 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
         console.log(`Updating node ${node.dockerIndex} from ${info.docker.tag} to ${latestTag}`);
 
         // save the beacon and shard files somewhere else
+        const tempDir = await createTempDataDir().then((dir) => dir.fullPath);
         const blockDir = `${dataDir}_${node.dockerIndex}/mainnet/block`;
-        const tempBlockDir = join((await createTempDataDir()).fullPath, "block");
+        const tempBlockDir = join(tempDir, "block");
         const backup = await doesDirExists(blockDir);
         if (backup) await Deno.rename(blockDir, tempBlockDir);
 
@@ -104,6 +105,7 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
 
         await changeNode({ _id: node._id }, { $set: { inactive: false } });
         addNodeToConfigs(node.dockerIndex, node.name, node.validatorPublic);
+        await Deno.remove(tempDir, { recursive: true }).catch(handleError);
 
         await updateTagInDB(node);
       } catch (e) {
