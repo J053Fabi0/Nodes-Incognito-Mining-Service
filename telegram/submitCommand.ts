@@ -1,12 +1,4 @@
-import {
-  Command,
-  Commands,
-  saveToRedis,
-  CommandOptions,
-  CommandResponse,
-  addSaveToRedisProxy,
-  getCommandsFromReds,
-} from "./submitCommandUtils.ts";
+import { Command, Commands, CommandOptions, CommandResponse, getCommandsFromReds } from "./submitCommandUtils.ts";
 import getCommandOrPossibilities, {
   AllowedCommands,
   AllowedCommandsWithOptions,
@@ -34,11 +26,9 @@ export const commands: Commands = (() => {
 
   return {
     resolved: new EventedArray<AllowedCommandsWithOptions>(({ array }) => {
-      saveToRedis();
       if (array.lengthNoEvent > 100) array.spliceNoEvent(100, Infinity);
     }),
     pending: new EventedArray<Command>(async ({ array: pending }) => {
-      saveToRedis();
       if (!working) {
         working = true;
         // Resolve the pending commands.
@@ -54,7 +44,6 @@ export const commands: Commands = (() => {
             });
             // remove it
             pending.shiftNoEvent();
-            saveToRedis();
             // resolve the promise
             command.resolve?.(successful);
             // add the command to the list of resolved commands
@@ -187,7 +176,7 @@ export default async function submitCommand(
 
       promises.push(
         new Promise<CommandResponse>((r) => {
-          commands.pending.push(addSaveToRedisProxy({ resolve: r, command: finalFullCommand, options }));
+          commands.pending.push({ resolve: r, command: finalFullCommand, options });
         })
       );
     }
