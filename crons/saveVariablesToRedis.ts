@@ -1,6 +1,5 @@
 import { sleep } from "sleep";
 import { redis } from "../initDatabase.ts";
-import handleError from "../utils/handleError.ts";
 import { variablesToSave } from "../utils/getRedisValue.ts";
 import { maxPromises } from "duplicatedFilesCleanerIncognito";
 
@@ -24,7 +23,7 @@ export default async function saveVariablesToRedis() {
       3
     ).then(() => (finished = true)),
     sleep(TIMEOUT).then(() => {
-      if (!finished) handleError(new Error(`saveVariablesToRedis timed out after ${TIMEOUT} seconds`));
+      if (!finished) console.error(new Error(`saveVariablesToRedis timed out after ${TIMEOUT} seconds`));
     }),
   ]);
 }
