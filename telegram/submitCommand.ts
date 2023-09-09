@@ -13,6 +13,7 @@ import handleDocker from "./handlers/handleDocker.ts";
 import handleDelete from "./handlers/handleDelete.ts";
 import handleUpdate from "./handlers/handleUpdate.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
+import handleDiffuse from "./handlers/handleDiffuse.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
@@ -127,6 +128,9 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
 
       case "update":
         return handleUpdate(args, options);
+
+      case "diffuse":
+        return handleDiffuse(args, options);
 
       case "full":
       case "text":

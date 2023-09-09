@@ -1,5 +1,5 @@
-import updateDockers from "../crons/updateDockers.ts";
 import sortNodes from "./sortNodes.ts";
+import updateDockers from "../crons/updateDockers.ts";
 
 const alreadyDone = [147, 193, 269, 206];
 
