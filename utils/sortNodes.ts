@@ -1,10 +1,12 @@
 import { IS_PRODUCTION } from "../env.ts";
 import { byNumber, byValues } from "sort-es";
 import { cronsStarted } from "../crons/crons.ts";
+import isError from "../types/guards/isError.ts";
 import getShouldBeOnline from "./getShouldBeOnline.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
+import { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 
@@ -158,7 +160,24 @@ async function getNodesInfoByDockerIndex(
       return nodesInfoByDockerIndexTest.filter(([doIdx]) => nodesToFetch.some((n) => `${n}` === doIdx));
 
     if (!cronsStarted) console.time("getInfo");
-    const nodesInfo = await duplicatedFilesCleaner.getInfo(nodesToFetch);
+    const nodesInfo = await (async () => {
+      while (true) {
+        try {
+          return await duplicatedFilesCleaner.getInfo(nodesToFetch);
+        } catch (e) {
+          if (isError(e) && e.message.includes("No such object: inc_mainnet_")) {
+            // get the docker index from the error message with a regex
+            const dockerIndex = e.message.match(/inc_mainnet_(\d+)/)?.[1];
+            if (dockerIndex && !isNaN(+dockerIndex)) {
+              console.error(
+                new Error(`Docker ${dockerIndex} not found. Removing it from the configs and trying again.`)
+              );
+              removeNodeFromConfigs(+dockerIndex);
+            }
+          } else throw e;
+        }
+      }
+    })();
     if (!cronsStarted) console.timeEnd("getInfo");
 
     return Object.entries(nodesInfo).map(
