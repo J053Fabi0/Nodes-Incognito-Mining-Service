@@ -17,10 +17,10 @@ export default async function handleUpdate(
   if (options?.telegramMessages)
     await sendMessage("Updating...", undefined, { disable_notification: options?.silent });
 
-  updateDockers({ force: true, dockerIndexes: nodes.map((node) => +node) }).then(async () => {
-    if (options?.telegramMessages)
-      await sendMessage("Update successful.", undefined, { disable_notification: options?.silent });
-  });
+  await updateDockers({ force: true, dockerIndexes: nodes.map((node) => +node) });
+
+  if (options?.telegramMessages)
+    await sendMessage("Update successful.", undefined, { disable_notification: options?.silent });
 
   return { successful: true, response: "" };
 }
