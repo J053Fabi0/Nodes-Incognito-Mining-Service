@@ -4,11 +4,11 @@ import { cronsStarted } from "../crons/crons.ts";
 import isError from "../types/guards/isError.ts";
 import getShouldBeOnline from "./getShouldBeOnline.ts";
 import { getNode } from "../controllers/node.controller.ts";
-import createDocker from "../incognito/docker/createDocker.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
 import duplicatedFilesCleaner from "../controller/duplicatedFilesCleaner.ts";
 import { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
+import createDocker from "../controller/controllers/createNode/docker/createDocker.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 

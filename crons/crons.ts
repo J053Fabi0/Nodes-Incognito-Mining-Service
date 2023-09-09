@@ -26,8 +26,10 @@ function startCrons() {
   cronsStarted = true;
   console.timeEnd("startCrons");
 
+  // every 5 minutes, check the earnings
   new Cron("*/5 * * * *", options, checkEarnings);
 
+  // every 10 minutes, check the nodes
   new Cron("*/10 * * * * *", { protect: true, ...options }, checkNodes);
 
   // every minute, check the accounts that have used the website in the last 5 minutes
