@@ -16,6 +16,8 @@ const helpMessage =
     ["r", "Repeat the last command"],
   ]
     .map(([command, description]) => `- ${description}.\n<code>${command}</code>`)
-    .join("\n\n");
+    .join("\n\n") +
+  "\n\n" +
+  "Add <code>&amp;</code> at the end of the command to run it in the background.";
 
 export default helpMessage;

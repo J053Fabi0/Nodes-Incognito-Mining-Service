@@ -10,6 +10,8 @@ export type CommandResponse = { response: string; successful: true } | { success
 export interface CommandOptions {
   /** Send telegram messages silently */
   silent?: boolean;
+  /** If true, runs the command without awaiting for it. */
+  detached?: boolean;
   telegramMessages?: boolean;
 }
 export interface Command {

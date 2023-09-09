@@ -1,4 +1,3 @@
-import { Command, Commands, CommandOptions, CommandResponse, getCommandsFromReds } from "./submitCommandUtils.ts";
 import getCommandOrPossibilities, {
   AllowedCommands,
   AllowedCommandsWithOptions,
@@ -12,13 +11,14 @@ import EventedArray from "../utils/EventedArray.ts";
 import handleIgnore from "./handlers/handleIgnore.ts";
 import handleDocker from "./handlers/handleDocker.ts";
 import handleDelete from "./handlers/handleDelete.ts";
+import handleUpdate from "./handlers/handleUpdate.ts";
 import { lastErrorTimes } from "../utils/variables.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
-import handleUpdate from "./handlers/handleUpdate.ts";
+import { Command, Commands, CommandOptions, CommandResponse, getCommandsFromReds } from "./submitCommandUtils.ts";
 
 export const commands: Commands = (() => {
   let working = false;
@@ -37,17 +37,24 @@ export const commands: Commands = (() => {
             // get the first command
             const command = pending[0];
             if (!command) continue;
+
             // execute the command
-            const successful = await handleCommands(command).catch((e) => {
+            const promise = handleCommands(command).catch((e) => {
               if (isError(e)) return { successful: false, error: e.message } satisfies CommandResponse;
               else return { successful: false, error: "Unknown error." } satisfies CommandResponse;
             });
+
+            const successful = command.options?.detached
+              ? await promise
+              : // don't await for the command if it's detached
+                ({ successful: true, response: "Command submitted detached." } satisfies CommandResponse);
+
             // remove it
             pending.shiftNoEvent();
             // resolve the promise
             command.resolve?.(successful);
             // add the command to the list of resolved commands
-            if (successful) commands.resolved.unshift(command.command);
+            commands.resolved.unshift(command.command);
           }
         } catch (e) {
           handleError(e);
@@ -137,7 +144,7 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
 /** Pushes a command to the queue and waits for it to be executed. */
 export default async function submitCommand(
   command: string,
-  options?: CommandOptions
+  options: CommandOptions = {}
 ): Promise<CommandResponse[]> {
   const fullCommands = command
     .toLowerCase()
@@ -150,6 +157,11 @@ export default async function submitCommand(
   for (const fullCommand of fullCommands) {
     const [commandText, ...args] = fullCommand.split(" ").filter((x) => x.trim());
     const commandOrPossibilities = getCommandOrPossibilities(commandText);
+
+    if (args[args.length - 1] === "&") {
+      args.pop();
+      options.detached = true;
+    }
 
     // if command was ambiguous
     if (commandOrPossibilities.possibleCommands) {
