@@ -107,20 +107,29 @@ async function restoreAndExit(
   tempDir: string,
   info: Info
 ) {
+  const { dockerIndex } = node;
+
   // wait for it to be online in the monitor
   await (async (timedout = false) => {
     await Promise.race([
       (async () => {
         while (!timedout) {
-          const [nodeStatus] = await getNodesStatus({ dockerIndexes: [node.dockerIndex], onlyActive: false });
-          if (!nodeStatus) console.error(new Error(`Node ${node.dockerIndex} not found in the monitor`));
+          const { [dockerIndex]: newInfo } = await duplicatedFilesCleaner.getInfo([dockerIndex]);
+          if (!newInfo?.docker.running) {
+            if (await doesDirExists(`${dataDir}_${dockerIndex}`))
+              await Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true });
+            await docker(`inc_mainnet_${dockerIndex}`, "start");
+          }
+
+          const [nodeStatus] = await getNodesStatus({ dockerIndexes: [dockerIndex], onlyActive: false });
+          if (!nodeStatus) console.error(new Error(`Node ${dockerIndex} not found in the monitor`));
           if (nodeStatus.status === "ONLINE") break;
           await sleep(5);
         }
       })(),
       sleep(60 * 5).finally(() => {
         timedout = true;
-        console.error(new Error(`Node ${node.dockerIndex} did not come online in 5 minutes.`));
+        console.error(new Error(`Node ${dockerIndex} did not come online in 5 minutes.`));
       }),
     ]);
   })();
