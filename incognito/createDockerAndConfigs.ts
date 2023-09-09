@@ -1,3 +1,4 @@
+import { sleep } from "sleep";
 import { ObjectId } from "mongo/mod.ts";
 import isError from "../types/guards/isError.ts";
 import constants, { adminId } from "../constants.ts";
@@ -72,6 +73,7 @@ export default async function createDockerAndConfigs({
         console.error(e);
         console.error(`Docker index ${portAndIndex.dockerIndex} is already in use, trying to delete it.`);
         await deleteDocker(portAndIndex.dockerIndex);
+        await sleep(5);
       } else throw e;
     }
 
