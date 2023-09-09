@@ -12,6 +12,7 @@ const helpMessage =
     ["delete [fromNodeIndex] [...shards=beacon]", "Delete the shards of a node"],
     ["errors [...errorCode=all]", "Show the errors' statuses"],
     ["instructions", "Show the instructions to move or delete files"],
+    ["update [...nodeIndexes", "Update the docker containers"],
     ["r", "Repeat the last command"],
   ]
     .map(([command, description]) => `- ${description}.\n<code>${command}</code>`)

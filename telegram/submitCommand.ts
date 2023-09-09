@@ -26,6 +26,7 @@ import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
+import handleUpdate from "./handlers/handleUpdate.ts";
 
 export const commands: Commands = (() => {
   let working = false;
@@ -127,6 +128,9 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
         if (options?.telegramMessages)
           await sendMessage("Reset successful.", undefined, { disable_notification: options?.silent });
         return { successful: true, response: "Reset successful." };
+
+      case "update":
+        return handleUpdate(args, options);
 
       case "full":
       case "text":

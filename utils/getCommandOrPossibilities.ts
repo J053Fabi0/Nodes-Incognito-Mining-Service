@@ -12,6 +12,7 @@ export type AllowedCommands =
   | "ignore"
   | "info"
   | "instructions"
+  | "update"
   | "help";
 export type AllowedCommandsWithOptions = `${AllowedCommands}${string}`;
 interface CommandWithAliases {
