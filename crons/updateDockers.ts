@@ -38,12 +38,15 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
   if (dockerIndexes) nodesQuery.dockerIndex = { $in: dockerIndexes };
   const nodes = await getNodes(nodesQuery);
   if (!nodes.length) return;
+  if (!dockerIndexes) dockerIndexes = nodes.map((n) => n.dockerIndex);
 
   const nodesInfo = await duplicatedFilesCleaner.getInfo(nodes.map((n) => n.dockerIndex));
 
   await maxPromises(
-    nodes.map((node) => async () => {
+    dockerIndexes.map((dockerIndex) => async () => {
       try {
+        const node = nodes.find((n) => n.dockerIndex === dockerIndex);
+        if (!node) return;
         const info = nodesInfo[node.dockerIndex];
 
         if (info.docker.tag === latestTag && !force) {
