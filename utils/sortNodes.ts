@@ -173,6 +173,7 @@ async function getNodesInfoByDockerIndex(
                 new Error(`Docker ${dockerIndex} not found. Removing it from the configs and trying again.`)
               );
               removeNodeFromConfigs(+dockerIndex);
+              nodesToFetch.splice(nodesToFetch.indexOf(+dockerIndex), 1);
             }
           } else throw e;
         }
