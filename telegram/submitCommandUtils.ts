@@ -29,20 +29,6 @@ function isCommands(data: unknown): data is Commands {
   return typeof data === "object" && data !== null && "resolved" in data && "pending" in data;
 }
 
-/** Pending nodes */
-export async function saveToRedis() {
-  await redis.set(redisKey, JSON.stringify(commands));
-}
-
-export function addSaveToRedisProxy<T extends Command>(obj: T): T {
-  return new Proxy(obj, {
-    set(target, name, value) {
-      saveToRedis();
-      return Reflect.set(target, name, value);
-    },
-  });
-}
-
 export async function getCommandsFromReds(): Promise<void> {
   const commandsStr = await redis.get(redisKey);
   // if there are no pending nodes in redis, return null
