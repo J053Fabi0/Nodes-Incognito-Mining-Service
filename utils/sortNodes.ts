@@ -171,9 +171,7 @@ async function getNodesInfoByDockerIndex(
             // get the docker index from the error message with a regex
             const dockerIndex = e.message.match(/inc_mainnet_(\d+)/)?.[1];
             if (dockerIndex && !isNaN(+dockerIndex)) {
-              console.error(
-                new Error(`Docker ${dockerIndex} not found. Removing it from the configs and trying again.`)
-              );
+              console.error(new Error(`Docker ${dockerIndex} not found.`));
               const node = await getNode({ dockerIndex: +dockerIndex });
               if (!node) {
                 console.error(new Error(`Node ${dockerIndex} not found in the database.`));
