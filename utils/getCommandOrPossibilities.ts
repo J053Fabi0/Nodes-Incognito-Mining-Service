@@ -33,6 +33,7 @@ const commandsWithAliases: CommandWithAliases[] = [
   { command: "ignore", aliases: [] },
   { command: "info", aliases: ["status"] },
   { command: "instructions", aliases: [] },
+  { command: "update", aliases: ["actualizar"] },
   { command: "help", aliases: [] },
 ];
 interface PossibleCommand {
