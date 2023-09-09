@@ -99,7 +99,6 @@ async function restoreAndExit(
       (async () => {
         while (!timedout) {
           const [nodeStatus] = await getNodesStatus({ dockerIndexes: [node.dockerIndex], onlyActive: false });
-          console.log(nodeStatus?.status, node.dockerIndex);
           if (nodeStatus?.status === "ONLINE") break;
           await sleep(5);
         }
