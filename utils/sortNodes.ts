@@ -35,6 +35,7 @@ export type NodeInfo = Info & { shard: ShardsNames | "" };
 export type NodeInfoByDockerIndex = [string, NodeInfo];
 export type NodesStatusByDockerIndex = Record<string, NodeStatus | undefined>;
 export type SortedNodes = {
+  /** dockerIndex as key */
   nodesStatusByDockerIndex: NodesStatusByDockerIndex;
   /** An array of sorted nodes. Each element is [dockerIndex, Info] */
   nodesInfoByDockerIndex: NodeInfoByDockerIndex[];
