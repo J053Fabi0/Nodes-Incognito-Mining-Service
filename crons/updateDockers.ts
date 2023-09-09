@@ -10,8 +10,8 @@ import { dataDir } from "../incognito/docker/createDocker.ts";
 import { Info, docker } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
-import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
 import createDockerAndConfigs, { addNodeToConfigs } from "../incognito/createDockerAndConfigs.ts";
+import deleteDockerAndConfigs, { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
 
 let instanceRunning = false;
 
@@ -63,6 +63,7 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
         if (backup) await Deno.rename(blockDir, tempBlockDir);
 
         // delete and recreate the docker
+        removeNodeFromConfigs(node.dockerIndex);
         await deleteDockerAndConfigs({
           number: node.number,
           clientId: node.client,
@@ -79,7 +80,6 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
           validatorPublic: node.validatorPublic,
         });
         // await changeNode({ _id: node._id }, { $set: { inactive: true } });
-        // removeNodeFromConfigs(node.dockerIndex);
         // await deleteDocker(node.dockerIndex);
         // await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex, latestTag);
 
