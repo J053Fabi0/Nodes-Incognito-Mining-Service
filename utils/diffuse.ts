@@ -1,10 +1,14 @@
 import updateDockers from "../crons/updateDockers.ts";
+import sortNodes from "./sortNodes.ts";
 
 export default async function diffuse() {
+  const { nodesInfoByDockerIndex: nodesInfo } = await sortNodes(undefined, {
+    fullData: false,
+    fromCacheIfConvenient: true,
+  });
+
   await updateDockers({
     force: true,
-    dockerIndexes: Array.from({ length: 325 })
-      .map((_, i) => i)
-      .slice(90),
+    dockerIndexes: nodesInfo.map(([n]) => +n),
   });
 }
