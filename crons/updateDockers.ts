@@ -3,6 +3,7 @@ import { join } from "std/path/mod.ts";
 import handleError from "../utils/handleError.ts";
 import Node from "../types/collections/node.type.ts";
 import doesDirExists from "../utils/doesDirExists.ts";
+import getNodesStatus from "../utils/getNodesStatus.ts";
 import { docker } from "duplicatedFilesCleanerIncognito";
 import { maxPromises } from "duplicatedFilesCleanerIncognito";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
@@ -65,6 +66,23 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
         await deleteDocker(node.dockerIndex);
         await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
 
+        // wait for it to be online in the monitor
+        await (async (timedout = false) => {
+          await Promise.race([
+            (async () => {
+              while (!timedout) {
+                const [nodeStatus] = await getNodesStatus({ dockerIndexes: [node.dockerIndex] });
+                if (nodeStatus?.status === "ONLINE") break;
+                await sleep(1);
+              }
+            })(),
+            sleep(60 * 5).finally(() => {
+              timedout = true;
+              console.error(new Error(`Node ${node.dockerIndex} did not come online in 5 minutes.`));
+            }),
+          ]);
+        })();
+
         // restore backup
         thisIf: if (backup) {
           // wait until a new block dir is created
@@ -97,11 +115,12 @@ export default async function updateDockers({ force = false, dockerIndexes }: Up
           // move the backup to the new block dir
           await Deno.rename(tempBlockDir, blockDir);
 
-          if (info.docker.running) await docker(`inc_mainnet_${node.dockerIndex}`, "start");
+          // start the docker
+          await docker(`inc_mainnet_${node.dockerIndex}`, "start");
         }
 
         // stop the docker if it was stopped before
-        else if (!info.docker.running) await docker(`inc_mainnet_${node.dockerIndex}`, "stop");
+        if (!info.docker.running) await docker(`inc_mainnet_${node.dockerIndex}`, "stop");
 
         await changeNode({ _id: node._id }, { $set: { inactive: false } });
         addNodeToConfigs(node.dockerIndex, node.name, node.validatorPublic);
