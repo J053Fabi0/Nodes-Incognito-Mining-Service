@@ -145,3 +145,15 @@ export const onlineQueue = createTrueRecord(
   await getRedisValue<OnlineQueue>("onlineQueue", {} as OnlineQueue),
   () => []
 );
+
+export interface UpdatingNode {
+  deleted: boolean;
+  created: boolean;
+  dockerIndex: number;
+  backupRestored: boolean;
+  dockerWasOnline: boolean;
+  provenToBeOnline: boolean;
+  tempDir: null | { tempDir: string; tempBlockDir: string; blockDir: string; backup: boolean };
+}
+
+export const updatingNodes = await getRedisValue<UpdatingNode[]>("updatingNodes", []);
