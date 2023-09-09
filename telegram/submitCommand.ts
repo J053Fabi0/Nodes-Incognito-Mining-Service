@@ -45,9 +45,9 @@ export const commands: Commands = (() => {
             });
 
             const successful = command.options?.detached
-              ? await promise
-              : // don't await for the command if it's detached
-                ({ successful: true, response: "Command submitted detached." } satisfies CommandResponse);
+              ? // don't await for the command if it's detached
+                ({ successful: true, response: "Command submitted detached." } satisfies CommandResponse)
+              : await promise;
 
             // remove it
             pending.shiftNoEvent();
