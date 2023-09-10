@@ -19,6 +19,7 @@ const helpMessage =
     .map(([command, description]) => `- ${description}.\n<code>${command}</code>`)
     .join("\n\n") +
   "\n\n" +
-  "Add <code>&amp;</code> at the end of the command to run it in the background.";
+  "<code>command!</code> - Run it right away and with no await.\n" +
+  "<code>command&amp;</code> - Run it with no await.";
 
 export default helpMessage;
