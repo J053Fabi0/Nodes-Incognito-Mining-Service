@@ -4,6 +4,8 @@ import { NodeInfoByDockerIndex } from "./sortNodes.ts";
 import { NodesStatistics } from "./getNodesStatistics.ts";
 import { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 
+// ######################################## Errors ####################################################
+
 export type ErrorTypes = "alert" | "isSlashed" | "isOldVersion" | "offline" | "stalling" | "unsynced";
 export const errorTypes = [
   "alert",
@@ -28,6 +30,8 @@ export const lastErrorTimes = await getRedisValue<Record<string, LastErrorTime>>
 export type LastGlobalErrorTime = Partial<Record<GlobalErrorTypes, ErrorInfo>>;
 export const lastGlobalErrorTimes = await getRedisValue<LastGlobalErrorTime>("lastGlobalErrorTimes", {});
 
+// ####################################### Ignore #####################################################
+
 export type Ignore = Record<AllErrorTypes | "docker" | "autoMove", { minutes: number; from: number }>;
 export const ignore = await getRedisValue<Ignore>("ignore", {
   alert: { minutes: 0, from: Date.now() },
@@ -41,6 +45,8 @@ export const ignore = await getRedisValue<Ignore>("ignore", {
   lowDiskSpace: { minutes: 0, from: Date.now() },
   redisTimeout: { minutes: 0, from: Date.now() },
 });
+
+// ######################################## Last roles ################################################
 
 type LastRole = {
   /** The date in which the role changed */
@@ -83,6 +89,8 @@ export const lastRoles = createTrueRecord(
   }
 );
 
+// ####################################### Prv to pay #################################################
+
 type PrvToPay = {
   usd: number;
   expires: number; // timestamp
@@ -98,7 +106,11 @@ export const prvToPay = createTrueRecord(await getRedisValue<Record<string, PrvT
   confirmed: false,
 }));
 
+// ######################################## Nodes statistics ##########################################
+
 export const nodesStatistics = await getRedisValue<NodesStatistics>("nodesStatistics", {} as NodesStatistics);
+
+// ######################################## Monthly payments ##########################################
 
 export type MonthlyPayments = {
   /** If an error happened with us */
@@ -116,6 +128,8 @@ export const monthlyPayments = createTrueRecord(
   () => ({ errorInTransaction: false, fee: null, forMonth: new Date().getUTCMonth(), lastWarningDay: null })
 );
 
+// ######################################## Monitor info ##############################################
+
 /** For one node */
 export interface MonitorInfo {
   date: number;
@@ -124,6 +138,8 @@ export interface MonitorInfo {
 }
 
 export const monitorInfoByDockerIndex: Record<string, MonitorInfo | undefined> = {};
+
+// ###################################### Last accessed page ##########################################
 
 interface LastAccessedPage {
   lastAccesed: number;
@@ -134,6 +150,8 @@ export const lastAccessedPages = createTrueRecord(
   await getRedisValue<Record<string, LastAccessedPage>>("lastAccessedPages", {}),
   () => ({ lastAccesed: 0 })
 );
+
+// ###################################### Node in queue ###############################################
 
 export interface NodeInQueue {
   dockerIndex: number;
@@ -147,6 +165,8 @@ export const onlineQueue = createTrueRecord(
   () => []
 );
 
+// ###################################### Updating node ###############################################
+
 export interface UpdatingNode {
   deleted: boolean;
   created: boolean;
@@ -158,3 +178,5 @@ export interface UpdatingNode {
 }
 
 export const updatingNodes = await getRedisValue<UpdatingNode[]>("updatingNodes", []);
+
+// ####################################################################################################
