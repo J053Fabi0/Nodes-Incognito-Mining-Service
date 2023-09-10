@@ -23,12 +23,7 @@ export default async function saveVariablesToRedis() {
       }),
       3
     ).then(() => (finished = true)),
-    sleep(TIMEOUT).then(() => {
-      if (!finished)
-        console.error(
-          new Error(`saveVariablesToRedis timed out after ${TIMEOUT} second${TIMEOUT === 1 ? "" : "s"}.`)
-        );
-    }),
+    sleep(TIMEOUT),
   ]);
 
   setOrRemoveErrorTime(!finished, lastGlobalErrorTimes, "redisTimeout");
