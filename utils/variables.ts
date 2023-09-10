@@ -33,18 +33,10 @@ export const lastGlobalErrorTimes = await getRedisValue<LastGlobalErrorTime>("la
 // ####################################### Ignore #####################################################
 
 export type Ignore = Record<AllErrorTypes | "docker" | "autoMove", { minutes: number; from: number }>;
-export const ignore = await getRedisValue<Ignore>("ignore", {
-  alert: { minutes: 0, from: Date.now() },
-  isSlashed: { minutes: 0, from: Date.now() },
-  isOldVersion: { minutes: 0, from: Date.now() },
-  offline: { minutes: 0, from: Date.now() },
-  stalling: { minutes: 0, from: Date.now() },
-  docker: { minutes: 0, from: Date.now() },
-  autoMove: { minutes: 0, from: Date.now() },
-  unsynced: { minutes: 0, from: Date.now() },
-  lowDiskSpace: { minutes: 0, from: Date.now() },
-  redisTimeout: { minutes: 0, from: Date.now() },
-});
+export const ignore = createTrueRecord(await getRedisValue<Ignore>("ignore", {} as Ignore), () => ({
+  minutes: 0,
+  from: Date.now(),
+}));
 
 // ######################################## Last roles ################################################
 
