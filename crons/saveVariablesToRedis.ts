@@ -18,11 +18,11 @@ export const times: number[] = [];
 export default async function saveVariablesToRedis() {
   const time = Date.now();
   let finished = false;
+
   await Promise.race([
     maxPromises(
-      variablesToSave.map(([key, value]) => () => {
-        times.push(Date.now() - time);
-        return redis.set(key, JSON.stringify(value));
+      variablesToSave.map(([key, value]) => async () => {
+        return await redis.set(key, JSON.stringify(value));
       }),
       3
     ).then(() => (finished = true)),
@@ -31,5 +31,6 @@ export default async function saveVariablesToRedis() {
     }),
   ]);
 
+  times.push(Date.now() - time);
   setOrRemoveErrorTime(!finished, lastGlobalErrorTimes, "redisTimeout");
 }
