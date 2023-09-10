@@ -13,10 +13,7 @@ globalThis.addEventListener("unload", async () => {
 /** In seconds */
 const TIMEOUT = 5;
 
-export const times: number[] = [];
-
 export default async function saveVariablesToRedis() {
-  const time = Date.now();
   let finished = false;
 
   await Promise.race([
@@ -31,6 +28,5 @@ export default async function saveVariablesToRedis() {
     }),
   ]);
 
-  times.push(Date.now() - time);
   setOrRemoveErrorTime(!finished, lastGlobalErrorTimes, "redisTimeout");
 }
