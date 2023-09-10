@@ -176,9 +176,9 @@ export default async function submitCommand(
   const promises: Promise<CommandResponse>[] = [];
 
   for (const fullCommand of fullCommands) {
-    const [commandText, ...args] = fullCommand.split(" ").filter(Boolean);
+    const commandArray = fullCommand.split(" ").filter(Boolean);
 
-    const lastArgument = () => args[args.length - 1];
+    const lastArgument = () => commandArray[commandArray.length - 1];
     if (/(&|!|&!|!&)$/.test(lastArgument())) {
       if (lastArgument().includes("!")) {
         options.rightAway = true;
@@ -186,10 +186,12 @@ export default async function submitCommand(
       } else if (lastArgument().includes("&")) options.detached = true;
 
       while (lastArgument().endsWith("&") || lastArgument().endsWith("!"))
-        args[args.length - 1] = lastArgument().slice(0, -1); // remove the & or !
-      if (!lastArgument()) args.pop(); // remove the last argument if it's empty
+        commandArray[commandArray.length - 1] = lastArgument().slice(0, -1); // remove the & or !
+      if (!lastArgument()) commandArray.pop(); // remove the last argument if it's empty
     }
 
+    const [commandText, ...args] = commandArray;
+    if (!commandText) continue;
     const commandOrPossibilities = getCommandOrPossibilities(commandText);
 
     // if command was ambiguous
