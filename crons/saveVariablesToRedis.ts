@@ -13,11 +13,15 @@ globalThis.addEventListener("unload", async () => {
 /** In seconds */
 const TIMEOUT = 5;
 
+export const times: number[] = [];
+
 export default async function saveVariablesToRedis() {
+  const time = Date.now();
   let finished = false;
   await Promise.race([
     maxPromises(
       variablesToSave.map(([key, value]) => () => {
+        times.push(Date.now() - time);
         return redis.set(key, JSON.stringify(value));
       }),
       3
