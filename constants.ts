@@ -41,10 +41,9 @@ const schema = joi.object<Json>({
   maxNotPayedDays: joi.number().integer().default(3),
   incognitoFee: joi.number().positive().allow(0).default(0.1),
   adminTelegramUsername: joi.string().default("@incognitoNodes"),
-  waitingTimes: joi
-    .object()
-    .pattern(joi.string().valid(...allErrorTypes), joi.number().positive().allow(0))
-    .required(),
+  waitingTimes: Object.fromEntries(
+    allErrorTypes.map((type) => [type, joi.number().positive().allow(0).required()])
+  ),
   maxNotStakedDays: joi.number().integer().allow(0).default(3),
   maxNotStakedDaysForNew: joi.number().integer().min(4).default(10),
   cacheMonitorInfoEvery: joi.number().integer().min(1).default(15),
