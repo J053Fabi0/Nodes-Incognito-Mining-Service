@@ -29,7 +29,24 @@ export const commands: Commands = (() => {
     resolved: new EventedArray<AllowedCommandsWithOptions>(({ array }) => {
       if (array.lengthNoEvent > 100) array.spliceNoEvent(100, Infinity);
     }),
-    pending: new EventedArray<Command>(async ({ array: pending }) => {
+    pending: new EventedArray<Command>(async ({ array: pending, added }) => {
+      if (added && added.some((a) => a.options?.rightAway)) {
+        const rightAwayCommands = pending.filter((a) => a.options?.rightAway);
+        // delete them from the pending array
+        for (const command of rightAwayCommands) pending.spliceNoEvent(pending.indexOf(command), 1);
+        // resolve them all at once
+        for (const command of rightAwayCommands) {
+          handleCommands(command)
+            .then((successful) => command.resolve?.(successful))
+            .catch((e) => {
+              if (isError(e)) command.resolve?.({ successful: false, error: e.message });
+              else command.resolve?.({ successful: false, error: "Unknown error." });
+            })
+            // add the command to the list of resolved commands
+            .finally(() => commands.resolved.unshift(command.command));
+        }
+      }
+
       if (!working) {
         working = true;
         // Resolve the pending commands.
@@ -162,9 +179,14 @@ export default async function submitCommand(
     const [commandText, ...args] = fullCommand.split(" ").filter((x) => x.trim());
     const commandOrPossibilities = getCommandOrPossibilities(commandText);
 
-    if (args[args.length - 1] === "&") {
+    const lastArgument = args[args.length - 1];
+    if (/^(&|!|&!|!&)$/.test(lastArgument)) {
+      if (lastArgument.includes("!")) {
+        options.rightAway = true;
+        options.detached = true; // if it's right away, it's detached
+      } else if (lastArgument.includes("&")) options.detached = true;
+
       args.pop();
-      options.detached = true;
     }
 
     // if command was ambiguous

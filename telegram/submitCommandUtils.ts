@@ -13,6 +13,8 @@ export interface CommandOptions {
   /** If true, runs the command without awaiting for it. */
   detached?: boolean;
   telegramMessages?: boolean;
+  /** Execute right away, without passing through the queue */
+  rightAway?: boolean;
 }
 export interface Command {
   /** Full command, with the first word always as an allowed command */
