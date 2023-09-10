@@ -11,7 +11,7 @@ globalThis.addEventListener("unload", async () => {
 });
 
 /** In seconds */
-const TIMEOUT = 5;
+const TIMEOUT = 1;
 
 export default async function saveVariablesToRedis() {
   let finished = false;
@@ -24,7 +24,10 @@ export default async function saveVariablesToRedis() {
       3
     ).then(() => (finished = true)),
     sleep(TIMEOUT).then(() => {
-      if (!finished) console.error(new Error(`saveVariablesToRedis timed out after ${TIMEOUT} seconds`));
+      if (!finished)
+        console.error(
+          new Error(`saveVariablesToRedis timed out after ${TIMEOUT} second${TIMEOUT === 1 ? "" : "s"}.`)
+        );
     }),
   ]);
 
