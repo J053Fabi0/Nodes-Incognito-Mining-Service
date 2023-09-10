@@ -14,8 +14,8 @@ export const errorTypes = [
   "isOldVersion",
 ] as ErrorTypes[];
 
-export type GlobalErrorTypes = "lowDiskSpace";
-export const globalErrorTypes: GlobalErrorTypes[] = ["lowDiskSpace"];
+export type GlobalErrorTypes = "lowDiskSpace" | "redisTimeout";
+export const globalErrorTypes: GlobalErrorTypes[] = ["lowDiskSpace", "redisTimeout"];
 
 export type AllErrorTypes = ErrorTypes | GlobalErrorTypes;
 export const allErrorTypes: readonly AllErrorTypes[] = [...errorTypes, ...globalErrorTypes];
@@ -39,6 +39,7 @@ export const ignore = await getRedisValue<Ignore>("ignore", {
   autoMove: { minutes: 0, from: Date.now() },
   unsynced: { minutes: 0, from: Date.now() },
   lowDiskSpace: { minutes: 0, from: Date.now() },
+  redisTimeout: { minutes: 0, from: Date.now() },
 });
 
 type LastRole = {
