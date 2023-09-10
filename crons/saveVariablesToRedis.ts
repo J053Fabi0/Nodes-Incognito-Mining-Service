@@ -17,17 +17,15 @@ export default async function saveVariablesToRedis() {
   let finished = false;
   await Promise.race([
     maxPromises(
-      variablesToSave.map(([key, value]) => async () => {
-        await redis.set(key, JSON.stringify(value));
-        setOrRemoveErrorTime(false, lastGlobalErrorTimes, "redisTimeout");
+      variablesToSave.map(([key, value]) => () => {
+        return redis.set(key, JSON.stringify(value));
       }),
       3
     ).then(() => (finished = true)),
     sleep(TIMEOUT).then(() => {
-      if (!finished) {
-        console.error(new Error(`saveVariablesToRedis timed out after ${TIMEOUT} seconds`));
-        setOrRemoveErrorTime(true, lastGlobalErrorTimes, "redisTimeout");
-      }
+      if (!finished) console.error(new Error(`saveVariablesToRedis timed out after ${TIMEOUT} seconds`));
     }),
   ]);
+
+  setOrRemoveErrorTime(!finished, lastGlobalErrorTimes, "redisTimeout");
 }
