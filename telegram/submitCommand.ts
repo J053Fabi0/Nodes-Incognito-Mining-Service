@@ -110,25 +110,25 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
         return { successful: true, response: helpMessage };
 
       case "docker":
-        return handleDocker(args, options);
+        return await handleDocker(args, options);
 
       case "ignore":
-        return handleIgnore(args, options);
+        return await handleIgnore(args, options);
 
       case "info":
-        return handleInfo(args, options);
+        return await handleInfo(args, options);
 
       case "copy":
-        return handleCopyOrMove(args, "copy", options);
+        return await handleCopyOrMove(args, "copy", options);
 
       case "move":
-        return handleCopyOrMove(args, "move", options);
+        return await handleCopyOrMove(args, "move", options);
 
       case "delete":
-        return handleDelete(args, options);
+        return await handleDelete(args, options);
 
       case "errors":
-        return handleErrorsInfo(args, options);
+        return await handleErrorsInfo(args, options);
 
       case "instructions": {
         const response = await getTextInstructionsToMoveOrDelete();
@@ -144,16 +144,16 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
         return { successful: true, response: "Reset successful." };
 
       case "update":
-        return handleUpdate(args, options);
+        return await handleUpdate(args, options);
 
       case "diffuse":
-        return handleDiffuse(args, options);
+        return await handleDiffuse(args, options);
 
       case "full":
       case "text":
       case "fulltext":
       default:
-        return handleTextMessage(command, options);
+        return await handleTextMessage(command, options);
     }
   } catch (e) {
     handleError(e);
