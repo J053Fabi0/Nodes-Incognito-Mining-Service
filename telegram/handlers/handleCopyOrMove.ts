@@ -66,7 +66,8 @@ export default async function handleCopyOrMove(
     await axiod.post(`${fromServer.url}/shards`, { action, from, to, shards });
   } finally {
     // restore the ignore value
-    ignore.docker[from] = lastIgnoreInfo;
+    ignore.docker[from].from = lastIgnoreInfo.from;
+    ignore.docker[from].minutes = lastIgnoreInfo.minutes;
   }
 
   if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });

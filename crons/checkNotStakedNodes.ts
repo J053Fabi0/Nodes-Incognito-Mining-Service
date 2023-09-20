@@ -68,7 +68,10 @@ async function deleteFiles(notStakedNodes: string[]) {
   for (const node of nodesOnline) setCache(node, "docker.running", true);
 
   // restore the ignore values
-  for (const node of notStakedNodes) ignore.docker[node] = lastIgnoreInfo[node];
+  for (const node of notStakedNodes) {
+    ignore.docker[node].from = lastIgnoreInfo[node].from;
+    ignore.docker[node].minutes = lastIgnoreInfo[node].minutes;
+  }
 }
 
 async function checkAndAlert() {
