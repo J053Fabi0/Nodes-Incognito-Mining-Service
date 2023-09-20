@@ -3,12 +3,10 @@ import { asset } from "$fresh/runtime.ts";
 import State from "../types/state.type.ts";
 import { Chart } from "fresh-charts/mod.ts";
 import { BAR_COLORS } from "../constants.ts";
-import { toFixedS } from "../utils/numbersString.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { nodesStatistics } from "../utils/variables.ts";
 import { getButtonClasses } from "../components/Button.tsx";
-import { countNodes } from "../controllers/node.controller.ts";
-import { countNodeEarnings } from "../controllers/nodeEarning.controller.ts";
+import { moveDecimalDot, toFixedS } from "../utils/numbersString.ts";
 import Typography, { getTypographyClass } from "../components/Typography.tsx";
 
 const styles = {
@@ -35,7 +33,7 @@ export const handler: Handlers<HomeProps, State> = {
       months: monthsLabels,
       isAdmin: ctx.state.isAdmin,
       loggedIn: Boolean(ctx.state.user),
-      data: Object.values(averageTotalEarningsByMonth),
+      data: Object.values(averageTotalEarningsByMonth).map((n) => parseFloat(moveDecimalDot(n, -9))),
     });
   },
 };

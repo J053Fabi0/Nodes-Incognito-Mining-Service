@@ -12,5 +12,5 @@ export default async function getMonthlyFee(client: ObjectId): Promise<number> {
   if (!nodes.length) return 0;
 
   const earningsLastMonth = await getTotalEarnings(nodes, 1);
-  return +toFixedS(Big(earningsLastMonth).div(10).mul(1000000000).valueOf(), 0);
+  return +toFixedS(Big(earningsLastMonth).div(10).valueOf(), 0);
 }

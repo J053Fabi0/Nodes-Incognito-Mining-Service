@@ -5,6 +5,6 @@ export default interface NodeEarning extends CommonCollection {
   time: Date;
   epoch: number;
   node: ObjectId;
-  /** Decimal format */
+  /** Int format */
   earning: number;
 }

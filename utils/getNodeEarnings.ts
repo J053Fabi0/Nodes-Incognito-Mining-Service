@@ -11,11 +11,13 @@ interface NodeEarningIncomplete {
 
 interface NodeEarningNull extends NodeEarningIncomplete {
   time: null;
+  /** Int format */
   earning: null;
 }
 
 interface NodeEarningString extends NodeEarningIncomplete {
   time: string;
+  /** Int format */
   earning: number;
 }
 

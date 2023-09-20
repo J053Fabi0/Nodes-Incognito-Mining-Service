@@ -5,6 +5,7 @@ import sendMessage from "../telegram/sendMessage.ts";
 import getNodesStatus from "../utils/getNodesStatus.ts";
 import Client from "../types/collections/client.type.ts";
 import getNodeEarnings from "../utils/getNodeEarnings.ts";
+import { moveDecimalDot } from "../utils/numbersString.ts";
 import { getNodes } from "../controllers/node.controller.ts";
 import { getClients } from "../controllers/client.controller.ts";
 import { createNodeEarning } from "../controllers/nodeEarning.controller.ts";
@@ -45,8 +46,8 @@ export default async function checkEarnings() {
       const created = await createNodeEarning({
         time,
         epoch,
+        earning,
         node: _id,
-        earning: earning / 1e9,
       }).catch(() => false as false);
       // If the earning was alredy registered, continue.
       if (created === false) continue;
@@ -58,7 +59,7 @@ export default async function checkEarnings() {
           const isAdmin = telegram === adminTelegram;
           sendMessage(
             `Node <code>#${number}${isAdmin ? ` ${client}` : ""}</code>.\n` +
-              `Earned: <code>${earning / 1e9}</code>.\n` +
+              `Earned: <code>${moveDecimalDot(earning, -9)}</code>.\n` +
               `Epoch: <code>${epoch}</code>.\n` +
               `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
             telegram,

@@ -3,6 +3,7 @@ import moment from "moment";
 import { lodash as _ } from "lodash";
 import { cronsStarted } from "../crons/crons.ts";
 import Node from "../types/collections/node.type.ts";
+import getNodeRole from "../incognito/getNodeRole.ts";
 import getSyncState from "../incognito/getSyncState.ts";
 import { getNodes } from "../controllers/node.controller.ts";
 import getBlockchainInfo from "../incognito/getBlockchainInfo.ts";
@@ -77,10 +78,10 @@ export default async function getNodesStatus({
         isSlashed: d.IsSlashed,
         shard: d.CommitteeChain,
         shardsBlockHeights: null,
-        role: d.Role || "NOT_STAKED",
         isOldVersion: d.IsOldVersion,
         syncState: d.SyncState || "-",
         epochsToNextEvent: Number(d.NextEventMsg.match(/\d+/)?.[0] ?? 0),
+        role: (await getNodeRole(node.validatorPublic)) || d.Role || "NOT_STAKED",
         voteStat: d.VoteStat[0] === "" ? null : Number(d.VoteStat[0]?.match(/\d+/)?.[0] ?? 0),
       };
 
