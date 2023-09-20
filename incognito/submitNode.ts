@@ -4,7 +4,6 @@ import {
   getDockerIndex,
   resolveAndForget,
   sendErrorToClient,
-  addSaveToRedisProxy,
   getPendingNodesFromRedis,
 } from "./submitNodeUtils.ts";
 import { sleep } from "sleep";
@@ -23,6 +22,7 @@ import { getAccountById } from "../controllers/account.controller.ts";
 import { changeNode, getNode } from "../controllers/node.controller.ts";
 import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
+import { BUILDING } from "../env.ts";
 
 type ResolveData = { success: true; dockerIndex: number; number: number } | { success: false };
 export interface NewNode extends Omit<CreateDockerAndConfigsOptions, "number" | "inactive"> {
@@ -63,10 +63,16 @@ export const pendingNodes = new EventedArray<NewNode>(
   )()
 );
 // Add the pending nodes from redis
-getPendingNodesFromRedis().then((pending) => {
-  if (!pending) return;
-  pendingNodes.push(...pending.map(addSaveToRedisProxy));
-});
+if (!BUILDING)
+  getPendingNodesFromRedis().then((pending) => {
+    if (!pending) return;
+    const newPending: NewNode[] = [];
+    for (const node of pending) {
+      if (newPending.find((n) => n.validatorPublic === node.validatorPublic)) continue;
+      newPending.push(node);
+    }
+    pendingNodes.push(...newPending);
+  });
 
 async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode>): Promise<boolean> {
   const [newNode] = pending;
@@ -169,5 +175,7 @@ async function handleNextPendingNode(pending: EventedArrayWithoutHandler<NewNode
 }
 
 export default function submitNode(newNode: Omit<NewNode, "resolve">): Promise<ResolveData> {
-  return new Promise((resolve) => pendingNodes.push(addSaveToRedisProxy({ ...newNode, resolve })));
+  if (pendingNodes.find((n) => n.validatorPublic === newNode.validatorPublic))
+    return Promise.reject(new Error("Node already pending"));
+  return new Promise((resolve) => pendingNodes.push({ ...newNode, resolve }));
 }

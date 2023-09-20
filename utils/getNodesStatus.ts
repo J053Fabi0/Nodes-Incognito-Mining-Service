@@ -40,21 +40,23 @@ export interface NodeStatus extends Node {
 interface GetNodesStatusOptions {
   dockerIndexes?: (number | string)[];
   fullData?: boolean;
+  onlyActive?: boolean;
 }
 
 /**
  * @param param0.dockerIndexes The docker indexes to get the status from. If not provided, it will get the status from all the nodes. If it's an empty array, it will return an empty array.
  * @param param0.fullData If true, returns the block height for each shard
- * @returns
+ * @param param0.onliActive If true, only returns the active nodes. Default: true
  */
 export default async function getNodesStatus({
   dockerIndexes = duplicatedFilesCleaner.dockerIndexes,
   fullData,
+  onlyActive = true,
 }: GetNodesStatusOptions = {}): Promise<NodeStatus[]> {
   if (dockerIndexes.length === 0) return [];
 
   const nodes = await getNodes({
-    inactive: { $ne: true },
+    ...(onlyActive ? { inactive: { $ne: true } } : {}),
     dockerIndex: { $in: dockerIndexes.map((d) => Number(d)) },
   });
   const rawData = await getRawData(nodes.map((n) => n.validatorPublic));

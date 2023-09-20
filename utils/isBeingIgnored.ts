@@ -1,6 +1,16 @@
-import { ignore } from "./variables.ts";
+import { GlobalErrorTypes, ignore } from "./variables.ts";
+import isGlobalErrorType from "../types/guards/isGlobalErrorType.ts";
 
-// errorType is any key of ignore
-export default function isBeingIgnored(errorType: keyof typeof ignore) {
-  return ignore[errorType].from + ignore[errorType].minutes * 60 * 1000 > Date.now();
+export default function isBeingIgnored(errorType: GlobalErrorTypes): boolean;
+export default function isBeingIgnored(
+  errorType: Exclude<keyof typeof ignore, GlobalErrorTypes>,
+  dockerIndex: number | string
+): boolean;
+export default function isBeingIgnored(errorType: keyof typeof ignore, dockerIndex?: number | string): boolean {
+  const isGlobal = isGlobalErrorType(errorType);
+  if (!isGlobal && dockerIndex === undefined) throw new Error("dockerIndex is required for non global errors.");
+
+  const errorInfo = isGlobal ? ignore[errorType] : ignore[errorType][dockerIndex!];
+
+  return errorInfo.from + errorInfo.minutes * 60 * 1000 > Date.now();
 }

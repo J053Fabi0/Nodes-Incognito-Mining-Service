@@ -12,8 +12,8 @@ import { sendHTMLMessage } from "../sendMessage.ts";
 import isError from "../../types/guards/isError.ts";
 import objectToTableText from "../objectToTableText.ts";
 import validateItems from "../../utils/validateItems.ts";
-import getMinutesSinceError from "../../utils/getMinutesSinceError.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
+import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 
 export default async function handleErrorsInfo(
   rawErrorCodes: string[],
@@ -38,7 +38,7 @@ export default async function handleErrorsInfo(
     if (!errorCodesToShow.includes(error)) continue;
     text +=
       `<code>${error}</code><code>: </code>` +
-      `<code>${getMinutesSinceError(date.startedAt).toFixed(1)} min</code>\n`;
+      `<code>${rangeMsToTimeDescription(date.startedAt, Date.now(), { short: true, includeMs: true })}</code>\n`;
   }
   if (text) text += "\n";
 
@@ -52,7 +52,10 @@ export default async function handleErrorsInfo(
       `<code>${escapeHtml(
         objectToTableText(
           Object.fromEntries(
-            errors.map(([error, { startedAt }]) => [error, `${getMinutesSinceError(startedAt).toFixed(1)} min`])
+            errors.map(([error, { startedAt }]) => [
+              error,
+              rangeMsToTimeDescription(startedAt, Date.now(), { short: true, includeMs: true }),
+            ])
           )
         )
       )

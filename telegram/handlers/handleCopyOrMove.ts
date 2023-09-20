@@ -1,12 +1,13 @@
 import sendMessage from "../sendMessage.ts";
 import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
+import ignoreError from "../../utils/ignoreError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
-import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
+import { IgnoreData, ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
 
 export default async function handleCopyOrMove(
   args: string[],
@@ -49,9 +50,9 @@ export default async function handleCopyOrMove(
     if (files[shard][fromNodeIndex].length === 0)
       return { successful: false, error: `Node ${fromNodeIndex} doesn't have any files for ${shard}.` };
 
-  // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
-  const lastIgnoreMinutes = ignore.docker.minutes;
-  ignore.docker.minutes = Infinity;
+  // Save the current docker ignore value and set it to 40 to ignore dockers until the process is done
+  const lastIgnoreInfo: IgnoreData = ignore.docker[fromNodeIndex];
+  ignoreError("docker", +fromNodeIndex, 40);
 
   const responses: string[] = [];
 
@@ -110,7 +111,7 @@ export default async function handleCopyOrMove(
   }
 
   // restore the ignore value
-  ignore.docker.minutes = lastIgnoreMinutes;
+  ignore.docker[fromNodeIndex] = lastIgnoreInfo;
 
   if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });
 

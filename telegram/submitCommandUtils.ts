@@ -10,7 +10,11 @@ export type CommandResponse = { response: string; successful: true } | { success
 export interface CommandOptions {
   /** Send telegram messages silently */
   silent?: boolean;
+  /** If true, runs the command without awaiting for it. */
+  detached?: boolean;
   telegramMessages?: boolean;
+  /** Execute right away, without passing through the queue */
+  rightAway?: boolean;
 }
 export interface Command {
   /** Full command, with the first word always as an allowed command */
@@ -27,20 +31,6 @@ export type Commands = {
 
 function isCommands(data: unknown): data is Commands {
   return typeof data === "object" && data !== null && "resolved" in data && "pending" in data;
-}
-
-/** Pending nodes */
-export async function saveToRedis() {
-  await redis.set(redisKey, JSON.stringify(commands));
-}
-
-export function addSaveToRedisProxy<T extends Command>(obj: T): T {
-  return new Proxy(obj, {
-    set(target, name, value) {
-      saveToRedis();
-      return Reflect.set(target, name, value);
-    },
-  });
 }
 
 export async function getCommandsFromReds(): Promise<void> {

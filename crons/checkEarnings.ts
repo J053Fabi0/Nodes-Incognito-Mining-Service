@@ -26,6 +26,7 @@ export default async function checkEarnings() {
 
   for (const nodeStatus of nodesStatus) {
     const node = nodes.find((n) => n.validatorPublic === nodeStatus.validatorPublic)!;
+    if (!node) continue;
     const { _id, sendTo, number, client, validatorPublic } = node;
 
     const nodeEarnings = await getNodeEarnings(validatorPublic);

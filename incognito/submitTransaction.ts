@@ -1,9 +1,3 @@
-import {
-  saveToRedis,
-  checkBalance,
-  addSaveToRedisProxy,
-  fetchPendingTransactionsFromRedisAndDB,
-} from "./submitTransactionUtils.ts";
 import { sleep } from "sleep";
 import { ObjectId } from "mongo/mod.ts";
 import { IS_PRODUCTION } from "../env.ts";
@@ -13,6 +7,7 @@ import { incognitoFeeInt } from "../constants.ts";
 import { notAssignableKeys } from "../utils/createTrueRecord.ts";
 import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { changeAccountTransaction } from "../controllers/accountTransaction.controller.ts";
+import { checkBalance, fetchPendingTransactionsFromRedisAndDB } from "./submitTransactionUtils.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
 const MAX_RETRIES = 5;
@@ -81,8 +76,6 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
               }
             }
 
-            saveToRedis();
-
             if (working) return;
             working = true;
 
@@ -101,7 +94,6 @@ export const pendingTransactionsByAccount = new Proxy<Record<string, EventedArra
       ));
     },
     set(target, name, value) {
-      saveToRedis();
       return Reflect.set(target, name, value);
     },
   }
@@ -151,7 +143,6 @@ async function handlePendingTransactions(
 
   // remove it from the array
   pending.shiftNoEvent();
-  saveToRedis();
 
   // resolve the promise
   transaction.resolve?.({ status, txHash: txHash ?? null, retries: transaction.retries });
@@ -167,9 +158,12 @@ export default function submitTransaction(
   urgent = false
 ): Promise<Result> {
   return new Promise((resolve) => {
-    pendingTransactionsByAccount[`${params.account}`][urgent ? "unshift" : "push"](
-      addSaveToRedisProxy({ resolve, ...params, retries: [], createdAt: params.createdAt ?? Date.now() })
-    );
+    pendingTransactionsByAccount[`${params.account}`][urgent ? "unshift" : "push"]({
+      resolve,
+      ...params,
+      retries: [],
+      createdAt: params.createdAt ?? Date.now(),
+    });
   });
 }
 

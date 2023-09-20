@@ -2,10 +2,11 @@ import { join } from "std/path/mod.ts";
 import sendMessage from "../sendMessage.ts";
 import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
+import ignoreError from "../../utils/ignoreError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
-import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
+import { IgnoreData, ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
 import { ShardsNames, dockerPs, docker, shardsNames } from "duplicatedFilesCleanerIncognito";
 
 export default async function handleDelete(args: string[], options?: CommandOptions): Promise<CommandResponse> {
@@ -47,9 +48,9 @@ export default async function handleDelete(args: string[], options?: CommandOpti
         })) as ShardsNames[] | Error);
   if (isError(shards)) return { successful: false, error: shards.message };
 
-  // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
-  const lastIgnoreMinutes = ignore.docker.minutes;
-  ignore.docker.minutes = Infinity;
+  // Save the current docker ignore value and set it to 40 to ignore dockers until the process is done
+  const lastIgnoreInfo: IgnoreData = ignore.docker[fromNodeIndex];
+  ignoreError("docker", +fromNodeIndex, 40);
 
   const responses: string[] = [];
 
@@ -90,7 +91,7 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   }
 
   // restore the ignore value
-  ignore.docker.minutes = lastIgnoreMinutes;
+  ignore.docker[fromNodeIndex] = lastIgnoreInfo;
 
   // start the docker if they were not being ignored
   if (fromRunning) {

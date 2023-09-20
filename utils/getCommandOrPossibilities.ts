@@ -12,6 +12,8 @@ export type AllowedCommands =
   | "ignore"
   | "info"
   | "instructions"
+  | "update"
+  | "diffuse"
   | "help";
 export type AllowedCommandsWithOptions = `${AllowedCommands}${string}`;
 interface CommandWithAliases {
@@ -32,6 +34,8 @@ const commandsWithAliases: CommandWithAliases[] = [
   { command: "ignore", aliases: [] },
   { command: "info", aliases: ["status"] },
   { command: "instructions", aliases: [] },
+  { command: "update", aliases: ["actualizar"] },
+  { command: "diffuse", aliases: ["diffuser"] },
   { command: "help", aliases: [] },
 ];
 interface PossibleCommand {

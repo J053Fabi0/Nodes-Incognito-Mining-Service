@@ -1,12 +1,3 @@
-import {
-  Command,
-  Commands,
-  saveToRedis,
-  CommandOptions,
-  CommandResponse,
-  addSaveToRedisProxy,
-  getCommandsFromReds,
-} from "./submitCommandUtils.ts";
 import getCommandOrPossibilities, {
   AllowedCommands,
   AllowedCommandsWithOptions,
@@ -16,16 +7,19 @@ import isError from "../types/guards/isError.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
 import helpMessage from "../utils/helpMessage.ts";
+import ignoreError from "../utils/ignoreError.ts";
 import EventedArray from "../utils/EventedArray.ts";
 import handleIgnore from "./handlers/handleIgnore.ts";
 import handleDocker from "./handlers/handleDocker.ts";
 import handleDelete from "./handlers/handleDelete.ts";
-import { lastErrorTimes } from "../utils/variables.ts";
+import handleUpdate from "./handlers/handleUpdate.ts";
+import handleDiffuse from "./handlers/handleDiffuse.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
+import { Command, Commands, CommandOptions, CommandResponse, getCommandsFromReds } from "./submitCommandUtils.ts";
 
 export const commands: Commands = (() => {
   let working = false;
@@ -33,11 +27,26 @@ export const commands: Commands = (() => {
 
   return {
     resolved: new EventedArray<AllowedCommandsWithOptions>(({ array }) => {
-      saveToRedis();
       if (array.lengthNoEvent > 100) array.spliceNoEvent(100, Infinity);
     }),
-    pending: new EventedArray<Command>(async ({ array: pending }) => {
-      saveToRedis();
+    pending: new EventedArray<Command>(async ({ array: pending, added }) => {
+      if (added && added.some((a) => a.options?.rightAway)) {
+        const rightAwayCommands = pending.filter((a) => a.options?.rightAway);
+        // delete them from the pending array
+        for (const command of rightAwayCommands) pending.spliceNoEvent(pending.indexOf(command), 1);
+        // resolve them all at once
+        for (const command of rightAwayCommands) {
+          handleCommands(command)
+            .then((successful) => command.resolve?.(successful))
+            .catch((e) => {
+              if (isError(e)) command.resolve?.({ successful: false, error: e.message });
+              else command.resolve?.({ successful: false, error: "Unknown error." });
+            })
+            // add the command to the list of resolved commands
+            .finally(() => commands.resolved.unshift(command.command));
+        }
+      }
+
       if (!working) {
         working = true;
         // Resolve the pending commands.
@@ -46,18 +55,24 @@ export const commands: Commands = (() => {
             // get the first command
             const command = pending[0];
             if (!command) continue;
+
             // execute the command
-            const successful = await handleCommands(command).catch((e) => {
+            const promise = handleCommands(command).catch((e) => {
               if (isError(e)) return { successful: false, error: e.message } satisfies CommandResponse;
               else return { successful: false, error: "Unknown error." } satisfies CommandResponse;
             });
+
+            const successful = command.options?.detached
+              ? // don't await for the command if it's detached
+                ({ successful: true, response: "Command submitted detached." } satisfies CommandResponse)
+              : await promise;
+
             // remove it
             pending.shiftNoEvent();
-            saveToRedis();
             // resolve the promise
             command.resolve?.(successful);
             // add the command to the list of resolved commands
-            if (successful) commands.resolved.unshift(command.command);
+            commands.resolved.unshift(command.command);
           }
         } catch (e) {
           handleError(e);
@@ -95,25 +110,25 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
         return { successful: true, response: helpMessage };
 
       case "docker":
-        return handleDocker(args, options);
+        return await handleDocker(args, options);
 
       case "ignore":
-        return handleIgnore(args, options);
+        return await handleIgnore(args, options);
 
       case "info":
-        return handleInfo(args, options);
+        return await handleInfo(args, options);
 
       case "copy":
-        return handleCopyOrMove(args, "copy", options);
+        return await handleCopyOrMove(args, "copy", options);
 
       case "move":
-        return handleCopyOrMove(args, "move", options);
+        return await handleCopyOrMove(args, "move", options);
 
       case "delete":
-        return handleDelete(args, options);
+        return await handleDelete(args, options);
 
       case "errors":
-        return handleErrorsInfo(args, options);
+        return await handleErrorsInfo(args, options);
 
       case "instructions": {
         const response = await getTextInstructionsToMoveOrDelete();
@@ -123,16 +138,22 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
       }
 
       case "reset":
-        for (const dockerIndex of Object.keys(lastErrorTimes)) delete lastErrorTimes[dockerIndex];
+        ignoreError("all", "all", 0);
         if (options?.telegramMessages)
           await sendMessage("Reset successful.", undefined, { disable_notification: options?.silent });
         return { successful: true, response: "Reset successful." };
+
+      case "update":
+        return await handleUpdate(args, options);
+
+      case "diffuse":
+        return await handleDiffuse(args, options);
 
       case "full":
       case "text":
       case "fulltext":
       default:
-        return handleTextMessage(command, options);
+        return await handleTextMessage(command, options);
     }
   } catch (e) {
     handleError(e);
@@ -144,18 +165,33 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
 /** Pushes a command to the queue and waits for it to be executed. */
 export default async function submitCommand(
   command: string,
-  options?: CommandOptions
+  options: CommandOptions = {}
 ): Promise<CommandResponse[]> {
   const fullCommands = command
     .toLowerCase()
     .split(/\n|;/)
-    .filter((x) => x.trim())
-    .map((x) => x.trim());
+    .map((x) => x.trim())
+    .filter(Boolean);
 
   const promises: Promise<CommandResponse>[] = [];
 
   for (const fullCommand of fullCommands) {
-    const [commandText, ...args] = fullCommand.split(" ").filter((x) => x.trim());
+    const commandArray = fullCommand.split(" ").filter(Boolean);
+
+    const lastArgument = () => commandArray[commandArray.length - 1];
+    if (/(&|!|&!|!&)$/.test(lastArgument())) {
+      if (lastArgument().includes("!")) {
+        options.rightAway = true;
+        options.detached = true; // if it's right away, it's detached
+      } else if (lastArgument().includes("&")) options.detached = true;
+
+      while (lastArgument().endsWith("&") || lastArgument().endsWith("!"))
+        commandArray[commandArray.length - 1] = lastArgument().slice(0, -1); // remove the & or !
+      if (!lastArgument()) commandArray.pop(); // remove the last argument if it's empty
+    }
+
+    const [commandText, ...args] = commandArray;
+    if (!commandText) continue;
     const commandOrPossibilities = getCommandOrPossibilities(commandText);
 
     // if command was ambiguous
@@ -183,7 +219,7 @@ export default async function submitCommand(
 
       promises.push(
         new Promise<CommandResponse>((r) => {
-          commands.pending.push(addSaveToRedisProxy({ resolve: r, command: finalFullCommand, options }));
+          commands.pending.push({ resolve: r, command: finalFullCommand, options });
         })
       );
     }

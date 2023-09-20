@@ -1,10 +1,14 @@
 import { IS_PRODUCTION } from "../env.ts";
 import { byNumber, byValues } from "sort-es";
 import { cronsStarted } from "../crons/crons.ts";
+import isError from "../types/guards/isError.ts";
 import getShouldBeOnline from "./getShouldBeOnline.ts";
+import { getNode } from "../controllers/node.controller.ts";
+import createDocker from "../incognito/docker/createDocker.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
+import { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
 import { Info, ShardsNames, normalizeShard, ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
 
@@ -31,6 +35,7 @@ export type NodeInfo = Info & { shard: ShardsNames | "" };
 export type NodeInfoByDockerIndex = [string, NodeInfo];
 export type NodesStatusByDockerIndex = Record<string, NodeStatus | undefined>;
 export type SortedNodes = {
+  /** dockerIndex as key */
   nodesStatusByDockerIndex: NodesStatusByDockerIndex;
   /** An array of sorted nodes. Each element is [dockerIndex, Info] */
   nodesInfoByDockerIndex: NodeInfoByDockerIndex[];
@@ -158,7 +163,30 @@ async function getNodesInfoByDockerIndex(
       return nodesInfoByDockerIndexTest.filter(([doIdx]) => nodesToFetch.some((n) => `${n}` === doIdx));
 
     if (!cronsStarted) console.time("getInfo");
-    const nodesInfo = await duplicatedFilesCleaner.getInfo(nodesToFetch);
+    const nodesInfo = await (async () => {
+      while (true) {
+        try {
+          return await duplicatedFilesCleaner.getInfo(nodesToFetch);
+        } catch (e) {
+          if (isError(e) && e.message.includes("No such object: inc_mainnet_")) {
+            // get the docker index from the error message with a regex
+            const dockerIndex = e.message.match(/inc_mainnet_(\d+)/)?.[1];
+            if (dockerIndex && !isNaN(+dockerIndex)) {
+              console.error(new Error(`Docker ${dockerIndex} not found.`));
+              const node = await getNode({ dockerIndex: +dockerIndex });
+              if (!node) {
+                console.error(new Error(`Node ${dockerIndex} not found in the database.`));
+                nodesToFetch.splice(nodesToFetch.indexOf(+dockerIndex), 1);
+                removeNodeFromConfigs(+dockerIndex);
+              } else {
+                console.log(`Creating docker ${dockerIndex} again.`);
+                await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
+              }
+            }
+          } else throw e;
+        }
+      }
+    })();
     if (!cronsStarted) console.timeEnd("getInfo");
 
     return Object.entries(nodesInfo).map(
