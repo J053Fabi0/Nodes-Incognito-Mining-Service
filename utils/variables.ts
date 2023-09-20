@@ -58,6 +58,7 @@ for (const key of Object.keys(ignore) as AllIgnoreTypes[]) // transform redis da
     }
   }
 
+
 // ######################################## Last roles ################################################
 
 type LastRole = {
