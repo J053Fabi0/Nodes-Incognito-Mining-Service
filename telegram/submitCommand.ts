@@ -7,12 +7,12 @@ import isError from "../types/guards/isError.ts";
 import handleInfo from "./handlers/handleInfo.ts";
 import handleError from "../utils/handleError.ts";
 import helpMessage from "../utils/helpMessage.ts";
-import ignoreError from "../utils/ignoreError.ts";
 import EventedArray from "../utils/EventedArray.ts";
 import handleIgnore from "./handlers/handleIgnore.ts";
 import handleDocker from "./handlers/handleDocker.ts";
 import handleDelete from "./handlers/handleDelete.ts";
 import handleUpdate from "./handlers/handleUpdate.ts";
+import { lastErrorTimes } from "../utils/variables.ts";
 import handleDiffuse from "./handlers/handleDiffuse.ts";
 import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
@@ -138,7 +138,7 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
       }
 
       case "reset":
-        ignoreError("all", "all", 0);
+        for (const dockerIndex of Object.keys(lastErrorTimes)) delete lastErrorTimes[dockerIndex];
         if (options?.telegramMessages)
           await sendMessage("Reset successful.", undefined, { disable_notification: options?.silent });
         return { successful: true, response: "Reset successful." };
