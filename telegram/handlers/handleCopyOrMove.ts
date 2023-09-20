@@ -111,7 +111,8 @@ export default async function handleCopyOrMove(
   }
 
   // restore the ignore value
-  ignore.docker[fromNodeIndex] = lastIgnoreInfo;
+  ignore.docker[fromNodeIndex].from = lastIgnoreInfo.from;
+  ignore.docker[fromNodeIndex].minutes = lastIgnoreInfo.minutes;
 
   if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });
 

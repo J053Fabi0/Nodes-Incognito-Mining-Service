@@ -91,7 +91,8 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   }
 
   // restore the ignore value
-  ignore.docker[fromNodeIndex] = lastIgnoreInfo;
+  ignore.docker[fromNodeIndex].from = lastIgnoreInfo.from;
+  ignore.docker[fromNodeIndex].minutes = lastIgnoreInfo.minutes;
 
   // start the docker if they were not being ignored
   if (fromRunning) {
