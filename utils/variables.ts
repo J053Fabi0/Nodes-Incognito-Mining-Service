@@ -1,6 +1,7 @@
 import getRedisValue from "./getRedisValue.ts";
 import createTrueRecord from "./createTrueRecord.ts";
 import { NodeInfoByDockerIndex } from "./sortNodes.ts";
+import isErrorType from "../types/guards/isErrorType.ts";
 import { NodesStatistics } from "./getNodesStatistics.ts";
 import { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 
@@ -32,11 +33,31 @@ export const lastGlobalErrorTimes = await getRedisValue<LastGlobalErrorTime>("la
 
 // ####################################### Ignore #####################################################
 
-export type Ignore = Record<AllErrorTypes | "docker" | "autoMove", { minutes: number; from: number }>;
-export const ignore = createTrueRecord(await getRedisValue<Ignore>("ignore", {} as Ignore), () => ({
-  minutes: 0,
-  from: Date.now(),
-}));
+export type AllIgnoreTypes = ErrorTypes | GlobalErrorTypes | "docker" | "autoMove";
+export const allIgnoreTypes: AllIgnoreTypes[] = [...errorTypes, ...globalErrorTypes, "docker", "autoMove"];
+
+export type IgnoreData = { minutes: number; from: number };
+/** Docker index as key */
+export type IgnoreNode = Record<string, IgnoreData>;
+export type Ignore = Record<Exclude<AllIgnoreTypes, GlobalErrorTypes>, IgnoreNode> &
+  Record<GlobalErrorTypes, IgnoreData>;
+/** First key is the error code, second key is the docker index */
+export const ignore = createTrueRecord(await getRedisValue<Ignore>("ignore", {} as Ignore), (key) =>
+  globalErrorTypes.includes(key as GlobalErrorTypes)
+    ? { minutes: 0, from: 0 }
+    : createTrueRecord<IgnoreNode>({}, () => ({ minutes: 0, from: 0 }))
+);
+for (const key of Object.keys(ignore) as AllIgnoreTypes[]) // transform redis data into true records
+  if (isErrorType(key)) {
+    const entries = Object.entries(ignore[key]);
+    delete ignore[key];
+    for (const [dockerIndex, values] of entries) {
+      const { from, minutes } = values;
+      ignore[key][dockerIndex].from = from;
+      ignore[key][dockerIndex].minutes = minutes;
+    }
+  }
+
 
 // ######################################## Last roles ################################################
 

@@ -2,10 +2,9 @@ import moment from "moment";
 import { sleep } from "sleep";
 import { onlineQueue } from "../utils/variables.ts";
 import { allNodeRoles } from "../utils/getNodesStatus.ts";
-import { assertEquals } from "std/assert/assert_equals.ts";
 import { maxOnlineMinutesNotStaked } from "../constants.ts";
 import calculateOnlineQueue from "../utils/calculateOnlineQueue.ts";
-import { assertStrictEquals } from "std/assert/assert_strict_equals.ts";
+import { assertEquals, assertStrictEquals } from "std/assert/mod.ts";
 
 function emptyQueue() {
   for (const role of allNodeRoles) onlineQueue[role].splice(0, Infinity);

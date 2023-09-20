@@ -41,7 +41,6 @@
     "math": "https://deno.land/x/math@v1.1.0/mod.ts",
     "moment": "npm:moment@2.29.4",
     "mongo/": "https://deno.land/x/mongo@v0.31.2/",
-    "notion/": "https://deno.land/x/notion_sdk@v2.2.3/src/",
     "preact-render-to-string": "https://esm.sh/*preact-render-to-string@6.2.1",
     "preact": "https://esm.sh/preact@10.17.0",
     "preact/": "https://esm.sh/preact@10.17.0/",
