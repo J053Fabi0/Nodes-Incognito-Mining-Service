@@ -38,26 +38,13 @@ export const allIgnoreTypes: AllIgnoreTypes[] = [...errorTypes, ...globalErrorTy
 
 export type IgnoreData = { minutes: number; from: number };
 /** Docker index as key */
-export type IgnoreNode = Record<string, IgnoreData>;
+export type IgnoreNode = Record<string, IgnoreData | undefined>;
 export type Ignore = Record<Exclude<AllIgnoreTypes, GlobalErrorTypes>, IgnoreNode> &
   Record<GlobalErrorTypes, IgnoreData>;
 /** First key is the error code, second key is the docker index */
 export const ignore = createTrueRecord(await getRedisValue<Ignore>("ignore", {} as Ignore), (key) =>
-  globalErrorTypes.includes(key as GlobalErrorTypes)
-    ? { minutes: 0, from: 0 }
-    : createTrueRecord<IgnoreNode>({}, () => ({ minutes: 0, from: 0 }))
+  globalErrorTypes.includes(key as GlobalErrorTypes) ? { minutes: 0, from: 0 } : ({} as IgnoreNode)
 );
-for (const key of Object.keys(ignore) as AllIgnoreTypes[]) // transform redis data into true records
-  if (isErrorType(key)) {
-    const entries = Object.entries(ignore[key]);
-    delete ignore[key];
-    for (const [dockerIndex, values] of entries) {
-      const { from, minutes } = values;
-      ignore[key][dockerIndex].from = from;
-      ignore[key][dockerIndex].minutes = minutes;
-    }
-  }
-
 
 // ######################################## Last roles ################################################
 

@@ -12,5 +12,5 @@ export default function isBeingIgnored(errorType: keyof typeof ignore, dockerInd
 
   const errorInfo = isGlobal ? ignore[errorType] : ignore[errorType][dockerIndex!];
 
-  return errorInfo.from + errorInfo.minutes * 60 * 1000 > Date.now();
+  return (errorInfo?.from ?? 0) + (errorInfo?.minutes ?? 0) * 60 * 1000 > Date.now();
 }

@@ -51,7 +51,7 @@ export default async function handleCopyOrMove(
       return { successful: false, error: `Node ${fromNodeIndex} doesn't have any files for ${shard}.` };
 
   // Save the current docker ignore value and set it to 40 to ignore dockers until the process is done
-  const lastIgnoreInfo: IgnoreData = ignore.docker[fromNodeIndex];
+  const lastIgnoreInfo: IgnoreData | undefined = ignore.docker[fromNodeIndex];
   ignoreError("docker", +fromNodeIndex, 40);
 
   const responses: string[] = [];
@@ -111,8 +111,7 @@ export default async function handleCopyOrMove(
   }
 
   // restore the ignore value
-  ignore.docker[fromNodeIndex].from = lastIgnoreInfo.from;
-  ignore.docker[fromNodeIndex].minutes = lastIgnoreInfo.minutes;
+  ignore.docker[fromNodeIndex] = lastIgnoreInfo;
 
   if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });
 

@@ -45,7 +45,8 @@ export default async function checkNotStakedNodes() {
 async function deleteFiles(notStakedNodes: string[]) {
   // Save the current docker ignore values and set them to 40 to ignore dockers until the process is done
   const lastIgnoreInfo: IgnoreNode = {};
-  for (const node of notStakedNodes) lastIgnoreInfo[node] = { ...ignore.docker[node] };
+  for (const node of notStakedNodes)
+    lastIgnoreInfo[node] = { minutes: ignore.docker[node]?.minutes ?? 0, from: ignore.docker[node]?.from ?? 0 };
   ignoreError("docker", notStakedNodes, 40);
 
   const nodesOnline = notStakedNodes.filter((dockerIndex) =>
@@ -68,10 +69,7 @@ async function deleteFiles(notStakedNodes: string[]) {
   for (const node of nodesOnline) setCache(node, "docker.running", true);
 
   // restore the ignore values
-  for (const node of notStakedNodes) {
-    ignore.docker[node].from = lastIgnoreInfo[node].from;
-    ignore.docker[node].minutes = lastIgnoreInfo[node].minutes;
-  }
+  for (const node of notStakedNodes) ignore.docker[node] = lastIgnoreInfo[node];
 }
 
 async function checkAndAlert() {
