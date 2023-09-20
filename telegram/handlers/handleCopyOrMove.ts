@@ -59,15 +59,14 @@ export default async function handleCopyOrMove(
   }
 
   // Save the current docker ignore value and set it to 40 to ignore dockers until the process is done
-  const lastIgnoreInfo: IgnoreData = ignore.docker[from];
+  const lastIgnoreInfo: IgnoreData | undefined = ignore.docker[from];
   ignoreError("docker", +from, 40);
 
   try {
     await axiod.post(`${fromServer.url}/shards`, { action, from, to, shards });
   } finally {
     // restore the ignore value
-    ignore.docker[from].from = lastIgnoreInfo.from;
-    ignore.docker[from].minutes = lastIgnoreInfo.minutes;
+    ignore.docker[from] = lastIgnoreInfo;
   }
 
   if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });

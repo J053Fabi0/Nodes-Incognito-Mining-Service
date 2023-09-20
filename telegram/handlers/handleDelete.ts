@@ -57,15 +57,14 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   if (fromNodeIndexData) for (const shard of shards) fromNodeIndexData.nodeInfo[shard] = 0;
 
   // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
-  const lastIgnoreInfo: IgnoreData = ignore.docker[dockerIndex];
+  const lastIgnoreInfo: IgnoreData | undefined = ignore.docker[dockerIndex];
   ignoreError("docker", +dockerIndex, 40);
 
   try {
     await axiod.delete(`${server.url}/shards`, { node: dockerIndex, shards });
   } finally {
     // restore the ignore value
-    ignore.docker[dockerIndex].from = lastIgnoreInfo.from;
-    ignore.docker[dockerIndex].minutes = lastIgnoreInfo.minutes;
+    ignore.docker[dockerIndex] = lastIgnoreInfo;
   }
 
   return { successful: true, response: `${shards.join(", ")} deleted for node ${dockerIndex}.` };

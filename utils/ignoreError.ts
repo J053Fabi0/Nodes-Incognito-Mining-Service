@@ -53,7 +53,9 @@ export default function ignoreError(
 
   // Ignoring one error for one or many nodes
   for (const dI of Array.isArray(dockerIndex) ? dockerIndex : [dockerIndex]) {
-    ignore[type][dI].from = Date.now();
-    ignore[type][dI].minutes = minutes;
+    if (!(dI in ignore[type])) ignore[type][dI] = { from: 0, minutes: 0 };
+
+    ignore[type][dI]!.from = Date.now();
+    ignore[type][dI]!.minutes = minutes;
   }
 }
