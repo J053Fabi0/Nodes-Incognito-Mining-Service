@@ -1,11 +1,12 @@
 import axiod from "axiod";
 import sendMessage from "../sendMessage.ts";
 import isError from "../../types/guards/isError.ts";
+import ignoreError from "../../utils/ignoreError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { getNodeServer } from "../../controllers/node.controller.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
-import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
+import { IgnoreData, ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
 
 export default async function handleCopyOrMove(
   args: string[],
@@ -57,15 +58,15 @@ export default async function handleCopyOrMove(
     if (action === "move" && fromNodeIndexData) fromNodeIndexData.nodeInfo[shard] = 0;
   }
 
-  // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
-  const lastIgnoreMinutes = ignore.docker.minutes;
-  ignore.docker.minutes = Infinity;
+  // Save the current docker ignore value and set it to 40 to ignore dockers until the process is done
+  const lastIgnoreInfo: IgnoreData = ignore.docker[from];
+  ignoreError("docker", +from, 40);
 
   try {
     await axiod.post(`${fromServer.url}/shards`, { action, from, to, shards });
   } finally {
     // restore the ignore value
-    ignore.docker.minutes = lastIgnoreMinutes === Infinity ? 0 : lastIgnoreMinutes;
+    ignore.docker[from] = lastIgnoreInfo;
   }
 
   if (options?.telegramMessages) await sendMessage("Done.", undefined, { disable_notification: options?.silent });

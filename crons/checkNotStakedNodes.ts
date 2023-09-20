@@ -5,14 +5,15 @@ import { ObjectId } from "mongo/mod.ts";
 import { IS_PRODUCTION } from "../env.ts";
 import setCache from "../utils/setCache.ts";
 import handleError from "../utils/handleError.ts";
+import ignoreError from "../utils/ignoreError.ts";
 import relativeTime from "dayjs/plugin/relativeTime.ts";
 import { docker } from "duplicatedFilesCleanerIncognito";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import { getClient } from "../controllers/client.controller.ts";
 import { maxNotStakedDays, maxNotStakedDaysForNew } from "../constants.ts";
 import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
-import { ignore, lastRoles, monitorInfoByDockerIndex } from "../utils/variables.ts";
 import { dataDir } from "../controller/controllers/createNode/docker/createDocker.ts";
+import { IgnoreNode, ignore, lastRoles, monitorInfoByDockerIndex } from "../utils/variables.ts";
 
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
@@ -40,10 +41,12 @@ export default async function checkNotStakedNodes() {
   await checkAndAlert();
 }
 
+/** @param notStakedNodes Docker indexes */
 async function deleteFiles(notStakedNodes: string[]) {
-  // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
-  const lastIgnoreMinutes = ignore.docker.minutes;
-  ignore.docker.minutes = Infinity;
+  // Save the current docker ignore values and set them to 40 to ignore dockers until the process is done
+  const lastIgnoreInfo: IgnoreNode = {};
+  for (const node of notStakedNodes) lastIgnoreInfo[node] = { ...ignore.docker[node] };
+  ignoreError("docker", notStakedNodes, 40);
 
   const nodesOnline = notStakedNodes.filter((dockerIndex) =>
     Boolean(monitorInfoByDockerIndex[dockerIndex]?.nodeInfo.docker.running)
@@ -64,7 +67,8 @@ async function deleteFiles(notStakedNodes: string[]) {
   await Promise.allSettled(nodesOnline.map((dockerIndex) => docker(`inc_mainnet_${dockerIndex}`, "start")));
   for (const node of nodesOnline) setCache(node, "docker.running", true);
 
-  ignore.docker.minutes = lastIgnoreMinutes;
+  // restore the ignore values
+  for (const node of notStakedNodes) ignore.docker[node] = lastIgnoreInfo[node];
 }
 
 async function checkAndAlert() {

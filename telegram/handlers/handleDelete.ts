@@ -2,11 +2,12 @@ import axiod from "axiod";
 import sendMessage from "../sendMessage.ts";
 import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
+import ignoreError from "../../utils/ignoreError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { getNodeServer } from "../../controllers/node.controller.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
-import { ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
+import { IgnoreData, ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
 
 export default async function handleDelete(args: string[], options?: CommandOptions): Promise<CommandResponse> {
   const [nodeRaw, rawShards] = [args.slice(0, 1), args.slice(1)];
@@ -56,14 +57,14 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   if (fromNodeIndexData) for (const shard of shards) fromNodeIndexData.nodeInfo[shard] = 0;
 
   // Save the current docker ignore value and set it to Infinity to ignore dockers until the process is done
-  const lastIgnoreMinutes = ignore.docker.minutes;
-  ignore.docker.minutes = Infinity;
+  const lastIgnoreInfo: IgnoreData = ignore.docker[dockerIndex];
+  ignoreError("docker", +dockerIndex, 40);
 
   try {
     await axiod.delete(`${server.url}/shards`, { node: dockerIndex, shards });
   } finally {
     // restore the ignore value
-    ignore.docker.minutes = lastIgnoreMinutes === Infinity ? 0 : lastIgnoreMinutes;
+    ignore.docker[dockerIndex] = lastIgnoreInfo;
   }
 
   return { successful: true, response: `${shards.join(", ")} deleted for node ${dockerIndex}.` };

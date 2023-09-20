@@ -12,7 +12,7 @@ type InstructionToMoveOrDelete =
  */
 export default async function getInstructionsToMoveOrDelete(
   sortedNodes: SortedNodes | Promise<SortedNodes> = sortNodes()
-) {
+): Promise<InstructionToMoveOrDelete[]> {
   sortedNodes = sortedNodes instanceof Promise ? await sortedNodes : sortedNodes;
   const nodesInfo = sortedNodes.nodesInfoByDockerIndex;
 

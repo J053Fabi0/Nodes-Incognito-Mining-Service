@@ -2,15 +2,18 @@ import {
   lastRoles,
   ErrorInfo,
   errorTypes,
+  ErrorTypes,
   AllErrorTypes,
   lastErrorTimes,
   globalErrorTypes,
+  GlobalErrorTypes,
   lastGlobalErrorTimes,
 } from "../utils/variables.ts";
 import flags from "../utils/flags.ts";
 import { escapeHtml } from "escapeHtml";
 import { NodeStatus } from "../utils/getNodesStatus.ts";
 import isBeingIgnored from "../utils/isBeingIgnored.ts";
+import isErrorType from "../types/guards/isErrorType.ts";
 import handleNodeError from "../utils/handleNodeError.ts";
 import sortNodes, { NodeInfo } from "../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
@@ -22,6 +25,7 @@ import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
 import calculateOnlineQueue from "../utils/calculateOnlineQueue.ts";
 import setOrRemoveErrorTime from "../utils/setOrRemoveErrorTime.ts";
 import { waitingTimes, minutesToRepeatAlert } from "../constants.ts";
+import isGlobalErrorType from "../types/guards/isGlobalErrorType.ts";
 import submitCommand, { commands } from "../telegram/submitCommand.ts";
 import handleTextMessage from "../telegram/handlers/handleTextMessage.ts";
 import getInstructionsToMoveOrDelete from "../utils/getInstructionsToMoveOrDelete.ts";
@@ -49,11 +53,12 @@ export default async function checkNodes() {
 
   // Check for errors in each node
   for (const nodeStatus of nodesStatus) {
-    if (!(nodeStatus.dockerIndex in lastErrorTimes)) lastErrorTimes[nodeStatus.dockerIndex] = {};
-    const { [nodeStatus.dockerIndex]: lastErrorTime } = lastErrorTimes;
+    const { dockerIndex } = nodeStatus;
+    if (!(dockerIndex in lastErrorTimes)) lastErrorTimes[dockerIndex] = {};
+    const { [dockerIndex]: lastErrorTime } = lastErrorTimes;
 
     // update the last role of the node
-    lastRoles[nodeStatus.dockerIndex] = {
+    lastRoles[dockerIndex] = {
       date: Date.now(),
       role: nodeStatus.role,
       nodeNumber: nodeStatus.number,
@@ -62,14 +67,14 @@ export default async function checkNodes() {
     };
 
     const shouldBeOnline = getShouldBeOnline(nodeStatus, maxNodesOnline, nodesInfoByDockerIndex);
-    const nodeInfo = dockerStatuses[nodeStatus.dockerIndex];
+    const nodeInfo = dockerStatuses[dockerIndex];
     const dockerInfo = nodeInfo?.docker;
     const isAllOnline = Boolean(dockerInfo?.running && nodeStatus.status === "ONLINE");
 
     // check if the docker is as it should be, and if not, fix it
     thisIf: if (
       !flags.ignoreDocker &&
-      !isBeingIgnored("docker") &&
+      !isBeingIgnored("docker", dockerIndex) &&
       dockerInfo &&
       ((dockerInfo.running && !shouldBeOnline) || (!dockerInfo.running && shouldBeOnline))
     ) {
@@ -77,20 +82,17 @@ export default async function checkNodes() {
       if (shouldBeOnline && nodeInfo.shard && nodeInfo.shard !== "beacon" && !nodeInfo[nodeInfo.shard])
         break thisIf;
 
-      console.log(
-        `${shouldBeOnline ? "Start" : "Stop"}ing docker ${nodeStatus.dockerIndex} ` +
-          `for node ${nodeStatus.dockerIndex}.`
-      );
+      console.log(`${shouldBeOnline ? "Start" : "Stop"}ing docker ${dockerIndex} ` + `for node ${dockerIndex}.`);
       // check in the pending commands if there is a command that is copying from or to the node
       const isCopying =
         commands.pending.findIndex((command) => {
           if (!command.command.startsWith("copy")) return false;
 
           const fromTo = command.command.split(" ").slice(1, 2);
-          return fromTo.includes(nodeStatus.dockerIndex.toString());
+          return fromTo.includes(dockerIndex.toString());
         }) !== -1;
 
-      if (!isCopying) await submitCommand(`docker ${shouldBeOnline ? "start" : "stop"} ${nodeStatus.dockerIndex}`);
+      if (!isCopying) await submitCommand(`docker ${shouldBeOnline ? "start" : "stop"} ${dockerIndex}`);
     }
 
     // save the previous lastErrorTime to check later if it any error was fixed
@@ -124,13 +126,7 @@ export default async function checkNodes() {
 
     // report errors if they have been present for longer than established
     for (const errorKey of errorTypes)
-      await handleErrors(
-        fixes,
-        lastErrorTime[errorKey],
-        prevLastErrorTime[errorKey],
-        errorKey,
-        nodeStatus.dockerIndex
-      );
+      await handleErrors(fixes, lastErrorTime[errorKey], prevLastErrorTime[errorKey], errorKey, dockerIndex);
   }
 
   if (fixes.length) {
@@ -139,10 +135,14 @@ export default async function checkNodes() {
   }
 
   // Check if there are shards that need to be moved or deleted
-  if (!isBeingIgnored("autoMove") && !flags.ignoreDocker) {
+  if (!flags.ignoreDocker) {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete(sortedNodes);
     if (instructionsToMoveOrDelete.length > 0)
       for (const instruction of instructionsToMoveOrDelete) {
+        // check neither the from or to are being ignored for autoMove
+        if (isBeingIgnored("autoMove", instruction.from)) continue;
+        if (instruction.to !== undefined && isBeingIgnored("autoMove", instruction.to)) continue;
+
         if (instruction.action.includes("delete")) continue; // temporarily disable deleting shards
 
         const command: `${typeof instruction.action}${string}` =
@@ -162,9 +162,22 @@ async function handleErrors(
   fixes: string[],
   date: ErrorInfo | undefined,
   lastDate: ErrorInfo | undefined,
+  errorKey: ErrorTypes,
+  dockerIndex: number
+): Promise<void>;
+async function handleErrors(
+  fixes: string[],
+  date: ErrorInfo | undefined,
+  lastDate: ErrorInfo | undefined,
+  errorKey: GlobalErrorTypes
+): Promise<void>;
+async function handleErrors(
+  fixes: string[],
+  date: ErrorInfo | undefined,
+  lastDate: ErrorInfo | undefined,
   errorKey: AllErrorTypes,
   dockerIndex?: number
-) {
+): Promise<void> {
   if (date) {
     const minutesSinceError = getMinutesSinceError(date.startedAt);
     const minutesSinceReported = getMinutesSinceError(date.notifiedAt);
@@ -173,7 +186,8 @@ async function handleErrors(
       // if it has been present for longer than established
       minutesSinceError >= waitingTimes[errorKey] &&
       // and it's not being ignored
-      !isBeingIgnored(errorKey)
+      ((isGlobalErrorType(errorKey) && !isBeingIgnored(errorKey)) ||
+        (dockerIndex !== undefined && isErrorType(errorKey) && !isBeingIgnored(errorKey, dockerIndex)))
     ) {
       await handleNodeError(errorKey, dockerIndex, minutesSinceError);
       date.notifiedAt = Date.now();
