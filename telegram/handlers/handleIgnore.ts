@@ -1,57 +1,75 @@
-import { ignore } from "../../utils/variables.ts";
+import { escapeHtml } from "escapeHtml";
+import isError from "../../types/guards/isError.ts";
+import ignoreError from "../../utils/ignoreError.ts";
+import validateItems from "../../utils/validateItems.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
+import isGlobalErrorType from "../../types/guards/isGlobalErrorType.ts";
+import { AllIgnoreTypes, allIgnoreTypes } from "../../utils/variables.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 
-const errorKeys = Object.keys(ignore).sort((a, b) => a.length - b.length) as (keyof typeof ignore)[];
-type Type = (typeof errorKeys)[number] | "all";
+const errorKeys = ["all", ...allIgnoreTypes].toSorted((a, b) => a.length - b.length);
+type Type = AllIgnoreTypes | "all";
 
 function getType(type: string): Type | null {
   for (const t of [...errorKeys, "all"] as Type[]) if (type.toLowerCase() === t.toLowerCase()) return t;
   return null;
 }
 
-async function sendError(options?: CommandOptions): Promise<CommandResponse> {
-  const error = `Valid types:\n- <code>${["all", ...errorKeys].join("</code>\n- <code>")}</code>`;
+const ERROR = `Valid types:\n- <code>${errorKeys.join("</code>\n- <code>")}</code>`;
+async function sendError(error: string, options?: CommandOptions): Promise<CommandResponse> {
   if (options?.telegramMessages)
     await sendHTMLMessage(error, undefined, { disable_notification: options?.silent });
-  return { successful: false, error };
+  return { successful: false, error: ERROR };
 }
 
 export default async function handleIgnore(args: string[], options?: CommandOptions): Promise<CommandResponse> {
-  let number = 0; // default value is 0, to disable the ignore
-  let type: Type | null = "docker";
+  const type = getType(args[0]);
+  if (type === null) return sendError(ERROR, options);
 
-  if (args.length === 1) {
-    // the first argument could be the type if it's not a number
-    if (isNaN(Number(args[0]))) type = args[0] as Type;
-    // if it is a number, it's the number of minutes to ignore the de default type docker
-    else number = Number(args[0]) || number;
-  } else if (args.length > 1) {
-    type = args[0] as Type;
-    number = Number(args[1]) || number;
-  }
+  if (!errorKeys.map((a) => a.toLowerCase()).includes(type.toLowerCase()) || type.toLowerCase() === "codes")
+    return sendError(ERROR, options);
 
-  type = getType(type);
-  if (type === null) return sendError(options);
+  const minutes = Number(args[args.length - 1]);
+  if (isNaN(minutes))
+    return sendError(
+      `The number of minutes must be a number, not <code>${escapeHtml(args[args.length - 1])}</code>.`,
+      options
+    );
 
-  if (number < 0) {
+  if (minutes < 0) {
     const error = "The number of minutes must be positive.";
     if (options?.telegramMessages) await sendMessage(error, undefined, { disable_notification: options?.silent });
     return { successful: false, error };
   }
 
-  if (
-    (type.toLowerCase() !== "all" && !errorKeys.map((a) => a.toLowerCase()).includes(type.toLowerCase())) ||
-    type.toLowerCase() === "codes"
-  )
-    return sendError(options);
+  if (isGlobalErrorType(type) || (args.length === 2 && type === "all")) {
+    if (args.length > 2)
+      return sendError(
+        "For global errors you don't need to specify the docker indexes or <code>all</code>.",
+        options
+      );
+    ignoreError(type, minutes);
+  } else {
+    if (args.length <= 2)
+      return sendError(
+        "For non-global errors you need to specify the docker indexes or <code>all</code>.",
+        options
+      );
 
-  for (const t of type === "all" ? errorKeys : [type]) {
-    ignore[t].from = Date.now();
-    ignore[t].minutes = number;
+    const nodes =
+      args.length === 3 && args[1] === "all"
+        ? "all"
+        : await validateItems({ rawItems: args.slice(1, -1) }).catch((e) => {
+            if (isError(e)) return e;
+            throw e;
+          });
+    if (isError(nodes)) return sendError(nodes.message, options);
+
+    if (nodes === "all") ignoreError(type, "all", minutes);
+    else for (const node of nodes) ignoreError(type, +node, minutes);
   }
 
-  const response = `Ignoring ${type} for ${number} minutes.`;
+  const response = `Ignoring ${args.join(" ")}`;
   if (options?.telegramMessages) await sendMessage(response, undefined, { disable_notification: options?.silent });
   return { successful: true, response };
 }

@@ -2,19 +2,11 @@ import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import isGlobalErrorType from "../types/guards/isGlobalErrorType.ts";
 import { AllIgnoreTypes, GlobalErrorTypes, allIgnoreTypes, ignore } from "./variables.ts";
 
-/** Ignores a global error. */
-export default function ignoreError(type: GlobalErrorTypes, minutes: number): void;
-/** Ignores all types of errors for all nodes. */
-export default function ignoreError(type: "all", minutes: number): void;
-/** Ignore all non-global errors for one node, many nodes or `"all"` nodes. */
-export default function ignoreError(
-  type: "all",
-  dockerIndex: number | (number | string)[] | "all",
-  minutes: number
-): void;
+/** Ignores a global error or all errors. */
+export default function ignoreError(type: GlobalErrorTypes | "all", minutes: number): void;
 /** Ignore a specific error for one node, many nodes or `"all"` nodes. */
 export default function ignoreError(
-  type: Exclude<AllIgnoreTypes, GlobalErrorTypes>,
+  type: Exclude<AllIgnoreTypes, GlobalErrorTypes> | "all",
   dockerIndex: number | (number | string)[] | "all",
   minutes: number
 ): void;
