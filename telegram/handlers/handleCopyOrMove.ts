@@ -59,7 +59,7 @@ export default async function handleCopyOrMove(
   }
 
   // Save the current docker ignore value and set it to 40 to ignore dockers until the process is done
-  const lastIgnoreInfo: IgnoreData | undefined = ignore.docker[from];
+  const lastIgnoreInfo: IgnoreData | undefined = ignore.docker[from] ? { ...ignore.docker[from]! } : undefined;
   ignoreError("docker", +from, 40);
 
   try {
