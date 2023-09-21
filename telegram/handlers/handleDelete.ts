@@ -49,7 +49,9 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   if (isError(shards)) return { successful: false, error: shards.message };
 
   // Save the current docker ignore value and set it to 40 to ignore dockers until the process is done
-  const lastIgnoreInfo: IgnoreData | undefined = ignore.docker[fromNodeIndex];
+  const lastIgnoreInfo: IgnoreData | undefined = ignore.docker[fromNodeIndex]
+    ? { ...(ignore.docker[fromNodeIndex] as IgnoreData) }
+    : undefined;
   ignoreError("docker", +fromNodeIndex, 40);
 
   const responses: string[] = [];

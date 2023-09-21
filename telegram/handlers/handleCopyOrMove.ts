@@ -51,7 +51,9 @@ export default async function handleCopyOrMove(
       return { successful: false, error: `Node ${fromNodeIndex} doesn't have any files for ${shard}.` };
 
   // Save the current docker ignore value and set it to 40 to ignore dockers until the process is done
-  const lastIgnoreInfo: IgnoreData | undefined = ignore.docker[fromNodeIndex];
+  const lastIgnoreInfo: IgnoreData | undefined = ignore.docker[fromNodeIndex]
+    ? { ...(ignore.docker[fromNodeIndex] as IgnoreData) }
+    : undefined;
   ignoreError("docker", +fromNodeIndex, 40);
 
   const responses: string[] = [];
