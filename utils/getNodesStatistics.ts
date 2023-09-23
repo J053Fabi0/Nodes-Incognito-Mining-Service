@@ -1,10 +1,7 @@
-import dayjs from "dayjs/mod.ts";
-import utc from "dayjs/plugin/utc.ts";
+import moment from "moment";
 import nameOfMonth, { Month } from "./nameOfMonth.ts";
 import { countNodes, getNodes } from "../controllers/node.controller.ts";
 import { countNodeEarnings, getNodeEarnings } from "../controllers/nodeEarning.controller.ts";
-
-dayjs.extend(utc);
 
 interface NormalizedNode {
   createdAt: number;
@@ -23,7 +20,7 @@ export type NodesStatistics = {
 export default async function getNodesStatistics(): Promise<NodesStatistics> {
   const months = Array.from({ length: 5 })
     .map((_, i) =>
-      dayjs()
+      moment()
         .utc()
         .subtract(i + 1, "month")
         .startOf("month")
@@ -44,7 +41,7 @@ export default async function getNodesStatistics(): Promise<NodesStatistics> {
   for (const month of months) {
     // if the node was created before the month, add it to the array.
     for (const node of nodes)
-      if (dayjs(node.createdAt).isBefore(month)) {
+      if (moment(node.createdAt).isBefore(month)) {
         const normalized = { createdAt: +node.createdAt, _id: `${node._id}` };
         if (!nodesByMonth[month]) nodesByMonth[month] = [normalized];
         else nodesByMonth[month].push(normalized);
