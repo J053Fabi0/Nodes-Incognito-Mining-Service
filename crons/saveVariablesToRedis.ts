@@ -2,8 +2,8 @@ import { sleep } from "sleep";
 import { redis } from "../initDatabase.ts";
 import { variablesToSave } from "../utils/getRedisValue.ts";
 import { lastGlobalErrorTimes } from "../utils/variables.ts";
-import { maxPromises } from "duplicatedFilesCleanerIncognito";
 import setOrRemoveErrorTime from "../utils/setOrRemoveErrorTime.ts";
+import maxPromises from "../duplicatedFilesCleaner/utils/maxPromises.ts";
 
 globalThis.addEventListener("unload", async () => {
   await saveVariablesToRedis();

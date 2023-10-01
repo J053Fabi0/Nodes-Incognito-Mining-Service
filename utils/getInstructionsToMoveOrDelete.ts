@@ -1,7 +1,7 @@
 import { minShardsToKeep } from "../constants.ts";
 import sortNodes, { SortedNodes } from "./sortNodes.ts";
-import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../controller/duplicatedFilesCleaner.ts";
+import { ShardsNames, shardsNames } from "../duplicatedFilesCleaner/types/shards.type.ts";
 
 type InstructionToMoveOrDelete =
   | { shards: ShardsNames[]; from: string; to?: undefined; action: "delete" }

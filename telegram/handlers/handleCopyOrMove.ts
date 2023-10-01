@@ -4,9 +4,9 @@ import isError from "../../types/guards/isError.ts";
 import ignoreError from "../../utils/ignoreError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import { getNodeServer } from "../../controllers/node.controller.ts";
-import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
 import { IgnoreData, ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
+import { ShardsNames, shardsNames } from "../../duplicatedFilesCleaner/types/shards.type.ts";
 
 export default async function handleCopyOrMove(
   args: string[],

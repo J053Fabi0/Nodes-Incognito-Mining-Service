@@ -1,7 +1,9 @@
 import { Context } from "cheetah";
 import { IS_PRODUCTION } from "../../env.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { docker, dockerPs, ShardsStr, ShardsNames, normalizeShards } from "duplicatedFilesCleanerIncognito";
+import { docker, dockerPs } from "../../duplicatedFilesCleaner/utils/commands.ts";
+import normalizeShards from "../../duplicatedFilesCleaner/utils/normalizeShards.ts";
+import { ShardsNames, ShardsStr } from "../../duplicatedFilesCleaner/types/shards.type.ts";
 
 interface copyOrMoveShardsBody {
   action: "copy" | "move";

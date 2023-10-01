@@ -2,7 +2,9 @@ import { Context } from "cheetah";
 import { join } from "std/path/mod.ts";
 import { IS_PRODUCTION } from "../../env.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { dockerPs, docker, normalizeShards, ShardsNames, ShardsStr } from "duplicatedFilesCleanerIncognito";
+import { docker, dockerPs } from "../../duplicatedFilesCleaner/utils/commands.ts";
+import normalizeShards from "../../duplicatedFilesCleaner/utils/normalizeShards.ts";
+import { ShardsNames, ShardsStr } from "../../duplicatedFilesCleaner/types/shards.type.ts";
 
 interface DeleteShardsBody {
   node: number;

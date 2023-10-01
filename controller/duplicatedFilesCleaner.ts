@@ -2,7 +2,8 @@ import joi from "joi";
 import { server } from "./constants.ts";
 import { parse } from "std/jsonc/mod.ts";
 import { getNodes } from "../controllers/node.controller.ts";
-import DuplicatedFilesCleaner, { Constants } from "duplicatedFilesCleanerIncognito";
+import Constants from "../duplicatedFilesCleaner/types/constants.type.ts";
+import DuplicatedFilesCleaner from "../duplicatedFilesCleaner/src/DuplicatedFilesCleaner.ts";
 
 type Json = Pick<Constants, "homePath" | "minFilesToConsiderShard">;
 const schema = joi.object<Json>({

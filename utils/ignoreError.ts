@@ -1,5 +1,5 @@
-import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import isGlobalErrorType from "../types/guards/isGlobalErrorType.ts";
+import duplicatedFilesCleaner from "../controller/duplicatedFilesCleaner.ts";
 import { AllIgnoreTypes, GlobalErrorTypes, allIgnoreTypes, ignore } from "./variables.ts";
 
 /** Ignores a global error or all errors. */

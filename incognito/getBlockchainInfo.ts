@@ -1,5 +1,5 @@
 import axiod from "axiod";
-import { ShardsStr } from "duplicatedFilesCleanerIncognito";
+import { ShardsStr } from "../duplicatedFilesCleaner/types/shards.type.ts";
 
 export interface BestBlockRaw {
   Height: number;

@@ -2,9 +2,9 @@ import NodePill from "./NodePill.tsx";
 import { ComponentChildren } from "preact";
 import { lastRoles } from "../../utils/variables.ts";
 import { NodeStatus } from "../../utils/getNodesStatus.ts";
-import { ShardsStr } from "duplicatedFilesCleanerIncognito";
 import { numberWithCommas, toFixedS } from "../../utils/numbersString.ts";
 import { roleToEmoji } from "../../telegram/handlers/handleTextMessage.ts";
+import { ShardsStr } from "../../duplicatedFilesCleaner/types/shards.type.ts";
 import { rangeMsToTimeDescription } from "../../utils/msToTimeDescription.ts";
 import { NodeInfoByDockerIndex, NodesStatusByDockerIndex } from "../../utils/sortNodes.ts";
 

@@ -1,4 +1,4 @@
-import { binaryWrapper } from "duplicatedFilesCleanerIncognito";
+import binaryWrapper from "../duplicatedFilesCleaner/utils/binaryWrapper.ts";
 
 export const docker = binaryWrapper("docker");
 export const optipng = binaryWrapper("optipng");

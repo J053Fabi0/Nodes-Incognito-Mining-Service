@@ -4,7 +4,7 @@ import balanceAccount from "./account/balance.ts";
 import generateAccount from "./account/generate.ts";
 import { join, fromFileUrl } from "std/path/mod.ts";
 import submitKeyAccount from "./account/submitKey.ts";
-import { binaryWrapper } from "duplicatedFilesCleanerIncognito";
+import binaryWrapper from "../duplicatedFilesCleaner/utils/binaryWrapper.ts";
 
 const PRV_ID = "0000000000000000000000000000000000000000000000000000000000000004" as const;
 
