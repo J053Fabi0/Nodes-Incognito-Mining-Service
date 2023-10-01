@@ -7,7 +7,9 @@ import getSyncState from "../incognito/getSyncState.ts";
 import { getNodes } from "../controllers/node.controller.ts";
 import getBlockchainInfo from "../incognito/getBlockchainInfo.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { ShardsStr, maxPromises, shardsNumbersStr, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
+import maxPromises from "../duplicatedFilesCleaner/utils/maxPromises.ts";
+import repeatUntilNoError from "../duplicatedFilesCleaner/utils/repeatUntilNoError.ts";
+import { ShardsStr, shardsNumbersStr } from "../duplicatedFilesCleaner/types/shards.type.ts";
 
 export type NodeStatusKeys =
   | "role"

@@ -5,7 +5,7 @@ import { nodesStatistics } from "../../utils/variables.ts";
 
 export const handler: Handlers = {
   GET() {
-    const { averageTotalEarningsByMonth, monthsLabels, nodesCount, earningsCount } = nodesStatistics;
+    const { averageTotalEarningsByMonth, monthsLabels } = nodesStatistics;
 
     return renderChart({
       type: "bar",

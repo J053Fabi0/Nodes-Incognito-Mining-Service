@@ -7,9 +7,9 @@ import deleteDocker from "./docker/deleteDocker.ts";
 import constants, { adminId } from "../constants.ts";
 import getBlockchainInfo from "./getBlockchainInfo.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
 import getPublicValidatorKey from "../utils/getPublicValidatorKey.ts";
 import { changeNode, createNode, getNodes } from "../controllers/node.controller.ts";
+import repeatUntilNoError from "../duplicatedFilesCleaner/utils/repeatUntilNoError.ts";
 import createNginxConfig, { CreateNginxConfigResponse } from "./nginx/createNginxConfig.ts";
 
 export interface CreateDockerAndConfigsOptions {
