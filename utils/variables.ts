@@ -1,7 +1,6 @@
 import getRedisValue from "./getRedisValue.ts";
 import createTrueRecord from "./createTrueRecord.ts";
 import { NodeInfoByDockerIndex } from "./sortNodes.ts";
-import isErrorType from "../types/guards/isErrorType.ts";
 import { NodesStatistics } from "./getNodesStatistics.ts";
 import { NodeRoles, NodeStatus } from "./getNodesStatus.ts";
 

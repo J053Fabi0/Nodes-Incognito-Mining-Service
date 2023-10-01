@@ -1,7 +1,8 @@
 import axiod from "axiod";
 import handleError from "./handleError.ts";
 import { NodeRoles } from "./getNodesStatus.ts";
-import { docker, dockerPs, repeatUntilNoError } from "duplicatedFilesCleanerIncognito";
+import { docker, dockerPs } from "../duplicatedFilesCleaner/utils/commands.ts";
+import repeatUntilNoError from "../duplicatedFilesCleaner/utils/repeatUntilNoError.ts";
 
 interface GetMiningInfoResult {
   ShardHeight: number;

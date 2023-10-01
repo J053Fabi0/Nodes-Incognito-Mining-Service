@@ -3,11 +3,11 @@ import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
 import ignoreError from "../../utils/ignoreError.ts";
 import validateItems from "../../utils/validateItems.ts";
-import { docker, dockerPs } from "duplicatedFilesCleanerIncognito";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
-import { ShardsNames, shardsNames } from "duplicatedFilesCleanerIncognito";
+import { docker, dockerPs } from "../../duplicatedFilesCleaner/utils/commands.ts";
 import { IgnoreData, ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
+import { ShardsNames, shardsNames } from "../../duplicatedFilesCleaner/types/shards.type.ts";
 
 export default async function handleCopyOrMove(
   args: string[],

@@ -5,12 +5,13 @@ import Node from "../types/collections/node.type.ts";
 import doesDirExists from "../utils/doesDirExists.ts";
 import getLatestTag from "../incognito/getLatestTag.ts";
 import getNodesStatus from "../utils/getNodesStatus.ts";
-import { maxPromises } from "duplicatedFilesCleanerIncognito";
 import { dataDir } from "../incognito/docker/createDocker.ts";
-import { Info, docker } from "duplicatedFilesCleanerIncognito";
+import { Info } from "../duplicatedFilesCleaner/src/getInfo.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
 import { UpdatingNode, updatingNodes } from "../utils/variables.ts";
+import { docker } from "../duplicatedFilesCleaner/utils/commands.ts";
 import { changeNode, getNodes } from "../controllers/node.controller.ts";
+import maxPromises from "../duplicatedFilesCleaner/utils/maxPromises.ts";
 import createDockerAndConfigs, { addNodeToConfigs } from "../incognito/createDockerAndConfigs.ts";
 import deleteDockerAndConfigs, { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
 

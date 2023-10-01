@@ -1,5 +1,5 @@
-import { DockerInfo } from "duplicatedFilesCleanerIncognito";
 import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
+import { DockerInfo } from "../duplicatedFilesCleaner/utils/commands.ts";
 
 type DI = number | string;
 type Keys = "docker.running";

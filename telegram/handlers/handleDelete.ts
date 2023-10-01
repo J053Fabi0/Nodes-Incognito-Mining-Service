@@ -6,8 +6,9 @@ import ignoreError from "../../utils/ignoreError.ts";
 import validateItems from "../../utils/validateItems.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
+import { docker, dockerPs } from "../../duplicatedFilesCleaner/utils/commands.ts";
 import { IgnoreData, ignore, monitorInfoByDockerIndex } from "../../utils/variables.ts";
-import { ShardsNames, dockerPs, docker, shardsNames } from "duplicatedFilesCleanerIncognito";
+import { ShardsNames, shardsNames } from "../../duplicatedFilesCleaner/types/shards.type.ts";
 
 export default async function handleDelete(args: string[], options?: CommandOptions): Promise<CommandResponse> {
   const [nodeRaw, rawShards] = [args.slice(0, 1), args.slice(1)];

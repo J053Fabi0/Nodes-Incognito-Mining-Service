@@ -1,10 +1,10 @@
 import setCache from "../../utils/setCache.ts";
 import isError from "../../types/guards/isError.ts";
-import { docker } from "duplicatedFilesCleanerIncognito";
 import validateItems from "../../utils/validateItems.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
 import duplicatedFilesCleaner from "../../duplicatedFilesCleaner.ts";
 import { CommandOptions, CommandResponse } from "../submitCommandUtils.ts";
+import { docker } from "../../duplicatedFilesCleaner/utils/commands.ts";
 
 export default async function handleDocker(
   [action, ...rawNodes]: string[],

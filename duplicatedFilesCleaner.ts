@@ -1,12 +1,12 @@
 import joi from "joi";
 import { parse } from "std/jsonc/mod.ts";
 import { getNodes } from "./controllers/node.controller.ts";
-import DuplicatedFilesCleaner, { Constants } from "duplicatedFilesCleanerIncognito";
+import Constants from "./duplicatedFilesCleaner/types/constants.type.ts";
+import DuplicatedFilesCleaner from "./duplicatedFilesCleaner/src/DuplicatedFilesCleaner.ts";
 
-type Json = Pick<Constants, "homePath" | "minFilesToConsiderShard" | "filesToStrip">;
+type Json = Pick<Constants, "homePath" | "minFilesToConsiderShard">;
 const schema = joi.object<Json>({
   homePath: joi.string().required(),
-  filesToStrip: joi.number().default(20_000),
   minFilesToConsiderShard: joi.number().required(),
 });
 

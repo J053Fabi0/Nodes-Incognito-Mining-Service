@@ -7,8 +7,6 @@ import { toFixedS } from "../utils/numbersString.ts";
 import { Handlers, PageProps } from "$fresh/server.ts";
 import { nodesStatistics } from "../utils/variables.ts";
 import { getButtonClasses } from "../components/Button.tsx";
-import { countNodes } from "../controllers/node.controller.ts";
-import { countNodeEarnings } from "../controllers/nodeEarning.controller.ts";
 import Typography, { getTypographyClass } from "../components/Typography.tsx";
 
 const styles = {
