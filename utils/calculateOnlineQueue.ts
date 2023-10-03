@@ -18,8 +18,8 @@ export default function calculateOnlineQueue(nodesStatus: PartialNodeStatus[]) {
     }
 
     // remove the nodes that are no longer in the same role
-    for (const node of queue) {
-      const index = nodesByRole.findIndex((ns) => ns.dockerIndex === node.dockerIndex);
+    for (const node of nodesByRole) {
+      const index = queue.findIndex((ns) => ns.dockerIndex === node.dockerIndex);
       if (index === -1) queue.splice(index, 1);
     }
   }
