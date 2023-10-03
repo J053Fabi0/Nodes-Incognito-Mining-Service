@@ -18,6 +18,7 @@ import deleteDockerAndConfigs, { removeNodeFromConfigs } from "../incognito/dele
 let instanceRunning = false;
 
 interface UpdateDockersOptions {
+  /** Update even if the docker is at the latest tag */
   force?: boolean;
   dockerIndexes?: number[];
 }

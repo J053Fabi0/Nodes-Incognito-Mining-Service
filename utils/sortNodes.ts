@@ -6,9 +6,9 @@ import getShouldBeOnline from "./getShouldBeOnline.ts";
 import { getNode } from "../controllers/node.controller.ts";
 import { Info } from "../duplicatedFilesCleaner/src/getInfo.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
-import { MonitorInfo, monitorInfoByDockerIndex } from "./variables.ts";
 import duplicatedFilesCleaner from "../controller/duplicatedFilesCleaner.ts";
 import { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
+import { MonitorInfo, lastRoles, monitorInfoByDockerIndex } from "./variables.ts";
 import { normalizeShard } from "../duplicatedFilesCleaner/utils/normalizeShards.ts";
 import createDocker from "../controller/controllers/createNode/docker/createDocker.ts";
 import { ShardsNames, ShardsStr } from "../duplicatedFilesCleaner/types/shards.type.ts";
@@ -96,8 +96,20 @@ export default async function sortNodes(
         },
         byNumber(),
       ],
-      // then by how many epochs to the next event
-      [([dockerIndex]) => nodesStatusByDockerIndex[dockerIndex]?.epochsToNextEvent ?? 0, byNumber()],
+      [
+        ([dockerIndex]) => {
+          const nodeStatus = nodesStatusByDockerIndex[dockerIndex];
+          if (!nodeStatus) return rolesOrder.length - 1;
+
+          // then by how many epochs to the next event if it's committee or pending
+          if (nodeStatus.role === "COMMITTEE" || nodeStatus.role === "PENDING")
+            return nodeStatus.epochsToNextEvent ?? 0;
+
+          // else by the time it has been in the current role
+          return lastRoles[dockerIndex].date;
+        },
+        byNumber(),
+      ],
     ])
   );
 
