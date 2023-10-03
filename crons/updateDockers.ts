@@ -140,7 +140,7 @@ async function restoreAndExit(
 
   // wait for it to be online in the monitor
   if (!updatingInfo.provenToBeOnline) {
-    await (async (timedout = false) => {
+    await (async (timedout = false, ended = false) => {
       await Promise.race([
         (async () => {
           while (!timedout) {
@@ -158,10 +158,12 @@ async function restoreAndExit(
           }
         })(),
         sleep(60 * 8).finally(() => {
+          if (ended) return;
           timedout = true;
           console.error(new Error(`Node ${dockerIndex} did not come online in 8 minutes.`));
         }),
       ]);
+      ended = true;
     })();
     updatingInfo.provenToBeOnline = true;
   }
