@@ -137,12 +137,20 @@ export default async function checkNodes() {
   // Check if there are shards that need to be moved or deleted
   if (!flags.ignoreDocker) {
     const instructionsToMoveOrDelete = await getInstructionsToMoveOrDelete(sortedNodes);
+    console.log(instructionsToMoveOrDelete.length);
     if (instructionsToMoveOrDelete.length > 0)
       for (const instruction of instructionsToMoveOrDelete) {
+        console.log("1", isBeingIgnored("autoMove", instruction.from));
         // check neither the from or to are being ignored for autoMove
         if (isBeingIgnored("autoMove", instruction.from)) continue;
+        console.log(
+          "2",
+          instruction.to,
+          instruction.to !== undefined && isBeingIgnored("autoMove", instruction.to)
+        );
         if (instruction.to !== undefined && isBeingIgnored("autoMove", instruction.to)) continue;
 
+        console.log("3", instruction.action.includes("delete"));
         if (instruction.action.includes("delete")) continue; // temporarily disable deleting shards
 
         const command: `${typeof instruction.action}${string}` =
