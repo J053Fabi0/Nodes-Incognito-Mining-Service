@@ -40,7 +40,7 @@ export function removeNodeFromConfigs(dockerIndex: number) {
   {
     const index = constants.findIndex((i) => i.dockerIndex === dockerIndex);
     if (index !== -1) {
-      const [{ dockerIndex }] = constants.splice(index, 1);
+      constants.splice(index, 1);
       delete lastErrorTimes[dockerIndex];
 
       for (const queue of Object.values(onlineQueue)) {
