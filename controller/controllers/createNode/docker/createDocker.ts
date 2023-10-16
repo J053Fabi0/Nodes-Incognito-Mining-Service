@@ -24,27 +24,6 @@ export default async function createDocker(
 
   const nodePort = rpcPort + nodePortDiff;
 
-  console.log(
-    [
-      "run",
-      "--restart=no",
-      ...["--net", "inc_net"],
-      ...["-p", `${nodePort}:${nodePort}`],
-      ...["-p", `${rpcPort}:${rpcPort}`],
-      ...["-e", `NODE_PORT=${nodePort}`],
-      ...["-e", `RPC_PORT=${rpcPort}`],
-      ...["-e", `BOOTNODE_IP=${bootnode}`],
-      ...["-e", `GETH_NAME=${infuraURL}`],
-      ...["-e", `MININGKEY=${validatorKey}`],
-      ...["-e", "TESTNET=false"],
-      ...["-e", `INDEXER_ACCESS_TOKEN=${coinIndexAccessToken}`],
-      ...["-e", "NUM_INDEXER_WORKERS=0"],
-      ...["-v", `${dataDir}_${dockerIndex}:/data`],
-      "-d",
-      ...["--name", `inc_mainnet_${dockerIndex}`],
-      `incognitochain/incognito-mainnet:${latestTag}`,
-    ].join(" ")
-  );
   return docker([
     "run",
     "--restart=no",
