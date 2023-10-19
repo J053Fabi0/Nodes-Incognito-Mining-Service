@@ -3,6 +3,7 @@ import { loadSync } from "std/dotenv/mod.ts";
 const env = loadSync({ examplePath: "./.example.env" });
 
 export const BOT_TOKEN = env.BOT_TOKEN;
+export const API_KEY = env.API_KEY;
 export const NOTIFICATIONS_BOT_TOKEN = env.NOTIFICATIONS_BOT_TOKEN;
 export const NOTIFICATIONS_BOT_USERNAME = env.NOTIFICATIONS_BOT_USERNAME;
 export const PORT = +env.PORT;
