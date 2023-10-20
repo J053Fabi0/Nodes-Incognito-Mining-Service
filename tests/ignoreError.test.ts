@@ -12,15 +12,16 @@ Deno.test("ignoreError", async function (t) {
   emptyIgnoreErrors();
 
   await t.step("Ignoring all errors for all nodes", function () {
-    function assertMinutes(minutes: number) {
+    function assertMinutes(minutes: number | undefined) {
       for (const key of allIgnoreTypes)
-        if (isGlobalErrorType(key)) assertStrictEquals(ignore[key].minutes, minutes);
+        if (isGlobalErrorType(key)) assertStrictEquals(ignore[key].minutes, minutes ?? 0, key);
         else
-          for (const node of duplicatedFilesCleaner.dockerIndexes)
-            assertStrictEquals(ignore[key][node].minutes, minutes);
+          for (const node of duplicatedFilesCleaner.dockerIndexes) {
+            assertStrictEquals(ignore[key][node]?.minutes, minutes, `${key} ${node}`);
+          }
     }
 
-    assertMinutes(0);
+    assertMinutes(undefined);
 
     const minutes = Math.floor(Math.random() * 100);
     ignoreError("all", minutes);
@@ -29,4 +30,11 @@ Deno.test("ignoreError", async function (t) {
 
     emptyIgnoreErrors();
   });
+});
+
+import { assertEquals } from "https://deno.land/std@0.202.0/assert/mod.ts";
+
+Deno.test("url test", () => {
+  const url = new URL("./foo.js", "https://deno.land/");
+  assertEquals(url.href, "https://deno.land/foo.js");
 });
