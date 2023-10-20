@@ -28,3 +28,7 @@ export default async function saveVariablesToRedis() {
 
   setOrRemoveErrorTime(!finished, lastGlobalErrorTimes, "redisTimeout");
 }
+
+export function subscribeVariableToRedis(key: string, value: any) {
+  variablesToSave.push([key, value]);
+}

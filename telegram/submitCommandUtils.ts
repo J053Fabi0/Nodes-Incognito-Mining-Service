@@ -2,6 +2,7 @@ import { redis } from "../initDatabase.ts";
 import { commands } from "./submitCommand.ts";
 import handleError from "../utils/handleError.ts";
 import EventedArray from "../utils/EventedArray.ts";
+import { subscribeVariableToRedis } from "../crons/saveVariablesToRedis.ts";
 import { AllowedCommandsWithOptions } from "../utils/getCommandOrPossibilities.ts";
 
 const redisKey = "commands";
@@ -33,7 +34,7 @@ function isCommands(data: unknown): data is Commands {
   return typeof data === "object" && data !== null && "resolved" in data && "pending" in data;
 }
 
-export async function getCommandsFromReds(): Promise<void> {
+export async function getCommandsFromRedis(): Promise<void> {
   const commandsStr = await redis.get(redisKey);
   // if there are no pending nodes in redis, return null
   if (!commandsStr) return;
@@ -45,6 +46,8 @@ export async function getCommandsFromReds(): Promise<void> {
 
     for (const pending of parsedCommands.pending) commands.pending.push(pending);
     for (const resolved of parsedCommands.resolved) commands.resolved.push(resolved);
+
+    subscribeVariableToRedis(redisKey, commands);
   } catch (e) {
     handleError(e);
   }

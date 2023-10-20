@@ -19,11 +19,11 @@ import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
-import { Command, Commands, CommandOptions, CommandResponse, getCommandsFromReds } from "./submitCommandUtils.ts";
+import { Command, Commands, CommandOptions, CommandResponse, getCommandsFromRedis } from "./submitCommandUtils.ts";
 
 export const commands: Commands = (() => {
   let working = false;
-  if (!BUILDING) setTimeout(getCommandsFromReds, 100);
+  if (!BUILDING) setTimeout(getCommandsFromRedis, 100);
 
   return {
     resolved: new EventedArray<AllowedCommandsWithOptions>(({ array }) => {
