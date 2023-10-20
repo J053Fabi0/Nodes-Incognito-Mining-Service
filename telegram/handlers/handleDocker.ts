@@ -112,28 +112,42 @@ export default async function handleDocker(
       for (const node of nodesInfo) {
         if (!node) continue;
 
-        if (action === "create") {
-          if (node.inactive === false) responses.push(`Node <code>${node.number}</code> is already created.`);
-          else
-            await submitNode({
-              cost: 0,
-              nodeId: node._id,
-              number: node.number,
-              rcpPort: node.rcpPort,
-              clientId: node.client,
-              validator: node.validator,
-              dockerIndex: node.dockerIndex,
-              validatorPublic: node.validatorPublic,
-            });
-        } else {
-          if (node.inactive) responses.push(`Node <code>${node.number}</code> is already deleted.`);
-          else
-            await deleteDockerAndConfigs({
-              number: node.number,
-              clientId: node.client,
-              dockerIndex: node.dockerIndex,
-            });
+        let response = "";
+        switch (action) {
+          case "create": {
+            if (node.inactive === false) response = `Node <code>${node.number}</code> is already created.`;
+            else {
+              await submitNode({
+                cost: 0,
+                nodeId: node._id,
+                number: node.number,
+                rcpPort: node.rcpPort,
+                clientId: node.client,
+                validator: node.validator,
+                dockerIndex: node.dockerIndex,
+                validatorPublic: node.validatorPublic,
+              });
+              response = `Node <code>${node.number}</code> created.`;
+            }
+            break;
+          }
+
+          case "delete": {
+            if (node.inactive) response = `Node <code>${node.number}</code> is already deleted.`;
+            else {
+              await deleteDockerAndConfigs({
+                number: node.number,
+                clientId: node.client,
+                dockerIndex: node.dockerIndex,
+              });
+              response = `Node <code>${node.number}</code> deleted.`;
+            }
+          }
         }
+
+        responses.push(response);
+        if (options?.telegramMessages)
+          await sendHTMLMessage(response, undefined, { disable_notification: options?.silent });
       }
     }
   }
