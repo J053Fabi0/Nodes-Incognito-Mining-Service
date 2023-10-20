@@ -19,7 +19,7 @@ export default async function saveVariablesToRedis() {
   await Promise.race([
     maxPromises(
       variablesToSave.map(([key, value]) => async () => {
-        return await redis.set(key, JSON.stringify(value));
+        return await redis.set(key, JSON.stringify(typeof value === "function" ? await value() : value));
       }),
       3
     ).then(() => (finished = true)),
@@ -29,6 +29,10 @@ export default async function saveVariablesToRedis() {
   setOrRemoveErrorTime(!finished, lastGlobalErrorTimes, "redisTimeout");
 }
 
-export function subscribeVariableToRedis(key: string, value: any) {
+/**
+ * @param key The key to save in redis
+ * @param value The value to save in redis. If it's a function, it will be executed before saving it
+ */
+export function subscribeVariableToRedis(key: string, value: unknown) {
   variablesToSave.push([key, value]);
 }
