@@ -91,10 +91,10 @@ export default async function createDockerAndConfigs({
           name,
           number,
           inactive,
+          sendTo: [],
           rcpPort: portAndIndex.rcpPort,
           client: new ObjectId(clientId),
           dockerIndex: portAndIndex.dockerIndex,
-          sendTo: [adminId, new ObjectId(clientId)],
         },
       }
     );
