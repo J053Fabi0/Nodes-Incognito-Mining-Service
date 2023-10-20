@@ -12,7 +12,7 @@ import { ShardsNames, shardsNames } from "../../duplicatedFilesCleaner/types/sha
 export default async function handleCopyOrMove(
   args: string[],
   action: "copy" | "move",
-  options?: CommandOptions
+  options?: Pick<CommandOptions, "silent" | "telegramMessages">
 ): Promise<CommandResponse> {
   const [nodesRaw, rawShards] = [args.slice(0, 2), args.slice(2)];
 
