@@ -115,7 +115,7 @@ export default async function handleDocker(
         let response = "";
         switch (action) {
           case "create": {
-            if (node.inactive === false) response = `Node <code>${node.number}</code> is already created.`;
+            if (node.inactive === false) response = `Node <code>${node.dockerIndex}</code> is already created.`;
             else {
               await submitNode({
                 cost: 0,
@@ -127,20 +127,20 @@ export default async function handleDocker(
                 dockerIndex: node.dockerIndex,
                 validatorPublic: node.validatorPublic,
               });
-              response = `Node <code>${node.number}</code> created.`;
+              response = `Node <code>${node.dockerIndex}</code> created.`;
             }
             break;
           }
 
           case "delete": {
-            if (node.inactive) response = `Node <code>${node.number}</code> is already deleted.`;
+            if (node.inactive) response = `Node <code>${node.dockerIndex}</code> is already deleted.`;
             else {
               await deleteDockerAndConfigs({
                 number: node.number,
                 clientId: node.client,
                 dockerIndex: node.dockerIndex,
               });
-              response = `Node <code>${node.number}</code> deleted.`;
+              response = `Node <code>${node.dockerIndex}</code> deleted.`;
             }
           }
         }
