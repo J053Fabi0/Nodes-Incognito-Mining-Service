@@ -8,11 +8,11 @@ import createDocker from "../incognito/docker/createDocker.ts";
 import { Info } from "../duplicatedFilesCleaner/src/getInfo.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
 import { MonitorInfo, lastRoles, monitorInfoByDockerIndex } from "./variables.ts";
 import { normalizeShard } from "../duplicatedFilesCleaner/utils/normalizeShards.ts";
 import { ShardsNames, ShardsStr } from "../duplicatedFilesCleaner/types/shards.type.ts";
 import { nodesInfoByDockerIndexTest, nodesStatusByDockerIndexTest } from "./testingConstants.ts";
+import { dockersBeingDeleted, removeNodeFromConfigs } from "../incognito/deleteDockerAndConfigs.ts";
 
 export const rolesOrder: ((nodeStatus: NodeStatus) => boolean)[] = [
   ({ role }) => role === "COMMITTEE",
@@ -192,7 +192,9 @@ async function getNodesInfoByDockerIndex(
                 console.error(new Error(`Node ${dockerIndex} not found in the database.`));
                 nodesToFetch.splice(nodesToFetch.indexOf(+dockerIndex), 1);
                 removeNodeFromConfigs(+dockerIndex);
-              } else if (node.inactive === false) {
+              }
+              // if it is not being deleted, create it again
+              else if (!dockersBeingDeleted[dockerIndex] && !node.inactive) {
                 console.log(`Creating docker ${dockerIndex} again.`);
                 await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
               }

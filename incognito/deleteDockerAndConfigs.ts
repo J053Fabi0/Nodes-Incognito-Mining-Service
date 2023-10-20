@@ -12,6 +12,8 @@ interface DeleteDockerAndConfigsOptions {
   clientId: string | ObjectId;
 }
 
+export const dockersBeingDeleted: Record<string, true | undefined> = {};
+
 /**
  * It completely creates a new node, including docker, nginx config, node in the database and update configurations
  */
@@ -20,6 +22,9 @@ export default async function deleteDockerAndConfigs({
   clientId,
   dockerIndex,
 }: DeleteDockerAndConfigsOptions): Promise<void> {
+  if (dockersBeingDeleted[dockerIndex]) return;
+  dockersBeingDeleted[dockerIndex] = true;
+
   // Delete docker, files and nginx config
   await deleteDocker(dockerIndex);
   await deleteNginxConfig(clientId, number);
@@ -29,6 +34,10 @@ export default async function deleteDockerAndConfigs({
 
   // Remove from constants
   removeNodeFromConfigs(dockerIndex);
+
+  setTimeout(() => {
+    delete dockersBeingDeleted[dockerIndex];
+  }, 30_000);
 }
 
 export function removeNodeFromConfigs(dockerIndex: number) {
