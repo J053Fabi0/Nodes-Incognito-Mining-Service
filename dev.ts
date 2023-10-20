@@ -3,10 +3,11 @@
 import "./crons/crons.ts";
 import dev from "$fresh/dev.ts";
 
-// Code to supress the error "Improper nesting of table"
+// Code to supress some automatic errors
 const origConsoleError = console.error;
+const ERRORS = Object.freeze(["Improper nesting of table", "@babel/plugin-transform-react-jsx-source"] as const);
 console.error = (msg) => {
-  if (typeof msg === "string" && msg.includes("Improper nesting of table")) return;
+  if (typeof msg === "string" && ERRORS.some((e) => msg.includes(e))) return;
   origConsoleError(msg);
 };
 
