@@ -192,7 +192,7 @@ async function getNodesInfoByDockerIndex(
                 console.error(new Error(`Node ${dockerIndex} not found in the database.`));
                 nodesToFetch.splice(nodesToFetch.indexOf(+dockerIndex), 1);
                 removeNodeFromConfigs(+dockerIndex);
-              } else {
+              } else if (node.inactive === false) {
                 console.log(`Creating docker ${dockerIndex} again.`);
                 await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
               }
