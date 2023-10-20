@@ -14,7 +14,7 @@ const helpMessage =
     ["delete [fromNodeIndex] [...shards=beacon]", "Delete the shards of a node"],
     ["errors [...errorCode=all]", "Show the errors' statuses"],
     ["instructions", "Show the instructions to move or delete files"],
-    ["update [...nodeIndexes", "Update the docker containers"],
+    ["update [...nodeIndexes]", "Update the docker containers"],
     ["diffuse", "Run the diffuser function"],
     ["r", "Repeat the last command"],
   ]
