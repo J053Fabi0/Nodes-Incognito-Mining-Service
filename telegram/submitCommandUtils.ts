@@ -46,9 +46,9 @@ export async function getCommandsFromRedis(): Promise<void> {
 
     for (const pending of parsedCommands.pending) commands.pending.push(pending);
     for (const resolved of parsedCommands.resolved) commands.resolved.push(resolved);
-
-    subscribeVariableToRedis(redisKey, commands);
   } catch (e) {
     handleError(e);
   }
+
+  subscribeVariableToRedis(redisKey, commands);
 }
