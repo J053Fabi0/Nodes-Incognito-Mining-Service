@@ -20,28 +20,31 @@ export default async function deleteDocker(
   removingDataDir: PromiseSettledResult<void>;
 }> {
   const [stopping] = await Promise.allSettled([docker(["stop", `inc_mainnet_${dockerIndex}`])]);
+
+  const isDirPresent = await doesDirExists(`${dataDir}_${dockerIndex}`);
+  if (deleteDataDir && isDirPresent) {
+    const nodesInfo = await duplicatedFilesCleaner.getInfo();
+
+    const thisNodeInfo = nodesInfo[dockerIndex];
+
+    const hasBeacon = thisNodeInfo.beacon !== undefined;
+    const hasShardAndWhich = getShard(thisNodeInfo);
+
+    // ignore autoMove for this node if any of its files are going to be moved to another node
+    if (hasBeacon || hasShardAndWhich) ignoreError("autoMove", dockerIndex, 10);
+
+    // try to move the beacon files to another node
+    if (hasBeacon) await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, "beacon");
+
+    // try to move the shard's files to another node
+    if (hasShardAndWhich !== null) await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, hasShardAndWhich);
+  }
+
   const [removing] = await Promise.allSettled([docker(["rm", `inc_mainnet_${dockerIndex}`])]);
+
   const [removingDataDir] = await Promise.allSettled([
-    deleteDataDir && (await doesDirExists(`${dataDir}_${dockerIndex}`))
-      ? (async () => {
-          const nodesInfo = await duplicatedFilesCleaner.getInfo();
-
-          const thisNodeInfo = nodesInfo[dockerIndex];
-
-          const hasBeacon = thisNodeInfo.beacon !== undefined;
-          const hasShardAndWhich = getShard(thisNodeInfo);
-          // ignore autoMove for this node if any of its files are going to be moved to another node
-          if (hasBeacon || hasShardAndWhich) ignoreError("autoMove", dockerIndex, 10);
-
-          // try to move the beacon files to another node
-          if (hasBeacon) await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, "beacon");
-
-          // try to move the shard's files to another node
-          if (hasShardAndWhich !== null)
-            await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, hasShardAndWhich);
-
-          await Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }).catch(handleError);
-        })()
+    deleteDataDir && isDirPresent
+      ? Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }).catch(handleError)
       : Promise.resolve(),
   ]);
 
