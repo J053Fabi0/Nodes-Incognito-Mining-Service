@@ -22,14 +22,20 @@ export default async function deleteDocker(dockerIndex: number, deleteDataDir = 
 
     const hasBeacon = thisNodeInfo.beacon !== undefined;
     const hasShardAndWhich = getShard(thisNodeInfo);
+    console.log({ hasBeacon, hasShardAndWhich });
+
     // ignore autoMove for this node if any of its files are going to be moved to another node
     if (hasBeacon || hasShardAndWhich) ignoreError("autoMove", dockerIndex, 10);
 
     // try to move the beacon files to another node
+    console.log("a");
     if (hasBeacon) await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, "beacon");
+    console.log("b");
 
     // try to move the shard's files to another node
+    console.log("c");
     if (hasShardAndWhich !== null) await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, hasShardAndWhich);
+    console.log("d");
 
     await Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }).catch(handleError);
   }
@@ -54,6 +60,7 @@ async function moveBeaconOrShardToOtherNode(
       if (!info[shardName] && dI !== `${fromDockerIndex}` && !info.docker.running) return dI;
     return null;
   })();
+  console.log("moveBeaconOrShardToOtherNode", fromDockerIndex, shardName, dockerIndexToMoveTo);
 
   if (dockerIndexToMoveTo !== null)
     await handleCopyOrMove([`${fromDockerIndex}`, dockerIndexToMoveTo, shardName], "move", {
