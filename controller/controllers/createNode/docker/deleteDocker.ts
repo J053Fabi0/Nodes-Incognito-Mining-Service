@@ -1,6 +1,7 @@
 import { dataDir } from "./createDocker.ts";
 import { docker } from "../../../../utils/commands.ts";
 import handleError from "../../../../utils/handleError.ts";
+import ignoreError from "../../../../utils/ignoreError.ts";
 import doesDirExists from "../../../../utils/doesDirExists.ts";
 import duplicatedFilesCleaner from "../../../duplicatedFilesCleaner.ts";
 import { Info } from "../../../../duplicatedFilesCleaner/src/getInfo.ts";
@@ -27,12 +28,15 @@ export default async function deleteDocker(
 
           const thisNodeInfo = nodesInfo[dockerIndex];
 
+          const hasBeacon = thisNodeInfo.beacon !== undefined;
+          const hasShardAndWhich = getShard(thisNodeInfo);
+          // ignore autoMove for this node if any of its files are going to be moved to another node
+          if (hasBeacon || hasShardAndWhich) ignoreError("autoMove", dockerIndex, 10);
+
           // try to move the beacon files to another node
-          if (thisNodeInfo.beacon !== undefined)
-            await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, "beacon");
+          if (hasBeacon) await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, "beacon");
 
           // try to move the shard's files to another node
-          const hasShardAndWhich = getShard(thisNodeInfo);
           if (hasShardAndWhich !== null)
             await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, hasShardAndWhich);
 
@@ -60,7 +64,7 @@ async function moveBeaconOrShardToOtherNode(
 ) {
   const dockerIndexToMoveTo: string | null = (() => {
     for (const [dI, info] of Object.entries(nodesInfo))
-      if (info[shardName] === undefined && dI !== `${fromDockerIndex}`) return dI;
+      if (!info[shardName] && dI !== `${fromDockerIndex}` && !info.docker.running) return dI;
     return null;
   })();
 
