@@ -13,9 +13,10 @@ import { ShardsNames, shardsNames } from "../../duplicatedFilesCleaner/types/sha
  */
 export default async function deleteDocker(dockerIndex: number, deleteDataDir = true) {
   await docker(["stop", `inc_mainnet_${dockerIndex}`]).catch(console.error);
-  await docker(["rm", `inc_mainnet_${dockerIndex}`]).catch(handleError);
 
-  if (deleteDataDir && (await doesDirExists(`${dataDir}_${dockerIndex}`))) {
+  const isDirPresent = await doesDirExists(`${dataDir}_${dockerIndex}`);
+
+  if (deleteDataDir && isDirPresent) {
     const nodesInfo = await duplicatedFilesCleaner.getInfo();
 
     const thisNodeInfo = nodesInfo[dockerIndex];
@@ -36,9 +37,12 @@ export default async function deleteDocker(dockerIndex: number, deleteDataDir = 
     console.log("c");
     if (hasShardAndWhich !== null) await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, hasShardAndWhich);
     console.log("d");
-
-    await Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }).catch(handleError);
   }
+
+  await docker(["rm", `inc_mainnet_${dockerIndex}`]).catch(handleError);
+
+  if (deleteDataDir && isDirPresent)
+    await Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }).catch(handleError);
 }
 
 function getShard(nodeInfo: Info): Exclude<ShardsNames, "beacon"> | null {
