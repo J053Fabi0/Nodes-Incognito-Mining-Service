@@ -14,35 +14,29 @@ import { ShardsNames, shardsNames } from "../../duplicatedFilesCleaner/types/sha
 export default async function deleteDocker(dockerIndex: number, deleteDataDir = true) {
   await docker(["stop", `inc_mainnet_${dockerIndex}`]).catch(console.error);
 
-  const isDirPresent = await doesDirExists(`${dataDir}_${dockerIndex}`);
+  const canDeleteDataDir = deleteDataDir && (await doesDirExists(`${dataDir}_${dockerIndex}`));
 
-  if (deleteDataDir && isDirPresent) {
+  if (canDeleteDataDir) {
     const nodesInfo = await duplicatedFilesCleaner.getInfo();
 
     const thisNodeInfo = nodesInfo[dockerIndex];
 
     const hasBeacon = thisNodeInfo.beacon !== undefined;
     const hasShardAndWhich = getShard(thisNodeInfo);
-    console.log({ hasBeacon, hasShardAndWhich });
 
     // ignore autoMove for this node if any of its files are going to be moved to another node
     if (hasBeacon || hasShardAndWhich) ignoreError("autoMove", dockerIndex, 10);
 
     // try to move the beacon files to another node
-    console.log("a");
     if (hasBeacon) await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, "beacon");
-    console.log("b");
 
     // try to move the shard's files to another node
-    console.log("c");
     if (hasShardAndWhich !== null) await moveBeaconOrShardToOtherNode(nodesInfo, dockerIndex, hasShardAndWhich);
-    console.log("d");
   }
 
   await docker(["rm", `inc_mainnet_${dockerIndex}`]).catch(handleError);
 
-  if (deleteDataDir && isDirPresent)
-    await Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }).catch(handleError);
+  if (canDeleteDataDir) await Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }).catch(handleError);
 }
 
 function getShard(nodeInfo: Info): Exclude<ShardsNames, "beacon"> | null {
@@ -60,11 +54,11 @@ async function moveBeaconOrShardToOtherNode(
   shardName: ShardsNames
 ) {
   const dockerIndexToMoveTo: string | null = (() => {
+    // it doesn't matter if the target node is assigned to the same shard or not. AutoMove will handle it anyway
     for (const [dI, info] of Object.entries(nodesInfo))
-      if (!info[shardName] && dI !== `${fromDockerIndex}` && !info.docker.running) return dI;
+      if (dI !== `${fromDockerIndex}` && !info[shardName] && !info.docker.running) return dI;
     return null;
   })();
-  console.log("moveBeaconOrShardToOtherNode", fromDockerIndex, shardName, dockerIndexToMoveTo);
 
   if (dockerIndexToMoveTo !== null)
     await handleCopyOrMove([`${fromDockerIndex}`, dockerIndexToMoveTo, shardName], "move", {
