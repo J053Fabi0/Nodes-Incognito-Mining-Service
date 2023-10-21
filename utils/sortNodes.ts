@@ -198,7 +198,9 @@ async function getNodesInfoByDockerIndex(
                 console.log(`Creating docker ${dockerIndex} again.`);
                 await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
               }
-            }
+              // at last remove it from the configs
+              else removeNodeFromConfigs(parseInt(dockerIndex));
+            } else throw e;
           } else throw e;
         }
       }
