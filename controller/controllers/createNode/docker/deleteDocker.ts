@@ -21,8 +21,8 @@ export default async function deleteDocker(
 }> {
   const [stopping] = await Promise.allSettled([docker(["stop", `inc_mainnet_${dockerIndex}`])]);
 
-  const isDirPresent = await doesDirExists(`${dataDir}_${dockerIndex}`);
-  if (deleteDataDir && isDirPresent) {
+  const canDeleteDataDir = deleteDataDir && (await doesDirExists(`${dataDir}_${dockerIndex}`));
+  if (canDeleteDataDir) {
     const nodesInfo = await duplicatedFilesCleaner.getInfo();
 
     const thisNodeInfo = nodesInfo[dockerIndex];
@@ -43,7 +43,7 @@ export default async function deleteDocker(
   const [removing] = await Promise.allSettled([docker(["rm", `inc_mainnet_${dockerIndex}`])]);
 
   const [removingDataDir] = await Promise.allSettled([
-    deleteDataDir && isDirPresent
+    canDeleteDataDir
       ? Deno.remove(`${dataDir}_${dockerIndex}`, { recursive: true }).catch(handleError)
       : Promise.resolve(),
   ]);
@@ -66,8 +66,9 @@ async function moveBeaconOrShardToOtherNode(
   shardName: ShardsNames
 ) {
   const dockerIndexToMoveTo: string | null = (() => {
+    // it doesn't matter if the target node is assigned to the same shard or not. AutoMove will handle it anyway
     for (const [dI, info] of Object.entries(nodesInfo))
-      if (!info[shardName] && dI !== `${fromDockerIndex}` && !info.docker.running) return dI;
+      if (dI !== `${fromDockerIndex}` && !info[shardName] && !info.docker.running) return dI;
     return null;
   })();
 
