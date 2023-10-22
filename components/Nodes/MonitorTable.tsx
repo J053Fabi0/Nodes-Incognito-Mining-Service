@@ -62,8 +62,8 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
             return (
               <tr class={styles.tr}>
                 {/* Nodes */}
-                <td class={styles.td}>
-                  <NodePill baseURL={null} nodeNumber={isAdmin ? +node : status.number} relative />
+                <td class={styles.td} title={isAdmin ? `${status.client}` : undefined}>
+                  <NodePill relative baseURL={null} nodeNumber={isAdmin ? +node : status.number} />
                   {isAdmin && (
                     <>
                       <br />
