@@ -100,12 +100,13 @@ export const handler: Handlers<AdminNodesProps, State> = {
 export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
   const { nodes } = data;
 
-  const nodesPerClient: Record<string, { number: number; name: string } | undefined> = {};
+  const nodesPerClient: Record<string, { number: number; name: string; active: number } | undefined> = {};
 
   for (const node of nodes) {
     const { _id } = node.client;
-    if (!nodesPerClient[`${_id}`]) nodesPerClient[`${_id}`] = { number: 0, name: node.client.name };
+    if (!nodesPerClient[`${_id}`]) nodesPerClient[`${_id}`] = { number: 0, active: 0, name: node.client.name };
     nodesPerClient[`${_id}`]!.number++;
+    if (!node.inactive) nodesPerClient[`${_id}`]!.active++;
   }
 
   return (
@@ -116,7 +117,7 @@ export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
 
       <form method="post">
         <div class="overflow-x-auto">
-          <table class="table-auto border-collapse border border-slate-400 mb-5 w-full">
+          <table class="table-auto border-collapse border border-slate-400 w-full">
             <thead>
               <tr>
                 <th class={styles.th}>Client</th>
@@ -158,15 +159,35 @@ export default function AdminNodes({ data }: PageProps<AdminNodesProps>) {
         </div>
       </form>
 
-      <ul class="list-disc list-inside mb-5">
-        {Object.entries(nodesPerClient)
-          .sort((a, b) => b[1]!.number - a[1]!.number)
-          .map(([clientId, nodes]) => (
-            <li class={styles.li} title={clientId}>
-              {nodes!.name} - {nodes!.number} nodes
-            </li>
-          ))}
-      </ul>
+      <hr class="my-10" />
+
+      {/* Same as above but in a table */}
+      <div class="overflow-x-auto">
+        <table class="table-auto border-collapse border border-slate-400 mb-5">
+          <thead>
+            <tr>
+              <th class={styles.th}>Client</th>
+              <th class={styles.th}>Nodes</th>
+              <th class={styles.th}>Active</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(nodesPerClient)
+              .sort((a, b) => b[1]!.number - a[1]!.number)
+              .map(([clientId, nodes]) => (
+                <tr>
+                  <td class={styles.td} title={clientId}>
+                    {nodes!.name}
+                  </td>
+
+                  <td class={styles.td}>{nodes!.number}</td>
+
+                  <td class={styles.td}>{nodes!.active}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
