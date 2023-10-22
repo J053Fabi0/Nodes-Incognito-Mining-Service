@@ -30,6 +30,9 @@ export default async function handleDocker(
     return { successful: false, error };
   }
 
+  // remove duplicated nodes
+  rawNodes.splice(0, Infinity, ...[...new Set(rawNodes)]);
+
   const stopOrStart = action === "start" || action === "stop";
 
   if (!stopOrStart && rawNodes.includes("all")) {
