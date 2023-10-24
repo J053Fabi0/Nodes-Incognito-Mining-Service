@@ -1,10 +1,6 @@
-import dayjs from "dayjs/mod.ts";
 import { useSignal } from "@preact/signals";
 import { IS_BROWSER } from "$fresh/runtime.ts";
-import relativeTime from "dayjs/plugin/relativeTime.ts";
 import { rangeMsToTimeDescription } from "../utils/msToTimeDescription.ts";
-
-dayjs.extend(relativeTime);
 
 interface TimeLeftProps {
   date: number;
