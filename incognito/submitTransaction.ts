@@ -5,48 +5,16 @@ import IncognitoCli from "./IncognitoCli.ts";
 import handleError from "../utils/handleError.ts";
 import { incognitoFeeInt } from "../constants.ts";
 import { notAssignableKeys } from "../utils/createTrueRecord.ts";
+import TransactionResult from "../types/TransactionResult.type.ts";
+import PendingTransaction from "../types/PendingTransaction.type.ts";
 import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { changeAccountTransaction } from "../controllers/accountTransaction.controller.ts";
+import { AccountTransactionStatus } from "../types/collections/accountTransaction.type.ts";
 import { checkBalance, fetchPendingTransactionsFromRedisAndDB } from "./submitTransactionUtils.ts";
-import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
-const MAX_RETRIES = 5;
+export const MAX_RETRIES = 5;
 /** In seconds */
-const RETRY_DELAY = 1 * 60;
-
-interface Result {
-  /** If it's null, the result couldn't be parsed, but the transaction may have been done anyway */
-  txHash: string | null;
-  retries: PendingTransaction["retries"];
-  status: AccountTransactionStatus.COMPLETED | AccountTransactionStatus.FAILED;
-  errorDetails?: string;
-}
-
-export interface PendingTransaction {
-  type: AccountTransactionType.EXPENSE | AccountTransactionType.WITHDRAWAL;
-  /** Int format. It doesn't include the fee */
-  amount: number;
-  /** Int format. If not provided, defaults to `incognitoFeeInt` */
-  fee?: number;
-  /** Payment address */
-  sendTo: string;
-  account: ObjectId | string;
-  privateKey: string;
-  /** The owner of the account */
-  userId: ObjectId | string;
-  /** Timestamps of the dates in which it has been tried */
-  retries: number[];
-  /** Defaults to MAX_RETRIES */
-  maxRetries?: number;
-  /** Defaults to RETRY_DELAY. In seconds */
-  retryDelay?: number;
-  resolve?: (result: Result) => void;
-  /** If you have uploaded the transaction. If not, it'll be uploaded automatically to the DB */
-  transactionId?: ObjectId | string;
-  /** Timestamp */
-  createdAt: number;
-  details?: string;
-}
+export const RETRY_DELAY = 1 * 60;
 
 /**
  * This is a true record that can never return undefined
@@ -156,7 +124,7 @@ export default function submitTransaction(
   params: Omit<PendingTransaction, "resolve" | "retries" | "createdAt"> &
     Partial<Pick<PendingTransaction, "createdAt">>,
   urgent = false
-): Promise<Result> {
+): Promise<TransactionResult> {
   return new Promise((resolve) => {
     pendingTransactionsByAccount[`${params.account}`][urgent ? "unshift" : "push"]({
       resolve,

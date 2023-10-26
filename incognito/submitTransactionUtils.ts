@@ -12,7 +12,8 @@ import { getClient } from "../controllers/client.controller.ts";
 import { EventedArrayWithoutHandler } from "../utils/EventedArray.ts";
 import { subscribeVariableToRedis } from "../crons/saveVariablesToRedis.ts";
 import { changeAccount, getAccount } from "../controllers/account.controller.ts";
-import submitTransaction, { PendingTransaction, pendingTransactionsByAccount } from "./submitTransaction.ts";
+import submitTransaction, { pendingTransactionsByAccount } from "./submitTransaction.ts";
+import PendingTransaction, { pendingTransactionSchema } from "../types/PendingTransaction.type.ts";
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 
 const redisKey = "transactions";
@@ -23,7 +24,8 @@ export async function fetchPendingTransactionsFromRedisAndDB() {
   if (redisTransactions)
     // without the balance, so it can be checked again
     for (const transaction of JSON.parse(redisTransactions) as PendingTransaction[])
-      pendingTransactionsByAccount[`${transaction.account}`].push(transaction);
+      if (!pendingTransactionSchema.validate(transaction).error)
+        pendingTransactionsByAccount[`${transaction.account}`].push(transaction);
 
   subscribeVariableToRedis(redisKey, () => Object.values(pendingTransactionsByAccount));
 

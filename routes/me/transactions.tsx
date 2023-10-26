@@ -15,9 +15,10 @@ import Typography from "../../components/Typography.tsx";
 import RelativeDate from "../../islands/RelativeDate.tsx";
 import getQueryParams from "../../utils/getQueryParams.ts";
 import { moveDecimalDot } from "../../utils/numbersString.ts";
+import PendingTransaction from "../../types/PendingTransaction.type.ts";
+import { pendingTransactionsByAccount } from "../../incognito/submitTransaction.ts";
 import TransactionStatusPill from "../../components/Account/TransactionStatusPill.tsx";
 import { getAccountTransactions } from "../../controllers/accountTransaction.controller.ts";
-import { PendingTransaction, pendingTransactionsByAccount } from "../../incognito/submitTransaction.ts";
 
 interface TransactionsProps {
   isAdmin: boolean;
