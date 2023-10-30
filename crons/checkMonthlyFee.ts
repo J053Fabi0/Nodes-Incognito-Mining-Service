@@ -20,7 +20,7 @@ import { MonthlyPayments, monthlyPayments } from "../utils/variables.ts";
 import deleteDockerAndConfigs from "../incognito/deleteDockerAndConfigs.ts";
 import { changeClient, getClients } from "../controllers/client.controller.ts";
 import { AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
-import { adminAccount, adminTelegram, incognitoFee, incognitoFeeInt, maxNotPayedDays } from "../constants.ts";
+import { adminAccount, incognitoFee, adminTelegram, incognitoFeeInt, maxNotPayedDays } from "../constants.ts";
 
 const { None } = ShowQuantityAs;
 const contactKeyboard = new InlineKeyboard().url("Contact", `tg://user?id=${adminTelegram}`);
@@ -138,36 +138,34 @@ async function sendAcknowledgment(
   const type: "automatic" | "deposit" = paymentData.lastWarningDay === null ? "automatic" : "deposit";
   const error = paymentData.errorInTransaction;
 
+  let message = "";
+
   if (!error)
-    await sendHTMLMessage(
+    message =
       (type === "automatic"
         ? `Hello 👋.\nThis month your nodes have earned <code>${totalEarnings}</code> PRV.\n\n` +
           `Your monthly fee has been automatically charged from your balance.`
         : `Your deposit has been received and the monthly fee paid.`) +
-        `\n\n${details}\n\n` +
-        `Have a nice month!`,
-      telegramID,
-      { disable_web_page_preview: true, reply_markup: contactKeyboard },
-      "notificationsBot"
-    );
+      `\n\n${details}\n\n` +
+      `Have a nice month!`;
   // error in transaction
   else if (!successfull)
-    await sendHTMLMessage(
+    message =
       "Unfortunately, an error occurred while processing the " +
-        (type === "automatic" ? `automatic payment.` : "payment, although your deposit has been received.") +
-        "\n\nPlease don't worry, we'll handle the payment manually. Your nodes won't be suspended, " +
-        "unless you withdraw your balance.",
-      telegramID,
-      { disable_web_page_preview: true, reply_markup: contactKeyboard },
-      "notificationsBot"
-    );
+      (type === "automatic" ? `automatic payment.` : "payment, although your deposit has been received.") +
+      "\n\nPlease don't worry, we'll handle the payment manually. Your nodes won't be suspended, " +
+      "unless you withdraw your balance.";
   // past error in transaction, but it was solved
   else
-    await sendHTMLMessage(
+    message =
       "The error that occurred while processing the payment has been solved and the payment has been made.\n\n" +
-        `${details}\n\n` +
-        `Have a nice month!`,
-      telegramID,
+      `${details}\n\n` +
+      `Have a nice month!`;
+
+  for (const to of [telegramID, adminTelegram])
+    await sendHTMLMessage(
+      message,
+      to,
       { disable_web_page_preview: true, reply_markup: contactKeyboard },
       "notificationsBot"
     );
@@ -192,17 +190,27 @@ async function sendWarning(
     `Deposit to:\n<code>${account.paymentAddress}</code>.\n\n` +
     `You can manage your balance <a href='${WEBSITE_URL}/me'>here</a>.`;
 
-  const response = await sendHTMLMessage(
+  const message =
     paymentData.lastWarningDay === null
       ? // a different message for the first warning
         `Hello 👋.\nThis month your nodes have earned <code>${totalEarnings}</code> PRV.\n\n` +
-          `To continue hosting your nodes, deposit at least <code>${numbers["Total"]}</code> PRV.` +
-          `\n\n${details}`
+        `To continue hosting your nodes, deposit at least <code>${numbers["Total"]}</code> PRV.` +
+        `\n\n${details}`
       : "Hello 👋.\n" +
-          `Just to remind you you have until the end of this month's <b>${maxNotPayedDays.ordinalize()} day</b> ` +
-          `to pay the fee of the last month, or else your nodes will be suspended, ` +
-          `in which case you'll need to pay the initial setup again for each one if you wish to continue using our services.` +
-          `\n\n${details}`,
+        `Just to remind you you have until the end of this month's <b>${maxNotPayedDays.ordinalize()} day</b> ` +
+        `to pay the fee of the last month, or else your nodes will be suspended, ` +
+        `in which case you'll need to pay the initial setup again for each one if you wish to continue using our services.` +
+        `\n\n${details}`;
+
+  // send to admin too
+  await sendHTMLMessage(
+    message,
+    adminTelegram,
+    { disable_web_page_preview: true, reply_markup: contactKeyboard },
+    "notificationsBot"
+  );
+  const response = await sendHTMLMessage(
+    message,
     telegramID,
     { disable_web_page_preview: true, reply_markup: contactKeyboard },
     "notificationsBot"
@@ -230,10 +238,11 @@ async function sendThatNodesHaveBeenRemoved(
     { disable_web_page_preview: true, reply_markup: keyboard },
     "notificationsBot"
   );
+  // send to admin too
   await sendHTMLMessage(
     `Nodes <code>${nodes.map((n) => n.dockerIndex).join("</code>, <code>")}</code>` +
       ` have been deleted because they weren't paid for the last month.`,
-    undefined,
+    adminTelegram,
     { reply_markup: new InlineKeyboard().url("View nodes", `${WEBSITE_URL}/admin/nodes`) }
   );
 }
