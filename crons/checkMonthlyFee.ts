@@ -1,6 +1,5 @@
+import moment from "moment";
 import "humanizer/toQuantity.ts";
-import dayjs from "dayjs/mod.ts";
-import utc from "dayjs/plugin/utc.ts";
 import { ObjectId } from "mongo/mod.ts";
 import { WEBSITE_URL } from "../env.ts";
 import cryptr from "../utils/cryptrInstance.ts";
@@ -23,12 +22,11 @@ import { changeClient, getClients } from "../controllers/client.controller.ts";
 import { AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 import { adminAccount, adminTelegram, incognitoFee, incognitoFeeInt, maxNotPayedDays } from "../constants.ts";
 
-dayjs.extend(utc);
 const { None } = ShowQuantityAs;
 const contactKeyboard = new InlineKeyboard().url("Contact", `tg://user?id=${adminTelegram}`);
 
 export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
-  const thisMonth = dayjs().utc().month();
+  const thisMonth = moment().utc().month();
 
   const clients = await getClients({}, { projection: { account: 1, lastPayment: 1, telegram: 1 } });
 
@@ -113,7 +111,7 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
     //
     // if it does't have enough balance, send a warning if it hasn't been sent today.
     // don't send a warning if there was an error in the transaction
-    else if (paymentData.lastWarningDay !== dayjs().utc().date() && !paymentData.errorInTransaction)
+    else if (paymentData.lastWarningDay !== moment().utc().date() && !paymentData.errorInTransaction)
       await sendWarning(account, feeWithIncognitoFee, paymentData, telegram);
   }
 }
@@ -212,7 +210,8 @@ async function sendWarning(
 
   // only if the user didn't blocked the bot and there's more than an hour left to the end of the day
   // count the message as sent
-  if (typeof response === "object" && dayjs().utc().hour() < 23) paymentData.lastWarningDay = dayjs().utc().date();
+  if (typeof response === "object" && moment().utc().hour() < 23)
+    paymentData.lastWarningDay = moment().utc().date();
 }
 
 async function sendThatNodesHaveBeenRemoved(
@@ -246,5 +245,5 @@ async function markAsCompleted(paymentData: MonthlyPayments, clientId: ObjectId)
   paymentData.fee = null;
   paymentData.lastWarningDay = null;
   paymentData.errorInTransaction = false;
-  paymentData.forMonth = dayjs().utc().month();
+  paymentData.forMonth = moment().utc().month();
 }
