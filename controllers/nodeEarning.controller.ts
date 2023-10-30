@@ -1,10 +1,7 @@
-import dayjs from "dayjs/mod.ts";
+import moment from "moment";
 import * as a from "./dbUtils.ts";
-import utc from "dayjs/plugin/utc.ts";
 import { ObjectId } from "mongo/mod.ts";
 import Model from "../models/nodeEarning.model.ts";
-
-dayjs.extend(utc);
 
 export const getNodeEarnings = a.find(Model);
 export const getNodeEarning = a.findOne(Model);
@@ -31,11 +28,11 @@ export const aggregateNodeEarning = a.aggregate(Model);
  */
 export async function getTotalEarnings(nodeOrNodes: ObjectId | ObjectId[] | null, monthsToSubtract: number) {
   const time: { $gte: Date; $lte?: Date } = {
-    $gte: dayjs().utc().subtract(monthsToSubtract, "month").startOf("month").toDate(),
+    $gte: moment().utc().subtract(monthsToSubtract, "month").startOf("month").toDate(),
   };
   // if the monthsToSubtract is 0, we don't need to add the $lte
   if (monthsToSubtract !== 0)
-    time.$lte = dayjs().utc().subtract(monthsToSubtract, "month").endOf("month").toDate();
+    time.$lte = moment().utc().subtract(monthsToSubtract, "month").endOf("month").toDate();
 
   const match: { node?: ObjectId | { $in: ObjectId[] }; time: typeof time } = { time };
 
