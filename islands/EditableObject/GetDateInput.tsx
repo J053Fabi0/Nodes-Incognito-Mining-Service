@@ -4,7 +4,7 @@ import MonthSelect from "../../components/MonthSelect.tsx";
 import GetInput from "../../components/EditableObject/GetInput.tsx";
 import Button, { getButtonClasses } from "../../components/Button.tsx";
 
-export type DateElements = "day" | "month" | "year" | "hours" | "minutes" | "seconds";
+export type DateElements = "date" | "month" | "year" | "hours" | "minutes" | "seconds";
 
 interface EditableObjectDateInputProps {
   id: string;
@@ -22,7 +22,7 @@ export default function GetDateInput({ value, id }: EditableObjectDateInputProps
   const seconds = useSignal(dateObj.getSeconds());
 
   const dateElements: [DateElements, number][] = [
-    ["day", day.value],
+    ["date", day.value],
     ["month", month.value],
     ["year", year.value],
     ["hours", hours.value],

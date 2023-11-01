@@ -70,26 +70,7 @@ export const handler: Handlers<EditProps, State> = {
 
         const [element, p] = key.split("&") as [DateElements, string];
         const value = +form.get(key)!;
-        switch (element) {
-          case "day":
-            date.date(value);
-            break;
-          case "month":
-            date.month(value);
-            break;
-          case "year":
-            date.year(value);
-            break;
-          case "hours":
-            date.hour(value);
-            break;
-          case "minutes":
-            date.minute(value);
-            break;
-          case "seconds":
-            date.second(value);
-            break;
-        }
+        date[element](value);
 
         if (path.length === 0) path.push(...p.split("."));
       }
