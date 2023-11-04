@@ -28,7 +28,12 @@ const contactKeyboard = new InlineKeyboard().url("Contact", `tg://user?id=${admi
 export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
   const thisMonth = moment().utc().month();
 
-  const clients = await getClients({}, { projection: { account: 1, lastPayment: 1, telegram: 1 } });
+  const clients = await getClients(
+    { _id: new ObjectId("64c96b3fb4dd2689f376fa56") },
+    { projection: { account: 1, lastPayment: 1, telegram: 1 } }
+  );
+
+  console.log(clients);
 
   for (const client of clients) {
     const { lastPayment, telegram } = client;
@@ -44,6 +49,8 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
     // delete the last record to create a new one the next time it's accessed
     else if (monthlyPayments[`${client._id}`].forMonth !== thisMonth) delete monthlyPayments[`${client._id}`];
 
+    console.log("1");
+
     const paymentData = monthlyPayments[`${client._id}`];
     if (paymentData.fee === null) paymentData.fee = await getMonthlyFee(client._id);
 
@@ -52,6 +59,8 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
       await markAsCompleted(paymentData, client._id);
       continue;
     }
+
+    console.log("2");
 
     // get the balance of the client
     const account = await getAccountById(client.account, {
@@ -62,7 +71,11 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
       continue;
     }
 
+    console.log("3");
+
     const feeWithIncognitoFee = paymentData.fee + incognitoFeeInt;
+
+    console.log(account.balance >= feeWithIncognitoFee, paymentData.errorInTransaction, removeNotPayedNodes);
 
     // if the client has enough balance, do the payment
     if (account.balance >= feeWithIncognitoFee) {
