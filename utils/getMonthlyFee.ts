@@ -1,7 +1,7 @@
 import { Big } from "math";
 import { ObjectId } from "mongo/mod.ts";
-import { getNodes } from "../controllers/node.controller.ts";
 import { toFixedS } from "../utils/numbersString.ts";
+import { getNodes } from "../controllers/node.controller.ts";
 import { getTotalEarnings } from "../controllers/nodeEarning.controller.ts";
 
 /** Int format, without incognito fee. Only from active nodes. */
