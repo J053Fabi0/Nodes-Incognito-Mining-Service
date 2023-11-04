@@ -60,7 +60,8 @@ export const { handler }: Middleware<State> = {
         );
 
         const url = new URL(req.url);
-        if (user.isBotBlocked && url.pathname !== "/bot-is-blocked") return redirect("/bot-is-blocked");
+        if (user.isBotBlocked && !ctx.state.isAdmin && url.pathname !== "/bot-is-blocked")
+          return redirect("/bot-is-blocked");
       }
 
       return ctx.next();
