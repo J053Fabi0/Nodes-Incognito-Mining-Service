@@ -97,7 +97,7 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
     // if it's the day to remove the nodes
     else if (removeNotPayedNodes) {
       const nodes = await getNodes(
-        { client, inactive: false },
+        { client: client._id, inactive: false },
         { projection: { _id: 0, dockerIndex: 1, number: 1 } }
       );
       for (const node of nodes)
