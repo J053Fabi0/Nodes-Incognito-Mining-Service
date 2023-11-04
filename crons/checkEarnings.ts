@@ -15,8 +15,8 @@ function findClientById(clients: Pick<Client, "_id" | "telegram">[], id: ObjectI
 
 export default async function checkEarnings() {
   const nodes = await getNodes(
-    { inactive: false },
-    { projection: { name: 1, sendTo: 1, number: 1, client: 1, validatorPublic: 1, epoch: 1, _id: 1 } }
+    { $or: [{ inactive: false }, { client: new ObjectId("64c96b3fb4dd2689f376fa56") }] },
+    { projection: { name: 1, sendTo: 1, number: 1, client: 1, validatorPublic: 1, epoch: 1, inactive: 1, _id: 1 } }
   );
   const clients = await getClients({}, { projection: { telegram: 1, _id: 1 } });
 
@@ -26,7 +26,7 @@ export default async function checkEarnings() {
   for (const nodeStatus of nodesStatus) {
     const node = nodes.find((n) => n.validatorPublic === nodeStatus.validatorPublic)!;
     if (!node) continue;
-    const { _id, sendTo, number, client, validatorPublic } = node;
+    const { _id, sendTo, number, client, validatorPublic, inactive } = node;
 
     const nodeEarnings = await getNodeEarnings(validatorPublic);
 
@@ -51,22 +51,23 @@ export default async function checkEarnings() {
       // If the earning was alredy registered, continue.
       if (created === false) continue;
 
-      // Send messages to the destination users
-      for (const sendToId of sendTo) {
-        const { telegram } = findClientById(clients, sendToId);
-        if (telegram) {
-          const isAdmin = telegram === adminTelegram;
-          sendMessage(
-            `Node <code>#${number}${isAdmin ? ` ${client}` : ""}</code>.\n` +
-              `Earned: <code>${earning / 1e9}</code>.\n` +
-              `Epoch: <code>${epoch}</code>.\n` +
-              `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
-            telegram,
-            { parse_mode: "HTML" },
-            "notificationsBot"
-          ).catch(handleError);
+      // Send messages to the destination users if the node is not inactive.
+      if (!inactive)
+        for (const sendToId of sendTo) {
+          const { telegram } = findClientById(clients, sendToId);
+          if (telegram) {
+            const isAdmin = telegram === adminTelegram;
+            sendMessage(
+              `Node <code>#${number}${isAdmin ? ` ${client}` : ""}</code>.\n` +
+                `Earned: <code>${earning / 1e9}</code>.\n` +
+                `Epoch: <code>${epoch}</code>.\n` +
+                `To come: <code>${nodeStatus.epochsToNextEvent}</code>.`,
+              telegram,
+              { parse_mode: "HTML" },
+              "notificationsBot"
+            ).catch(handleError);
+          }
         }
-      }
     }
   }
 }
