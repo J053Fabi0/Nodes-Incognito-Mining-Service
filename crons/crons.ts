@@ -33,9 +33,9 @@ function startCrons() {
   new Cron("*/10 * * * * *", { protect: true, ...options }, checkNodes);
 
   // every minute, check the accounts that have used the website in the last 5 minutes
-  new Cron("*/1 * * * *", { protect: true, ...options }, checkAccounts.bind(null, 5, Unit.minute));
-  // every hour, check the accounts that have used the website in the last day
-  new Cron("0 * * * *", { protect: true, ...options }, checkAccounts.bind(null, 1, Unit.day));
+  new Cron("*/1 * * * *", { protect: true, ...options }, () => checkAccounts(5, Unit.minute));
+  // every hour, check the accounts that have active nodes
+  new Cron("0 * * * *", { protect: true, ...options }, () => checkAccounts());
 
   // delete empty sessions every hour
   new Cron("0 * * * *", { protect: true, ...options }, deleteEmptySessions);
@@ -47,9 +47,9 @@ function startCrons() {
   new Cron("*/5 * * * *", options, cacheNodesStatistics);
 
   // check the monthly fee every 1st day of the month until the maxNotPayedDays
-  new Cron(`*/30 * 1-${maxNotPayedDays} * *`, options, checkMonthlyFee.bind(null, false));
+  new Cron(`*/30 * 1-${maxNotPayedDays} * *`, options, () => checkMonthlyFee(false));
   // remove the nodes that haven't paid after maxNotPayedDays
-  new Cron(`*/20 1 ${maxNotPayedDays + 1} * *`, options, checkMonthlyFee.bind(null, true));
+  new Cron(`*/20 1 ${maxNotPayedDays + 1} * *`, options, () => checkMonthlyFee(true));
 
   // cache the monitor responses every 10 seconds
   new Cron(`*/${cacheMonitorInfoEvery} * * * * *`, { protect: true, ...options }, cacheMonitor);

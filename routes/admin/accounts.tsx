@@ -65,7 +65,7 @@ export const handler: Handlers<AccountsProps, State> = {
   },
 
   async POST(req) {
-    await checkAccounts(30, Unit.day);
+    await checkAccounts();
     return redirect(req.url);
   },
 };
