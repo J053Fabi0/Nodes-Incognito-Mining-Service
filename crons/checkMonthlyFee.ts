@@ -2,6 +2,7 @@ import moment from "moment";
 import "humanizer/toQuantity.ts";
 import { ObjectId } from "mongo/mod.ts";
 import { WEBSITE_URL } from "../env.ts";
+import checkAccounts from "./checkAccounts.ts";
 import cryptr from "../utils/cryptrInstance.ts";
 import handleError from "../utils/handleError.ts";
 import Node from "../types/collections/node.type.ts";
@@ -29,6 +30,9 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
   const thisMonth = moment().utc().month();
 
   const clients = await getClients({}, { projection: { account: 1, lastPayment: 1, telegram: 1 } });
+
+  // reload all the accounts' balance
+  if (clients.length > 0) await checkAccounts();
 
   for (const client of clients) {
     const { lastPayment, telegram } = client;
