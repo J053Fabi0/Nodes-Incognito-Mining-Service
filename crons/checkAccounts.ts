@@ -5,6 +5,7 @@ import cryptr from "../utils/cryptrInstance.ts";
 import handleError from "../utils/handleError.ts";
 import IncognitoCli from "../incognito/IncognitoCli.ts";
 import { isLastAccess } from "../types/lastAccess.type.ts";
+import { getNodes } from "../controllers/node.controller.ts";
 import { changeAccount, getAccount } from "../controllers/account.controller.ts";
 
 /**
@@ -44,15 +45,24 @@ export enum Unit {
   minute = 1,
   hour = 60,
   day = 60 * 24,
+  month = 60 * 24 * 30,
 }
 
-/**
- * @param max The maximum number of minutes that the account can be offline
- */
-export default async function checkAccounts(maxUnit: number, unit: Unit = Unit.minute) {
-  const minutes = maxUnit * unit;
+/** Check the accounts that have active nodes */
+export default async function checkAccounts(): Promise<void>;
+/** @param max The maximum number of minutes that the account can be offline */
+export default async function checkAccounts(max: number, unit: Unit): Promise<void>;
+export default async function checkAccounts(max?: number, unit: Unit = Unit.minute): Promise<void> {
+  const accounts = await (async () => {
+    if (max === undefined) {
+      const nodes = await getNodes({ inactive: false }, { projection: { _id: 0, client: 1 } });
+      return nodes.map((node) => node.client.toString());
+    } else {
+      const minutes = max * unit;
+      return getAccounts(minutes);
+    }
+  })();
 
-  const accounts = await getAccounts(minutes);
   const accountsViewed: string[] = [];
 
   for (const accountId of accounts) {
@@ -75,10 +85,7 @@ export default async function checkAccounts(maxUnit: number, unit: Unit = Unit.m
     });
     if (!privateKey) continue;
 
-    await updateAccount(privateKey, account._id, account.balance).catch((e) => {
-      handleError(e);
-      return 0;
-    });
+    await updateAccount(privateKey, account._id, account.balance).catch(handleError);
 
     accountsViewed.push(accountId);
   }
