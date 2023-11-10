@@ -8,6 +8,7 @@ const maxLength = 4096 - "<code></code>".length - 10;
 // deno-lint-ignore no-explicit-any
 export default async function handleError(e: any) {
   console.error("#".repeat(40));
+  console.error(e);
   for (const key of Object.getOwnPropertyNames(e)) console.error(key + ":", e[key]);
 
   // These are "Wont fix" issues
