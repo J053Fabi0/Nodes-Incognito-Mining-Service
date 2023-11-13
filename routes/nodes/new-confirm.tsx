@@ -48,7 +48,7 @@ interface NewNodeConfirmProps {
 async function getDataOrRedirect(
   ctx: HandlerContext<NewNodeConfirmProps, State>
 ): Promise<Response | NewNodeConfirmProps> {
-  return redirect(NEW_URL); // temporary
+  // return redirect(NEW_URL); // temporary
 
   const savedPrvPrice = prvToPay[ctx.state.userId!];
   const isAdmin = ctx.state.isAdmin;
