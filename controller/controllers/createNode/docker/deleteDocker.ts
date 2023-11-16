@@ -24,7 +24,12 @@ export default async function deleteDocker(
   const canDeleteDataDir = deleteDataDir && (await doesDirExists(`${dataDir}_${dockerIndex}`));
 
   thisIf: if (canDeleteDataDir) {
-    const nodesInfo = await duplicatedFilesCleaner.getInfo();
+    duplicatedFilesCleaner.dockerIndexes;
+    const nodesInfo = await duplicatedFilesCleaner.getInfo(
+      duplicatedFilesCleaner.dockerIndexes.includes(dockerIndex)
+        ? duplicatedFilesCleaner.dockerIndexes
+        : [dockerIndex, ...duplicatedFilesCleaner.dockerIndexes]
+    );
 
     const thisNodeInfo = nodesInfo[dockerIndex] as Info | undefined;
     if (!thisNodeInfo) break thisIf;
