@@ -22,10 +22,12 @@ export default async function deleteDocker(
   const [stopping] = await Promise.allSettled([docker(["stop", `inc_mainnet_${dockerIndex}`])]);
 
   const canDeleteDataDir = deleteDataDir && (await doesDirExists(`${dataDir}_${dockerIndex}`));
-  if (canDeleteDataDir) {
+
+  thisIf: if (canDeleteDataDir) {
     const nodesInfo = await duplicatedFilesCleaner.getInfo();
 
-    const thisNodeInfo = nodesInfo[dockerIndex];
+    const thisNodeInfo = nodesInfo[dockerIndex] as Info | undefined;
+    if (!thisNodeInfo) break thisIf;
 
     const hasBeacon = thisNodeInfo.beacon !== undefined;
     const hasShardAndWhich = getShard(thisNodeInfo);
