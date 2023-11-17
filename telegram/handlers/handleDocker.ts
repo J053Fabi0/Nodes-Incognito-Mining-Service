@@ -51,7 +51,7 @@ export default async function handleDocker(
       ? duplicatedFilesCleaner.dockerIndexes
       : await validateItems({ rawItems: rawNodes, validItems: validNodes }).catch((e) => {
           if (isError(e)) return e;
-          else throw e;
+          throw new Error(e);
         });
 
   if (isError(nodes)) return { successful: false, error: nodes.message };

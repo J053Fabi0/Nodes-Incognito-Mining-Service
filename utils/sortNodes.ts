@@ -201,7 +201,7 @@ async function getNodesInfoByDockerIndex(
               // at last remove it from the configs
               else removeNodeFromConfigs(parseInt(dockerIndex));
             } else throw e;
-          } else throw e;
+          } else throw isError(e) ? e : new Error(e);
         }
       }
     })();

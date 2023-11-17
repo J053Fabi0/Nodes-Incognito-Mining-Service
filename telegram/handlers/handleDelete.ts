@@ -27,7 +27,7 @@ export default async function handleDelete(args: string[], options?: CommandOpti
   // Validate and get the nodes indexes
   const nodeIndexOrError = await validateItems({ rawItems: nodeRaw }).catch((e) => {
     if (isError(e)) return e;
-    throw e;
+    throw new Error(e);
   });
   if (isError(nodeIndexOrError)) return { successful: false, error: nodeIndexOrError.message };
   const [fromNodeIndex] = nodeIndexOrError;
@@ -45,7 +45,7 @@ export default async function handleDelete(args: string[], options?: CommandOpti
           rawItems: rawShards.map((shard) => (/^(shard[0-7]|beacon)$/i.test(shard) ? shard : `shard${shard}`)),
         }).catch((e) => {
           if (isError(e)) return e;
-          throw e;
+          throw new Error(e);
         })) as ShardsNames[] | Error);
   if (isError(shards)) return { successful: false, error: shards.message };
 

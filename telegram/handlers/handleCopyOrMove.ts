@@ -19,7 +19,7 @@ export default async function handleCopyOrMove(
   // Validate and get the nodes indexes
   const nodesOrError = await validateItems({ rawItems: nodesRaw }).catch((e) => {
     if (isError(e)) return e;
-    throw e;
+    throw new Error(e);
   });
   if (isError(nodesOrError)) return { successful: false, error: nodesOrError.message };
 
@@ -40,7 +40,7 @@ export default async function handleCopyOrMove(
           validItems: [...shardsNames] as string[],
         }).catch((e) => {
           if (isError(e)) return e;
-          throw e;
+          throw new Error(e);
         })) as ShardsNames[] | Error);
   if (isError(shards)) return { successful: false, error: shards.message };
 

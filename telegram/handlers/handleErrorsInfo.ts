@@ -28,7 +28,7 @@ export default async function handleErrorsInfo(
           validItems: allErrorTypes as unknown as string[],
         }).catch((e) => {
           if (isError(e)) return e;
-          throw e;
+          throw new Error(e);
         })) as AllErrorTypes[] | Error);
   if (isError(errorCodesToShow)) return { successful: false, error: errorCodesToShow.message };
 

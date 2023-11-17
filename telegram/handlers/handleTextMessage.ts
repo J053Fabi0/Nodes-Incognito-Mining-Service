@@ -1,6 +1,7 @@
 import bot from "../initBots.ts";
 import { ADMIN_ID } from "../../env.ts";
 import { InputFile } from "grammy/mod.ts";
+import isError from "../../types/guards/isError.ts";
 import getShouldBeOnline from "../../utils/getShouldBeOnline.ts";
 import { optipng, wkhtmltoimage } from "../../utils/commands.ts";
 import sendMessage, { sendHTMLMessage } from "../sendMessage.ts";
@@ -85,11 +86,11 @@ export default async function handleTextMessage(
     Deno.writeTextFileSync("./full.html", html);
     await wkhtmltoimage(["--width", "0", "--quality", "100", "full.html", "full.png"]).catch((e) => {
       if (e.message.includes("Done")) return e.message;
-      throw e;
+      throw isError(e) ? e : new Error(e);
     });
     await optipng(["full.png"]).catch((e) => {
       if (e.message.includes("decrease")) return e.message;
-      throw e;
+      throw isError(e) ? e : new Error(e);
     });
     const { document } = await bot.api.sendDocument(ADMIN_ID, new InputFile("./full.png"));
     lastPhotoId = document.file_id;

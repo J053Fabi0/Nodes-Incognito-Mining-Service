@@ -32,7 +32,7 @@ export default async function handleInfo(
 
   const nodes = await validateItems({ rawItems: rawNodes }).catch((e) => {
     if (isError(e)) return e;
-    throw e;
+    throw new Error(e);
   });
   if (isError(nodes)) return { successful: false, error: nodes.message };
 
