@@ -17,14 +17,11 @@
     "build": "BUILDING=yes deno run -A dev.ts build",
     "preview": "deno run -A main.ts"
   },
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact"
-  },
+  "compilerOptions": { "jsx": "react-jsx", "jsxImportSource": "preact" },
   "imports": {
     "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.0",
     "@preact/signals": "https://esm.sh/*@preact/signals@1.2.1",
-    "$fresh/": "https://deno.land/x/fresh@1.5.2/",
+    "$fresh/": "https://deno.land/x/fresh@1.5.4/",
     "axiod": "https://deno.land/x/axiod@0.26.2/mod.ts",
     "croner": "https://deno.land/x/croner@7.0.1/dist/croner.js",
     "dayjs/": "https://deno.land/x/deno_dayjs@v0.5.0/",
@@ -59,10 +56,6 @@
     "sort-es": "https://esm.sh/sort-es@1.7.1/",
     "std/": "https://deno.land/std@0.202.0/"
   },
-  "lint": {
-    "rules": {
-      "tags": ["fresh", "recommended"]
-    }
-  },
+  "lint": { "rules": { "tags": ["fresh", "recommended"] } },
   "exclude": ["**/_fresh/*"]
 }
