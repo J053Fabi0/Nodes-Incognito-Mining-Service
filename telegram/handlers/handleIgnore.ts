@@ -61,7 +61,7 @@ export default async function handleIgnore(args: string[], options?: CommandOpti
         ? "all"
         : await validateItems({ rawItems: args.slice(1, -1) }).catch((e) => {
             if (isError(e)) return e;
-            throw e;
+            throw new Error(e);
           });
     if (isError(nodes)) return sendError(nodes.message, options);
 

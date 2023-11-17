@@ -10,7 +10,7 @@ export default async function handleUpdate(
 ): Promise<CommandResponse> {
   const nodes = await validateItems({ rawItems: rawNodes }).catch((e) => {
     if (isError(e)) return e;
-    throw e;
+    throw new Error(e);
   });
   if (isError(nodes)) return { successful: false, error: nodes.message };
 
