@@ -113,6 +113,12 @@ export default async function sortNodes(
     ])
   );
 
+  // reverse the order of the committee nodes. Nodes with less epochs to next event will be slashed first.
+  const reversedCommittee = sortedInfo
+    .filter(([dockerIndex]) => nodesStatusByDockerIndex[dockerIndex]?.role === "COMMITTEE")
+    .reverse();
+  for (let i = 0; i < reversedCommittee.length; i++) sortedInfo[i] = reversedCommittee[i];
+
   // save data in monitorInfoByDockerIndex
   for (const [dockerIndex, nodeInfo] of sortedInfo) {
     const nodeStatus = nodesStatusByDockerIndex[dockerIndex];
