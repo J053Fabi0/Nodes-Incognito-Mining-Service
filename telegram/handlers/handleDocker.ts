@@ -115,7 +115,7 @@ export default async function handleDocker(
       for (const node of nodesInfo) {
         if (!node) continue;
 
-        if (node._id.toString() !== "64c96b3fb4dd2689f376fa56") {
+        if (node.client.toString() !== "64c96b3fb4dd2689f376fa56") {
           const error = `Node <code>${node.dockerIndex}</code> is not from Sid.`;
 
           if (options?.telegramMessages)
