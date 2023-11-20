@@ -115,6 +115,16 @@ export default async function handleDocker(
       for (const node of nodesInfo) {
         if (!node) continue;
 
+        if (node._id.toString() !== "64c96b3fb4dd2689f376fa56") {
+          const error = `Node <code>${node.dockerIndex}</code> is not from Sid.`;
+
+          if (options?.telegramMessages)
+            await sendHTMLMessage(error, undefined, { disable_notification: options?.silent });
+          responses.push(error);
+
+          continue;
+        }
+
         let response = "";
         switch (action) {
           case "create": {
