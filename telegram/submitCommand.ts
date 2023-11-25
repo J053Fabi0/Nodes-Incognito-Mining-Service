@@ -18,6 +18,7 @@ import handleCopyOrMove from "./handlers/handleCopyOrMove.ts";
 import handleErrorsInfo from "./handlers/handleErrorsInfo.ts";
 import handleTextMessage from "./handlers/handleTextMessage.ts";
 import sendMessage, { sendHTMLMessage } from "./sendMessage.ts";
+import handleNodeCommand from "./handlers/handleNodeCommand.ts";
 import { getTextInstructionsToMoveOrDelete } from "../utils/getInstructionsToMoveOrDelete.ts";
 import { Command, Commands, CommandOptions, CommandResponse, getCommandsFromRedis } from "./submitCommandUtils.ts";
 
@@ -148,6 +149,9 @@ async function handleCommands(commandObj: Command): Promise<CommandResponse> {
 
       case "diffuse":
         return await handleDiffuse(args, options);
+
+      case "node":
+        return await handleNodeCommand(args, options);
 
       case "full":
       case "text":

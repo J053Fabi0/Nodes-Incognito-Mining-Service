@@ -16,6 +16,7 @@ const helpMessage =
     ["instructions", "Show the instructions to move or delete files"],
     ["update [...nodeIndexes]", "Update the docker containers"],
     ["diffuse", "Run the diffuser function"],
+    ["node [...nodeIndexes]", "Show the info of the nodes"],
     ["r", "Repeat the last command"],
   ]
     .map(([command, description]) => `- ${description}.\n<code>${command}</code>`)

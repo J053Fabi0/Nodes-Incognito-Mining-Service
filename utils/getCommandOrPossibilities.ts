@@ -1,4 +1,5 @@
 export type AllowedCommands =
+  | "node"
   | "repeat"
   | "full"
   | "fulltext"
@@ -21,6 +22,7 @@ interface CommandWithAliases {
   aliases: string[];
 }
 const commandsWithAliases: CommandWithAliases[] = [
+  { command: "node", aliases: ["nodes"] },
   { command: "repeat", aliases: ["r", "repetir"] },
   { command: "full", aliases: ["f", "completo", "todo", "all"] },
   { command: "fulltext", aliases: ["ft"] },
