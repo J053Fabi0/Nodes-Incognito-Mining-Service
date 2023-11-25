@@ -16,5 +16,6 @@ export default interface Node extends CommonCollection {
   rcpPort: number;
   /** The latest epoch at the time of creation */
   epoch: number;
+  /** The version of the docker */
   dockerTag: string;
 }
