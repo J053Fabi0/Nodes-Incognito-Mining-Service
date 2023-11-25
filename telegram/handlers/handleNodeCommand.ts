@@ -43,7 +43,7 @@ export default async function handleNodeCommand(
       message += `Client: <code>${escapeHtml(client.name)}</code> - <code>${node.client}</code>.\n`;
       message += `Docker version: <code>${node.dockerTag}</code>.\n`;
       message += `RPC Port: <code>${node.rcpPort}</code>.\n`;
-      message += `Status: <code>${node.inactive ? "Active" : "Inactive"}</code>.\n`;
+      message += `Status: <code>${node.inactive ? "Inactive" : "Active"}</code>.\n`;
       message += `Validator: <code>${node.validator}</code>.\n`;
       message += `Public validator: <code>${node.validatorPublic}</code>.`;
     }
