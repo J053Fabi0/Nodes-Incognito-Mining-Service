@@ -1,4 +1,4 @@
-import { join } from "../deps.ts";
+import { join } from "std/path/mod.ts";
 import spawnPromise from "./spawnPromise.ts";
 
 type BinaryWrapper = (
