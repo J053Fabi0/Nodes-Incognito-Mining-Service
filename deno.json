@@ -1,11 +1,11 @@
 {
   "tasks": {
     "stop": "pm2 stop nodeschecker",
-    "start": "deno task build && DENO_DEPLOYMENT_ID=\"$(git rev-parse HEAD)\" pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env --allow-run --allow-write' --name nodeschecker dev.ts && pm2 logs nodeschecker",
+    "start": "deno task build && DENO_DEPLOYMENT_ID=\"$(git rev-parse HEAD)\" pm2 start --interpreter='deno' --interpreter-args='run --allow-net --allow-read --allow-env --allow-run --allow-write' --name nodeschecker main.ts && pm2 logs nodeschecker",
     "logs": "pm2 logs nodeschecker",
     "reload": "deno task build && pm2 reload nodeschecker && pm2 logs nodeschecker",
     "update": "deno task build && deno run -A -r https://fresh.deno.dev/update .",
-    "run": "deno task build && deno run --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts",
+    "run": "deno task build && deno run --allow-net --allow-read --allow-env --allow-run --allow-write main.ts",
 
     "dev": "deno task build && deno run --watch=static/,routes/  --allow-net --allow-read --allow-env --allow-run --allow-write dev.ts -i",
     "devController": "deno run --watch=controller/  --allow-net --allow-read --allow-env --allow-run --allow-write controller/main.ts",
@@ -15,7 +15,7 @@
     "diffuse": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write utils/diffuse.ts",
     "test": "deno test -A --trace-ops tests/",
     "testWatch": "deno test -A --watch --trace-ops tests/",
-    "build": "BUILDING=yes deno run -A dev.ts build",
+    "build": "BUILDING=yes deno run -A main.ts build",
     "preview": "deno run -A main.ts"
   },
   "compilerOptions": { "jsx": "react-jsx", "jsxImportSource": "preact" },
