@@ -2,6 +2,7 @@
 
 import "./crons/crons.ts";
 import dev from "$fresh/dev.ts";
+import config from "./fresh.config.ts";
 
 // Code to supress some automatic errors
 const origConsoleError = console.error;
@@ -11,4 +12,4 @@ console.error = (msg) => {
   origConsoleError(msg);
 };
 
-await dev(import.meta.url, "./main.ts");
+await dev(import.meta.url, "./main.ts", config);
