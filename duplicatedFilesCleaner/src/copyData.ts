@@ -1,8 +1,9 @@
 import { lodash as _ } from "lodash";
+import { join } from "std/path/mod.ts";
 import { cp } from "../utils/commands.ts";
 import getFiles from "../utils/getFiles.ts";
+import { MultiProgressBar } from "../deps.ts";
 import maxPromises from "../utils/maxPromises.ts";
-import { join, MultiProgressBar } from "../deps.ts";
 import normalizeShards from "../utils/normalizeShards.ts";
 import DuplicatedFilesCleaner from "./DuplicatedFilesCleaner.ts";
 import ShardsNumbers, { ShardsNames, ShardsStr } from "../types/shards.type.ts";

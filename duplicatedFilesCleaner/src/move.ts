@@ -1,4 +1,4 @@
-import { join } from "../deps.ts";
+import { join } from "std/path/mod.ts";
 import normalizeShards from "../utils/normalizeShards.ts";
 import DuplicatedFilesCleaner from "./DuplicatedFilesCleaner.ts";
 import ShardsNumbers, { ShardsNames, ShardsStr } from "../types/shards.type.ts";

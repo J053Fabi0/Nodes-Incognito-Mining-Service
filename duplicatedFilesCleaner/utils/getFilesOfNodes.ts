@@ -1,4 +1,4 @@
-import { join } from "../deps.ts";
+import { join } from "std/path/mod.ts";
 import getFiles, { LDBFile } from "../utils/getFiles.ts";
 import { shardsNames, ShardsNames } from "../types/shards.type.ts";
 import DuplicatedFilesCleaner from "../src/DuplicatedFilesCleaner.ts";
