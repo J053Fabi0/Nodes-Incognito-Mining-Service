@@ -14,7 +14,7 @@
     "diffuse": "deno run --allow-net --allow-read --allow-env --allow-run --allow-write utils/diffuse.ts",
     "test": "deno test -A --trace-ops tests/",
     "testWatch": "deno test -A --watch --trace-ops tests/",
-    "build": "BUILDING=yes deno run -A main.ts build",
+    "build": "BUILDING=yes deno run -A dev.ts build",
     "preview": "deno run -A main.ts"
   },
   "compilerOptions": { "jsx": "react-jsx", "jsxImportSource": "preact" },
