@@ -2,7 +2,6 @@ import { lodash as _ } from "lodash";
 import { join } from "std/path/mod.ts";
 import { cp } from "../utils/commands.ts";
 import getFiles from "../utils/getFiles.ts";
-import { MultiProgressBar } from "../deps.ts";
 import maxPromises from "../utils/maxPromises.ts";
 import normalizeShards from "../utils/normalizeShards.ts";
 import DuplicatedFilesCleaner from "./DuplicatedFilesCleaner.ts";
@@ -10,22 +9,15 @@ import ShardsNumbers, { ShardsNames, ShardsStr } from "../types/shards.type.ts";
 
 const filesToCopyAtOnce = 50;
 
-const bars = new MultiProgressBar({
-  complete: "#",
-  incomplete: ".",
-  display: "[:bar] :text :percent :completed/:total :time",
-});
-
 interface CopyDataOptions {
   to: string | number;
   from: string | number;
-  logProgressBar?: boolean;
   shards?: (ShardsStr | ShardsNumbers | ShardsNames)[];
 }
 
 export default async function copyData(
   this: DuplicatedFilesCleaner,
-  { to, from, shards = ["beacon"], logProgressBar = false }: CopyDataOptions
+  { to, from, shards = ["beacon"] }: CopyDataOptions
 ) {
   const normalizedShards = normalizeShards(shards);
   if (normalizedShards.length === 0) normalizedShards.push("beacon");
@@ -56,27 +48,12 @@ export default async function copyData(
       filesToHardLink.map((file) => Deno.link(join(fromShardPath, file.name), join(toShardPath, file.name)))
     );
 
-    let i = 0;
-    if (logProgressBar)
-      (async () => {
-        while (i !== Infinity) {
-          bars.render([{ completed: i, total: filesToCopy.length, text: "\n" }]);
-          await new Promise((resolve) => setTimeout(resolve, 150));
-        }
-      })();
-
     console.log("Copying the rest of the files with copy, including directories");
     const filesWithFullPath = filesToCopy.map((f) => join(fromShardPath, f.name));
     const promises = _.chunk(filesWithFullPath, filesToCopyAtOnce).map(
       (files) => () => cp(["-r", "--preserve=all", ...files, toShardPath])
     );
     await maxPromises(promises, 20);
-
-    i = Infinity;
-    if (logProgressBar) {
-      bars.render([{ completed: filesToCopy.length, total: filesToCopy.length, text: "\n" }]);
-      bars.end();
-    }
   }
 }
 
