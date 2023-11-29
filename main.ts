@@ -6,9 +6,18 @@
 
 import "./env.ts";
 import "./telegram/initBots.ts";
+import prefetchPlugin from "prefetch";
 
-import manifest from "./fresh.gen.ts";
-import config from "./fresh.config.ts";
 import { start } from "$fresh/server.ts";
+import manifest from "./fresh.gen.ts";
 
-await start(manifest, config);
+import twindPlugin from "$fresh/plugins/twindv1.ts";
+import twindConfig from "./twind.config.ts";
+
+await start(manifest, {
+  plugins: [
+    //
+    twindPlugin(twindConfig),
+    prefetchPlugin({ strategy: "opt-in" }),
+  ],
+});

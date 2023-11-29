@@ -1,7 +1,7 @@
 import ignoreError from "../utils/ignoreError.ts";
+import { assertStrictEquals } from "std/assert/mod.ts";
 import { allIgnoreTypes, ignore } from "../utils/variables.ts";
 import duplicatedFilesCleaner from "../duplicatedFilesCleaner.ts";
-import { assertStrictEquals, assertEquals } from "std/assert/mod.ts";
 import isGlobalErrorType from "../types/guards/isGlobalErrorType.ts";
 
 function emptyIgnoreErrors() {
@@ -31,6 +31,8 @@ Deno.test("ignoreError", async function (t) {
     emptyIgnoreErrors();
   });
 });
+
+import { assertEquals } from "https://deno.land/std@0.202.0/assert/mod.ts";
 
 Deno.test("url test", () => {
   const url = new URL("./foo.js", "https://deno.land/");

@@ -158,7 +158,7 @@ export default function Transactions({ data }: PageProps<TransactionsProps>) {
   );
 }
 
-function getTypeIcon(type: AccountTransactionType, size = 20) {
+function getTypeIcon(type: AccountTransactionType, size = 20): JSX.Element {
   switch (type) {
     case AccountTransactionType.DEPOSIT:
       return <BiImport size={size} />;

@@ -8,20 +8,18 @@ import LastAccess from "../types/lastAccess.type.ts";
 import { Middleware } from "$fresh/src/server/types.ts";
 import isLoggedInPage from "../utils/isLoggedInPage.tsx";
 import { lastAccessedPages } from "../utils/variables.ts";
-import { MiddlewareHandlerContext } from "$fresh/server.ts";
 import isFreshOrStaticPage from "../utils/isFreshOrStatic.ts";
 import { getClient } from "../controllers/client.controller.ts";
 
 export const { handler }: Middleware<State> = {
   handler: [
     // implement fresh-session
-    (req, ctx) =>
-      redisSession(redis, {
-        secure: true,
-        httpOnly: true,
-        sameSite: "Strict",
-        maxAge: Number.MAX_SAFE_INTEGER,
-      })(req, ctx as unknown as MiddlewareHandlerContext<Record<string, unknown>>),
+    redisSession(redis, {
+      secure: true,
+      httpOnly: true,
+      sameSite: "Strict",
+      maxAge: Number.MAX_SAFE_INTEGER,
+    }),
 
     // set last access
     (req, ctx) => {
