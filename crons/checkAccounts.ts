@@ -63,6 +63,8 @@ export default async function checkAccounts(max?: number, unit: Unit = Unit.minu
     }
   })();
 
+  if (max === undefined) console.log("accounts", accounts);
+
   const accountsViewed: string[] = [];
 
   for (const accountId of accounts) {
@@ -73,6 +75,7 @@ export default async function checkAccounts(max?: number, unit: Unit = Unit.minu
       { _id: new ObjectId(accountId) },
       { projection: { privateKey: 1, balance: 1, _id: 1 } }
     );
+    console.log("account", account);
     if (!account) {
       accountsViewed.push(accountId);
       continue;
@@ -83,6 +86,7 @@ export default async function checkAccounts(max?: number, unit: Unit = Unit.minu
       handleError(e);
       return null;
     });
+    console.log("privateKey", Boolean(privateKey), `${privateKey}`.length);
     if (!privateKey) continue;
 
     await updateAccount(privateKey, account._id, account.balance).catch(handleError);
@@ -101,6 +105,8 @@ export async function updateAccount(privateKey: string, accountId: string | Obje
   // get the balance
   const incognito = new IncognitoCli(privateKey);
   const balance = await incognito.balanceAccount({ decimalFormat: false });
+  console.log("balance", balance);
+  console.log("currentBalance", currentBalance);
 
   // update the balance if it's different
   if (balance === undefined || balance !== currentBalance)
