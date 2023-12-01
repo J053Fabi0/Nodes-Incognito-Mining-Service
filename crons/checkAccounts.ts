@@ -6,6 +6,7 @@ import handleError from "../utils/handleError.ts";
 import IncognitoCli from "../incognito/IncognitoCli.ts";
 import { isLastAccess } from "../types/lastAccess.type.ts";
 import { getNodes } from "../controllers/node.controller.ts";
+import { getClients } from "../controllers/client.controller.ts";
 import { changeAccount, getAccount } from "../controllers/account.controller.ts";
 
 /**
@@ -53,10 +54,19 @@ export default async function checkAccounts(): Promise<void>;
 /** @param max The maximum number of minutes that the account can be offline */
 export default async function checkAccounts(max: number, unit: Unit): Promise<void>;
 export default async function checkAccounts(max?: number, unit: Unit = Unit.minute): Promise<void> {
-  const accounts = await (async () => {
+  const accounts: string[] = await (async () => {
     if (max === undefined) {
       const nodes = await getNodes({ inactive: false }, { projection: { _id: 0, client: 1 } });
-      return nodes.map((node) => node.client.toString());
+
+      const clientsIds: Set<ObjectId> = new Set();
+      for (const clientId of nodes.map((node) => node.client)) clientsIds.add(clientId);
+
+      const accountsClient = await getClients(
+        { _id: { $in: [...clientsIds] } },
+        { projection: { account: 1, _id: 0 } }
+      );
+
+      return accountsClient.map((client) => client.account.toString());
     } else {
       const minutes = max * unit;
       return getAccounts(minutes);
@@ -73,7 +83,7 @@ export default async function checkAccounts(max?: number, unit: Unit = Unit.minu
 
     const account = await getAccount(
       { _id: new ObjectId(accountId) },
-      { projection: { privateKey: 1, balance: 1, _id: 1 } }
+      { projection: { privateKey: 1, balance: 1 } }
     );
     console.log("account", account);
     if (!account) {
