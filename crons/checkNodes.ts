@@ -86,7 +86,7 @@ export default async function checkNodes() {
       )
         break thisIf;
 
-      console.log(`${shouldBeOnline ? "Start" : "Stop"}ing docker ${dockerIndex} ` + `for node ${dockerIndex}.`);
+      console.log(`${shouldBeOnline ? "Start" : "Stop"}ing docker ${dockerIndex}`);
       // check in the pending commands if there is a command that is copying from or to the node
       const isCopying =
         commands.pending.findIndex((command) => {
