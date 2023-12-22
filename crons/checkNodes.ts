@@ -76,8 +76,14 @@ export default async function checkNodes() {
       dockerInfo &&
       ((dockerInfo.running && !shouldBeOnline) || (!dockerInfo.running && shouldBeOnline))
     ) {
-      // if shouldBeOnline, check if it has the shard data
-      if (shouldBeOnline && nodeInfo.shard && nodeInfo.shard !== "beacon" && !nodeInfo[nodeInfo.shard])
+      // if shouldBeOnline, check if it has the shard and beacon data
+      if (
+        shouldBeOnline &&
+        nodeInfo.shard &&
+        nodeInfo.shard !== "beacon" &&
+        !nodeInfo[nodeInfo.shard] &&
+        !nodeInfo.beacon
+      )
         break thisIf;
 
       console.log(`${shouldBeOnline ? "Start" : "Stop"}ing docker ${dockerIndex} ` + `for node ${dockerIndex}.`);
