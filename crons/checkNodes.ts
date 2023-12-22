@@ -18,7 +18,6 @@ import handleNodeError from "../utils/handleNodeError.ts";
 import sortNodes, { NodeInfo } from "../utils/sortNodes.ts";
 import { sendHTMLMessage } from "../telegram/sendMessage.ts";
 import getShouldBeOnline from "../utils/getShouldBeOnline.ts";
-import getMaxNodesOnline from "../utils/getMaxNodesOnline.ts";
 import checkGlobalErrors from "../utils/checkGlobalErrors.ts";
 import fixLowDiskSpace from "../incognito/fixLowDiskSpace.ts";
 import getMinutesSinceError from "../utils/getMinutesSinceError.ts";
@@ -48,7 +47,6 @@ export default async function checkNodes() {
   for (const errorKey of globalErrorTypes)
     await handleErrors(fixes, lastGlobalErrorTimes[errorKey], prevLastGlobalErrorTime[errorKey], errorKey);
 
-  const maxNodesOnline = await getMaxNodesOnline(nodesInfoByDockerIndex);
   calculateOnlineQueue(nodesStatus);
 
   // Check for errors in each node
@@ -66,7 +64,7 @@ export default async function checkNodes() {
       client: nodeStatus.client.toString(),
     };
 
-    const shouldBeOnline = getShouldBeOnline(nodeStatus, maxNodesOnline, nodesInfoByDockerIndex);
+    const shouldBeOnline = getShouldBeOnline(nodeStatus);
     const nodeInfo = dockerStatuses[dockerIndex];
     const dockerInfo = nodeInfo?.docker;
     const isAllOnline = Boolean(dockerInfo?.running && nodeStatus.status === "ONLINE");
