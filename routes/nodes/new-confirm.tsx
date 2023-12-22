@@ -22,6 +22,7 @@ import NewConfirmNodeSelector from "../../islands/NewConfirmNodeSelector.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import { countNodes, getNode, getNodes } from "../../controllers/node.controller.ts";
 import { incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
+import handleError from "../../utils/handleError.ts";
 
 export const styles = {
   th: "py-2 px-3 text-right",
@@ -147,18 +148,20 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
         clientId: ctx.state.user!._id,
         validator: validatedData.validator,
         cost: dataOrRedirect.prvToPay * 1e9 - incognitoFeeInt,
-      }).then(async (data) => {
-        if (data.success) {
-          await sendHTMLMessage(
-            `The user <code>${ctx.state.user!.name}</code> (<code>${ctx.state.user!.telegram}</code>) ` +
-              `has registered a new node.\n\nIndex: <code>${data.dockerIndex}</code> - <code>#${data.number}</code>`
-          );
+      })
+        .then(async (data) => {
+          if (data.success) {
+            await sendHTMLMessage(
+              `The user <code>${ctx.state.user!.name}</code> (<code>${ctx.state.user!.telegram}</code>) ` +
+                `has registered a new node.\n\nIndex: <code>${data.dockerIndex}</code> - <code>#${data.number}</code>`
+            );
 
-          const activeNodes = await countNodes({ client: new ObjectId(ctx.state.userId!), inactive: false });
-          if (activeNodes === 0)
-            await changeClient({ _id: new ObjectId(ctx.state.userId!) }, { $set: { lastPayment: new Date() } });
-        }
-      });
+            const activeNodes = await countNodes({ client: new ObjectId(ctx.state.userId!), inactive: false });
+            if (activeNodes === 0)
+              await changeClient({ _id: new ObjectId(ctx.state.userId!) }, { $set: { lastPayment: new Date() } });
+          }
+        })
+        .catch((e) => handleError(e));
 
     // delete default values if the values are valid
     ctx.state.session.flash("defaultValidator");
