@@ -11,6 +11,11 @@ export default function calculateOnlineQueue(nodesStatus: PartialNodeStatus[]) {
     const nodesByRole = nodesStatus.filter((ns) => ns.role === role);
     const queue = onlineQueue[role];
 
+    if (queue.find((ns) => ns.dockerIndex === 345)) {
+      const node = queue.find((ns) => ns.dockerIndex === 345)!;
+      console.log("queue", role, queue, moment().diff(node.date, "minutes"), ">=", maxOnlineMinutesNotStaked);
+    }
+
     // add the nodes that are in the role to the queue
     for (const node of nodesByRole) {
       const index = queue.findIndex((ns) => ns.dockerIndex === node.dockerIndex);
