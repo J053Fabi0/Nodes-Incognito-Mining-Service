@@ -19,14 +19,11 @@
     "run:molt": "deno run --allow-env --allow-read --allow-write=. --allow-run=git,deno --allow-net=deno.land,esm.sh,cdn.jsdelivr.net https://deno.land/x/molt/cli.ts",
     "update_deps": "deno task -q run:molt check ./**/*.ts"
   },
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact"
-  },
+  "compilerOptions": { "jsx": "react-jsx", "jsxImportSource": "preact" },
   "imports": {
     "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.0",
-    "@preact/signals": "https://esm.sh/*@preact/signals@1.2.2",
-    "$fresh/": "https://deno.land/x/fresh@1.5.4/",
+    "@preact/signals": "https://esm.sh/*@preact/signals@1.2.1",
+    "$fresh/": "https://deno.land/x/fresh@1.6.1/",
     "axiod": "https://deno.land/x/axiod@0.26.2/mod.ts",
     "bcrypt": "https://deno.land/x/bcrypt@v0.4.1/src/main.ts",
     "cheetah": "https://deno.land/x/cheetah@v1.4.0/mod.ts",
@@ -45,8 +42,8 @@
     "moment": "npm:moment@2.29.4",
     "mongo/": "https://deno.land/x/mongo@v0.31.2/",
     "preact-render-to-string": "https://esm.sh/*preact-render-to-string@6.2.2",
-    "preact": "https://esm.sh/preact@10.18.1",
-    "preact/": "https://esm.sh/preact@10.18.1/",
+    "preact": "https://esm.sh/preact@10.19.2",
+    "preact/": "https://esm.sh/preact@10.19.2/",
     "prefetch": "https://deno.land/x/prefetch@0.1.0/mod.ts",
     "qrcode": "https://raw.githubusercontent.com/denorg/qrcode/87101e061a7b1f9f9d5ddb304ca8c9e99262e9e1/mod.ts",
     "react-icons/ai": "https://cdn.jsdelivr.net/gh/urielch/react-icons-ai@1.0.9/mod.ts",
@@ -63,10 +60,6 @@
     "sort-es": "https://esm.sh/sort-es@1.7.4/",
     "std/": "https://deno.land/std@0.208.0/"
   },
-  "lint": {
-    "rules": {
-      "tags": ["fresh", "recommended"]
-    }
-  },
+  "lint": { "rules": { "tags": ["fresh", "recommended"] } },
   "exclude": ["**/_fresh/*"]
 }
