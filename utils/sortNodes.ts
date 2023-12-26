@@ -3,9 +3,9 @@ import { byNumber, byValues } from "sort-es";
 import { cronsStarted } from "../crons/crons.ts";
 import isError from "../types/guards/isError.ts";
 import getShouldBeOnline from "./getShouldBeOnline.ts";
-import { getNode } from "../controllers/node.controller.ts";
 import { Info } from "../duplicatedFilesCleaner/src/getInfo.ts";
 import getNodesStatus, { NodeStatus } from "./getNodesStatus.ts";
+import { changeNode, getNode } from "../controllers/node.controller.ts";
 import duplicatedFilesCleaner from "../controller/duplicatedFilesCleaner.ts";
 import { MonitorInfo, lastRoles, monitorInfoByDockerIndex } from "./variables.ts";
 import { normalizeShard } from "../duplicatedFilesCleaner/utils/normalizeShards.ts";
@@ -193,7 +193,10 @@ async function getNodesInfoByDockerIndex(
             const dockerIndex = e.message.match(/inc_mainnet_(\d+)/)?.[1];
             if (dockerIndex && !isNaN(+dockerIndex)) {
               console.error(new Error(`Docker ${dockerIndex} not found.`));
-              const node = await getNode({ dockerIndex: +dockerIndex });
+              const node = await getNode(
+                { dockerIndex: +dockerIndex },
+                { projection: { inactive: 1, rcpPort: 1, validatorPublic: 1, dockerIndex: 1 } }
+              );
               if (!node) {
                 console.error(new Error(`Node ${dockerIndex} not found in the database.`));
                 nodesToFetch.splice(nodesToFetch.indexOf(+dockerIndex), 1);
@@ -205,7 +208,10 @@ async function getNodesInfoByDockerIndex(
                 await createDocker(node.rcpPort, node.validatorPublic, node.dockerIndex);
               }
               // at last remove it from the configs
-              else removeNodeFromConfigs(parseInt(dockerIndex));
+              else {
+                removeNodeFromConfigs(parseInt(dockerIndex));
+                if (!node.inactive) await changeNode({ _id: node._id }, { $set: { inactive: true } });
+              }
             } else throw e;
           } else throw isError(e) ? e : new Error(e);
         }
