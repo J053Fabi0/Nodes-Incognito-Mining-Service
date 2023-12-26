@@ -2,91 +2,92 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $0 from "./routes/_404.tsx";
-import * as $1 from "./routes/_500.tsx";
-import * as $2 from "./routes/_app.tsx";
-import * as $3 from "./routes/_middleware.tsx";
-import * as $4 from "./routes/admin/accounts.tsx";
-import * as $5 from "./routes/admin/edit.tsx";
-import * as $6 from "./routes/admin/index.tsx";
-import * as $7 from "./routes/admin/nodes.tsx";
-import * as $8 from "./routes/api/balance.tsx";
-import * as $9 from "./routes/api/variables.ts";
-import * as $10 from "./routes/bot-is-blocked.tsx";
-import * as $11 from "./routes/charts/monthly-earnings.tsx";
-import * as $12 from "./routes/credentials.tsx";
-import * as $13 from "./routes/diffuse.tsx";
-import * as $14 from "./routes/index.tsx";
-import * as $15 from "./routes/me/index.tsx";
-import * as $16 from "./routes/me/transactions.tsx";
-import * as $17 from "./routes/nodes/delete/[indexOrNumber].tsx";
-import * as $18 from "./routes/nodes/delete/index.tsx";
-import * as $19 from "./routes/nodes/earnings/[number].tsx";
-import * as $20 from "./routes/nodes/earnings/index.tsx";
-import * as $21 from "./routes/nodes/earnings/monthly.tsx";
-import * as $22 from "./routes/nodes/index.tsx";
-import * as $23 from "./routes/nodes/monitor.tsx";
-import * as $24 from "./routes/nodes/new-confirm.tsx";
-import * as $25 from "./routes/nodes/new.tsx";
-import * as $26 from "./routes/nodes/notifications.tsx";
-import * as $27 from "./routes/signin.tsx";
-import * as $28 from "./routes/signout.tsx";
-import * as $$0 from "./islands/Balance.tsx";
-import * as $$1 from "./islands/EarningsTable.tsx";
-import * as $$2 from "./islands/EarningsTableAndOptions.tsx";
-import * as $$3 from "./islands/EditableObject/GetDateInput.tsx";
-import * as $$4 from "./islands/LocaleDate.tsx";
-import * as $$5 from "./islands/NewConfirmNodeSelector.tsx";
-import * as $$6 from "./islands/Nodes/TimeToPay.tsx";
-import * as $$7 from "./islands/RelativeDate.tsx";
-import * as $$8 from "./islands/TimeLeft.tsx";
-import * as $$9 from "./islands/Withdraw.tsx";
+import * as $_404 from "./routes/_404.tsx";
+import * as $_500 from "./routes/_500.tsx";
+import * as $_app from "./routes/_app.tsx";
+import * as $_middleware from "./routes/_middleware.tsx";
+import * as $admin_accounts from "./routes/admin/accounts.tsx";
+import * as $admin_edit from "./routes/admin/edit.tsx";
+import * as $admin_index from "./routes/admin/index.tsx";
+import * as $admin_nodes from "./routes/admin/nodes.tsx";
+import * as $api_balance from "./routes/api/balance.tsx";
+import * as $api_variables from "./routes/api/variables.ts";
+import * as $bot_is_blocked from "./routes/bot-is-blocked.tsx";
+import * as $charts_monthly_earnings from "./routes/charts/monthly-earnings.tsx";
+import * as $credentials from "./routes/credentials.tsx";
+import * as $diffuse from "./routes/diffuse.tsx";
+import * as $index from "./routes/index.tsx";
+import * as $me_index from "./routes/me/index.tsx";
+import * as $me_transactions from "./routes/me/transactions.tsx";
+import * as $nodes_delete_indexOrNumber_ from "./routes/nodes/delete/[indexOrNumber].tsx";
+import * as $nodes_delete_index from "./routes/nodes/delete/index.tsx";
+import * as $nodes_earnings_number_ from "./routes/nodes/earnings/[number].tsx";
+import * as $nodes_earnings_index from "./routes/nodes/earnings/index.tsx";
+import * as $nodes_earnings_monthly from "./routes/nodes/earnings/monthly.tsx";
+import * as $nodes_index from "./routes/nodes/index.tsx";
+import * as $nodes_monitor from "./routes/nodes/monitor.tsx";
+import * as $nodes_new_confirm from "./routes/nodes/new-confirm.tsx";
+import * as $nodes_new from "./routes/nodes/new.tsx";
+import * as $nodes_notifications from "./routes/nodes/notifications.tsx";
+import * as $signin from "./routes/signin.tsx";
+import * as $signout from "./routes/signout.tsx";
+import * as $Balance from "./islands/Balance.tsx";
+import * as $EarningsTable from "./islands/EarningsTable.tsx";
+import * as $EarningsTableAndOptions from "./islands/EarningsTableAndOptions.tsx";
+import * as $EditableObject_GetDateInput from "./islands/EditableObject/GetDateInput.tsx";
+import * as $LocaleDate from "./islands/LocaleDate.tsx";
+import * as $NewConfirmNodeSelector from "./islands/NewConfirmNodeSelector.tsx";
+import * as $Nodes_TimeToPay from "./islands/Nodes/TimeToPay.tsx";
+import * as $RelativeDate from "./islands/RelativeDate.tsx";
+import * as $TimeLeft from "./islands/TimeLeft.tsx";
+import * as $Withdraw from "./islands/Withdraw.tsx";
+import { type Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
-    "./routes/_404.tsx": $0,
-    "./routes/_500.tsx": $1,
-    "./routes/_app.tsx": $2,
-    "./routes/_middleware.tsx": $3,
-    "./routes/admin/accounts.tsx": $4,
-    "./routes/admin/edit.tsx": $5,
-    "./routes/admin/index.tsx": $6,
-    "./routes/admin/nodes.tsx": $7,
-    "./routes/api/balance.tsx": $8,
-    "./routes/api/variables.ts": $9,
-    "./routes/bot-is-blocked.tsx": $10,
-    "./routes/charts/monthly-earnings.tsx": $11,
-    "./routes/credentials.tsx": $12,
-    "./routes/diffuse.tsx": $13,
-    "./routes/index.tsx": $14,
-    "./routes/me/index.tsx": $15,
-    "./routes/me/transactions.tsx": $16,
-    "./routes/nodes/delete/[indexOrNumber].tsx": $17,
-    "./routes/nodes/delete/index.tsx": $18,
-    "./routes/nodes/earnings/[number].tsx": $19,
-    "./routes/nodes/earnings/index.tsx": $20,
-    "./routes/nodes/earnings/monthly.tsx": $21,
-    "./routes/nodes/index.tsx": $22,
-    "./routes/nodes/monitor.tsx": $23,
-    "./routes/nodes/new-confirm.tsx": $24,
-    "./routes/nodes/new.tsx": $25,
-    "./routes/nodes/notifications.tsx": $26,
-    "./routes/signin.tsx": $27,
-    "./routes/signout.tsx": $28,
+    "./routes/_404.tsx": $_404,
+    "./routes/_500.tsx": $_500,
+    "./routes/_app.tsx": $_app,
+    "./routes/_middleware.tsx": $_middleware,
+    "./routes/admin/accounts.tsx": $admin_accounts,
+    "./routes/admin/edit.tsx": $admin_edit,
+    "./routes/admin/index.tsx": $admin_index,
+    "./routes/admin/nodes.tsx": $admin_nodes,
+    "./routes/api/balance.tsx": $api_balance,
+    "./routes/api/variables.ts": $api_variables,
+    "./routes/bot-is-blocked.tsx": $bot_is_blocked,
+    "./routes/charts/monthly-earnings.tsx": $charts_monthly_earnings,
+    "./routes/credentials.tsx": $credentials,
+    "./routes/diffuse.tsx": $diffuse,
+    "./routes/index.tsx": $index,
+    "./routes/me/index.tsx": $me_index,
+    "./routes/me/transactions.tsx": $me_transactions,
+    "./routes/nodes/delete/[indexOrNumber].tsx": $nodes_delete_indexOrNumber_,
+    "./routes/nodes/delete/index.tsx": $nodes_delete_index,
+    "./routes/nodes/earnings/[number].tsx": $nodes_earnings_number_,
+    "./routes/nodes/earnings/index.tsx": $nodes_earnings_index,
+    "./routes/nodes/earnings/monthly.tsx": $nodes_earnings_monthly,
+    "./routes/nodes/index.tsx": $nodes_index,
+    "./routes/nodes/monitor.tsx": $nodes_monitor,
+    "./routes/nodes/new-confirm.tsx": $nodes_new_confirm,
+    "./routes/nodes/new.tsx": $nodes_new,
+    "./routes/nodes/notifications.tsx": $nodes_notifications,
+    "./routes/signin.tsx": $signin,
+    "./routes/signout.tsx": $signout,
   },
   islands: {
-    "./islands/Balance.tsx": $$0,
-    "./islands/EarningsTable.tsx": $$1,
-    "./islands/EarningsTableAndOptions.tsx": $$2,
-    "./islands/EditableObject/GetDateInput.tsx": $$3,
-    "./islands/LocaleDate.tsx": $$4,
-    "./islands/NewConfirmNodeSelector.tsx": $$5,
-    "./islands/Nodes/TimeToPay.tsx": $$6,
-    "./islands/RelativeDate.tsx": $$7,
-    "./islands/TimeLeft.tsx": $$8,
-    "./islands/Withdraw.tsx": $$9,
+    "./islands/Balance.tsx": $Balance,
+    "./islands/EarningsTable.tsx": $EarningsTable,
+    "./islands/EarningsTableAndOptions.tsx": $EarningsTableAndOptions,
+    "./islands/EditableObject/GetDateInput.tsx": $EditableObject_GetDateInput,
+    "./islands/LocaleDate.tsx": $LocaleDate,
+    "./islands/NewConfirmNodeSelector.tsx": $NewConfirmNodeSelector,
+    "./islands/Nodes/TimeToPay.tsx": $Nodes_TimeToPay,
+    "./islands/RelativeDate.tsx": $RelativeDate,
+    "./islands/TimeLeft.tsx": $TimeLeft,
+    "./islands/Withdraw.tsx": $Withdraw,
   },
   baseUrl: import.meta.url,
-};
+} satisfies Manifest;
 
 export default manifest;
