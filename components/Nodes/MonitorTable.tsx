@@ -105,7 +105,13 @@ export default function MonitorTable({ isAdmin, nodesInfo, nodesStatus }: Monito
                 {/* Sync */}
                 <td class={styles.td}>
                   <code>
-                    {sync === "-" || sync === "Latest" ? (
+                    {status.role === "NOT_STAKED" ? (
+                      <span title={sync}>
+                        Stake
+                        <br />
+                        ASAP
+                      </span>
+                    ) : sync === "-" || sync === "Latest" ? (
                       sync
                     ) : (
                       <>
