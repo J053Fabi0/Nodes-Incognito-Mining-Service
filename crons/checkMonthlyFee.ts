@@ -123,12 +123,13 @@ async function sendAcknowledgment(
   telegramID?: number | string
 ) {
   const numbers = {
-    ["Monthly fee - 10%"]: moveDecimalDot(paymentData.fee!, -9),
+    ["Monthly fee - 10%"]: paymentData.fee === null ? "Error gathering data" : moveDecimalDot(paymentData.fee, -9),
     ["Incognito fee"]: incognitoFee,
     ["Previous balance"]: moveDecimalDot(account.balance, -9),
     ["Current balance"]: moveDecimalDot(account.balance - feeWithIncognitoFee, -9),
   };
-  const totalEarnings = toFixedS((paymentData.fee! * 10) / 1e9, 9);
+  const totalEarnings =
+    paymentData.fee === null ? "Error gathering data" : toFixedS((paymentData.fee * 10) / 1e9, 9);
 
   const details =
     `${objectToTableText(numbers, "<code>", "</code>")}\n\n` +
