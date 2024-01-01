@@ -80,8 +80,8 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
           },
           true
         );
-        await markAsCompleted(paymentData, client._id);
         await sendAcknowledgment(true, account, feeWithIncognitoFee, paymentData, telegram);
+        await markAsCompleted(paymentData, client._id);
       } catch (e) {
         // say that an error occured
         handleError(e);
