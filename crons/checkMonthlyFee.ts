@@ -37,7 +37,6 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
   for (const client of clients) {
     const { lastPayment, telegram } = client;
 
-    console.log(lastPayment, telegram);
     // if the client has already paid this month, skip it
     if (hasClientPayed(lastPayment)) continue;
     // if the forMonth is not this one,
