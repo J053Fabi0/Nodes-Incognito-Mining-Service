@@ -10,5 +10,6 @@ export default function hasClientPayed(
 ): boolean {
   const lastPaymentMonth = moment(lastPayment).utc().month();
   // not '<=' because the payment of the lastPaymentMonth is for the month before it
+  console.log({ lastPaymentMonth, month });
   return month < lastPaymentMonth;
 }

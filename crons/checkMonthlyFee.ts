@@ -42,6 +42,7 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
       continue;
     }
 
+    console.log(lastPayment, telegram);
     // if the client has already paid this month, skip it
     if (hasClientPayed(lastPayment)) continue;
     // if the forMonth is not this one,
@@ -85,8 +86,8 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
           },
           true
         );
-        await sendAcknowledgment(true, account, feeWithIncognitoFee, paymentData, telegram);
         await markAsCompleted(paymentData, client._id);
+        await sendAcknowledgment(true, account, feeWithIncognitoFee, paymentData, telegram);
       } catch (e) {
         // say that an error occured
         handleError(e);
@@ -252,11 +253,10 @@ async function sendThatNodesHaveBeenRemoved(
 }
 
 async function markAsCompleted(paymentData: MonthlyPayments, clientId: ObjectId) {
-  await changeClient({ _id: clientId }, { $set: { lastPayment: new Date() } });
-
   // reset the data
   paymentData.fee = null;
   paymentData.lastWarningDay = null;
   paymentData.errorInTransaction = false;
   paymentData.forMonth = moment().utc().month();
+  await changeClient({ _id: clientId }, { $set: { lastPayment: new Date() } });
 }
