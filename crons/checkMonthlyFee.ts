@@ -36,11 +36,6 @@ export default async function checkMonthlyFee(removeNotPayedNodes: boolean) {
 
   for (const client of clients) {
     const { lastPayment, telegram } = client;
-    // skip people who don't have a telegram account
-    if (telegram === null) {
-      if (!hasClientPayed(lastPayment)) await markAsCompleted(monthlyPayments[`${client._id}`], client._id);
-      continue;
-    }
 
     console.log(lastPayment, telegram);
     // if the client has already paid this month, skip it
