@@ -46,6 +46,9 @@ export default async function handleDocker(
     ? duplicatedFilesCleaner.dockerIndexes
     : (await getNodes({}, { projection: { dockerIndex: 1, _id: 0 } })).map((n) => n.dockerIndex);
 
+  const noSid = rawNodes.some((n) => n.toLowerCase() === "nosid");
+  if (noSid) rawNodes.splice(rawNodes.indexOf("nosid"), 1);
+
   const nodes =
     rawNodes.length === 1 && rawNodes[0] === "all"
       ? duplicatedFilesCleaner.dockerIndexes
@@ -115,8 +118,8 @@ export default async function handleDocker(
       for (const node of nodesInfo) {
         if (!node) continue;
 
-        if (node.client.toString() !== "64c96b3fb4dd2689f376fa56") {
-          const error = `Node <code>${node.dockerIndex}</code> is not from Sid.`;
+        if (noSid === false && node.client.toString() !== "64c96b3fb4dd2689f376fa56") {
+          const error = `Node <code>${node.dockerIndex}</code> is not from Sid. Use <code>noSid</code> to force.`;
 
           if (options?.telegramMessages)
             await sendHTMLMessage(error, undefined, { disable_notification: options?.silent });
