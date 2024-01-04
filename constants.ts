@@ -13,6 +13,7 @@ interface Json {
   minEpochsToBeOnlinePending: number;
   minEpochsToBeOnlineSyncing: number;
   maxOnlineNodesNotStaked: number;
+  /** With @ */
   adminTelegramUsername: string;
   maxDiskPercentageUsage: number;
   waitingTimes: Record<AllErrorTypes, number>;

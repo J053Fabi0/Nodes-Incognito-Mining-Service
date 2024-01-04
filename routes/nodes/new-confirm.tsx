@@ -6,6 +6,7 @@ import Balance from "../../islands/Balance.tsx";
 import TimeLeft from "../../islands/TimeLeft.tsx";
 import { prvToPay } from "../../utils/variables.ts";
 import newZodError from "../../utils/newZodError.ts";
+import handleError from "../../utils/handleError.ts";
 import submitNode from "../../incognito/submitNode.ts";
 import { toFixedS } from "../../utils/numbersString.ts";
 import Node from "../../types/collections/node.type.ts";
@@ -21,8 +22,7 @@ import { error, validateFormData, z, ZodIssue } from "fresh-validation";
 import NewConfirmNodeSelector from "../../islands/NewConfirmNodeSelector.tsx";
 import Typography, { getTypographyClass } from "../../components/Typography.tsx";
 import { countNodes, getNode, getNodes } from "../../controllers/node.controller.ts";
-import { incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
-import handleError from "../../utils/handleError.ts";
+import { adminTelegramUsername, incognitoFee, incognitoFeeInt, minutesOfPriceStability } from "../../constants.ts";
 
 export const styles = {
   th: "py-2 px-3 text-right",
@@ -169,7 +169,20 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
               await changeClient({ _id: new ObjectId(ctx.state.userId!) }, { $set: { lastPayment: new Date() } });
           }
         })
-        .catch((e) => handleError(e));
+        .catch(async (e) => {
+          handleError(e);
+          await sendHTMLMessage(
+            `The user <code>${ctx.state.user!.name}</code> (<code>${ctx.state.user!.telegram}</code>) ` +
+              `failed to register a new node.\n\n`
+          );
+          // tell the user that the node was not registered
+          await sendHTMLMessage(
+            `Your node was not registered due to an error.\n\n` +
+              `The administrator has been notified about this error. Send him a message if you want to get notified ` +
+              `when the error is fixed: ${adminTelegramUsername}`,
+            ctx.state.user!.telegram
+          );
+        });
 
     // delete default values if the values are valid
     ctx.state.session.flash("defaultValidator");
