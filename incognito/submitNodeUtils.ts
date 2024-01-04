@@ -1,6 +1,8 @@
 import { ObjectId } from "mongo/mod.ts";
 import { redis } from "../initDatabase.ts";
+import getNodeUrl from "../utils/getNodeUrl.ts";
 import handleError from "../utils/handleError.ts";
+import getNodeName from "../utils/getNodeName.ts";
 import sendMessage from "../telegram/sendMessage.ts";
 import Node from "../types/collections/node.type.ts";
 import { NewNode, pendingNodes } from "./submitNode.ts";
@@ -18,7 +20,13 @@ export function resolveAndForget<S extends boolean>(
 ): S {
   const { resolve } = newNode;
   if (resolve)
-    if (success) resolve({ success: true, dockerIndex: newNode.dockerIndex!, number: newNode.number! });
+    if (success)
+      resolve({
+        success: true,
+        dockerIndex: newNode.dockerIndex!,
+        number: newNode.number!,
+        url: getNodeUrl(getNodeName(newNode.clientId, newNode.number!)),
+      });
     else resolve({ success: false });
 
   pending.shiftNoEvent();

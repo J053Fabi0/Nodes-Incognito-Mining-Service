@@ -128,18 +128,15 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
           await newZodError("validator", "This node is currently active. Please create a new account."),
         ]);
         return redirect(THIS_URL);
-      } else {
-        const vDiferent = existingNode.validator !== validatedData.validator;
-
-        // if the keys are different
-        if (vDiferent) {
-          const e =
-            `The validator key exists in one of your inactive nodes, ` +
-            `but the validator key provided is different. ` +
-            `Its value is: ${existingNode.validator}`;
-          ctx.state.session.flash("errors", [await newZodError("validator", e)]);
-          return redirect(THIS_URL);
-        }
+      }
+      // if the keys are different
+      else if (existingNode.validator !== validatedData.validator) {
+        const e =
+          `The validator key exists in one of your inactive nodes, ` +
+          `but the validator key provided is different. ` +
+          `Its value is: ${existingNode.validator}`;
+        ctx.state.session.flash("errors", [await newZodError("validator", e)]);
+        return redirect(THIS_URL);
       }
     }
 
@@ -154,6 +151,17 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
             await sendHTMLMessage(
               `The user <code>${ctx.state.user!.name}</code> (<code>${ctx.state.user!.telegram}</code>) ` +
                 `has registered a new node.\n\nIndex: <code>${data.dockerIndex}</code> - <code>#${data.number}</code>`
+            );
+            await sendHTMLMessage(
+              `Your node <code>${data.number}</code> has been registered successfully. Stake it as soon as possible.\n\n` +
+                `Here is it's URL: <code>${data.url}</code>.\n\n` +
+                `Find instructions on how to stake it here: ${WEBSITE_URL}/nodes/monitor.`
+            );
+            await sendHTMLMessage(
+              `Your node <code>${data.number}</code> has been registered successfully. Stake it as soon as possible.\n\n` +
+                `Here is it's URL: <code>${data.url}</code>.\n\n` +
+                `Find instructions on how to stake it here: ${WEBSITE_URL}/nodes/monitor.`,
+              ctx.state.user!.telegram
             );
 
             const activeNodes = await countNodes({ client: new ObjectId(ctx.state.userId!), inactive: false });

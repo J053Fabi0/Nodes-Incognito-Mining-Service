@@ -24,7 +24,7 @@ import EventedArray, { EventedArrayWithoutHandler } from "../utils/EventedArray.
 import { AccountTransactionStatus, AccountTransactionType } from "../types/collections/accountTransaction.type.ts";
 import { BUILDING } from "../env.ts";
 
-type ResolveData = { success: true; dockerIndex: number; number: number } | { success: false };
+type ResolveData = { success: true; dockerIndex: number; number: number; url: string } | { success: false };
 export interface NewNode extends Omit<CreateDockerAndConfigsOptions, "number" | "inactive"> {
   number?: number;
   /** In PRV. Int format. It MUST NOT have the incognitoFee included. */
