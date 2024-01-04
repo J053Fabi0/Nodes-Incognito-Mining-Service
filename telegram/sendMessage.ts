@@ -1,10 +1,12 @@
 import { ADMIN_ID } from "../env.ts";
+import { RawApi } from "grammy/mod.ts";
+import { Other } from "grammy/core/api.ts";
 import bot, { notificationsBot } from "./initBots.ts";
 import isGrammyError from "../types/guards/isGrammyError.ts";
 import isStringOrNumber from "../types/guards/isStringOrNumber.ts";
 import { changeClient, getClient } from "../controllers/client.controller.ts";
 
-type Options = Parameters<typeof bot.api.sendMessage>[2];
+type Options = Other<RawApi, "sendMessage", "chat_id" | "text">;
 
 const sendMessage = (
   message: string,

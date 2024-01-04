@@ -158,7 +158,7 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
                 `Here is it's URL: <code>${data.url}</code>.\n\n` +
                 `Find instructions on how to stake it here: ${WEBSITE_URL}/nodes/monitor.`,
               ctx.state.user!.telegram,
-              { disable_web_page_preview: true },
+              { link_preview_options: { is_disabled: true } },
               "notificationsBot"
             );
 

@@ -166,7 +166,7 @@ async function sendAcknowledgment(
     await sendHTMLMessage(
       message,
       to,
-      { disable_web_page_preview: true, reply_markup: contactKeyboard },
+      { link_preview_options: { is_disabled: true }, reply_markup: contactKeyboard },
       "notificationsBot"
     );
 }
@@ -206,13 +206,13 @@ async function sendWarning(
   await sendHTMLMessage(
     message,
     adminTelegram,
-    { disable_web_page_preview: true, reply_markup: contactKeyboard },
+    { link_preview_options: { is_disabled: true }, reply_markup: contactKeyboard },
     "notificationsBot"
   );
   const response = await sendHTMLMessage(
     message,
     telegramID,
-    { disable_web_page_preview: true, reply_markup: contactKeyboard },
+    { link_preview_options: { is_disabled: true }, reply_markup: contactKeyboard },
     "notificationsBot"
   );
 
@@ -235,7 +235,7 @@ async function sendThatNodesHaveBeenRemoved(
       `If you wish to continue using our services, you can pay the initial ` +
       `setup again for ${many ? "each one" : "it"}.`,
     telegramID,
-    { disable_web_page_preview: true, reply_markup: keyboard },
+    { link_preview_options: { is_disabled: true }, reply_markup: keyboard },
     "notificationsBot"
   );
   // send to admin too
