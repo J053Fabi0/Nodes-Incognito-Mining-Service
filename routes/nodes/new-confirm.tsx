@@ -161,6 +161,7 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
               { disable_web_page_preview: true }
             );
 
+            // set the last payment date to now if it's the first node
             const activeNodes = await countNodes({ client: new ObjectId(ctx.state.userId!), inactive: false });
             if (activeNodes === 0)
               await changeClient({ _id: new ObjectId(ctx.state.userId!) }, { $set: { lastPayment: new Date() } });
