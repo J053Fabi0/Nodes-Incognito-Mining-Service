@@ -158,7 +158,8 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
                 `Here is it's URL: <code>${data.url}</code>.\n\n` +
                 `Find instructions on how to stake it here: ${WEBSITE_URL}/nodes/monitor.`,
               ctx.state.user!.telegram,
-              { disable_web_page_preview: true }
+              { disable_web_page_preview: true },
+              "notificationsBot"
             );
 
             // set the last payment date to now if it's the first node
@@ -178,7 +179,9 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
             `Your node was not registered due to an error.\n\n` +
               `The administrator has been notified about this error. Send him a message if you want to get notified ` +
               `when the error is fixed: ${adminTelegramUsername}`,
-            ctx.state.user!.telegram
+            ctx.state.user!.telegram,
+            undefined,
+            "notificationsBot"
           );
         });
 
