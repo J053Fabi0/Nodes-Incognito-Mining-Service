@@ -153,15 +153,12 @@ export const handler: Handlers<NewNodeConfirmProps, State> = {
                 `has registered a new node.\n\nIndex: <code>${data.dockerIndex}</code> - <code>#${data.number}</code>`
             );
             await sendHTMLMessage(
-              `Your node <code>${data.number}</code> has been registered successfully. Stake it as soon as possible.\n\n` +
-                `Here is it's URL: <code>${data.url}</code>.\n\n` +
-                `Find instructions on how to stake it here: ${WEBSITE_URL}/nodes/monitor.`
-            );
-            await sendHTMLMessage(
-              `Your node <code>${data.number}</code> has been registered successfully. Stake it as soon as possible.\n\n` +
+              `Your node <code>${data.number}</code> has been registered successfully.\n` +
+                `Stake it as soon as possible so it can start mining.\n\n` +
                 `Here is it's URL: <code>${data.url}</code>.\n\n` +
                 `Find instructions on how to stake it here: ${WEBSITE_URL}/nodes/monitor.`,
-              ctx.state.user!.telegram
+              ctx.state.user!.telegram,
+              { disable_web_page_preview: true }
             );
 
             const activeNodes = await countNodes({ client: new ObjectId(ctx.state.userId!), inactive: false });
