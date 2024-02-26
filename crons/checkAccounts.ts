@@ -81,7 +81,7 @@ export default async function checkAccounts(max?: number, unit: Unit = Unit.minu
 
     const account = await getAccount(
       { _id: new ObjectId(accountId) },
-      { projection: { privateKey: 1, balance: 1 } }
+      { projection: { privateKey: 1, balance: 1, otaPrivateKey: 1 } }
     );
     if (!account) {
       accountsViewed.push(accountId);
@@ -94,23 +94,36 @@ export default async function checkAccounts(max?: number, unit: Unit = Unit.minu
       return null;
     });
     if (!privateKey) continue;
+    const otakey = await cryptr.decrypt(account.otaPrivateKey).catch((e) => {
+      console.error(`Error decrypting the OTA key of account ${accountId}`, account);
+      handleError(e);
+      return null;
+    });
+    if (!otakey) continue;
 
-    await updateAccount(privateKey, account._id, account.balance).catch(handleError);
+    await updateAccount(privateKey, otakey, accountId, account.balance).catch((e) => {
+      handleError(e);
+      return 0;
+    });
 
     accountsViewed.push(accountId);
   }
 }
 
 /**
- *
  * @param privateKey Decrypted private key
+ * @param otaKey Decrypted OTA key
  * @param accountId The id of the account to update, from the accounts collection
- * @param currentBalance If given, the balance will be updated only if it's different
- */
-export async function updateAccount(privateKey: string, accountId: string | ObjectId, currentBalance?: number) {
+ * @param currentBalance If given, the balance will be updated only if it's different */
+export async function updateAccount(
+  privateKey: string,
+  otaKey: string,
+  accountId: string | ObjectId,
+  currentBalance?: number
+) {
   // get the balance
   const incognito = new IncognitoCli(privateKey);
-  const balance = await incognito.balanceAccount({ decimalFormat: false });
+  const balance = await incognito.balanceAccount({ decimalFormat: false, otaKey });
 
   // update the balance if it's different
   if (balance === undefined || balance !== currentBalance)
